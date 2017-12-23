@@ -1,0 +1,17 @@
+{
+    "name": "road-to-legend-server",
+    "version": "0.1.0",
+    "description": "The server for a simple MUD inspired, browser-based multiplayer game.",
+    "scripts": {
+        "start": ""
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/MrEliasen/road-to-legend-server.git"
+    },
+    "author": "SirMrE (@markeliasen)",
+    "bugs": {
+        "url": "https://github.com/MrEliasen/road-to-legend-server/issues"
+    },
+    "homepage": "https://www.sirmre.com/apps/road-to-legend"
+}
