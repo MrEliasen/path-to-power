@@ -1,0 +1,17 @@
+{
+  "extends": "google",
+  "ecmaFeatures": {
+    "modules": true
+  },
+  "env": {
+    "browser": true,
+    "node": false
+  },
+  "parser": "babel-eslint",
+  "rules": {
+    "quotes": [2, "single"],
+    "strict": [2, "never"],
+    "require-jsdoc": "off"
+  },
+  "plugins": []
+}

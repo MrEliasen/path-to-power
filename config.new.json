@@ -1,0 +1,10 @@
+{
+    "mongo_db": "mongodb://localhost:27017/rtl",
+
+    "session": {
+        "ttl": 604800
+    },
+
+    "rfc2822": "ddd, D MMM YYYY H:mm:ss [GMT]",
+    "app_port": 8080
+}

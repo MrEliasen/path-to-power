@@ -1,0 +1,121 @@
+// Load required packages
+var express     = require('express'),
+    mongoose    = require('mongoose'),
+    bodyParser  = require('body-parser'),
+    https       = require('https'),
+    http        = require('http'),
+    fs          = require('fs'),
+    filter      = require('content-filter'),
+    helmet      = require('helmet'),
+    redis       = require('redis'),
+    winston     = require('winston'),
+    httpServer, httpsServer;
+
+try {
+    var core = require('./config');
+} catch(e) {
+    return console.log("API not configured. Please run `npm run setup`.");
+}
+
+/************************************
+ *              LOGGER              *
+ ************************************/
+winston.level = process.env.LOG_LEVEL;
+winston.add(winston.transports.File, {
+    filename: 'error.log'
+});
+winston.remove(winston.transports.Console);
+
+/************************************
+ *          INITIALISATION          *
+ ************************************/
+// Create our Express application
+var app = express();
+
+// Connect to the MongoDB
+mongoose.Promise = global.Promise;
+mongoose.connect(config.mongo_db, function(err) {
+    if (err) {
+        console.log(err);
+        return;
+    }
+    
+    console.log("DB connected");
+
+    var redisClient = redis.createClient(config.redis_server);
+    redisClient.on("error", function (err) {
+        console.log("Redis error:",  + err);
+    });
+
+    // Setup bodyParser which we will need to parsing data submitted by the user
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({
+        extended: true
+    }));
+
+    // Add a bit of security for our app
+    app.use(filter({
+        methodList:['GET', 'POST', 'PATCH', 'DELETE']
+    }));
+    app.use(helmet());
+    app.set('config', config);
+    app.set('redis', redisClient);
+
+    // Set needed headers for the application.
+    app.use(function (req, res, next) {
+        // Website you wish to allow to connect
+        res.setHeader('Access-Control-Allow-Origin', '*');
+
+        // Request methods you wish to allow
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+
+        // Request headers you wish to allow
+        res.setHeader('Access-Control-Allow-Headers', 'Accept, X-Requested-With, Content-Type');
+
+        // Whether requests needs to include cookies in the requests sent to the API. We shouldn't use this unless we retained sessions etc. which we don't!
+        res.setHeader('Access-Control-Allow-Credentials', false);
+
+        // Set the IP of the request, in case its from a proxy
+        req.connection.remoteAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+        // Pass to next middleware
+        next();
+    });
+
+    /************************************
+     *     LETSENCRYPT VERIFICATION     *
+     ************************************/
+    // bind information we need to the client
+    app.use('/.well-known/acme-challenge', express.static('www/.well-known/acme-challenge'));
+
+    // load the different versions of the API. Keep them separated for backwards compatibility. Once the API is live, you do NOT change that version.
+    require('./api/v1/route')(app, express);
+
+    /************************************
+     *         WEB SERVER SETUP         *
+     ************************************/
+    // if an SSL cert if defined, start the server with HTTPS
+    if (config.ssl && config.ssl.cert !== "" && config.ssl.key !== "") {
+        // load the SSL cert and create the webserver which handles the API
+        httpsServer = https.createServer({
+            key: fs.readFileSync(config.ssl.key, 'utf8'),
+            cert: fs.readFileSync(config.ssl.cert, 'utf8'),
+            ca: [
+                (config.ssl.bundle ? fs.readFileSync(config.ssl.bundle, 'utf8') : '')
+            ]
+        }, app);
+    }
+
+    // listen for connections
+    if (httpsServer) {
+        // Start HTTPS server since an SSL cert is defined.
+        var port = [80,443].indexOf(config.app_port) !== false ? 443 : config.app_port;
+
+        httpsServer.listen(port);
+        console.log('HTTPS listning on port ' + port);
+    } else {
+        // Start HTTP server since no SSL cert is defined.
+        httpServer = app.listen(config.app_port);
+        console.log('HTTP listning on port ' + config.app_port);
+    }
+});
