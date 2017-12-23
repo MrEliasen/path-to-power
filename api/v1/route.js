@@ -8,7 +8,12 @@ module.exports = function(app, express) {
      *         API v1 endpoints         *
      ************************************/
     // Load API endpoint controllers
-    var authController  = require(__dirname + '/controllers/authentication');
+    //var authController  = require(__dirname + '/controllers/authentication');
+    var accountController  = require(__dirname + '/controllers/account');
+
+    // Create endpoint handlers for account CRUD
+    router.route('/account')
+        .post(accountController.signup);
 
     // Create endpoint handlers for authentication
     router.route('/auth')
@@ -18,5 +23,5 @@ module.exports = function(app, express) {
     app.use('/api/v1', router);
 
     // initiate the rate limiters
-    throttle.init(app);
+    //throttle.init(app);
 };

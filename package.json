@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "description": "The server for a simple MUD inspired, browser-based multiplayer game.",
     "scripts": {
-        "start": ""
+        "start": "nodemon -L server.js"
     },
     "repository": {
         "type": "git",
@@ -13,5 +13,21 @@
     "bugs": {
         "url": "https://github.com/MrEliasen/road-to-legend-server/issues"
     },
-    "homepage": "https://www.sirmre.com/apps/road-to-legend"
+    "homepage": "https://www.sirmre.com/apps/road-to-legend",
+    "dependencies": {
+        "babel-preset-es2015": "^6.24.1",
+        "bcrypt-nodejs": "^0.0.3",
+        "body-parser": "^1.18.2",
+        "content-filter": "^1.1.2",
+        "express": "^4.16.2",
+        "express-limiter": "^1.6.1",
+        "helmet": "^3.9.0",
+        "jsonwebtoken": "^8.1.0",
+        "microtime": "^2.1.6",
+        "moment": "^2.20.1",
+        "mongoose": "^4.13.7",
+        "redis": "^2.8.0",
+        "uuid": "^3.1.0",
+        "winston": "^2.4.0"
+    }
 }

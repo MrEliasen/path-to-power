@@ -10,53 +10,31 @@ exports.authenticate = function(req, res, cb) {
     var token = req.headers.token;
 
     try {
-        var decoded = jwt.verify(token, req.app.get('config').session.signing_key);
+        var decoded = jwt.verify(token, req.app.get('config').session.key);
 
-        helper.decrypt(
-            decoded.data,
-            decoded.iv,
-            req.app.get('config').session.encryption_key
-        )
-        .catch((errId) => {
-            return res.status(401).json({
-                status: 401,
-                error: "You do not have permission to access this endpoint."
-            });
-        })
-        .then((data) => {
-            decoded.data = data;
+        Account.findOne({_id: escape(decoded.data._id), session_token: escape(decoded.data.session_token)}, {_id: 1}, function (err, user) {
+            if (err) {
+                winston.log('error', 'v1/controllers/authentication/authenticate find', {  
+                    err: err,
+                    id: uuid()
+                });
 
-            if (!decoded.data.device || decoded.data.device !== device) {
                 return res.status(401).json({
                     status: 401,
                     error: "You do not have permission to access this endpoint."
                 });
             }
 
-            Account.findOne({_id: escape(decoded.data._id), session_token: escape(decoded.data.sid)}, {_id: 1}, function (err, user) {
-                if (err) {
-                    winston.log('error', 'v1/controllers/authentication/authenticate find', {  
-                        err: err,
-                        id: uuid()
-                    });
+            // No user found with that username
+            if (!user) {
+                return res.status(401).json({
+                    status: 401,
+                    error: "You do not have permission to access this endpoint."
+                });
+            }
 
-                    return res.status(401).json({
-                        status: 401,
-                        error: "You do not have permission to access this endpoint."
-                    });
-                }
-
-                // No user found with that username
-                if (!user) {
-                    return res.status(401).json({
-                        status: 401,
-                        error: "You do not have permission to access this endpoint."
-                    });
-                }
-
-                req.user = decoded.data;
-                cb();
-            });
+            req.user = decoded.data._id;
+            cb();
         });
     } catch(err) {
         return res.status(401).json({

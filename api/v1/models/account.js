@@ -8,10 +8,6 @@ var mongoose = require('mongoose'),
 
 // Define our product schema
 var AccountSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
     email: {
         type: String,
         unique: true,
@@ -22,7 +18,7 @@ var AccountSchema = new mongoose.Schema({
         required: true
     },
     session_token: {
-        type: String,
+        type: String
     },
     date_added: String,
     date_updated: String
