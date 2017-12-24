@@ -1,163 +1,119 @@
 var Account     = require('../models/account'),
     winston     = require('winston'),
-    uuid        = require('uuid/v1');
+    uuid        = require('uuid/v1'),
+    request     = require('superagent'),
+    jwt         = require('jsonwebtoken'),
+    config      = require('../../../config.json');
 
-function checkEmail(email) {
-    if (!email.includes('@')) {
-        return false;
-    }
+function generateSigningToken(user, twitchData, res, callback) {
+    jwt.sign({
+        userId: user._id,
+        twitchId: twitchData.id,
+        session_key: user.session_key
+    }, config.session.key, { expiresIn: config.session.ttl }, function(err, token) {
+        if (err) {
+            var ecode = uuid();
 
-    if (!email.includes('.')) {
-        return false;
-    }
+            winston.log('error', 'v1/controllers/account/login generateSigningToken', {  
+                err: err,
+                id: ecode,
+            });
 
-    return true;
+            return res.status(500).json({
+                status: 500,
+                error_code: ecode,
+                message: 'An error occured. Please try again in a moment.'
+            });
+        }
+
+        callback(err, token);
+    });
 }
 
 exports.login = function (req, res) {
     var ecode = uuid();
 
-    if (!req.body.email || !req.body.password) {
+    if (!req.body.token) {
         return res.status(400).json({
             status: 400,
-            message: 'You must provide both an email and a password.'
+            message: 'Invalid authentication request.'
         });
     }
 
-    req.body.email = req.body.email.toString().toLowerCase();
-    req.body.password = req.body.password.toString();
+    req.body.token = req.body.token.toString();
 
-    Account.findOne({ email: req.body.email }, {_id: 1, password: 1}, function (err, user) {
-        if (err) {
-            winston.log('error', 'v1/controllers/account/login Find', {  
-                err: err,
-                id: ecode,
-            });
-
-            return res.status(500).json({
-                status: 500,
-                error_code: ecode,
-                message: 'An error occured. Please try again in a moment.'
-            });
-        }
-
-        // No user found with that username
-        if (!user) {
-            return res.status(400).json({
-                status: 400,
-                message: 'The email and password combination is invalid.'
-            });
-        }
-
-        // Make sure the password is correct
-        user.verifyPassword(req.body.password, function(err, isMatch) {
-            if (err) {
-                winston.log('error', 'v1/controllers/account/login VERIFY', {  
-                    err: err,
-                    id: ecode,
-                });
-
-                return res.status(500).json({
-                    status: 500,
-                    error_code: ecode,
-                    message: 'An error occured. Please try again in a moment.'
-                });
-            }
-
-            // Password did not match
-            if (!isMatch) {
+    request
+        .get('https://api.twitch.tv/helix/users')
+        .send()
+        .set('Authorization', `Bearer ${req.body.token}`)
+        .set('Client-ID', config.twitch.clientId)
+        .set('accept', 'json')
+        .end((twitchErr, twitchRes) => {
+            if (twitchErr) {
                 return res.status(400).json({
                     status: 400,
-                    message: 'The email and password combination is invalid'
+                    message: 'Invalid authentication request.'
                 });
             }
 
-            jwt.sign({
-                _id: user._id,
-                session_key: user.session_key
-            }, config.session.key, { expiresIn: config.session.ttl }, function(err, token) {
+            const twitchData = JSON.parse(twitchRes.text).data[0];
+
+            Account.findOne({ twitchId: escape(twitchData.id) }, { _id: 1 }, function (err, user) {
                 if (err) {
+                    winston.log('error', 'v1/controllers/account/login Find', {  
+                        err: err,
+                        id: ecode,
+                    });
+
                     return res.status(500).json({
                         status: 500,
+                        error_code: ecode,
                         message: 'An error occured. Please try again in a moment.'
                     });
                 }
 
-                res.json({
-                    status: 200,
-                    userId: user._id,
-                    token: token
+                if (user) {
+                    return generateSigningToken(user, twitchData, res, (err, token) => {
+                        res.json({
+                            status: 200,
+                            user: {
+                                display_name: twitchData.display_name,
+                                profile_image_url: twitchData.profile_image_url
+                            },
+                            token: token
+                        });
+                    });
+                }
+
+                user = new Account({
+                    twitchId: twitchData.id
+                });
+
+                user.save((err) => {
+                    if (err) {
+                        winston.log('error', 'v1/controllers/account/login Save', {  
+                            err: err,
+                            id: ecode,
+                        });
+
+                        return res.status(500).json({
+                            status: 500,
+                            error_code: ecode,
+                            message: 'An error occured. Please try again in a moment.'
+                        });
+                    }
+
+                    generateSigningToken(user, twitchData, res, (err, token) => {
+                        res.json({
+                            status: 200,
+                            user: {
+                                display_name: twitchData.display_name,
+                                profile_image_url: twitchData.profile_image_url
+                            },
+                            token: token
+                        });
+                    });
                 });
             });
         });
-    });
-};
-
-exports.signup = function (req, res) {
-    var ecode = uuid();
-
-    if (!req.body.email || !req.body.password) {
-        return res.status(400).json({
-            status: 400,
-            message: 'Please fill out all the frield in the sign up form.'
-        });
-    }
-
-    req.body.email = req.body.email.toString().toLowerCase().trim();
-    req.body.password = req.body.password.toString();
-
-    if (!checkEmail(req.body.email)) {
-        return res.status(400).json({
-            status: 400,
-            message: 'The email does not appear to be valid.'
-        });
-    }
-
-    Account.findOne({ email: req.body.email }, { _id: 1 }, function (err, user) {
-        if (err) {
-            winston.log('error', 'v1/controllers/account/signup findOne', {  
-                err: err,
-                id: ecode,
-            });
-
-            return res.status(500).json({
-                status: 500,
-                error_code: ecode,
-                message: 'An error occured. Please try again in a moment.'
-            });
-        }
-
-        // No user found with that username
-        if (user) {
-            return res.status(400).json({
-                status: 400,
-                message: 'An account already exists, using that email account.'
-            });
-        }
-
-        let newAccount = new Account({
-            password: req.body.password,
-            email: req.body.email
-        });
-
-        newAccount.save(function(err) {
-            if (err) {
-                winston.log('error', 'v1/controllers/account/signup findOne', {  
-                    err: err,
-                    id: ecode,
-                });
-
-                return res.status(500).json({
-                    status: 500,
-                    error_code: ecode,
-                    message: 'An error occured. Please try again in a moment.'
-                });
-            }
-
-            return res.status(203).json({
-                status: 203,
-                message: 'Your account was created successfully!'
-            });
-        });
-    });
 };

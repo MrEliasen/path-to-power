@@ -1,6 +1,6 @@
 var throttle = require('./throttle');
 
-module.exports = function(app, express) {
+module.exports = function(app, express, webServer) {
     // Create our Express v1 router
     var router = express.Router();
 
@@ -11,10 +11,6 @@ module.exports = function(app, express) {
     //var authController  = require(__dirname + '/controllers/authentication');
     var accountController  = require(__dirname + '/controllers/account');
 
-    // Create endpoint handlers for account CRUD
-    router.route('/account')
-        .post(accountController.signup);
-
     // Create endpoint handlers for authentication
     router.route('/auth')
         .post(accountController.login);
@@ -24,4 +20,7 @@ module.exports = function(app, express) {
 
     // initiate the rate limiters
     //throttle.init(app);
+
+    // Load socket server
+    require('./socket')(webServer);
 };

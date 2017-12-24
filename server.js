@@ -9,12 +9,12 @@ var express     = require('express'),
     helmet      = require('helmet'),
     //redis       = require('redis'),
     winston     = require('winston'),
-    httpServer, httpsServer;
+    webServer   = null;
 
 try {
     var config = require('./config');
 } catch(e) {
-    return console.log("API not configured. Please run `npm run setup`.");
+    return console.log("API not configured.");
 }
 
 /************************************
@@ -83,39 +83,31 @@ mongoose.connect(config.mongo_db, function(err) {
     });
 
     /************************************
-     *     LETSENCRYPT VERIFICATION     *
-     ************************************/
-    // bind information we need to the client
-    app.use('/.well-known/acme-challenge', express.static('www/.well-known/acme-challenge'));
-
-    // load the different versions of the API. Keep them separated for backwards compatibility. Once the API is live, you do NOT change that version.
-    require('./api/v1/route')(app, express);
-
-    /************************************
      *         WEB SERVER SETUP         *
      ************************************/
     // if an SSL cert if defined, start the server with HTTPS
     if (config.ssl && config.ssl.cert !== "" && config.ssl.key !== "") {
         // load the SSL cert and create the webserver which handles the API
-        httpsServer = https.createServer({
+        webServer = https.createServer({
             key: fs.readFileSync(config.ssl.key, 'utf8'),
             cert: fs.readFileSync(config.ssl.cert, 'utf8'),
             ca: [
                 (config.ssl.bundle ? fs.readFileSync(config.ssl.bundle, 'utf8') : '')
             ]
         }, app);
-    }
-
-    // listen for connections
-    if (httpsServer) {
-        // Start HTTPS server since an SSL cert is defined.
-        var port = [80,443].indexOf(config.app_port) !== false ? 443 : config.app_port;
-
-        httpsServer.listen(port);
-        console.log('HTTPS listning on port ' + port);
     } else {
-        // Start HTTP server since no SSL cert is defined.
-        httpServer = app.listen(config.app_port);
-        console.log('HTTP listning on port ' + config.app_port);
+        webServer = http.createServer(app)
     }
+
+    /************************************
+     *     LETSENCRYPT VERIFICATION     *
+     ************************************/
+    // bind information we need to the client
+    app.use('/.well-known/acme-challenge', express.static('www/.well-known/acme-challenge'));
+
+    // load the different versions of the API. Keep them separated for backwards compatibility. Once the API is live, you do NOT change that version.
+    require('./api/v1/route')(app, express, webServer);
+
+    webServer.listen(config.app_port);
+    console.log('Listning on port', config.app_port);
 });

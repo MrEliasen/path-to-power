@@ -8,13 +8,9 @@ var mongoose = require('mongoose'),
 
 // Define our product schema
 var AccountSchema = new mongoose.Schema({
-    email: {
+    twitchId: {
         type: String,
         unique: true,
-        required: true
-    },
-    password: {
-        type: String,
         required: true
     },
     session_token: {
