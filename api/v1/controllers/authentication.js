@@ -10,7 +10,7 @@ function checkJsonToken(token, callback) {
     try {
         var decoded = jwt.verify(token, config.session.key);
 
-        Account.findOne({_id: escape(decoded.data._id), session_token: escape(decoded.data.session_token)}, {_id: 1}, function (err, user) {
+        Account.findOne({_id: escape(decoded.userId), session_token: escape(decoded.session_token)}, {_id: 1}, function (err, user) {
             if (err) {
                 winston.log('error', 'v1/controllers/authentication/authenticate find', {  
                     err: err,
@@ -41,20 +41,26 @@ function checkJsonToken(token, callback) {
     }
 };
 
-exports.socketLogin = function(socket, data, callback) {
+exports.socketLogin = function(socket, data, cb, callback) {
+    cb = cb || function() {};
+
     if (!data.token) {
-        return callback("Invalid or missing data.", null);
+        return cb("Invalid or missing data.", null);
     }
 
-    checkJsonToken(token, function (err, decoded_data) {
+    checkJsonToken(data.token, function(err, decoded_data) {
         // No user found with that username
         if (err) {
-            return callback(err.error, null);
+            return cb(err.error, null);
         }
 
-        socket.userId = decoded_data._id;
-
-        callback(null, {});
+        socket.user = {
+            userId: decoded_data.userId,
+            twitchId: decoded_data.twitchId,
+            display_name: decoded_data.display_name,
+            profile_image_url: decoded_data.profile_image_url
+        };
+        callback(null);
     });
 };
 
@@ -62,8 +68,8 @@ exports.checkSocketAuthentication = function(socket, cb, callback) {
     cb = cb || function() {};
     callback = callback || function() {};
     
-    if (!socket.userId) {
-        return cb('Authentication error (1)', null);
+    if (!socket.user.userId) {
+        return cb('Authentication error', null);
     }
 
     callback();

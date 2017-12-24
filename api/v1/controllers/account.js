@@ -8,8 +8,10 @@ var Account     = require('../models/account'),
 function generateSigningToken(user, twitchData, res, callback) {
     jwt.sign({
         userId: user._id,
+        display_name: twitchData.display_name,
         twitchId: twitchData.id,
-        session_key: user.session_key
+        profile_image_url: twitchData.profile_image_url,
+        session_token: user.session_token
     }, config.session.key, { expiresIn: config.session.ttl }, function(err, token) {
         if (err) {
             var ecode = uuid();
@@ -58,7 +60,7 @@ exports.login = function (req, res) {
 
             const twitchData = JSON.parse(twitchRes.text).data[0];
 
-            Account.findOne({ twitchId: escape(twitchData.id) }, { _id: 1 }, function (err, user) {
+            Account.findOne({ twitchId: escape(twitchData.id) }, { _id: 1, session_token: 1 }, function (err, user) {
                 if (err) {
                     winston.log('error', 'v1/controllers/account/login Find', {  
                         err: err,
