@@ -15,8 +15,6 @@ module.exports = async function(webServer, app) {
     const playerList = {};
 
     io.on('connection', function(socket) {
-        // Authenticate the user upon login.
-        // Send player list on success.
         socket.on("authenticate", function(data, cb){
             authController.socketLogin(socket, data, cb, function(err) {
                 // Check if the player is already in the "online players list"; if not, add them!
@@ -28,36 +26,42 @@ module.exports = async function(webServer, app) {
                     };
 
                     playerList[socket.user.userId] = player;
+                    // let the rest of the network know, a new player joined (add them to the online player list)
                     io.emit('update playerlist', { action: 'add', player: player });
                 }
 
-                // Load the inital positon of the player, and sends it to the client.
+                // Load the inital positon of the player
                 mapController.getPlayerPosition(socket.user.userId, function(mapPosition) {
                     socket.user.position = mapPosition;
 
+                    // Add the player to the list of players at the map grid postion
                     mapController.gridUpdatePlayerlist(mapPosition, socket.user, 'add', function(playerlist) {
+                        // Send the details of the current postion down to the client.
                         socket.emit('update position', mapPosition, playerlist);
                     });
 
-                    // send remove player from grid to clients
+                    // Let the players in the same grid, see the new player
                     io.sockets.in(`grid_${mapPosition.mapId}_${mapPosition.x}_${mapPosition.y}`).emit('update grid players', {
                         action: 'add',
                         userId: socket.user.userId,
                         display_name: socket.user.display_name
                     });
 
+                    // Join the "room" of the player position
                     socket.join(`grid_${mapPosition.mapId}_${mapPosition.x}_${mapPosition.y}`);
                 });
 
+                // Get a list of all online players.
                 socket.emit('load playerlist', playerList);
                 // Join a room with their userId, used for private messages.
                 socket.join(socket.user.userId);
-                // Join a room by map location, for local message.
             });
         });
 
         socket.on('player move', function(direction) {
+            // Check if the request contains a valid session token
             authController.checkSocketAuthentication(socket, null, function() {
+                // Update the position of the player, if it is a valid move
                 mapController.setPlayerPosition(socket.user, direction, function(oldPosition, newPosition, playerlist) {
                     const newGridKey = `grid_${newPosition.mapId}_${newPosition.x}_${newPosition.y}`;
                     const oldGridKey = `grid_${oldPosition.mapId}_${oldPosition.x}_${oldPosition.y}`;
@@ -77,6 +81,7 @@ module.exports = async function(webServer, app) {
                         userId: socket.user.userId
                     });
 
+                    // Send the details for the new map grid position to the client
                     socket.emit('update position', newPosition, playerlist);
                     socket.user.position = newPosition;
                 });
@@ -85,6 +90,7 @@ module.exports = async function(webServer, app) {
 
         socket.on('disconnect', function() {
             if (socket.user) {
+                // remove them from the online players list
                 if (playerList[socket.user.userId]) {
                     delete playerList[socket.user.userId];
                 }
