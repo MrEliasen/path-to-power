@@ -66,8 +66,7 @@ exports.socketLogin = function(socket, data, cb, callback) {
 
 exports.checkSocketAuthentication = function(socket, cb, callback) {
     cb = cb || function() {};
-    callback = callback || function() {};
-    
+
     if (!socket.user.userId) {
         return cb('Authentication error', null);
     }

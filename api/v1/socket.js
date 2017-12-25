@@ -1,14 +1,18 @@
 module.exports = function(webServer) {
-    var authController = require('./controllers/authentication');
-
     // Create SocketIO server and start listening for conection
     var io = require('socket.io')(webServer);
     io.listen(8086);
+
+    // Controllers
+    var authController = require('./controllers/authentication');
+    var commandController = require('./controllers/commands');
 
     // Game variables
     const playerList = {};
 
     io.on('connection', function(socket) {
+        // Authenticate the user upon login.
+        // Send player list on success.
         socket.on("authenticate", function(data, cb){
             authController.socketLogin(socket, data, cb, function(err) {
                 // Check if the player is already in the "online players list"; if not, add them!
@@ -28,7 +32,7 @@ module.exports = function(webServer) {
             });
         });
 
-        socket.on('disconnect', function(){
+        socket.on('disconnect', function() {
             if (socket.user) {
                 if (playerList[socket.user.userId]) {
                     delete playerList[socket.user.userId];
@@ -37,9 +41,14 @@ module.exports = function(webServer) {
                 io.emit('update playerlist', { action: 'remove', player: socket.user.userId});
             }
 
-
             //socket.leave(socket.handshake.session.username);
             socket.disconnect();
+        });
+
+        socket.on('send command', function(data, cb) {
+            authController.checkSocketAuthentication(socket, cb, function() {
+                commandController.parse(io, socket, data);
+            });
         });
     });
 };
