@@ -1,3 +1,10 @@
+/*
+    This project is based on the original Streetwars Online 2 MUD, but B.Smith aka Wuzzbent.
+    I would not have become a developer, if he had not open souced this game.
+
+    Thanks you.
+*/
+
 // Load required packages
 var express     = require('express'),
     mongoose    = require('mongoose'),
@@ -7,7 +14,7 @@ var express     = require('express'),
     fs          = require('fs'),
     filter      = require('content-filter'),
     helmet      = require('helmet'),
-    //redis       = require('redis'),
+    redis       = require('redis'),
     winston     = require('winston'),
     webServer   = null;
 
@@ -42,10 +49,10 @@ mongoose.connect(config.mongo_db, function(err) {
     
     console.log("DB connected");
 
-    /*var redisClient = redis.createClient(config.redis_server);
+    var redisClient = redis.createClient(config.redis_server);
     redisClient.on("error", function (err) {
         console.log("Redis error:",  + err);
-    });*/
+    });
 
     // Setup bodyParser which we will need to parsing data submitted by the user
     app.use(bodyParser.json());
@@ -59,7 +66,7 @@ mongoose.connect(config.mongo_db, function(err) {
     }));
     app.use(helmet());
     app.set('config', config);
-    //app.set('redis', redisClient);
+    app.set('redis', redisClient);
 
     // Set needed headers for the application.
     app.use(function (req, res, next) {

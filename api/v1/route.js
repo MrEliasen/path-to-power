@@ -22,5 +22,5 @@ module.exports = function(app, express, webServer) {
     //throttle.init(app);
 
     // Load socket server
-    require('./socket')(webServer);
+    require('./socket')(webServer, app);
 };

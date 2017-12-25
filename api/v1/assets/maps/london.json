@@ -1,0 +1,52 @@
+{
+    "id" : "london",
+    "title": "London",
+    "mapGrid": [
+        [
+            {
+                "description": "",
+                "buildings": []
+            },
+            {
+                "description": "",
+                "buildings": []
+            },
+            {
+                "description": "",
+                "buildings": []
+            }
+        ],
+        [
+            {
+                "description": "",
+                "buildings": []
+            },
+            {
+                "description": "",
+                "buildings": []
+            },
+            {
+                "description": "",
+                "buildings": []
+            }
+        ],
+        [
+            {
+                "description": "",
+                "buildings": []
+            },
+            {
+                "description": "",
+                "buildings": []
+            },
+            {
+                "description": "",
+                "buildings": []
+            }
+       ]
+    ],
+    "spawn": {
+       "y": 1,
+       "x": 1 
+    }
+}

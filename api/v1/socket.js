@@ -1,11 +1,15 @@
-module.exports = function(webServer) {
+module.exports = async function(webServer, app) {
     // Create SocketIO server and start listening for conection
     var io = require('socket.io')(webServer);
     io.listen(8086);
 
     // Controllers
-    var authController = require('./controllers/authentication');
-    var commandController = require('./controllers/commands');
+    var authController      = require('./controllers/authentication');
+    var commandController   = require('./controllers/commands');
+    var mapController       = require('./controllers/map');
+
+    // init the controllers, which depends on redis
+    await mapController.init(app);
 
     // Game variables
     const playerList = {};
@@ -24,14 +28,25 @@ module.exports = function(webServer) {
                     };
 
                     playerList[socket.user.userId] = player;
-                    io.emit('update playerlist', { action: 'add', player: player});
+                    io.emit('update playerlist', { action: 'add', player: player });
                 }
+
+                // Load the inital positon of the player, and sends it to the client.
+                mapController.getPlayerPosition(socket.user.twitchId, function(mapPosition) {
+                    socket.emit('update position', mapPosition);
+                });
 
                 socket.emit('load playerlist', playerList);
                 // Join a room with their twitchId, used for private messages.
                 socket.join(socket.user.twitchId);
                 // Join a room by map location, for local message.
                 // TBD
+            });
+        });
+
+        socket.on('player move', function(direction) {
+            mapController.setPlayerPosition(socket.user.twitchId, direction, function(mapPosition) {
+                socket.emit('update position', mapPosition);
             });
         });
 

@@ -1,0 +1,13 @@
+{
+    "maps": [
+        "london"
+    ],
+    "spawn" : {
+        "map": "london",
+        "x": 1,
+        "y": 1
+    },
+    "mapDescription": [
+
+    ]
+}

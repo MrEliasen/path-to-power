@@ -1,10 +1,16 @@
 {
     "mongo_db": "mongodb://localhost:27017/rtl",
-
+    "redis_server": "localhost",
     "session": {
-        "ttl": 604800
+        "ttl": 604800,
+        "key": ""
     },
-
+    "twitch": {
+        "clientId": ""
+    },
+    "password": {
+        "round": 12
+    },
     "rfc2822": "ddd, D MMM YYYY H:mm:ss [GMT]",
-    "app_port": 8080
+    "app_port": 8085
 }

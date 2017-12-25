@@ -41,7 +41,6 @@ jspm_packages
 # Do not include live config files
 config.js
 config.json
-vault
 
 # Yarn
 *yarn.lock
