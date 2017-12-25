@@ -101,6 +101,7 @@ exports.login = function (req, res) {
                         res.json({
                             status: 200,
                             user: {
+                                userId: user._id,
                                 display_name: twitchData.display_name,
                                 profile_image_url: twitchData.profile_image_url
                             },

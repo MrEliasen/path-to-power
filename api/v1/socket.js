@@ -32,21 +32,49 @@ module.exports = async function(webServer, app) {
                 }
 
                 // Load the inital positon of the player, and sends it to the client.
-                mapController.getPlayerPosition(socket.user.twitchId, function(mapPosition) {
-                    socket.emit('update position', mapPosition);
+                mapController.getPlayerPosition(socket.user.userId, function(mapPosition) {
+                    socket.user.position = mapPosition;
+
+                    mapController.gridGetPlayerlist(mapPosition, function(playerlist) {
+                        socket.emit('update position', mapPosition, playerlist);
+                    });
+
+                    socket.join(`grid_${mapPosition.mapId}_${mapPosition.x}_${mapPosition.y}`);
                 });
 
                 socket.emit('load playerlist', playerList);
-                // Join a room with their twitchId, used for private messages.
-                socket.join(socket.user.twitchId);
+                // Join a room with their userId, used for private messages.
+                socket.join(socket.user.userId);
                 // Join a room by map location, for local message.
                 // TBD
             });
         });
 
         socket.on('player move', function(direction) {
-            mapController.setPlayerPosition(socket.user.twitchId, direction, function(mapPosition) {
-                socket.emit('update position', mapPosition);
+            authController.checkSocketAuthentication(socket, null, function() {
+                mapController.setPlayerPosition(socket.user, direction, function(oldPosition, newPosition, playerlist) {
+                    const newGridKey = `grid_${newPosition.mapId}_${newPosition.x}_${newPosition.y}`;
+                    const oldGridKey = `grid_${oldPosition.mapId}_${oldPosition.x}_${oldPosition.y}`;
+
+                    // Send leave events to the players in the old grid
+                    socket.leave(oldGridKey);
+                    io.sockets.in(oldGridKey).emit('update grid players', {
+                        action: 'remove',
+                        userId: socket.user.userId
+                    });
+
+                    // Send join events to the player in the new grid
+                    socket.join(newGridKey);
+                    io.sockets.in(newGridKey).emit('update grid players', {
+                        action: 'add',
+                        display_name: socket.user.display_name,
+                        userId: socket.user.userId
+                    });
+
+
+                    socket.emit('update position', newPosition, playerlist);
+                    socket.user.position = newPosition;
+                });
             });
         });
 
@@ -59,7 +87,7 @@ module.exports = async function(webServer, app) {
                 io.emit('update playerlist', { action: 'remove', player: socket.user.userId});
 
                 // Leave the private message channel for the client
-                socket.leave(socket.user.twitchId);
+                //socket.leave(socket.user.userId);
             }
 
             socket.disconnect();

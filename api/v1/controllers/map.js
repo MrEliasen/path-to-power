@@ -61,16 +61,60 @@ function getMapPosition(mapName, x, y) {
     }
 }
 
-function getPlayerPosition(twitchId, callback) {
-    /*
-        // position param
-        {
-            map: "london",
-            x: 0,
-            y: 0
+function gridGetPlayerlist(position, callback) {
+    redis.get(`grid_${position.mapId}_${position.x}_${position.y}`, function(err, playerlist) {
+        // Error with the redis store
+        if (err) {
+            return console.log('Redis Error', err);
         }
-    */
-    redis.get(`player_${twitchId}`, function(err, position) {
+
+        playerlist = parseJson(playerlist);
+
+        if (!playerlist) {
+            playerlist = {};
+        }
+
+        callback(playerlist);
+    });
+}
+exports.gridGetPlayerlist = gridGetPlayerlist;
+
+function gridUpdatePlayerlist(position, player, action, callback) {
+    gridGetPlayerlist(position, function(playerlist) {
+        switch (action) {
+            case "add":
+                playerlist[player.userId] = player.display_name;
+                break;
+
+            case "remove":
+                delete playerlist[player.userId];
+                break;
+        }
+
+        redis.set(`grid_${position.mapId}_${position.x}_${position.y}`, JSON.stringify(playerlist), function(err) {
+            // Error with the redis store
+            if (err) {
+                return console.log('Redis Error', err);
+            }
+
+            callback(playerlist);
+        });
+    });
+}
+
+exports.init = async function(app) {
+    config = require('../config.json');
+    redis = app.get('redis');
+
+    config.maps.map((mapName) => {
+        loadMap(mapName);
+    });
+
+    return true;
+};
+
+function getPlayerPosition(userId, callback) {
+    redis.get(`player_${userId}`, function(err, position) {
         // Error with the redis store
         if (err) {
             return console.log('Redis Error', err);
@@ -106,25 +150,17 @@ function getPlayerPosition(twitchId, callback) {
         return callback(mapPosition);
     });
 }
+exports.getPlayerPosition = getPlayerPosition;
 
-exports.init = async function(app) {
-    config = require('../config.json');
-    redis = app.get('redis');
-
-    config.maps.map((mapName) => {
-        loadMap(mapName);
-    });
-
-    return true;
-};
-
-exports.setPlayerPosition = function (twitchId, direction, callback) {
+exports.setPlayerPosition = function (user, direction, callback) {
     if (!direction || !direction.grid || (!direction.direction && direction.direction !== 0)) {
         return;
     }
 
     // get current position
-    getPlayerPosition(twitchId, function(currentPosition) {
+    getPlayerPosition(user.userId, function(currentPosition) {
+        const oldPosition = {...currentPosition};
+
         switch (direction.grid) {
             case 'y':
                 currentPosition.y = currentPosition.y + direction.direction;
@@ -141,7 +177,7 @@ exports.setPlayerPosition = function (twitchId, direction, callback) {
             return;
         }
 
-        redis.set(`player_${twitchId}`, JSON.stringify({
+        redis.set(`player_${user.userId}`, JSON.stringify({
             map: newPosition.mapId,
             x: newPosition.x,
             y: newPosition.y
@@ -151,9 +187,11 @@ exports.setPlayerPosition = function (twitchId, direction, callback) {
                 return console.log('Redis Error', err);
             }
 
-            callback(newPosition);
+            gridUpdatePlayerlist(oldPosition, user, 'remove', function() {
+                gridUpdatePlayerlist(newPosition, user, 'add', function(playerlist) {
+                    callback(oldPosition, newPosition, playerlist);
+                });
+            });
         })
     })
 }
-
-exports.getPlayerPosition = getPlayerPosition;
