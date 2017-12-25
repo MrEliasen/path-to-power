@@ -80,6 +80,8 @@ function gridGetPlayerlist(position, callback) {
 exports.gridGetPlayerlist = gridGetPlayerlist;
 
 function gridUpdatePlayerlist(position, player, action, callback) {
+    callback = callback || function() {};
+
     gridGetPlayerlist(position, function(playerlist) {
         switch (action) {
             case "add":
@@ -101,6 +103,7 @@ function gridUpdatePlayerlist(position, player, action, callback) {
         });
     });
 }
+exports.gridUpdatePlayerlist = gridUpdatePlayerlist;
 
 exports.init = async function(app) {
     config = require('../config.json');

@@ -35,8 +35,15 @@ module.exports = async function(webServer, app) {
                 mapController.getPlayerPosition(socket.user.userId, function(mapPosition) {
                     socket.user.position = mapPosition;
 
-                    mapController.gridGetPlayerlist(mapPosition, function(playerlist) {
+                    mapController.gridUpdatePlayerlist(mapPosition, socket.user, 'add', function(playerlist) {
                         socket.emit('update position', mapPosition, playerlist);
+                    });
+
+                    // send remove player from grid to clients
+                    io.sockets.in(`grid_${mapPosition.mapId}_${mapPosition.x}_${mapPosition.y}`).emit('update grid players', {
+                        action: 'add',
+                        userId: socket.user.userId,
+                        display_name: socket.user.display_name
                     });
 
                     socket.join(`grid_${mapPosition.mapId}_${mapPosition.x}_${mapPosition.y}`);
@@ -46,7 +53,6 @@ module.exports = async function(webServer, app) {
                 // Join a room with their userId, used for private messages.
                 socket.join(socket.user.userId);
                 // Join a room by map location, for local message.
-                // TBD
             });
         });
 
@@ -71,7 +77,6 @@ module.exports = async function(webServer, app) {
                         userId: socket.user.userId
                     });
 
-
                     socket.emit('update position', newPosition, playerlist);
                     socket.user.position = newPosition;
                 });
@@ -84,10 +89,15 @@ module.exports = async function(webServer, app) {
                     delete playerList[socket.user.userId];
                 }
 
+                // remove player from the online players list
                 io.emit('update playerlist', { action: 'remove', player: socket.user.userId});
-
-                // Leave the private message channel for the client
-                //socket.leave(socket.user.userId);
+                // remove the player from the grid (redis)
+                mapController.gridUpdatePlayerlist(socket.user.position, socket.user, 'remove');
+                // send remove player from grid to clients
+                io.sockets.in(`grid_${socket.user.position.mapId}_${socket.user.position.x}_${socket.user.position.y}`).emit('update grid players', {
+                    action: 'remove',
+                    userId: socket.user.userId
+                });
             }
 
             socket.disconnect();
