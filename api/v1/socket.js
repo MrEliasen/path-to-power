@@ -28,7 +28,10 @@ module.exports = function(webServer) {
                 }
 
                 socket.emit('load playerlist', playerList);
-                //socket.join(socket.handshake.session.username); // later, join only the active "square" the user is at.
+                // Join a room with their twitchId, used for private messages.
+                socket.join(socket.user.twitchId);
+                // Join a room by map location, for local message.
+                // TBD
             });
         });
 
@@ -39,9 +42,11 @@ module.exports = function(webServer) {
                 }
 
                 io.emit('update playerlist', { action: 'remove', player: socket.user.userId});
+
+                // Leave the private message channel for the client
+                socket.leave(socket.user.twitchId);
             }
 
-            //socket.leave(socket.handshake.session.username);
             socket.disconnect();
         });
 

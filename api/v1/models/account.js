@@ -13,6 +13,12 @@ var AccountSchema = new mongoose.Schema({
         unique: true,
         required: true
     },
+    username: {
+        type: String,
+    },
+    display_name: {
+        type: String,
+    },
     session_token: {
         type: String
     },

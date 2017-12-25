@@ -74,22 +74,14 @@ exports.login = function (req, res) {
                     });
                 }
 
-                if (user) {
-                    return generateSigningToken(user, twitchData, res, (err, token) => {
-                        res.json({
-                            status: 200,
-                            user: {
-                                display_name: twitchData.display_name,
-                                profile_image_url: twitchData.profile_image_url
-                            },
-                            token: token
-                        });
+                if (!user) {
+                    user = new Account({
+                        twitchId: twitchData.id
                     });
                 }
 
-                user = new Account({
-                    twitchId: twitchData.id
-                });
+                user.display_name = twitchData.display_name;
+                user.username = twitchData.login;
 
                 user.save((err) => {
                     if (err) {
