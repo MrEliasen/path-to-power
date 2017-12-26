@@ -1,14 +1,15 @@
 var Account     = require('../models/account'),
+    Character   = require('../controllers/character'),
     winston     = require('winston'),
     uuid        = require('uuid/v1'),
     request     = require('superagent'),
     jwt         = require('jsonwebtoken'),
     config      = require('../../../config.json');
 
-function generateSigningToken(user, twitchData, res, callback) {
+function generateSigningToken(user, twitchData, character, res, callback) {
     jwt.sign({
         userId: user._id,
-        display_name: twitchData.display_name,
+        display_name: character.name,
         twitchId: twitchData.id,
         profile_image_url: twitchData.profile_image_url,
         session_token: user.session_token
@@ -35,25 +36,16 @@ function generateSigningToken(user, twitchData, res, callback) {
 exports.login = function (req, res) {
     var ecode = uuid();
 
-    if (!req.body.token) {
-        return res.status(400).json({
-            status: 400,
-            message: 'Invalid authentication request.'
-        });
-    }
-
-    req.body.token = req.body.token.toString();
-
     request
         .get('https://api.twitch.tv/helix/users')
         .send()
-        .set('Authorization', `Bearer ${req.body.token}`)
+        .set('Authorization', `Bearer ${(req.body.token || '')}`)
         .set('Client-ID', config.twitch.clientId)
         .set('accept', 'json')
         .end((twitchErr, twitchRes) => {
             if (twitchErr) {
-                return res.status(400).json({
-                    status: 400,
+                return res.status(401).json({
+                    status: 401,
                     message: 'Invalid authentication request.'
                 });
             }
@@ -97,17 +89,52 @@ exports.login = function (req, res) {
                         });
                     }
 
-                    generateSigningToken(user, twitchData, res, (err, token) => {
-                        res.json({
-                            status: 200,
-                            user: {
-                                userId: user._id,
-                                display_name: twitchData.display_name,
-                                profile_image_url: twitchData.profile_image_url
-                            },
-                            token: token
-                        });
-                    });
+                    Character.load(user._id, function(error, character) {
+                        if (error) {
+                            return res.status(error.status_code).json({
+                                status: error.status_code,
+                                error_code: error.error_code || '',
+                                message: error.message
+                            });
+                        }
+
+                        // If a character already is created, just login the player
+                        if (character) {
+                            return generateSigningToken(user, twitchData, character, res, (err, token) => {
+                                res.json({
+                                    status: 200,
+                                    user: {
+                                        userId: user._id,
+                                        display_name: character.name,
+                                        profile_image_url: twitchData.profile_image_url
+                                    },
+                                    token: token
+                                });
+                            });
+                        }
+
+                        Character.create(user._id, req.body.character_name, function(error, character) {
+                            if (error) {
+                                return res.status(error.status_code).json({
+                                    status: error.status_code,
+                                    error_code: error.error_code || '',
+                                    message: error.message
+                                });
+                            }
+
+                            return generateSigningToken(user, twitchData, character, res, (err, token) => {
+                                res.json({
+                                    status: 200,
+                                    user: {
+                                        userId: user._id,
+                                        display_name: character.name,
+                                        profile_image_url: twitchData.profile_image_url
+                                    },
+                                    token: token
+                                });
+                            });
+                        })
+                    })
                 });
             });
         });

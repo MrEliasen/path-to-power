@@ -6,17 +6,18 @@
 */
 
 // Load required packages
-var express     = require('express'),
-    mongoose    = require('mongoose'),
-    bodyParser  = require('body-parser'),
-    https       = require('https'),
-    http        = require('http'),
-    fs          = require('fs'),
-    filter      = require('content-filter'),
-    helmet      = require('helmet'),
-    redis       = require('redis'),
-    winston     = require('winston'),
-    webServer   = null;
+const express       = require('express');
+const mongoose      = require('mongoose');
+const bodyParser    = require('body-parser');
+const https         = require('https');
+const http          = require('http');
+const fs            = require('fs');
+const filter        = require('content-filter');
+const helmet        = require('helmet');
+const redis         = require('redis');
+const winston       = require('winston');
+const dump          = require('redis-dump-restore').dump;
+  let webServer     = null;
 
 try {
     var config = require('./config');
@@ -117,4 +118,29 @@ mongoose.connect(config.mongo_db, function(err) {
 
     webServer.listen(config.app_port);
     console.log('Listning on port', config.app_port);
+
+    function shutdown (err) {
+        if (err) {
+            console.error(err)
+            process.exit(1)
+        }
+
+        // start graceul shutdown here
+        server.close(function onServerClosed (err) {
+            if (err) {
+                console.error(err)
+                process.exit(1)
+            }
+
+            closeMyResources(function onResourcesClosed (err) {
+                // error handling
+                process.exit()
+            })
+        });
+    }
+
+    // On shutdown signal, gracefully close all connections and clear the memory store.
+    process.on('SIGTERM', function onSigterm () {
+        console.log('--- Running server shutdown procedures ---');
+    })
 });
