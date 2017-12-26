@@ -89,7 +89,7 @@ exports.login = function (req, res) {
                         });
                     }
 
-                    Character.load(user._id, function(error, character) {
+                    Character.loadFromDb(user._id, function(error, character) {
                         if (error) {
                             return res.status(error.status_code).json({
                                 status: error.status_code,

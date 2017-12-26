@@ -1,18 +1,37 @@
 const Character = require('../models/character');
 const winston   = require('winston');
-const config    = require('../config.json');
+const gameConfig    = require('../config.json');
+const helper    = require('../helper');
 const uuid      = require('uuid/v1');
 const escapeStringRegex = require('escape-string-regexp');
+
+// set from the init function
+let redis;
+let ioServer;
+let gameMap;
 
 function validateName(username) {
     let matches = escapeStringRegex(username).match(/[^0-91-z]+/i);
     return !matches;
 }
 
-exports.load = function(userId, callback) {
-    const ecode = uuid();
+exports.init = function(app, mapController, io) {
+    redis = app.get('redis');
+    gameMap = mapController;
+    ioServer = io;
+};
 
-    Character.findOne({ userId: userId }, { userId: 1, name: 1 }, function(err, character) {
+exports.loadFromDb = function(userId, callback) {
+    const ecode = uuid();
+    const fetchData = {
+        userId: 1,
+        name: 1,
+        health: 1,
+        health_max: 1,
+        money: 1
+    };
+
+    Character.findOne({ userId: userId }, fetchData, function(err, character) {
         if (err) {
             winston.log('error', 'v1/controllers/character/load find character', {  
                 err: err,
@@ -26,7 +45,9 @@ exports.load = function(userId, callback) {
             }, null);
         }
 
-        return callback(null, character);
+        set(userId, character, function() {
+            return callback(null, character);
+        });
     });
 }
 
@@ -51,16 +72,19 @@ exports.create = function(userId, characterName, callback) {
         });
     }
 
-    if (characterName.length < config.character.name_length_min || characterName.length > config.character.name_length_max) {
+    if (characterName.length < gameConfig.character.name_length_min || characterName.length > gameConfig.character.name_length_max) {
         return callback({
             status_code: 400,
-            message: `Your character name must be between ${config.character.name_length_min} and ${config.character.name_length_max} characters long.`
+            message: `Your character name must be between ${gameConfig.character.name_length_min} and ${gameConfig.character.name_length_max} characters long.`
         });
     }
 
     const newCharacter = new Character({
         userId: userId,
-        name: characterName
+        name: characterName,
+        health_max: gameConfig.character.defaults.health_max,
+        health: gameConfig.character.defaults.health_max,
+        money: gameConfig.character.defaults.money
     });
 
     newCharacter.save(function(err) {
@@ -77,13 +101,60 @@ exports.create = function(userId, characterName, callback) {
                 id: ecode,
             });
 
-            return callback(ecode);
+            return callback({
+                status_code: ecode,
+                message: 'Something went wrong while trying to create your character!'
+            });
         }
 
-        callback(null, newCharacter);
+        set(userId, newCharacter, function() {
+            callback(null, newCharacter);
+        });
     });
 }
 
-exports.updateCharacter = function(userId, schemaKey, value) {
+function set(userId, playerObject, callback) {
+    redis.set(`player_${userId}`, JSON.stringify(playerObject), function(err) {
+        // Error with the redis store
+        if (err) {
+            return console.log('Redis Error', err);
+        }
 
+        updatePlayerSocket(userId);
+        callback();
+    })
 }
+exports.set = set;
+
+function getCharacter(userId, callback) {
+    redis.get(`player_${userId}`, function(err, playerData) {
+        // Error with the redis store
+        if (err) {
+            return console.log('Redis Error', err);
+        }
+
+        playerData = helper.parseJson(playerData);
+
+        if (!playerData) {
+            playerData = {};
+        }
+
+        callback(playerData);
+    });
+}
+exports.getCharacter = getCharacter;
+
+function updatePlayerSocket(userId) {
+    gameMap.getPlayerPosition(userId, function(position) {
+        getCharacter(userId, function(playerObject) {
+            ioServer.sockets.in(userId).emit('update character', {
+                name: playerObject.name,
+                mapTitle: position.title,
+                money: playerObject.money,
+                health: playerObject.health,
+                health_max: playerObject.health_max,
+            });
+        })
+    });
+}
+exports.updatePlayerSocket = updatePlayerSocket;

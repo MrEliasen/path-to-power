@@ -1,6 +1,11 @@
 const fs = require('fs');
+const helper = require('../helper');
+const gameConfig = require('../config.json');
+const building = require('./building');
+const CharacterController = require('./character');
+
+// to be overwritten by the init function
 let redis;
-let gameConfig = require('../config.json');
 
 // holds all the loaded maps
 const gameMaps = {};
@@ -23,20 +28,35 @@ function loadMap(mapName) {
 
         mapData.mapGrid.map((yGrid, y) => {
             yGrid.map((location, x) => {
+                // choose a random description from the game config
                 mapData.mapGrid[y][x].description = gameConfig.mapDescription[Math.floor(Math.random() * descriptionCount)];
+
+                // load the builds on the grid
+                const gridBuildingId = location.buildings || [];
+                const buildings = {};
+                const actions = {};
+                let   buildingObj;
+
+                if (gridBuildingId.length) {
+                    gridBuildingId.map((buildingId) => {
+                        buildingObj = building.load(buildingId);
+
+                        if (buildingObj) {
+                            buildings[buildingId] = buildingObj;
+                            Object.keys(buildingObj.commands).map((command) => {
+                                actions[command] = buildingObj.commands[command];
+                            })
+                        }
+                    })
+                }
+
+                mapData.mapGrid[y][x].buildings = buildings;
+                mapData.mapGrid[y][x].actions = actions;
             });
         });
 
         gameMaps[mapData.id] = mapData;
     });
-}
-
-function parseJson(jsonString) {
-    try {
-        return JSON.parse(jsonString);
-    } catch (err) {
-        return null;
-    } 
 }
 
 function getMapPosition(mapName, x, y) {
@@ -56,6 +76,7 @@ function getMapPosition(mapName, x, y) {
         mapId: mapName,
         map: gameMaps[mapName].mapGrid[y][x],
         title: gameMaps[mapName].title,
+        buildings: gameMaps[mapName].mapGrid[y][x].buildings,
         x: x,
         y: y
     }
@@ -68,7 +89,7 @@ function gridGetPlayerlist(position, callback) {
             return console.log('Redis Error', err);
         }
 
-        playerlist = parseJson(playerlist);
+        playerlist = helper.parseJson(playerlist);
 
         if (!playerlist) {
             playerlist = {};
@@ -117,14 +138,14 @@ exports.init = async function(app) {
 };
 
 function getPlayerPosition(userId, callback) {
-    redis.get(`player_${userId}`, function(err, position) {
+    redis.get(`position_${userId}`, function(err, position) {
         // Error with the redis store
         if (err) {
             return console.log('Redis Error', err);
         }
 
         // if the JSON string parse, return the JSON object, otherwise, return null.
-        position = parseJson(position);
+        position = helper.parseJson(position);
 
         // if the string is not a valid json string
         if (!position) {
@@ -180,7 +201,7 @@ exports.setPlayerPosition = function (user, direction, callback) {
             return;
         }
 
-        redis.set(`player_${user.userId}`, JSON.stringify({
+        redis.set(`position_${user.userId}`, JSON.stringify({
             map: newPosition.mapId,
             x: newPosition.x,
             y: newPosition.y
@@ -192,9 +213,31 @@ exports.setPlayerPosition = function (user, direction, callback) {
 
             gridUpdatePlayerlist(oldPosition, user, 'remove', function() {
                 gridUpdatePlayerlist(newPosition, user, 'add', function(playerlist) {
+                    CharacterController.updatePlayerSocket(user.userId);
                     callback(oldPosition, newPosition, playerlist);
                 });
             });
         })
     })
+}
+
+exports.checkCommandAvailable = function(commandName, position, callback) {
+    if (!gameMaps[position.mapId]) {
+        return callback('err 1');
+    }
+    if (!gameMaps[position.mapId].mapGrid[position.y]) {
+        return callback('err 2');
+    }
+    if (!gameMaps[position.mapId].mapGrid[position.y][position.x]) {
+        return callback('err 3');
+    }
+
+    const actions = gameMaps[position.mapId].mapGrid[position.y][position.x].actions || {};
+    const cmdSettings = actions[commandName] || null;
+
+    if (!cmdSettings) {
+        return callback('err 4');
+    }
+
+    callback(null, cmdSettings);
 }

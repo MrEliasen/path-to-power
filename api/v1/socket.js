@@ -7,9 +7,12 @@ module.exports = async function(webServer, app) {
     var authController      = require('./controllers/authentication');
     var commandController   = require('./controllers/commands');
     var mapController       = require('./controllers/map');
+    var characterController = require('./controllers/character');
 
     // init the controllers, which depends on redis
     await mapController.init(app);
+    characterController.init(app, mapController, io);
+    commandController.init(characterController);
 
     // Game variables
     const playerList = {};
@@ -17,6 +20,9 @@ module.exports = async function(webServer, app) {
     io.on('connection', function(socket) {
         socket.on("authenticate", function(data, cb){
             authController.socketLogin(socket, data, cb, function(err) {
+                // Join a room with their userId, used for private messages.
+                socket.join(socket.user.userId);
+
                 // Check if the player is already in the "online players list"; if not, add them!
                 if (!Object.keys(playerList).includes(socket.user.userId)) {
                     const player = {
@@ -49,12 +55,11 @@ module.exports = async function(webServer, app) {
 
                     // Join the "room" of the player position
                     socket.join(`grid_${mapPosition.mapId}_${mapPosition.x}_${mapPosition.y}`);
+                    characterController.updatePlayerSocket(socket.user.userId);
                 });
 
                 // Get a list of all online players.
                 socket.emit('load playerlist', playerList);
-                // Join a room with their userId, used for private messages.
-                socket.join(socket.user.userId);
             });
         });
 

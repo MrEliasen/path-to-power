@@ -3,46 +3,21 @@
     "title": "London",
     "mapGrid": [
         [
+            {},
             {
                 "description": "",
-                "buildings": []
+                "buildings": [
+                    "hospital"
+                ],
+                "actions": {}
             },
-            {
-                "description": "",
-                "buildings": []
-            },
-            {
-                "description": "",
-                "buildings": []
-            }
+            {}
         ],
         [
-            {
-                "description": "",
-                "buildings": []
-            },
-            {
-                "description": "",
-                "buildings": []
-            },
-            {
-                "description": "",
-                "buildings": []
-            }
+            {}, {}, {}
         ],
         [
-            {
-                "description": "",
-                "buildings": []
-            },
-            {
-                "description": "",
-                "buildings": []
-            },
-            {
-                "description": "",
-                "buildings": []
-            }
+            {}, {}, {}
        ]
     ],
     "spawn": {

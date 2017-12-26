@@ -18,6 +18,12 @@ var CharacterSchema = new mongoose.Schema({
     location: {
         type: Array // [x,y,mapName]
     },
+    health_max: {
+        type: Number,
+        required: true
+    },
+    money: Number,
+    health: Number,
     date_added: String,
     date_updated: String
 });
