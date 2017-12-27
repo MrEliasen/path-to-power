@@ -15,20 +15,21 @@ function validateName(username) {
     return !matches;
 }
 
-exports.init = function(app, mapController, io) {
+function init(app, mapController, io) {
     redis = app.get('redis');
     gameMap = mapController;
     ioServer = io;
 };
 
-exports.loadFromDb = function(userId, callback) {
+function loadFromDb(userId, callback) {
     const ecode = uuid();
     const fetchData = {
         userId: 1,
         name: 1,
         health: 1,
         health_max: 1,
-        money: 1
+        money: 1,
+        inventory: 1
     };
 
     Character.findOne({ userId: userId }, fetchData, function(err, character) {
@@ -45,13 +46,18 @@ exports.loadFromDb = function(userId, callback) {
             }, null);
         }
 
-        set(userId, character, function() {
-            return callback(null, character);
+        const inventory = {...character.inventory};
+        delete character.inventory;
+
+        setCharacter(userId, character, function() {
+            setInventory(userId, inventory, function() {
+                return callback(null, character);
+            });
         });
     });
 }
 
-exports.create = function(userId, characterName, callback) {
+function create(userId, characterName, callback) {
     const ecode = uuid();
 
     // sanity check character name
@@ -107,13 +113,13 @@ exports.create = function(userId, characterName, callback) {
             });
         }
 
-        set(userId, newCharacter, function() {
+        setCharacter(userId, newCharacter, function() {
             callback(null, newCharacter);
         });
     });
 }
 
-function set(userId, playerObject, callback) {
+function setCharacter(userId, playerObject, callback) {
     redis.set(`player_${userId}`, JSON.stringify(playerObject), function(err) {
         // Error with the redis store
         if (err) {
@@ -124,7 +130,6 @@ function set(userId, playerObject, callback) {
         callback();
     })
 }
-exports.set = set;
 
 function getCharacter(userId, callback) {
     redis.get(`player_${userId}`, function(err, playerData) {
@@ -142,7 +147,34 @@ function getCharacter(userId, callback) {
         callback(playerData);
     });
 }
-exports.getCharacter = getCharacter;
+
+function setInventory(userId, inventoryObject, callback) {
+    redis.set(`player_${userId}_inventory`, JSON.stringify(inventoryObject), function(err) {
+        // Error with the redis store
+        if (err) {
+            return console.log('Redis Error', err);
+        }
+
+        callback(inventoryObject);
+    })
+}
+
+function getInventory(userId, callback) {
+    redis.get(`player_${userId}_inventory`, function(err, inventoryData) {
+        // Error with the redis store
+        if (err) {
+            return console.log('Redis Error', err);
+        }
+
+        inventoryData = helper.parseJson(inventoryData);
+
+        if (!inventoryData) {
+            inventoryData = {};
+        }
+
+        callback(inventoryData);
+    });
+}
 
 function updatePlayerSocket(userId) {
     gameMap.getPlayerPosition(userId, function(position) {
@@ -157,4 +189,14 @@ function updatePlayerSocket(userId) {
         })
     });
 }
-exports.updatePlayerSocket = updatePlayerSocket;
+
+module.exports = {
+    init: init,
+    create: create,
+    loadFromDb: loadFromDb,
+    updatePlayerSocket: updatePlayerSocket,
+    getCharacter: getCharacter,
+    setCharacter: setCharacter,
+    getInventory: getInventory,
+    setInventory: setInventory
+}

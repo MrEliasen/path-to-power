@@ -1,40 +1,38 @@
-module.exports = async function(webServer, app) {
+module.exports = function(webServer, app) {
     // Create SocketIO server and start listening for conection
     var io = require('socket.io')(webServer);
     io.listen(8086);
 
     // Controllers
-    var authController      = require('./controllers/authentication');
-    var commandController   = require('./controllers/commands');
-    var mapController       = require('./controllers/map');
-    var characterController = require('./controllers/character');
+    const gameConfig          = require('./config.json');
+    const gameController      = require('./controllers/game');
+    const authController      = require('./controllers/authentication');
+    const commandController   = require('./controllers/commands');
+    const mapController       = require('./controllers/map');
+    const characterController = require('./controllers/character');
 
     // init the controllers, which depends on redis
-    await mapController.init(app);
+    mapController.init(app);
     characterController.init(app, mapController, io);
     commandController.init(characterController);
 
-    // Game variables
-    const playerList = {};
-
     io.on('connection', function(socket) {
-        socket.on("authenticate", function(data, cb){
+        socket.on("authenticate", function(data, cb) {
             authController.socketLogin(socket, data, cb, function(err) {
                 // Join a room with their userId, used for private messages.
                 socket.join(socket.user.userId);
+                socket.emit('update game data', gameController.fetchGameData())
 
-                // Check if the player is already in the "online players list"; if not, add them!
-                if (!Object.keys(playerList).includes(socket.user.userId)) {
-                    const player = {
-                        userId: socket.user.userId,
-                        profile_image_url: socket.user.profile_image_url,
-                        display_name: socket.user.display_name
-                    };
-
-                    playerList[socket.user.userId] = player;
+                const player = {
+                    userId: socket.user.userId,
+                    profile_image_url: socket.user.profile_image_url,
+                    display_name: socket.user.display_name
+                };
+                
+                gameController.addOnlinePlayer(socket.user.userId, player, function() {
                     // let the rest of the network know, a new player joined (add them to the online player list)
                     io.emit('update playerlist', { action: 'add', player: player });
-                }
+                })
 
                 // Load the inital positon of the player
                 mapController.getPlayerPosition(socket.user.userId, function(mapPosition) {
@@ -59,7 +57,10 @@ module.exports = async function(webServer, app) {
                 });
 
                 // Get a list of all online players.
-                socket.emit('load playerlist', playerList);
+                socket.emit('load playerlist', gameController.getPlayerList('online'));
+                characterController.getInventory(socket.user.userId, function(inventory) { 
+                    socket.emit('update inventory', inventory)
+                })
             });
         });
 
@@ -95,19 +96,16 @@ module.exports = async function(webServer, app) {
 
         socket.on('disconnect', function() {
             if (socket.user) {
-                // remove them from the online players list
-                if (playerList[socket.user.userId]) {
-                    delete playerList[socket.user.userId];
-                }
-
-                // remove player from the online players list
-                io.emit('update playerlist', { action: 'remove', player: socket.user.userId});
-                // remove the player from the grid (redis)
-                mapController.gridUpdatePlayerlist(socket.user.position, socket.user, 'remove');
-                // send remove player from grid to clients
-                io.sockets.in(`grid_${socket.user.position.mapId}_${socket.user.position.x}_${socket.user.position.y}`).emit('update grid players', {
-                    action: 'remove',
-                    userId: socket.user.userId
+                gameController.addOfflinePlayer(socket.user.userId, function() {
+                    // remove player from the online players list
+                    io.emit('update playerlist', { action: 'remove', player: socket.user.userId});
+                    // remove the player from the grid (redis)
+                    mapController.gridUpdatePlayerlist(socket.user.position, socket.user, 'remove');
+                    // send remove player from grid to clients
+                    io.sockets.in(`grid_${socket.user.position.mapId}_${socket.user.position.x}_${socket.user.position.y}`).emit('update grid players', {
+                        action: 'remove',
+                        userId: socket.user.userId
+                    });
                 });
             }
 
@@ -120,4 +118,15 @@ module.exports = async function(webServer, app) {
             });
         });
     });
+
+    if (gameConfig.autosave.enabled) {         
+        // run the "auto-save" every x interval
+        let autosave = setInterval(() => {
+            gameController.saveAll();
+        }, gameConfig.autosave.interval);
+    }
+
+    return {
+        shutdown: gameController.shutdown
+    };
 };

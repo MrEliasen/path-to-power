@@ -114,33 +114,16 @@ mongoose.connect(config.mongo_db, function(err) {
     app.use('/.well-known/acme-challenge', express.static('www/.well-known/acme-challenge'));
 
     // load the different versions of the API. Keep them separated for backwards compatibility. Once the API is live, you do NOT change that version.
-    require('./api/v1/route')(app, express, webServer);
+    const game = require('./api/v1/route')(app, express, webServer);
 
     webServer.listen(config.app_port);
     console.log('Listning on port', config.app_port);
 
-    function shutdown (err) {
-        if (err) {
-            console.error(err)
-            process.exit(1)
-        }
-
-        // start graceul shutdown here
-        server.close(function onServerClosed (err) {
-            if (err) {
-                console.error(err)
-                process.exit(1)
-            }
-
-            closeMyResources(function onResourcesClosed (err) {
-                // error handling
-                process.exit()
-            })
-        });
-    }
-
     // On shutdown signal, gracefully close all connections and clear the memory store.
-    process.on('SIGTERM', function onSigterm () {
-        console.log('--- Running server shutdown procedures ---');
-    })
+    process.on('SIGTERM', function () {
+        game.shutdown(function() {
+            // error handling
+            process.exit()
+        })
+    });
 });

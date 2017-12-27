@@ -1,9 +1,21 @@
 const Account = require('../models/account');
 const uuid    = require('uuid');
 const GameMap = require('./map');
+const Item = require('./item');
 
 // Set from the init function
 let Character;
+
+function cmdGive(io, socket, params) {
+    // params: [apple, 2, sirmre];
+    if (params.length < 1) {
+        return socket.emit('event feedback', 'Invalid command! Syntax: /give <itemid> <amount> <username>');
+    }
+
+    Item.giveItem(params[0], params[1], params[2] || socket.user.userId, function(inventory) {
+        return socket.emit('update inventory', inventory);
+    })
+}
 
 function cmdHeal(io, socket, params, cmdSettings = {}) {
     // Get player position
@@ -36,7 +48,7 @@ function cmdHeal(io, socket, params, cmdSettings = {}) {
         character.money = character.money - price;
         character.health = character.health + healAmount;
 
-        Character.set(socket.user.userId, character, function(err) {
+        Character.setCharacter(socket.user.userId, character, function(err) {
             socket.emit('event feedback', `You healed ${healAmount}, costing you ${price}`);
         });
     })
@@ -124,6 +136,10 @@ exports.parse = function(io, socket, command) {
             // because the first word is removed from the command,
             // we put it back, since its considered part of the message
             return cmdSay(io, socket, params)
+            break;
+
+        case '/give':
+            return cmdGive(io, socket, params)
             break;
 
         default:

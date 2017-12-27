@@ -1,5 +1,6 @@
 // Load required packages
 var mongoose = require('mongoose'),
+    schema
     config = require('../../../config.json'),
     moment = require('moment');
 
@@ -16,11 +17,14 @@ var CharacterSchema = new mongoose.Schema({
         unique: true
     },
     location: {
-        type: Array // [x,y,mapName]
+        type: Array // [mapName, x,y]
     },
     health_max: {
         type: Number,
         required: true
+    },
+    inventory: {
+        type: {}
     },
     money: Number,
     health: Number,
