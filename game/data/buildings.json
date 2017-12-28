@@ -1,0 +1,11 @@
+{
+    "hospital": {
+        "title": "Hospital",
+        "colour": "#1769ed", 
+        "commands": {
+            "/heal": {
+                "cost": 1
+            }
+        }
+    }
+}

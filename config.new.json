@@ -8,9 +8,22 @@
     "twitch": {
         "clientId": ""
     },
-    "password": {
-        "round": 12
-    },
     "rfc2822": "ddd, D MMM YYYY H:mm:ss [GMT]",
-    "app_port": 8085
+    "game": {
+        "maps": [],
+        "spawn" : {
+            "map": "",
+            "x": 0,
+            "y": 0
+        },
+        "character": {
+            "name_length_min": 2,
+            "name_length_max": 25,
+            "defaults": {
+                "health_max": 100
+            }
+        },
+        "mapDescription": [
+        ]
+    }
 }

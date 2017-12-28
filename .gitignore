@@ -45,3 +45,5 @@ config.json
 # Yarn
 *yarn.lock
 package-lock.json
+
+Superseded

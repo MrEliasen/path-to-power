@@ -6,24 +6,20 @@
 */
 
 // Load required packages
-const express       = require('express');
-const mongoose      = require('mongoose');
-const bodyParser    = require('body-parser');
-const https         = require('https');
-const http          = require('http');
-const fs            = require('fs');
-const filter        = require('content-filter');
-const helmet        = require('helmet');
-const redis         = require('redis');
-const winston       = require('winston');
-const dump          = require('redis-dump-restore').dump;
-  let webServer     = null;
+import express from 'express';
+import mongoose from 'mongoose';
+import bodyParser from 'body-parser';
+import https from 'https';
+import http from 'http';
+import fs from 'fs';
+import filter from 'content-filter';
+import helmet from 'helmet';
+import redis from 'redis';
+import winston from 'winston';
+import game from './game';
 
-try {
-    var config = require('./config');
-} catch(e) {
-    return console.log("API not configured.");
-}
+const config = require('./config');
+let webServer = null;
 
 /************************************
  *              LOGGER              *
@@ -38,7 +34,7 @@ winston.remove(winston.transports.Console);
  *          INITIALISATION          *
  ************************************/
 // Create our Express application
-var app = express();
+const app = express();
 
 // Connect to the MongoDB
 mongoose.Promise = global.Promise;
@@ -50,7 +46,7 @@ mongoose.connect(config.mongo_db, function(err) {
     
     console.log("DB connected");
 
-    var redisClient = redis.createClient(config.redis_server);
+    const redisClient = redis.createClient(config.redis_server);
     redisClient.on("error", function (err) {
         console.log("Redis error:",  + err);
     });
@@ -114,10 +110,7 @@ mongoose.connect(config.mongo_db, function(err) {
     app.use('/.well-known/acme-challenge', express.static('www/.well-known/acme-challenge'));
 
     // load the different versions of the API. Keep them separated for backwards compatibility. Once the API is live, you do NOT change that version.
-    const game = require('./api/v1/route')(app, express, webServer);
-
-    webServer.listen(config.app_port);
-    console.log('Listning on port', config.app_port);
+    const gameServer = game(redisClient, webServer);
 
     // On shutdown signal, gracefully close all connections and clear the memory store.
     process.on('SIGTERM', function () {
