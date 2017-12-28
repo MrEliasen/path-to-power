@@ -1,5 +1,9 @@
 import { createStore, applyMiddleware } from 'redux';
 import ReduxPromise from 'redux-promise';
+import thunk from 'redux-thunk';
+
+import socketIo from 'socket.io';
+import config from '../config.json';
 
 import rootReducer from './reducers';
 import socket from './socket';
@@ -11,13 +15,15 @@ const defaultState = {
 }
 
 export default function (redis, server) {
+    const io = socketIo(server);
+    io.listen(config.server_port);
+
     const store = createStore(
         rootReducer,
-        applyMiddleware(ReduxPromise)
+        applyMiddleware(ReduxPromise, thunk.withExtraArgument(io))
     );
 
-    socket(store, server);
-
+    socket(store, io);
     return this;
 }
 
