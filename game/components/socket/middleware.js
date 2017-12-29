@@ -81,6 +81,8 @@ exports.socketIn = function(io) {
 
                 payload
                     .then((result) => {
+                        console.log('then', result)
+
                         next({
                             type: action.type,
                             payload: result,
@@ -96,21 +98,10 @@ exports.socketIn = function(io) {
                         result.socket = action.socket;
                         store.dispatch(result);
                     })
-                    .catch((result) => {
-                        // if its not a new action, ignore it.
-                        if (result.type) {
-                            // attach the socket to the new action.
-                            store.dispatch({
-                                ...result,
-                                socket: action.socket
-                            });
-                        }
-
-                        next({
-                            type: action.type,
-                            payload: result
-                        })
-                    })
+                    .catch((err) => {
+                        console.log(err.message);
+                        console.log(err.stack);
+                    });
             } else {
                 next(action);
             }

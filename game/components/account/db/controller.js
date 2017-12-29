@@ -2,9 +2,10 @@ import Account from './model';
 import Character from '../../player/db/controller';
 import request from 'superagent';
 import jwt from 'jsonwebtoken';
+import Promise from 'bluebird';
 import config from '../../../../config.json';
 
-import { SERVER_TO_CLIENT, NOTIFICATION_SET, AUTH_LOGIN_SUCCES } from '../../../core/redux/types';
+import { PROMPT_CREATE_CHARACTER, SERVER_TO_CLIENT, NOTIFICATION_SET, AUTH_LOGIN_SUCCESS } from '../../../core/redux/types';
 
 function generateSigningToken(user_id, session_token, callback) {
     jwt.sign({
@@ -36,7 +37,7 @@ export function login(auth_data) {
             .set('accept', 'json')
             .end((twitchErr, twitchRes) => {
                 if (twitchErr) {
-                    return reject({
+                    return resolve({
                         type: NOTIFICATION_SET,
                         subtype: SERVER_TO_CLIENT,
                         payload: {
@@ -82,7 +83,7 @@ export function login(auth_data) {
 
                         Character.loadFromDb(user._id, function(error, character) {
                             if (error) {
-                                return reject(error);
+                                return resolve(error);
                             }
 
                             // If a character already is created, just login the player
@@ -105,9 +106,17 @@ export function login(auth_data) {
                                 });
                             }
 
+                            if (!auth_data.character_name) {
+                                return resolve({
+                                    type: PROMPT_CREATE_CHARACTER,
+                                    subtype: SERVER_TO_CLIENT,
+                                    payload: {}
+                                });
+                            }
+
                             Character.createNew(user._id, auth_data.character_name, function(error, character) {
                                 if (error) {
-                                    return reject(error);
+                                    return resolve(error);
                                 }
 
                                 return generateSigningToken(user._id, user.session_token, (error, token) => {
