@@ -1,4 +1,4 @@
-import { GAME_ADD_PLAYER, GAME_REMOVE_PLAYER } from './types';
+import { GAME_ADD_PLAYER, GAME_REMOVE_PLAYER } from '../../components/player/redux/types';
 
 const defaultState = {
     npcs: {},

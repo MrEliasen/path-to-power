@@ -2,7 +2,7 @@ import Character from './model';
 import escapeStringRegex from 'escape-string-regexp';
 import config from '../../../../config.json';
 
-import { NOTIFICATION_SET } from '../../../clientTypes';
+import { SERVER_TO_CLIENT, NOTIFICATION_SET } from '../../../core/redux/types';
 
 function validateName(username) {
     let matches = escapeStringRegex(username).match(/[^0-9a-z]+/i);
@@ -22,6 +22,7 @@ exports.loadFromDb = function(user_id, callback) {
         if (err) {
             return callback({
                 type: NOTIFICATION_SET,
+                subtype: SERVER_TO_CLIENT,
                 payload: {
                     type: 'error',
                     message: 'Internal server error'
@@ -40,6 +41,7 @@ exports.createNew = function(user_id, character_name, callback) {
     if (!character_name || character_name === '') {
         return callback({
             type: NOTIFICATION_SET,
+            subtype: SERVER_TO_CLIENT,
             payload: {
                 type: 'warning',
                 message: 'You cannot leave the character name blank.'
@@ -51,6 +53,7 @@ exports.createNew = function(user_id, character_name, callback) {
     if (!validateName(character_name)) {
         return callback({
             type: NOTIFICATION_SET,
+            subtype: SERVER_TO_CLIENT,
             payload: {
                 type: 'warning',
                 message: 'Your character name can only consist of alphanumeric character (0-9, a-z)'
@@ -61,6 +64,7 @@ exports.createNew = function(user_id, character_name, callback) {
     if (character_name.length < config.game.character.name_length_min || character_name.length > config.game.character.name_length_max) {
         return callback({
             type: NOTIFICATION_SET,
+            subtype: SERVER_TO_CLIENT,
             payload: {
                 type: 'warning',
                 message: `Your character name must be between ${config.game.character.name_length_min} and ${config.game.character.name_length_max} characters long.`
@@ -85,6 +89,7 @@ exports.createNew = function(user_id, character_name, callback) {
             if (err.code === 11000) {
                 return callback({
                     type: NOTIFICATION_SET,
+                    subtype: SERVER_TO_CLIENT,
                     payload: {
                         type: 'warning',
                         message: `That character name is already taken.`
@@ -94,6 +99,7 @@ exports.createNew = function(user_id, character_name, callback) {
 
             return callback({
                 type: NOTIFICATION_SET,
+                subtype: SERVER_TO_CLIENT,
                 payload: {
                     type: 'error',
                     message: 'Internal server error'

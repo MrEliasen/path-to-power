@@ -3,7 +3,8 @@ import Character from '../../player/db/controller';
 import request from 'superagent';
 import jwt from 'jsonwebtoken';
 import config from '../../../../config.json';
-import { NOTIFICATION_SET, AUTH_LOGIN_SUCCESS } from '../../../clientTypes';
+
+import { SERVER_TO_CLIENT, NOTIFICATION_SET, AUTH_LOGIN_SUCCES } from '../../../core/redux/types';
 
 function generateSigningToken(user_id, session_token, callback) {
     jwt.sign({
@@ -13,6 +14,7 @@ function generateSigningToken(user_id, session_token, callback) {
         if (err) {
             return callback({
                 type: NOTIFICATION_SET,
+                subtype: SERVER_TO_CLIENT,
                 payload: {
                     type: 'error',
                     message: 'An error occured. Please try again in a moment.'
@@ -20,12 +22,12 @@ function generateSigningToken(user_id, session_token, callback) {
             });
         }
 
-        callback(err, token);
+        callback(null, token);
     });
 }
 
 export function login(auth_data) {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
         request
             .get('https://api.twitch.tv/helix/users')
             .send()
@@ -36,6 +38,7 @@ export function login(auth_data) {
                 if (twitchErr) {
                     return reject({
                         type: NOTIFICATION_SET,
+                        subtype: SERVER_TO_CLIENT,
                         payload: {
                             type: 'error',
                             message: 'Invalid authentication request'
@@ -49,9 +52,10 @@ export function login(auth_data) {
                     if (err) {
                         return reject({
                             type: NOTIFICATION_SET,
+                            subtype: SERVER_TO_CLIENT,
                             payload: {
                                 type: 'error',
-                                message: 'Internal server error'
+                                message: 'Internal server error',
                             }
                         });
                     }
@@ -68,6 +72,7 @@ export function login(auth_data) {
                         if (err) {
                             return reject({
                                 type: NOTIFICATION_SET,
+                                subtype: SERVER_TO_CLIENT,
                                 payload: {
                                     type: 'error',
                                     message: 'Internal server error'
@@ -87,8 +92,9 @@ export function login(auth_data) {
                                         return reject(error);
                                     }
 
-                                    resolve({
+                                    return resolve({
                                         type: AUTH_LOGIN_SUCCESS,
+                                        subtype: SERVER_TO_CLIENT,
                                         payload: {
                                             user_id: user._id,
                                             token: token,
@@ -111,6 +117,7 @@ export function login(auth_data) {
 
                                     resolve({
                                         type: AUTH_LOGIN_SUCCESS,
+                                        subtype: SERVER_TO_CLIENT,
                                         payload: {
                                             user_id: user._id,
                                             token: token,

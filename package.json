@@ -3,7 +3,8 @@
     "version": "0.1.0",
     "description": "The server for a simple MUD inspired, browser-based multiplayer game.",
     "scripts": {
-        "start": "nodemon -L server.js --exec babel-node --presets es2015,stage-0"
+        "start": "nodemon -L server.js --exec babel-node --presets es2015,stage-0",
+        "start-dev": "node remote-dev-server"
     },
     "repository": {
         "type": "git",
@@ -12,6 +13,12 @@
     "author": "SirMrE (@markeliasen)",
     "bugs": {
         "url": "https://github.com/MrEliasen/road-to-legend-server/issues"
+    },
+    "nodemonConfig": {
+        "ignore": [
+            "node_modules/*",
+            "npm-debug.log"
+        ]
     },
     "homepage": "https://www.sirmre.com/apps/road-to-legend",
     "dependencies": {
@@ -38,5 +45,9 @@
         "superagent": "^3.8.2",
         "uuid": "^3.1.0",
         "winston": "^2.4.0"
+    },
+    "devDependencies": {
+        "remote-redux-devtools": "^0.5.12",
+        "remotedev-server": "^0.2.4"
     }
 }
