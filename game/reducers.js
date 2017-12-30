@@ -1,13 +1,17 @@
 import { combineReducers } from 'redux';
 
 import BuildingReducer from './components/building/redux/reducer';
-import PlayerReducer from './components/player/redux/reducer';
 import ItemReducer from './components/item/redux/reducer';
-import GameReducer from './core/redux/reducer';
+import MapReducer from './components/map/redux/reducer';
+import NPCReducer from './components/npc/redux/reducer';
+import PlayerReducer from './components/player/redux/reducer';
 
 const rootReducer = combineReducers({
     players: PlayerReducer,
-    game: GameReducer
+    buildings: BuildingReducer,
+    npcs: NPCReducer,
+    items: ItemReducer,
+    maps: MapReducer
 });
 
 export default rootReducer;
@@ -19,6 +23,10 @@ export default rootReducer;
         "player-id-1": {...},
         "player-id-2": {...}
     },
+    buildings: {
+        "building-id-1": {...},
+        "building-id-2": {...}
+    },
     npcs: {
         "npc-id-1": {...},
         "npc-id-2": {...}
@@ -27,23 +35,19 @@ export default rootReducer;
         "item-id-1": {...},
         "item-id-2": {...}
     },
-    game: {
-        npcs: 
-        players: {}, // online players list
-        locations: { // keeps track of the location of all players and NPCs
-            "london": [ // map name
-                2: [ // y coordinate
-                    1: { //x coordinate
-                        players: [
-                            "player-id-1"
-                        ],
-                        npc: [
-                            "npc-id-1"
-                        ]
-                    }
-                ]
+    maps: { // keeps track of the location of all players and NPCs
+        "london": [ // map name
+            2: [ // y coordinate
+                1: { //x coordinate
+                    players: [
+                        "player-id-1"
+                    ],
+                    npc: [
+                        "npc-id-1"
+                    ]
+                }
             ]
-        }
+        ]
     }
 }
 */

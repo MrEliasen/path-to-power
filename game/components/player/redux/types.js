@@ -1,2 +1,2 @@
-export const GAME_ADD_PLAYER = 'GAME_ADD_PLAYER';
-export const GAME_REMOVE_PLAYER = 'GAME_REMOVE_PLAYER';
+export const PLAYER_ADD = 'PLAYER_ADD';
+export const PLAYER_REMOVE = 'PLAYER_REMOVE';

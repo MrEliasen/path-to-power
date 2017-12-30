@@ -1,20 +1,12 @@
-import { ACCOUNT_AUTHENTICATE } from './types';
-import { GAME_ADD_PLAYER, GAME_REMOVE_PLAYER } from '../../../core/redux/types';
+import { PLAYER_ADD, PLAYER_REMOVE } from '../../player/redux/types';
 import { login } from '../db/controller';
-
-/*export function accountLogin(socket, auth_data) {
-    return {
-        type: ACCOUNT_AUTHENTICATE,
-        payload: login(auth_data)
-    }
-}*/
 
 export function accountLogin(socket, auth_data) {
     return function (dispatch, getState) {
         login(auth_data)
             .then((returnAction) => {
                 dispatch({
-                    type: GAME_ADD_PLAYER,
+                    type: PLAYER_ADD,
                     payload: {
                         name: returnAction.payload.name,
                         user_id: returnAction.payload.user_id
@@ -33,7 +25,7 @@ export function accountLogin(socket, auth_data) {
 export function accountLogout(user_id) {
     return function (dispatch, getState, io) {
         dispatch({
-            type: GAME_REMOVE_PLAYER,
+            type: PLAYER_REMOVE,
             payload: {
                 user_id: user_id
             }

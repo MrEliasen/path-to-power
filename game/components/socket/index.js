@@ -1,5 +1,5 @@
 // import redux actions
-import { CLIENT_TO_SERVER } from '../../core/redux/types';
+import { CLIENT_TO_SERVER } from './redux/types';
 import { removeOnlinePlayer } from '../player/redux/actions';
 import { accountLogin } from '../account/redux/actions';
 

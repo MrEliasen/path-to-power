@@ -1,5 +1,5 @@
-import { SERVER_TO_CLIENT, CLIENT_TO_SERVER } from '../../core/redux/types';
-import parsers from '../../core/parsers';
+import { SERVER_TO_CLIENT, CLIENT_TO_SERVER } from './redux/types';
+import requestParser from '../../requests';
 
 function dispatchToClient(io, socket, action) {
     // dispatch to client socket only, if no target is set
@@ -42,6 +42,7 @@ exports.socketOut = function(io) {
             // pass along to the server reducers
             next(action);
 
+            // if we do not remove the socket from the request, we create a loop.
             const clientAction = {...action}; 
             delete clientAction.socket;
 
@@ -68,41 +69,12 @@ exports.socketIn = function(io) {
                 return next(action);
             }
 
-            if (parsers[action.type]) {
-                const payload = parsers[action.type](action, store.dispatch);
-
-                if (typeof payload.then !== 'function') {
-                    return next({
-                        type: action.type,
-                        payload: payload,
-                        socket: action.socket
-                    })
-                }
-
-                payload
-                    .then((result) => {
-                        next({
-                            type: action.type,
-                            payload: result,
-                            socket: action.socket
-                        })
-
-                        // if its not a new action, ignore it.
-                        if (!result.type) {
-                            return;
-                        }
-
-                        // attach the socket to the new action.
-                        result.socket = action.socket;
-                        store.dispatch(result);
-                    })
-                    .catch((err) => {
-                        console.log(err.message);
-                        console.log(err.stack);
-                    });
-            } else {
-                next(action);
+            // if there is no parser for the action, merely pass it down the stack
+            if (!requestParser[action.type]) {
+                return next(action);
             }
+
+            store.dispatch(requestParser[action.type](action, action.socket))
         }
     }
 }

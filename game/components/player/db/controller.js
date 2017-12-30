@@ -2,7 +2,7 @@ import Character from './model';
 import escapeStringRegex from 'escape-string-regexp';
 import config from '../../../../config.json';
 
-import { SERVER_TO_CLIENT, NOTIFICATION_SET } from '../../../core/redux/types';
+import { SERVER_TO_CLIENT, CLIENT_NOTIFICATION } from '../../socket/redux/types';
 
 function validateName(username) {
     let matches = escapeStringRegex(username).match(/[^0-9a-z]+/i);
@@ -21,7 +21,7 @@ exports.loadFromDb = function(user_id, callback) {
     Character.findOne({ user_id: user_id }, fetchData, function(err, character) {
         if (err) {
             return callback({
-                type: NOTIFICATION_SET,
+                type: CLIENT_NOTIFICATION,
                 subtype: SERVER_TO_CLIENT,
                 payload: {
                     type: 'error',
@@ -40,7 +40,7 @@ exports.createNew = function(user_id, character_name, callback) {
 
     if (!character_name || character_name === '') {
         return callback({
-            type: NOTIFICATION_SET,
+            type: CLIENT_NOTIFICATION,
             subtype: SERVER_TO_CLIENT,
             payload: {
                 type: 'warning',
@@ -52,7 +52,7 @@ exports.createNew = function(user_id, character_name, callback) {
     // validate character name
     if (!validateName(character_name)) {
         return callback({
-            type: NOTIFICATION_SET,
+            type: CLIENT_NOTIFICATION,
             subtype: SERVER_TO_CLIENT,
             payload: {
                 type: 'warning',
@@ -63,7 +63,7 @@ exports.createNew = function(user_id, character_name, callback) {
 
     if (character_name.length < config.game.character.name_length_min || character_name.length > config.game.character.name_length_max) {
         return callback({
-            type: NOTIFICATION_SET,
+            type: CLIENT_NOTIFICATION,
             subtype: SERVER_TO_CLIENT,
             payload: {
                 type: 'warning',
@@ -88,7 +88,7 @@ exports.createNew = function(user_id, character_name, callback) {
         if (err) {
             if (err.code === 11000) {
                 return callback({
-                    type: NOTIFICATION_SET,
+                    type: CLIENT_NOTIFICATION,
                     subtype: SERVER_TO_CLIENT,
                     payload: {
                         type: 'warning',
@@ -98,7 +98,7 @@ exports.createNew = function(user_id, character_name, callback) {
             }
 
             return callback({
-                type: NOTIFICATION_SET,
+                type: CLIENT_NOTIFICATION,
                 subtype: SERVER_TO_CLIENT,
                 payload: {
                     type: 'error',
