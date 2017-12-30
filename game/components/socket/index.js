@@ -1,6 +1,6 @@
 // import redux actions
 import { CLIENT_TO_SERVER } from '../../core/redux/types';
-import { removeOnlinePlayer } from '../../core/redux/actions';
+import { removeOnlinePlayer } from '../player/redux/actions';
 import { accountLogin } from '../account/redux/actions';
 
 export default function(store, io) {
@@ -15,7 +15,7 @@ export default function(store, io) {
 
         socket.on('disconnect', function() {
             if (socket.user) {
-                store.dispatch(removeOnlinePlayer(socket.user || null));
+                store.dispatch(removeOnlinePlayer(socket.user || null))
             }
 
             socket.disconnect();

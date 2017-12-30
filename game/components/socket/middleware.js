@@ -69,7 +69,7 @@ exports.socketIn = function(io) {
             }
 
             if (parsers[action.type]) {
-                const payload = parsers[action.type](action.payload);
+                const payload = parsers[action.type](action, store.dispatch);
 
                 if (typeof payload.then !== 'function') {
                     return next({
@@ -81,8 +81,6 @@ exports.socketIn = function(io) {
 
                 payload
                     .then((result) => {
-                        console.log('then', result)
-
                         next({
                             type: action.type,
                             payload: result,

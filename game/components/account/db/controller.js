@@ -6,6 +6,7 @@ import Promise from 'bluebird';
 import config from '../../../../config.json';
 
 import { PROMPT_CREATE_CHARACTER, SERVER_TO_CLIENT, NOTIFICATION_SET, AUTH_LOGIN_SUCCESS } from '../../../core/redux/types';
+import { addOnlinePlayer } from '../../player/redux/actions';
 
 function generateSigningToken(user_id, session_token, callback) {
     jwt.sign({
@@ -27,7 +28,9 @@ function generateSigningToken(user_id, session_token, callback) {
     });
 }
 
-export function login(auth_data) {
+export function login(action, dispatch) {
+    const auth_data = action.payload;
+
     return new Promise((resolve, reject) => {
         request
             .get('https://api.twitch.tv/helix/users')
@@ -93,6 +96,12 @@ export function login(auth_data) {
                                         return reject(error);
                                     }
 
+                                    // Add plyer to online list
+                                    dispatch(addOnlinePlayer({
+                                        user_id: user._id,
+                                        name: character.name
+                                    }))
+
                                     return resolve({
                                         type: AUTH_LOGIN_SUCCESS,
                                         subtype: SERVER_TO_CLIENT,
@@ -123,6 +132,12 @@ export function login(auth_data) {
                                     if (error) {
                                         return reject(error);
                                     }
+
+                                    // Add plyer to online list
+                                    dispatch(addOnlinePlayer({
+                                        user_id: user._id,
+                                        name: character.name
+                                    }))
 
                                     resolve({
                                         type: AUTH_LOGIN_SUCCESS,
