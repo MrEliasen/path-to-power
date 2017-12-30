@@ -2,8 +2,6 @@ import Character from './model';
 import escapeStringRegex from 'escape-string-regexp';
 import config from '../../../../config.json';
 
-import { SERVER_TO_CLIENT, CLIENT_NOTIFICATION } from '../../socket/redux/types';
-
 function validateName(username) {
     let matches = escapeStringRegex(username).match(/[^0-9a-z]+/i);
     return !matches;
@@ -34,41 +32,29 @@ exports.loadFromDb = function(user_id, callback) {
     });
 }
 
-exports.createNew = function(user_id, character_name, callback) {
+exports.create = function(user_id, action, callback) {
     // sanity check character name
-    character_name = (character_name || '').toString().trim();
+    const character_name = action.payload.name.toString().trim();
 
     if (!character_name || character_name === '') {
         return callback({
-            type: CLIENT_NOTIFICATION,
-            subtype: SERVER_TO_CLIENT,
-            payload: {
-                type: 'warning',
-                message: 'You cannot leave the character name blank.'
-            }
+            type: 'warning',
+            message: 'You cannot leave the character name blank.'
         });
     }
 
     // validate character name
     if (!validateName(character_name)) {
         return callback({
-            type: CLIENT_NOTIFICATION,
-            subtype: SERVER_TO_CLIENT,
-            payload: {
-                type: 'warning',
-                message: 'Your character name can only consist of alphanumeric character (0-9, a-z)'
-            }
+            type: 'warning',
+            message: 'Your character name can only consist of alphanumeric character (0-9, a-z)'
         });
     }
 
     if (character_name.length < config.game.character.name_length_min || character_name.length > config.game.character.name_length_max) {
         return callback({
-            type: CLIENT_NOTIFICATION,
-            subtype: SERVER_TO_CLIENT,
-            payload: {
-                type: 'warning',
-                message: `Your character name must be between ${config.game.character.name_length_min} and ${config.game.character.name_length_max} characters long.`
-            }
+            type: 'warning',
+            message: `Your character name must be between ${config.game.character.name_length_min} and ${config.game.character.name_length_max} characters long.`
         });
     }
 
@@ -88,22 +74,14 @@ exports.createNew = function(user_id, character_name, callback) {
         if (err) {
             if (err.code === 11000) {
                 return callback({
-                    type: CLIENT_NOTIFICATION,
-                    subtype: SERVER_TO_CLIENT,
-                    payload: {
-                        type: 'warning',
-                        message: `That character name is already taken.`
-                    }
+                    type: 'warning',
+                    message: `That character name is already taken.`
                 });
             }
 
             return callback({
-                type: CLIENT_NOTIFICATION,
-                subtype: SERVER_TO_CLIENT,
-                payload: {
-                    type: 'error',
-                    message: 'Internal server error'
-                }
+                type: 'error',
+                message: 'Internal server error'
             });
         }
 

@@ -1,4 +1,4 @@
-import { CLIENT_NOTIFICATION } from './types';
+import { CLIENT_NOTIFICATION, SERVER_TO_CLIENT } from './types';
 
 export function createNotification(type, message, title) {
     return {

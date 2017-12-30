@@ -5,7 +5,6 @@ import jwt from 'jsonwebtoken';
 import config from '../../../../config.json';
 
 import { CLIENT_NEW_CHARACTER, SERVER_TO_CLIENT, CLIENT_NOTIFICATION } from '../../socket/redux/types';
-import { addOnlineCharacter } from '../../character/redux/actions';
 
 function generateSigningToken(user_id, session_token, callback) {
     jwt.sign({
@@ -63,21 +62,20 @@ export function login(action, callback) {
                     });
                 }
 
-                generateSigningToken(user.user_id, user.session_token, (err, token) => {
+                /*generateSigningToken(user.user_id, user.session_token, (err, token) => {
                     if (err) {
                         return callback({
                             type: 'error',
                             message: 'Internal server error'
                         });
-                    }
+                    }*/
 
-                    callback(null, {
-                        user_id: user._id,
-                        token: token,
-                        name: user.display_name,
-                        profile_image: twitchData.profile_image_url
-                    });
-                })
+                callback(null, {
+                    user_id: user._id,
+                    name: user.display_name,
+                    profile_image: twitchData.profile_image_url
+                });
+                //})
             });
         });
     });

@@ -1,18 +1,25 @@
 import { CHARACTER_ADD, CHARACTER_REMOVE } from './types';
 
-export default function (state = {}, action) {
-    let players;
+const defaultState = {
+    online: {},
+    list: {}
+}
+
+export default function (state = defaultState, action) {
+    let characters;
 
     switch (action.type) {
         case CHARACTER_ADD:
-            players = {...state};
-            players[action.payload.user_id] = action.payload;
-            return players
+            characters = {...state};
+            characters.online[action.payload.user_id] = action.payload.name;
+            characters.list[action.payload.user_id] = action.payload;
+            return characters
 
         case CHARACTER_REMOVE:
-            players = {...state};
-            delete players[action.payload.user_id];
-            return players
+            characters = {...state};
+            delete characters.online[action.payload.user_id];
+            delete characters.list[action.payload.user_id];
+            return characters
     }
 
     return state;

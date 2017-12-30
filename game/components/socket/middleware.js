@@ -7,7 +7,7 @@ function dispatchToClient(io, socket_id, action) {
     }
 
     // check if we need to dispatch to a specific room
-    if (action.meta.target !== 'server') {
+    if (action.meta && action.meta.target !== 'server') {
         return io.sockets.in(action.meta.target).emit('dispatch', action);
     }
 
@@ -30,7 +30,7 @@ exports.socketOut = function(io) {
             next(action);
 
             // dispatch to client(s)
-            dispatchToClient(io, action.meta.socket_id || null, action);
+            dispatchToClient(io, (action.meta ? action.meta.socket_id : null), action);
         }
     }
 }
