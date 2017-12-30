@@ -1,21 +1,34 @@
 // import redux actions
-import { CLIENT_TO_SERVER } from './redux/types';
-import { removeOnlinePlayer } from '../player/redux/actions';
-import { accountLogin } from '../account/redux/actions';
+import { CLIENT_TO_SERVER, CLIENT_AUTH_SUCCESS } from './redux/types';
+import { removeOnlineCharacter } from '../character/redux/actions';
+import requestParser from '../../requests';
 
 export default function(store, io) {
     io.on('connection', function(socket) {
-        socket.on('dispatch', (data) => {
-            store.dispatch({
-                ...data,
-                subtype: CLIENT_TO_SERVER,
-                socket: socket
-            });
+        socket.on('dispatch', (action) => {
+            action.meta = {
+                socket_id: socket.id,
+            }
+
+            // if there is no parser for the action, merely pass it down the stack
+            if (!requestParser[action.type]) {
+                return store.dispatch(action);
+            }
+
+            const request = requestParser[action.type](action, socket);
+
+            if (typeof request.then !== 'function') {
+                return store.dispatch(request)
+            }
+
+            store
+                .dispatch(request)
+                .catch(console.log);
         });
 
         socket.on('disconnect', function() {
             if (socket.user) {
-                store.dispatch(removeOnlinePlayer(socket.user || null))
+                store.dispatch(removeOnlineCharacter(socket.user || null))
             }
 
             socket.disconnect();

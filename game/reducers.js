@@ -4,10 +4,10 @@ import BuildingReducer from './components/building/redux/reducer';
 import ItemReducer from './components/item/redux/reducer';
 import MapReducer from './components/map/redux/reducer';
 import NPCReducer from './components/npc/redux/reducer';
-import PlayerReducer from './components/player/redux/reducer';
+import CharacterReducer from './components/character/redux/reducer';
 
 const rootReducer = combineReducers({
-    players: PlayerReducer,
+    characters: CharacterReducer,
     buildings: BuildingReducer,
     npcs: NPCReducer,
     items: ItemReducer,

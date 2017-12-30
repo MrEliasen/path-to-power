@@ -30,7 +30,7 @@
     }
 }
 */
-class Player {
+class Character {
     constructor(characterData) {
         Object.keys(characterData).map((k) => {
             this[k] = characterData[k];
@@ -72,4 +72,4 @@ class Player {
     }
 }
 
-export default Player;
+export default Character;

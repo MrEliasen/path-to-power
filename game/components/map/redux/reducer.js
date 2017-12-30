@@ -1,8 +1,4 @@
-const defaultState = {
-    locations: {}
-}
-
-export default function(state = defaultState, action) {
+export default function(state = {}, action) {
     switch (action.type) {
 
     }

@@ -1,31 +1,37 @@
-import { PLAYER_ADD, PLAYER_REMOVE } from '../../player/redux/types';
+import { CHARACTER_REMOVE } from '../../character/redux/types';
+import { CLIENT_AUTH_SUCCESS, SERVER_TO_CLIENT } from '../../socket/redux/types';
+
 import { login } from '../db/controller';
+import { createNotification } from '../../socket/redux/actions';
 
-export function accountLogin(socket, auth_data) {
-    return function (dispatch, getState) {
-        login(auth_data)
-            .then((returnAction) => {
+export function accountLogin(action, socket) {
+    return (dispatch, getState, io) => {
+        return new Promise((resolve, reject) => {
+            login(action, (error, account) => {
+                if (error) {
+                    return dispatch(createNotification(error.type, error.message, error.title))
+                }
+
                 dispatch({
-                    type: PLAYER_ADD,
-                    payload: {
-                        name: returnAction.payload.name,
-                        user_id: returnAction.payload.user_id
-                    }
-                });
+                    type: CLIENT_AUTH_SUCCESS,
+                    subtype: SERVER_TO_CLIENT,
+                    meta: action.meta,
+                    payload: account
+                })
 
-                socket.join(returnAction.payload.user_id);
-                socket.emit('dispatch', returnAction);
+                socket.user = {
+                    user_id: account.user_id,
+                    name: account.name
+                };
             })
-            .catch((returnAction) => {
-                socket.emit('dispatch', returnAction);
-            });
+        })
     }
 }
 
 export function accountLogout(user_id) {
     return function (dispatch, getState, io) {
         dispatch({
-            type: PLAYER_REMOVE,
+            type: CHARACTER_REMOVE,
             payload: {
                 user_id: user_id
             }
