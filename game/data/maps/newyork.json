@@ -1,0 +1,27 @@
+{
+    "id" : "newyork",
+    "title": "New York",
+    "grid": [
+        [
+            {},
+            {
+                "description": "",
+                "buildings": [
+                    "hospital"
+                ],
+                "actions": {}
+            },
+            {}
+        ],
+        [
+            {}, {}, {}
+        ],
+        [
+            {}, {}, {}
+       ]
+    ],
+    "spawn": {
+       "y": 1,
+       "x": 1 
+    }
+}

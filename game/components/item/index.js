@@ -1,4 +1,4 @@
-import { itemList } from '../data';
+import fs from 'fs';
 
 /*
     {
@@ -29,15 +29,19 @@ import { itemList } from '../data';
         }
     }
 */
-class Item {
-    constructor(itemId, overwrites = {}) {
-        if (!itemList[itemId]) {
-            return null;
-        }
+export default class Item {
+    constructor(item) {
+        this.loaded = new Promise((resolve, rejecte) => {
+            Object.assign(this, item)
 
-        Object.keys(itemList[itemId].stats).map((statKey) => {
-            this.stats[statKey] = overwrites[statKey] || itemList[itemId].stats[statKey];
+            this.loadItem(() => {
+                resolve(this);
+            });
         });
+    }
+
+    loadItem(callback) {
+        callback()
     }
 
     consume() {
@@ -80,4 +84,36 @@ class Item {
     }
 }
 
-export default Item;
+export function createItem(data) {
+    return new Promise((resolve, rejecte) => {
+        const newItem = new Item(data);
+
+        newItem.loaded.then(() => {
+            resolve(newItem);
+        })
+    })
+}
+
+export function initialiseItems(dispatch) {
+    return new Promise((resolve, rejecte) => {
+        const items = fs.readdirSync(`${__dirname}/../../data/items`);
+        let loadeditems = 0;
+
+        items.map((itemfile) => {
+            let itemData = require(`${__dirname}/../../data/items/${itemfile}`);
+
+            createItem(itemData).then((loadedItem) => {
+                loadeditems++;
+
+                dispatch({
+                    type: 'SERVER_LOAD_ITEM',
+                    payload: loadedItem
+                })
+
+                if (loadeditems === items.length) {
+                    resolve();
+                }
+            })
+        })
+    })
+}

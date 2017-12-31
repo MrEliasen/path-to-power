@@ -1,0 +1,13 @@
+{
+    "id": "pistol",
+    "name": "Pistol",
+    "type": "weapon",
+    "subtype": "ranged",
+    "stats": {
+        "price": 35,
+        "stackable": false,
+        "durability": 50,
+        "damage_min": 6,
+        "damage_max": 8
+    }
+}

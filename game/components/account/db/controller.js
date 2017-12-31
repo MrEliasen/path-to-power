@@ -1,26 +1,9 @@
 import Account from './model';
 import Character from '../../character/db/controller';
 import request from 'superagent';
-import jwt from 'jsonwebtoken';
 import config from '../../../../config.json';
 
 import { CLIENT_NEW_CHARACTER, SERVER_TO_CLIENT, CLIENT_NOTIFICATION } from '../../socket/redux/types';
-
-function generateSigningToken(user_id, session_token, callback) {
-    jwt.sign({
-        user_id: user_id,
-        session_token: session_token
-    }, config.session.key, { expiresIn: config.session.ttl }, function(err, token) {
-        if (err) {
-            return callback({
-                type: 'error',
-                message: 'An error occured. Please try again in a moment.'
-            });
-        }
-
-        callback(null, token);
-    });
-}
 
 export function login(action, callback) {
     request.get('https://api.twitch.tv/helix/users')
@@ -62,88 +45,12 @@ export function login(action, callback) {
                     });
                 }
 
-                /*generateSigningToken(user.user_id, user.session_token, (err, token) => {
-                    if (err) {
-                        return callback({
-                            type: 'error',
-                            message: 'Internal server error'
-                        });
-                    }*/
-
                 callback(null, {
                     user_id: user._id,
                     name: user.display_name,
                     profile_image: twitchData.profile_image_url
                 });
-                //})
             });
         });
     });
 }
-
-
-                /*Character.loadFromDb(user._id, function(error, character) {
-                    if (error) {
-                        return dispatch(error);
-                    }
-
-                    // If a character already is created, just login the player
-                    if (character) {
-                        return generateSigningToken(user._id, user.session_token, (error, token) => {
-                            if (error) {
-                                return dispatch(error);
-                            }
-
-                            // Add plyer to online list
-                            dispatch(addOnlineCharacter(character));
-
-                            return callback({
-                                type: CLIENT_AUTH_SUCCESS,
-                                subtype: SERVER_TO_CLIENT,
-                                socket: action.socket,
-                                payload: {
-                                    user_id: user._id,
-                                    token: token,
-                                    name: character.name,
-                                    profile_image: twitchData.profile_image_url
-                                },
-                            });
-                        });
-                    }
-
-                    if (!action.payload.character_name) {
-                        return dispatch({
-                            type: CLIENT_NEW_CHARACTER,
-                            subtype: SERVER_TO_CLIENT,
-                            socket: action.socket,
-                            payload: {}
-                        });
-                    }
-
-                    Character.createNew(user._id, action.payload.character_name, function(error, character) {
-                        if (error) {
-                            return dispatch(error);
-                        }
-
-                        return generateSigningToken(user._id, user.session_token, (error, token) => {
-                            if (error) {
-                                return dispatch(error);
-                            }
-
-                            // Add plyer to online list
-                            dispatch(addOnlineCharacter(character))
-
-                            callback({
-                                type: CLIENT_AUTH_SUCCESS,
-                                subtype: SERVER_TO_CLIENT,
-                                socket: action.socket,
-                                payload: {
-                                    user_id: user._id,
-                                    token: token,
-                                    name: character.name,
-                                    profile_image: twitchData.profile_image_url
-                                },
-                            });
-                        });
-                    })
-                })*/

@@ -10,16 +10,27 @@ import { socketOut } from './components/socket/middleware';
 // dev tools
 import { composeWithDevTools } from 'remote-redux-devtools';
 
-export default function (redis, server) {
-    const io = socketIo(server);
-    io.listen(config.server_port);
+import { initialiseMaps } from './components/map';
+import { initialiseItems } from './components/item';
 
+export default async function (redis, server) {
+    const io = socketIo(server);
     const composeEnhancers = composeWithDevTools({realtime: true, port: 8000});
     const store = createStore(
         rootReducer,
         composeEnhancers(applyMiddleware(thunk.withExtraArgument(io), socketOut(io)))
     );
 
+    console.log('LOADING GAME DATA');
+    await initialiseMaps(store.dispatch).then(() => {
+        console.log('MAPS DONE');
+    })
+    await initialiseItems(store.dispatch).then(() => {
+        console.log('ITEMS DONE');
+    })
+    console.log('LOADING FINISHED');
+
     socket(store, io);
+    io.listen(config.server_port);
     return this;
 }

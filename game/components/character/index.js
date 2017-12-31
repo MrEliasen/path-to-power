@@ -30,11 +30,10 @@
     }
 }
 */
+
 class Character {
-    constructor(characterData) {
-        Object.keys(characterData).map((k) => {
-            this[k] = characterData[k];
-        });
+    constructor(character) {
+        Object.assign(this, character);
     }
 
     // Location

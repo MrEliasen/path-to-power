@@ -1,0 +1,27 @@
+{
+    "id" : "london",
+    "title": "London",
+    "grid": [
+        [
+            {},
+            {
+                "description": "",
+                "buildings": [
+                    "hospital"
+                ],
+                "actions": {}
+            },
+            {}
+        ],
+        [
+            {}, {}, {}
+        ],
+        [
+            {}, {}, {}
+       ]
+    ],
+    "spawn": {
+       "y": 1,
+       "x": 1 
+    }
+}

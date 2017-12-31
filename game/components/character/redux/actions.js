@@ -9,11 +9,12 @@ import {
 import { SERVER_TO_CLIENT } from '../../socket/redux/types';
 import { createNotification } from '../../socket/redux/actions';
 import { create, loadFromDb } from '../db/controller';
+import Character from '../index';
 
 export function addOnlineCharacter(character) {
     return {
         type: CHARACTER_ADD,
-        payload: character
+        payload: new Character(character)
     }
 }
 

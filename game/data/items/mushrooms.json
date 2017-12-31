@@ -1,0 +1,11 @@
+{
+    "id": "mushrooms",
+    "name": "Mushrooms",
+    "type": "consumable",
+    "subtype": "drug",
+    "stats": {
+        "price": 2,
+        "stackable": true,
+        "durability": 1
+    }
+}

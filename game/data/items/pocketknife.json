@@ -1,0 +1,13 @@
+{
+    "id": "pocketknife",
+    "name": "Pocket Knife",
+    "type": "weapon",
+    "subtype": "melee",
+    "stat": {
+        "price": 12,
+        "stackable": false,
+        "durability": 100,
+        "damage_min": 2,
+        "damage_max": 3
+    }
+}

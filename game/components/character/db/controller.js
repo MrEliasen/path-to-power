@@ -25,7 +25,7 @@ exports.getCharacterByName = function(name, callback) {
             });
         }
 
-        return callback(null, character);
+        return callback(null, character.toObject());
     });
 }
 
@@ -50,7 +50,7 @@ exports.loadFromDb = function(user_id, callback) {
             });
         }
 
-        return callback(null, character);
+        return callback(null, character.toObject());
     });
 }
 
@@ -107,6 +107,6 @@ exports.create = function(user_id, action, callback) {
             });
         }
 
-        callback(null, newCharacter);
+        callback(null, newCharacter.toObject());
     });
 }
