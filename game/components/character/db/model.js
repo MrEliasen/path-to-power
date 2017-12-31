@@ -15,6 +15,9 @@ var CharacterSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    name_lowercase: {
+        type: String,
+    },
     location: {
         type: Array
     },
@@ -37,6 +40,11 @@ CharacterSchema.pre('save', function (callback) {
 
     // set the date for when it was updated
     this.date_updated = moment().format(config.rfc2822);
+
+    if (this.name) {
+        this.name_lowercase = this.name.toLowerCase();
+    }
+
     callback();
 });
 

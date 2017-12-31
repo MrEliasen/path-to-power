@@ -89,6 +89,8 @@ export function createCharacter(action, socket) {
                     meta: action.meta,
                     payload: character
                 })
+
+                socket.user.name = character.name;
             })
         })
     }

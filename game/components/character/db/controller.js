@@ -7,6 +7,28 @@ function validateName(username) {
     return !matches;
 }
 
+exports.getCharacterByName = function(name, callback) {
+    const fetchData = {
+        user_id: 1,
+        name: 1
+    };
+
+    Character.findOne({ name_lowercase: name.toLowerCase() }, fetchData, function(err, character) {
+        if (err) {
+            return callback({
+                type: CLIENT_NOTIFICATION,
+                subtype: SERVER_TO_CLIENT,
+                payload: {
+                    type: 'error',
+                    message: 'Internal server error'
+                }
+            });
+        }
+
+        return callback(null, character);
+    });
+}
+
 exports.loadFromDb = function(user_id, callback) {
     const fetchData = {
         user_id: 1,

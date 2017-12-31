@@ -23,7 +23,18 @@ export function accountLogin(action, socket) {
                         payload: account
                     })
 
+                    // client joins a room by user ID, this allows
+                    // us to send private messages to the user.
+                    socket.join(account.user_id);
+
+                    socket.user = {
+                        user_id: account.user_id,
+                        name: account.name
+                    }
+
                     if (character) { 
+                        socket.user.name = character.name;
+
                         // send character information to socket
                         dispatch({
                             ...fetchCharacter(character),
@@ -40,11 +51,6 @@ export function accountLogin(action, socket) {
                             ...fetchOnlineCharacters(getState().characters.online),
                             meta: action.meta
                         })
-                    }
-
-                    socket.user = {
-                        user_id: account.user_id,
-                        name: account.name
                     }
 
                     resolve();
