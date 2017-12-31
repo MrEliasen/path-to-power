@@ -69,12 +69,18 @@ export function createCharacter(action, socket) {
                     return dispatch(createNotification(error.type, error.message, error.title))
                 }
 
-                delete character.date_updated;
-                delete character.date_created;
-                delete character._id;
+                // send character information to socket
+                dispatch({
+                    ...fetchCharacter(character),
+                    subtype: SERVER_TO_CLIENT,
+                });
 
-                // set the player in the online player list
+                // set the player in the online player list (server)
                 dispatch(addOnlineCharacter(character))
+                // announce a player is online
+                dispatch(broadcastOnlineCharacter(character));
+                // fetch all online players, dispatch to socket
+                dispatch(fetchOnlineCharacters(getState().characters.online))
 
                 // dispatch the character back to the client
                 dispatch({

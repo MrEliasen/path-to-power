@@ -1,6 +1,6 @@
 // import redux actions
 import { CLIENT_TO_SERVER, CLIENT_AUTH_SUCCESS } from './redux/types';
-import { removeOnlineCharacter } from '../character/redux/actions';
+import { removeOnlineCharacter, broadcastOfflineCharacter } from '../character/redux/actions';
 import requestParser from '../../requests';
 
 export default function(store, io) {
@@ -28,7 +28,8 @@ export default function(store, io) {
 
         socket.on('disconnect', function() {
             if (socket.user) {
-                store.dispatch(removeOnlineCharacter(socket.user || null))
+                store.dispatch(removeOnlineCharacter(socket.user))
+                store.dispatch(broadcastOfflineCharacter(socket.user))
             }
 
             socket.disconnect();

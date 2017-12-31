@@ -28,6 +28,7 @@ export function accountLogin(action, socket) {
                         dispatch({
                             ...fetchCharacter(character),
                             subtype: SERVER_TO_CLIENT,
+                            meta: action.meta,
                         });
 
                         // set the player in the online player list (server)
@@ -35,7 +36,10 @@ export function accountLogin(action, socket) {
                         // announce a player is online
                         dispatch(broadcastOnlineCharacter(character));
                         // fetch all online players, dispatch to socket
-                        dispatch(fetchOnlineCharacters(getState().characters.online))
+                        dispatch({
+                            ...fetchOnlineCharacters(getState().characters.online),
+                            meta: action.meta
+                        })
                     }
 
                     socket.user = {
