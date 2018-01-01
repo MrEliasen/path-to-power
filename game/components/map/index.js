@@ -9,7 +9,8 @@ export default class GameMap {
         // holds players and NPCs for the current players grid, locally.
         this.local = {
             players: {},
-            npcs: {}
+            npcs: {},
+            items: []
         }
 
         this.loaded = new Promise((resolve, rejecte) => {
@@ -101,6 +102,42 @@ export default class GameMap {
 
         return this.grid[y][x];
     }
+}
+
+export function loadLocalGrid(getState, location) {
+    return new Promise((resolve, reject) => {
+        let locationItems = [];
+        let locationPlayers = {};
+        let locationNpcs = {};
+
+        const locations = getState().characters.locations;
+        if (locations) {
+            if (locations[location.map]) {
+                if (locations[location.map][location.y]) {
+                    if (locations[location.map][location.y][location.x]) {
+                        locationPlayers = {
+                            ...locations[location.map][location.y][location.x]
+                        }
+                    }
+                }
+            }
+        }
+
+        const items = getState().items.locations;
+        if (items) {
+            if (items[location.map]) {
+                if (items[location.map][location.y]) {
+                    if (items[location.map][location.y][location.x]) {
+                        locationItems = [
+                            ...items[location.map][location.y][location.x]
+                        ];
+                    }
+                }
+            }
+        }
+
+        resolve(locationPlayers, locationItems, locationNpcs)
+    })
 }
 
 export function createMap(mapData) {

@@ -11,6 +11,7 @@ import {
 import { SERVER_TO_CLIENT } from '../../socket/redux/types';
 import { createNotification } from '../../socket/redux/actions';
 import { joinGrid, leaveGrid, loadGrid } from '../../map/redux/actions';
+import { loadLocalGrid } from '../../map';
 import { create, loadFromDb, autoSave } from '../db/controller';
 import Character from '../index';
 
@@ -131,20 +132,7 @@ export function moveCharacter(action, socket) {
             // dispatch a broadcast to the new grid
             const oldGrid = `${old_location.map}_${old_location.x}_${old_location.y}`;
             const grid = `${character.location.map}_${character.location.x}_${character.location.y}`;
-            const load = new Promise((resolve, reject) => {
-                const location = getState().characters.locations;
-                if (location) {
-                    if (location[character.location.map]) {
-                        if (location[character.location.map][character.location.y]) {
-                            if (location[character.location.map][character.location.y][character.location.x]) {
-                                return resolve(location[character.location.map][character.location.y][character.location.x]);
-                            }
-                        }
-                    }
-                }
-
-                resolve({})
-            })
+            const load = loadLocalGrid(getState, character.location)
 
             load.then((players) => {
                 // dispatch a broadcast to old grid

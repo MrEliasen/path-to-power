@@ -41,7 +41,7 @@ export function joinGrid(character) {
     }
 }
 
-export function loadGrid(players = {}, npcs = {}, items ={}) {
+export function loadGrid(players = {}, npcs = {}, items = []) {
     return {
         type: CLIENT_LOAD_GRID,
         payload: {

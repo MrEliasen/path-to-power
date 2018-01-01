@@ -2,10 +2,10 @@ import { SERVER_LOAD_ITEM, SERVER_DROP_ITEM } from './types';
 
 const defaultState = {
     list: {},
-    locations: []
+    locations: {}
 }
 
-export default function(state = {}, action) {
+export default function(state = defaultState, action) {
     let list;
     let locations;
 
@@ -31,7 +31,8 @@ export default function(state = {}, action) {
                 locations[action.payload.location.map][action.payload.location.y][action.payload.location.x] = [];
             }
 
-            locations[action.payload.location.map][action.payload.location.y][action.payload.location.x] = action.payload;
+            locations[action.payload.location.map][action.payload.location.y][action.payload.location.x].push(action.payload.item);
+
             return {
                 ...state,
                 locations

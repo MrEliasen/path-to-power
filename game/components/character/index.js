@@ -1,37 +1,4 @@
 import uuid from 'uuid/v4';
-/*
-{
-    "user_id" : "5a410f4b13137e70f82ba331",
-    "name" : "SirMrE",
-    "stats": {
-        "money" : 896,
-        "bank" : 896,
-        "health_max" : 100,
-        "health" : 56,
-    }
-    "location" : [ 
-        "london", 
-        1, 
-        1
-    ],
-    "inventory" : {
-        "apple" : {
-            "durability" : 14
-        },
-        "sword" : {
-            "553bac5f-f0ff-4176-a28a-c3e95ec1e7f8" : {
-                "durability" : 100
-            },
-            "46d78fd3-a066-4a86-b794-377bc5d2f405" : {
-                "durability" : 100
-            },
-            "eac6812e-f57e-472f-a5a7-e7f9b21aafb6" : {
-                "durability" : 100
-            }
-        }
-    }
-}
-*/
 
 class Character {
     constructor(character) {
@@ -87,7 +54,7 @@ class Character {
 
         // If the item is not stackable, just delete the item from the iventory, can return it
         if (!item.stats.stackable) {
-            delete this.inventory[itemIndex];
+            this.inventory.splice(itemIndex, 1);
             return item;
         }
 
@@ -97,12 +64,12 @@ class Character {
         }
 
         // reduce the number of said item, in the inventory
-        item.durability = amount
+        item.stats.durability = amount
         inventoryItem.durability = inventoryItem.durability - amount;
 
         // if there is not 0 items left, delete the item completely
         if (inventoryItem.durability <= 0) {
-            delete this.inventory[itemIndex];
+            this.inventory.splice(itemIndex, 1);
         }
 
         return item;
