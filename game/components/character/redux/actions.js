@@ -134,7 +134,7 @@ export function moveCharacter(action, socket) {
             const grid = `${character.location.map}_${character.location.x}_${character.location.y}`;
             const load = loadLocalGrid(getState, character.location)
 
-            load.then((players) => {
+            load.then((gridData) => {
                 // dispatch a broadcast to old grid
                 socket.leave(oldGrid)
                 dispatch({
@@ -146,7 +146,7 @@ export function moveCharacter(action, socket) {
                 })
                 // load the grid data
                 dispatch({
-                    ...loadGrid(players),
+                    ...loadGrid(gridData),
                     subtype: SERVER_TO_CLIENT,
                     meta: action.meta
                 })
@@ -212,24 +212,11 @@ export function createCharacter(action, socket) {
                 })
 
                 const grid = `${character.location.map}_${character.location.x}_${character.location.y}`;
-                const load = new Promise((resolve, reject) => {
-                    const location = getState().characters.locations;
-                    if (location) {
-                        if (location[character.location.map]) {
-                            if (location[character.location.map][character.location.y]) {
-                                if (location[character.location.map][character.location.y][character.location.x]) {
-                                    return resolve(location[character.location.map][character.location.y][character.location.x]);
-                                }
-                            }
-                        }
-                    }
+                const load = loadLocalGrid(getState, character.location)
 
-                    resolve({})
-                })
-
-                load.then((players) => {
+                load.then((gridData) => {
                     dispatch({
-                        ...loadGrid(players),
+                        ...loadGrid(gridData),
                         subtype: SERVER_TO_CLIENT,
                         meta: action.meta
                     })

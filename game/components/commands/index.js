@@ -119,6 +119,7 @@ function cmdDrop(socket, params, getState, resolve) {
     resolve([
         updateCharacter(character),
         serverRecordItemDrop({
+            stackable: droppedItem.stats.stackable,
             item: {
                 id: droppedItem.id,
                 durability: droppedItem.stats.durability
@@ -132,7 +133,8 @@ function cmdDrop(socket, params, getState, resolve) {
         {
             ...dropItem({
                 id: droppedItem.id,
-                durability: droppedItem.stats.durability
+                durability: droppedItem.stats.durability,
+                stackable: droppedItem.stats.stackable
             }),
             meta: {
                 target: grid

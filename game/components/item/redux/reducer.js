@@ -19,19 +19,34 @@ export default function(state = defaultState, action) {
             };
 
         case SERVER_DROP_ITEM:
+            let grid = action.payload.location;
             locations = {...state.locations};
 
-            if (!locations[action.payload.location.map]) {
-                locations[action.payload.location.map] = {};
+            if (!locations[grid.map]) {
+                locations[grid.map] = {};
             }
-            if (!locations[action.payload.location.map][action.payload.location.y]) {
-                locations[action.payload.location.map][action.payload.location.y] = {};
+            if (!locations[grid.map][grid.y]) {
+                locations[grid.map][grid.y] = {};
             }
-            if (!locations[action.payload.location.map][action.payload.location.y][action.payload.location.x]) {
-                locations[action.payload.location.map][action.payload.location.y][action.payload.location.x] = [];
+            if (!locations[grid.map][grid.y][grid.x]) {
+                locations[grid.map][grid.y][grid.x] = [];
             }
 
-            locations[action.payload.location.map][action.payload.location.y][action.payload.location.x].push(action.payload.item);
+            if (action.payload.stackable) {
+                let stacked = false;
+                locations[grid.map][grid.y][grid.x].map((item, index) => {
+                    if (item.id === action.payload.item.id) {
+                        stacked = true;
+                        locations[grid.map][grid.y][grid.x][index].durability += action.payload.item.durability;
+                    }
+                })
+
+                if (!stacked) {
+                    locations[grid.map][grid.y][grid.x].push(action.payload.item);
+                }
+            } else {
+                locations[grid.map][grid.y][grid.x].push(action.payload.item);
+            }
 
             return {
                 ...state,

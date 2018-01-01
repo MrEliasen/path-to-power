@@ -106,37 +106,37 @@ export default class GameMap {
 
 export function loadLocalGrid(getState, location) {
     return new Promise((resolve, reject) => {
-        let locationItems = [];
-        let locationPlayers = {};
-        let locationNpcs = {};
+        let items = [];
+        let players = {};
+        let npcs = {};
 
-        const locations = getState().characters.locations;
-        if (locations) {
-            if (locations[location.map]) {
-                if (locations[location.map][location.y]) {
-                    if (locations[location.map][location.y][location.x]) {
-                        locationPlayers = {
-                            ...locations[location.map][location.y][location.x]
+        const localplayers = getState().characters.locations;
+        if (localplayers) {
+            if (localplayers[location.map]) {
+                if (localplayers[location.map][location.y]) {
+                    if (localplayers[location.map][location.y][location.x]) {
+                        players = {
+                            ...localplayers[location.map][location.y][location.x]
                         }
                     }
                 }
             }
         }
 
-        const items = getState().items.locations;
-        if (items) {
-            if (items[location.map]) {
-                if (items[location.map][location.y]) {
-                    if (items[location.map][location.y][location.x]) {
-                        locationItems = [
-                            ...items[location.map][location.y][location.x]
+        const localitems = getState().items.locations;
+        if (localitems) {
+            if (localitems[location.map]) {
+                if (localitems[location.map][location.y]) {
+                    if (localitems[location.map][location.y][location.x]) {
+                        items = [
+                            ...localitems[location.map][location.y][location.x]
                         ];
                     }
                 }
             }
         }
 
-        resolve(locationPlayers, locationItems, locationNpcs)
+        resolve({players, items, npcs})
     })
 }
 

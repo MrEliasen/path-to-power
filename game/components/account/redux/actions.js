@@ -83,9 +83,9 @@ export function accountLogin(action, socket) {
                         const grid = `${character.location.map}_${character.location.x}_${character.location.y}`;
                         const load = loadLocalGrid(getState, character.location);
 
-                        load.then((players, items) => {
+                        load.then((gridData) => {
                             dispatch({
-                                ...loadGrid(players, items),
+                                ...loadGrid(gridData),
                                 subtype: SERVER_TO_CLIENT,
                                 meta: action.meta
                             })

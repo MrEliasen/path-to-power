@@ -26,12 +26,12 @@ class Character {
 
     dropItem (itemName, amount = 1, itemlist) {
         amount = parseInt(amount);
-        const inventoryItemCount = this.inventory.length - 1;
+        const inventoryItemCount = this.inventory.length;
         let   inventoryItem;
         let   itemIndex;
 
         // Loop inventory to find item, by name
-        for (var i = inventoryItemCount; i >= 0; i--) {
+        for (var i = 0; i < inventoryItemCount; i++) {
             if (itemlist[this.inventory[i].id].name.toLowerCase() === itemName) {
                 // check if item is equipped
                 if (!this.inventory[i].equipped) {
@@ -80,17 +80,17 @@ class Character {
 
         // check if item is stackable, and if so, see if we have that item in the inventory already
         if (itemObj.stats.stackable) {
-            const inventoryItemCount = this.inventory.length - 1;
+            const inventoryItemCount = this.inventory.length;
             let   itemIndex;
 
-            for (var i = inventoryItemCount; i >= 0; i--) {
+            for (var i = 0; i < inventoryItemCount; i++) {
                 if (this.inventory[i].id === itemObj.id) {
                     itemIndex = i;
                     break;
                 }
             }
 
-            if (itemIndex) {
+            if (itemIndex || itemIndex === 0) {
                 this.inventory[itemIndex].durability = (this.inventory[itemIndex].durability || 0) + amount;
             } else {
                 this.inventory.push({
