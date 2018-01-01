@@ -11,7 +11,7 @@ import {
 import { SERVER_TO_CLIENT } from '../../socket/redux/types';
 import { createNotification } from '../../socket/redux/actions';
 import { joinGrid, leaveGrid, loadGrid } from '../../map/redux/actions';
-import { create, loadFromDb } from '../db/controller';
+import { create, loadFromDb, autoSave } from '../db/controller';
 import Character from '../index';
 
 export function addOnlineCharacter(character) {
@@ -70,6 +70,22 @@ export function updateClientCharacter(character) {
         type: CLIENT_UPDATE_CHARACTER,
         subtype: SERVER_TO_CLIENT,
         payload: character
+    }
+}
+
+export function saveAccountCharacter(user_id) {
+    return (dispatch, getState, io) => {
+        return new Promise((resolve, reject) => {
+            const character = getState().characters.list[user_id];
+
+            if (!character) {
+                return resolve();
+            }
+
+            autoSave(character, () => {
+                return resolve();
+            })
+        })
     }
 }
 

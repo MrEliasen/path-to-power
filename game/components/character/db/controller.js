@@ -7,6 +7,35 @@ function validateName(username) {
     return !matches;
 }
 
+exports.autoSave = function(characterObj, callback) {
+    callback = callback || function() {};
+
+    saveCharacter(characterObj, () => {
+        callback();
+    })
+}
+
+export function saveCharacter(data, callback) {
+    callback = callback || function() {};
+
+    Character.findOne({ user_id: data.user_id }, (err, character) => {
+        if (err) {
+            console.log(err);
+            return callback();
+        }
+
+        character.stats = data.stats;
+        character.location = data.location;
+        character.save((err) => {
+            if (err) {
+                console.log(err);
+            }
+
+            callback();
+        });
+    });
+}
+
 exports.getCharacterByName = function(name, callback) {
     const fetchData = {
         user_id: 1,

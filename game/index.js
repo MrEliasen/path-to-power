@@ -10,8 +10,10 @@ import { socketOut } from './components/socket/middleware';
 // dev tools
 import { composeWithDevTools } from 'remote-redux-devtools';
 
+// components
 import { initialiseMaps } from './components/map';
 import { initialiseItems } from './components/item';
+import { autoSave } from './components/character/db/controller';
 
 export default async function (redis, server) {
     const io = socketIo(server);
@@ -32,5 +34,15 @@ export default async function (redis, server) {
 
     socket(store, io);
     io.listen(config.server_port);
+
+    if (config.game.autosave.enabled) {
+        const autoSaveInterval = setInterval(() => {
+            const characters = store.getState().characters.list;
+            Object.keys(characters).map((user_id) => {
+                autoSave(characters[user_id]);
+            })
+        }, config.game.autosave.interval)
+    }
+
     return this;
 }
