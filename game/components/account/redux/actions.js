@@ -3,7 +3,7 @@ import { CLIENT_AUTH_SUCCESS, SERVER_TO_CLIENT } from '../../socket/redux/types'
 
 import { login } from '../db/controller';
 import { loadFromDb } from '../../character/db/controller';
-import { fetchMaps, updateLocation, loadPlayerMap } from '../../map/redux/actions';
+import { fetchMaps, updateLocation, loadPlayerMap, joinGrid, loadGrid } from '../../map/redux/actions';
 import { fetchCharacter, fetchOnlineCharacters, addOnlineCharacter, broadcastOnlineCharacter } from '../../character/redux/actions';
 import { createNotification } from '../../socket/redux/actions';
 
@@ -68,6 +68,40 @@ export function accountLogin(action, socket) {
                             ...fetchOnlineCharacters(getState().characters.online),
                             meta: action.meta
                         })
+
+                        const grid = `${character.location.map}_${character.location.x}_${character.location.y}`;
+                        const load = new Promise((resolve, reject) => {
+                            const location = getState().characters.locations;
+                            if (location) {
+                                if (location[character.location.map]) {
+                                    if (location[character.location.map][character.location.y]) {
+                                        if (location[character.location.map][character.location.y][character.location.x]) {
+                                            return resolve(location[character.location.map][character.location.y][character.location.x]);
+                                        }
+                                    }
+                                }
+                            }
+
+                            resolve({})
+                        })
+
+                        load.then((players) => {
+                            dispatch({
+                                ...loadGrid(players),
+                                subtype: SERVER_TO_CLIENT,
+                                meta: action.meta
+                            })
+                            // dispatch a broadcast to the new grid
+                            dispatch({
+                                ...joinGrid({user_id: character.user_id, name: character.name, location: character.location }),
+                                subtype: SERVER_TO_CLIENT,
+                                meta: {
+                                    target: grid
+                                }
+                            })
+                            socket.join(grid)
+                        })
+                        .catch(console.log)
                     }
 
                     resolve();

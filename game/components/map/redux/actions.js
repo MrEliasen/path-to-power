@@ -1,4 +1,4 @@
-import { CLIENT_FETCH_MAPS, CLIENT_UPDATE_LOCATION, CLIENT_LOAD_PLAYER_MAP, CLIENT_LEAVE_GRID, CLIENT_JOIN_GRID } from './types';
+import { CLIENT_FETCH_MAPS, CLIENT_UPDATE_LOCATION, CLIENT_LOAD_PLAYER_MAP, CLIENT_LEAVE_GRID, CLIENT_JOIN_GRID, CLIENT_LOAD_GRID } from './types';
 
 export function fetchMaps(mapState) {
     const payload = {};
@@ -38,5 +38,16 @@ export function joinGrid(character) {
     return {
         type: CLIENT_JOIN_GRID,
         payload: character
+    }
+}
+
+export function loadGrid(players = {}, npcs = {}, items ={}) {
+    return {
+        type: CLIENT_LOAD_GRID,
+        payload: {
+            players,
+            npcs,
+            items
+        }
     }
 }

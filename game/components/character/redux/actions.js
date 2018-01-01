@@ -10,7 +10,7 @@ import {
     CHARACTER_UPDATE } from './types';
 import { SERVER_TO_CLIENT } from '../../socket/redux/types';
 import { createNotification } from '../../socket/redux/actions';
-import { joinGrid, leaveGrid } from '../../map/redux/actions';
+import { joinGrid, leaveGrid, loadGrid } from '../../map/redux/actions';
 import { create, loadFromDb } from '../db/controller';
 import Character from '../index';
 
@@ -108,34 +108,58 @@ export function moveCharacter(action, socket) {
                 payload: character
             })
 
-            // dispatch a broadcast to old grid
-            const oldGrid = `${old_location.map}_${old_location.x}_${old_location.y}`;
-            socket.leave(oldGrid)
-            dispatch({
-                ...leaveGrid({user_id: character.user_id, name: character.name, location: old_location }),
-                subtype: SERVER_TO_CLIENT,
-                meta: {
-                    target: oldGrid
-                }
-            })
-
             // dispatch a broadcast to the new grid
-            const newGrid = `${character.location.map}_${character.location.x}_${character.location.y}`;
-            dispatch({
-                ...joinGrid({user_id: character.user_id, name: character.name, location: character.location }),
-                subtype: SERVER_TO_CLIENT,
-                meta: {
-                    target: newGrid
+            const oldGrid = `${old_location.map}_${old_location.x}_${old_location.y}`;
+            const grid = `${character.location.map}_${character.location.x}_${character.location.y}`;
+            const load = new Promise((resolve, reject) => {
+                const location = getState().characters.locations;
+                if (location) {
+                    if (location[character.location.map]) {
+                        if (location[character.location.map][character.location.y]) {
+                            if (location[character.location.map][character.location.y][character.location.x]) {
+                                return resolve(location[character.location.map][character.location.y][character.location.x]);
+                            }
+                        }
+                    }
                 }
-            })
-            socket.join(newGrid)
 
-            // dispatch character update to client
-            dispatch({
-                ...updateClientCharacter(character),
-                subtype: SERVER_TO_CLIENT,
-                meta: action.meta
+                resolve({})
             })
+
+            load.then((players) => {
+                // dispatch a broadcast to old grid
+                socket.leave(oldGrid)
+                dispatch({
+                    ...leaveGrid({user_id: character.user_id, name: character.name, location: old_location }),
+                    subtype: SERVER_TO_CLIENT,
+                    meta: {
+                        target: oldGrid
+                    }
+                })
+                // load the grid data
+                dispatch({
+                    ...loadGrid(players),
+                    subtype: SERVER_TO_CLIENT,
+                    meta: action.meta
+                })
+                // dispatch a broadcast to the new grid
+                dispatch({
+                    ...joinGrid({user_id: character.user_id, name: character.name, location: character.location }),
+                    subtype: SERVER_TO_CLIENT,
+                    meta: {
+                        target: grid
+                    }
+                })
+                socket.join(grid)
+
+                // dispatch players in current grid
+                dispatch({
+                    ...updateClientCharacter(character),
+                    subtype: SERVER_TO_CLIENT,
+                    meta: action.meta
+                })
+            })
+            .catch(console.log)
         })
     }
 }
@@ -151,7 +175,8 @@ export function createCharacter(action, socket) {
                 }
 
                 // convery mongodb obj to plain obj
-                character = character.toObject();                
+                character = character.toObject();    
+                socket.user.name = character.name;            
 
                 // send character information to socket
                 dispatch({
@@ -178,7 +203,39 @@ export function createCharacter(action, socket) {
                     payload: character
                 })
 
-                socket.user.name = character.name;
+                const grid = `${character.location.map}_${character.location.x}_${character.location.y}`;
+                const load = new Promise((resolve, reject) => {
+                    const location = getState().characters.locations;
+                    if (location) {
+                        if (location[character.location.map]) {
+                            if (location[character.location.map][character.location.y]) {
+                                if (location[character.location.map][character.location.y][character.location.x]) {
+                                    return resolve(location[character.location.map][character.location.y][character.location.x]);
+                                }
+                            }
+                        }
+                    }
+
+                    resolve({})
+                })
+
+                load.then((players) => {
+                    dispatch({
+                        ...loadGrid(players),
+                        subtype: SERVER_TO_CLIENT,
+                        meta: action.meta
+                    })
+                    // dispatch a broadcast to the new grid
+                    dispatch({
+                        ...joinGrid({user_id: character.user_id, name: character.name, location: character.location }),
+                        subtype: SERVER_TO_CLIENT,
+                        meta: {
+                            target: grid
+                        }
+                    })
+                    socket.join(grid)
+                })
+                .catch(console.log)
             })
         })
     }

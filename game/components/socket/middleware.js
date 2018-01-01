@@ -27,7 +27,7 @@ exports.socketOut = function(io) {
             delete action.subtype;
 
             // pass along to the server reducers
-            //next(action);
+            next(action);
 
             // dispatch to client(s)
             dispatchToClient(io, (action.meta ? action.meta.socket_id : null), action);
