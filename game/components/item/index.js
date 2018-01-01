@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { SERVER_LOAD_ITEM } from './redux/types';
 
 /*
     {
@@ -106,7 +107,7 @@ export function initialiseItems(dispatch) {
                 loadeditems++;
 
                 dispatch({
-                    type: 'SERVER_LOAD_ITEM',
+                    type: SERVER_LOAD_ITEM,
                     payload: loadedItem
                 })
 

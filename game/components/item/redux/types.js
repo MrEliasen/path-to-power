@@ -1,0 +1,1 @@
+export const SERVER_LOAD_ITEM = 'SERVER_LOAD_ITEM';

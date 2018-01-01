@@ -3,6 +3,7 @@ import { CLIENT_AUTH_SUCCESS, SERVER_TO_CLIENT } from '../../socket/redux/types'
 
 import { login } from '../db/controller';
 import { loadFromDb } from '../../character/db/controller';
+import { fetchMaps, updateLocation, loadPlayerMap } from '../../map/redux/actions';
 import { fetchCharacter, fetchOnlineCharacters, addOnlineCharacter, broadcastOnlineCharacter } from '../../character/redux/actions';
 import { createNotification } from '../../socket/redux/actions';
 
@@ -23,6 +24,13 @@ export function accountLogin(action, socket) {
                         payload: account
                     })
 
+                    // set the player in the online player list (server)
+                    dispatch({
+                        ...fetchMaps(getState().maps),
+                        subtype: SERVER_TO_CLIENT,
+                        meta: action.meta
+                    })
+
                     // client joins a room by user ID, this allows
                     // us to send private messages to the user.
                     socket.join(account.user_id);
@@ -32,9 +40,18 @@ export function accountLogin(action, socket) {
                         name: account.name
                     }
 
-                    if (character) { 
+                    if (character) {
+                        // convery mongodb obj to plain obj
+                        character = character.toObject(); 
+
                         socket.user.name = character.name;
 
+                        // send the map the character is on
+                        dispatch({
+                            ...loadPlayerMap(getState().maps[character.location.map]),
+                            subtype: SERVER_TO_CLIENT,
+                            meta: action.meta
+                        })
                         // send character information to socket
                         dispatch({
                             ...fetchCharacter(character),

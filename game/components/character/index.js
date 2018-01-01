@@ -4,6 +4,7 @@
     "name" : "SirMrE",
     "stats": {
         "money" : 896,
+        "bank" : 896,
         "health_max" : 100,
         "health" : 56,
     }

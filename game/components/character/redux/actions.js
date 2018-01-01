@@ -5,9 +5,12 @@ import {
     CLIENT_CHARACTER_CREATED,
     CLIENT_ADD_TO_PLAYERLIST,
     CLIENT_REMOVE_FROM_PLAYERLIST,
-    CLIENT_LOAD_PLAYERLIST } from './types';
+    CLIENT_LOAD_PLAYERLIST,
+    CLIENT_UPDATE_CHARACTER,
+    CHARACTER_UPDATE } from './types';
 import { SERVER_TO_CLIENT } from '../../socket/redux/types';
 import { createNotification } from '../../socket/redux/actions';
+import { joinGrid, leaveGrid } from '../../map/redux/actions';
 import { create, loadFromDb } from '../db/controller';
 import Character from '../index';
 
@@ -62,18 +65,99 @@ export function broadcastOfflineCharacter(character) {
     }
 }
 
-export function createCharacter(action, socket) {
+export function updateClientCharacter(character) {
+    return {
+        type: CLIENT_UPDATE_CHARACTER,
+        subtype: SERVER_TO_CLIENT,
+        payload: character
+    }
+}
+
+export function moveCharacter(action, socket) {
     return (dispatch, getState, io) => {
         return new Promise((resolve, reject) => {
-            create(socket.user.user_id, action, (error, character) => {
+            // fetch the character
+            const character = getState().characters.list[socket.user.user_id];
+
+            if (!character) {
+                return resolve();
+            }
+
+            // fetch the character
+            const locationMap = getState().maps[character.location.map];
+
+            if (!locationMap) {
+                return resolve();
+            }
+
+            // check the new location is valid
+            const old_location = {...character.location};
+            const validMove = locationMap.isValidNewLocation(character.location, action.payload);
+
+            if (!validMove) {
+                return resolve();
+            }
+
+            // update the character location
+            character.location.x = validMove.x;
+            character.location.y = validMove.y;
+
+            // dispatch character update to store
+            dispatch({
+                type: CHARACTER_UPDATE,
+                payload: character
+            })
+
+            // dispatch a broadcast to old grid
+            const oldGrid = `${old_location.map}_${old_location.x}_${old_location.y}`;
+            socket.leave(oldGrid)
+            dispatch({
+                ...leaveGrid({user_id: character.user_id, name: character.name, location: old_location }),
+                subtype: SERVER_TO_CLIENT,
+                meta: {
+                    target: oldGrid
+                }
+            })
+
+            // dispatch a broadcast to the new grid
+            const newGrid = `${character.location.map}_${character.location.x}_${character.location.y}`;
+            dispatch({
+                ...joinGrid({user_id: character.user_id, name: character.name, location: character.location }),
+                subtype: SERVER_TO_CLIENT,
+                meta: {
+                    target: newGrid
+                }
+            })
+            socket.join(newGrid)
+
+            // dispatch character update to client
+            dispatch({
+                ...updateClientCharacter(character),
+                subtype: SERVER_TO_CLIENT,
+                meta: action.meta
+            })
+        })
+    }
+}
+
+export function createCharacter(action, socket) {
+    return (dispatch, getState, io) => {
+        const cities = getState().maps;
+
+        return new Promise((resolve, reject) => {
+            create(socket.user.user_id, action, cities, (error, character) => {
                 if (error) {
                     return dispatch(createNotification(error.type, error.message, error.title))
                 }
+
+                // convery mongodb obj to plain obj
+                character = character.toObject();                
 
                 // send character information to socket
                 dispatch({
                     ...fetchCharacter(character),
                     subtype: SERVER_TO_CLIENT,
+                    meta: action.meta
                 });
 
                 // set the player in the online player list (server)
@@ -81,7 +165,10 @@ export function createCharacter(action, socket) {
                 // announce a player is online
                 dispatch(broadcastOnlineCharacter(character));
                 // fetch all online players, dispatch to socket
-                dispatch(fetchOnlineCharacters(getState().characters.online))
+                dispatch({
+                    ...fetchOnlineCharacters(getState().characters.online),
+                    meta: action.meta
+                })
 
                 // dispatch the character back to the client
                 dispatch({

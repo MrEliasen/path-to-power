@@ -25,7 +25,7 @@ exports.getCharacterByName = function(name, callback) {
             });
         }
 
-        return callback(null, character.toObject());
+        return callback(null, character);
     });
 }
 
@@ -50,13 +50,14 @@ exports.loadFromDb = function(user_id, callback) {
             });
         }
 
-        return callback(null, character.toObject());
+        return callback(null, character);
     });
 }
 
-exports.create = function(user_id, action, callback) {
+exports.create = function(user_id, action, cities, callback) {
     // sanity check character name
     const character_name = action.payload.name.toString().trim();
+    const city = action.payload.city.toString().trim();
 
     if (!character_name || character_name === '') {
         return callback({
@@ -65,11 +66,26 @@ exports.create = function(user_id, action, callback) {
         });
     }
 
+    if (!city || city === '') {
+        return callback({
+            type: 'warning',
+            message: 'You must choose a city.'
+        });
+    }
+
     // validate character name
     if (!validateName(character_name)) {
         return callback({
             type: 'warning',
             message: 'Your character name can only consist of alphanumeric character (0-9, a-z)'
+        });
+    }
+
+    // validate character name
+    if (!cities[city]) {
+        return callback({
+            type: 'warning',
+            message: 'Please choose a city from the list.'
         });
     }
 
@@ -86,10 +102,14 @@ exports.create = function(user_id, action, callback) {
         stats: {
             health_max: config.game.character.defaults.health_max,
             health: config.game.character.defaults.health_max,
-            money: config.game.character.defaults.money
+            money: config.game.character.defaults.money,
+            bank: config.game.character.defaults.bank
         },
         inventory: {},
-        location: {}
+        location: {
+            map: city,
+            ...cities[city].spawn
+        }
     });
 
     newCharacter.save(function(err) {
@@ -107,6 +127,6 @@ exports.create = function(user_id, action, callback) {
             });
         }
 
-        callback(null, newCharacter.toObject());
+        callback(null, newCharacter);
     });
 }

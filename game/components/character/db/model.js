@@ -19,7 +19,7 @@ var CharacterSchema = new mongoose.Schema({
         type: String,
     },
     location: {
-        type: Array
+        type: {}
     },
     stats: {
         type: {}

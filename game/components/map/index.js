@@ -1,9 +1,16 @@
 import fs from 'fs';
 import descriptions from '../../data/descriptions.json';
 import buildings from '../../data/buildings.json';
+import { SERVER_LOAD_MAP } from './redux/types';
 
 export default class GameMap {
     constructor(data) {
+        // holds players and NPCs for the current players grid, locally.
+        this.local = {
+            players: {},
+            npcs: {}
+        }
+
         this.loaded = new Promise((resolve, rejecte) => {
             Object.assign(this, data);
 
@@ -24,7 +31,7 @@ export default class GameMap {
                 // load the builds on the grid
                 const gridBuildingId = location.buildings || [];
                 const gridBuildings = {};
-                const actions = {};
+                const gridActions = {};
                 let   buildingObj;
 
                 gridBuildingId.map((buildingId) => {
@@ -34,17 +41,35 @@ export default class GameMap {
                         gridBuildings[buildingId] = buildingObj;
 
                         Object.keys(buildingObj.commands).map((command) => {
-                            actions[command] = buildingObj.commands[command];
+                            gridActions[command] = buildingObj.commands[command];
                         })
                     }
                 })
 
-                this.grid[y][x].buildings = buildings;
-                this.grid[y][x].actions = actions;
+                this.grid[y][x].buildings = gridBuildings;
+                this.grid[y][x].actions = gridActions;
             });
         });
 
         callback()
+    }
+
+    isValidNewLocation(location, move) {
+        // move = { grid: 'x', direction: -1 }
+        // location =  { map: 'newyork', y: 1, x: 1 }
+
+        const newPostion = {
+            x: location.x,
+            y: location.y
+        }
+
+        if (move.grid === 'x') {
+            newPostion.x = newPostion.x + move.direction;
+        } else {
+            newPostion.y = newPostion.y + move.direction;
+        }
+
+        return (this.isValidPostion(newPostion.x, newPostion.y) ? newPostion : null);
     }
 
     isValidPostion (x, y) {
@@ -90,7 +115,7 @@ export function initialiseMaps(dispatch) {
                 loadedmaps++;
 
                 dispatch({
-                    type: 'SERVER_LOAD_MAP',
+                    type: SERVER_LOAD_MAP,
                     payload: loadedMap
                 })
 
