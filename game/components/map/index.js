@@ -1,6 +1,7 @@
 import fs from 'fs';
 import descriptions from '../../data/descriptions.json';
 import buildings from '../../data/buildings.json';
+import commands from '../../data/commands.json';
 import { SERVER_LOAD_MAP } from './redux/types';
 
 export default class GameMap {
@@ -33,6 +34,7 @@ export default class GameMap {
                 const gridBuildings = {};
                 const gridActions = {};
                 let   buildingObj;
+                let   action;
 
                 gridBuildingId.map((buildingId) => {
                     buildingObj = buildings[buildingId];
@@ -41,7 +43,15 @@ export default class GameMap {
                         gridBuildings[buildingId] = buildingObj;
 
                         Object.keys(buildingObj.commands).map((command) => {
-                            gridActions[command] = buildingObj.commands[command];
+                            if (commands[command]) {
+                                action = {
+                                    ...commands[command],
+                                    ...buildingObj.commands[command]
+                                }
+
+                                buildingObj.commands[command] = action;
+                                gridActions[command] = action;
+                            }
                         })
                     }
                 })

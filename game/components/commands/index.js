@@ -1,7 +1,110 @@
-import { CLIENT_NEW_MESSAGE } from './redux/types';
+import { CLIENT_NEW_MESSAGE, CLIENT_COMMAND_ERROR } from './redux/types';
 import { SERVER_TO_CLIENT, CLIENT_NEW_EVENT } from '../socket/redux/types';
+import { CHARACTER_UPDATE } from '../character/redux/types';
+import { getCharacterByName } from '../character/db/controller';
+import { updateClientCharacter } from '../character/redux/actions';
 
-import { getCharacterByName } from '../character/db/controller'
+function checkCommandAtLocation(socket, getState, command, callback) {
+    const character = getState().characters.list[socket.user.user_id] || null;
+
+    if (!character) {
+        return callback([{
+            type: CLIENT_COMMAND_ERROR,
+            subtype: SERVER_TO_CLIENT,
+            payload: 'Invalid character. Please logout and back in.',
+            meta: {
+                socket_id: socket.id
+            }
+        }]);
+    }
+
+    const map = getState().maps[character.location.map];
+    const location = map.getPosition(character.location.x, character.location.y);
+
+    // check if the command is available
+    if (!Object.keys(location.actions).includes(command)) {
+        return callback([{
+            type: CLIENT_COMMAND_ERROR,
+            subtype: SERVER_TO_CLIENT,
+            payload: 'There is nowhere to do that.',
+            meta: {
+                socket_id: socket.id
+            }
+        }]);
+    }
+
+    const actionModifiers = location.actions[command];
+    callback(null, character, location, actionModifiers)
+}
+
+function cmdHeal(socket, params, getState, command, resolve) {
+    let healAmount = parseInt(params[0]);
+    const meta = {
+        socket_id: socket.id
+    }
+
+    // Check if the healAmount is valid
+    if (!healAmount || healAmount < 1) {
+        return resolve([{
+            type: CLIENT_COMMAND_ERROR,
+            subtype: SERVER_TO_CLIENT,
+            payload: 'Invalid heal amount. Syntax: /heal <amount>',
+            meta
+        }]);
+    }
+
+    checkCommandAtLocation(socket, getState, command, (error, character, location, actionModifiers) => {
+        if (error) {
+            return resolve(error);
+        }
+
+        // Check if full health
+        if (character.stats.health === character.stats.health_max) {
+            return resolve([{
+                type: CLIENT_COMMAND_ERROR,
+                subtype: SERVER_TO_CLIENT,
+                payload: 'You are already at full health!',
+                meta
+            }]);
+        }
+
+        // Check if the heal would exceed 100%, if so, cap it.
+        if ((character.stats.health + healAmount) > character.stats.health_max) {
+            healAmount = character.stats.health_max - character.stats.health;
+        }
+
+        // Check if they have the money
+        const price = healAmount * actionModifiers.cost;
+        if (actionModifiers.cost && price > character.stats.money) {
+            return resolve([{
+                type: CLIENT_COMMAND_ERROR,
+                subtype: SERVER_TO_CLIENT,
+                payload: 'You do not have enough money to heal that amount.',
+                meta
+            }]);
+        }
+
+        // remove money and add health
+        character.stats.money = character.stats.money - price;
+        character.stats.health = character.stats.health + healAmount;
+
+        return resolve([{
+                type: CHARACTER_UPDATE,
+                payload: character
+            },
+            {
+                type: CLIENT_NEW_EVENT,
+                subtype: SERVER_TO_CLIENT,
+                meta,
+                payload: `You healed ${healAmount}, costing you ${price}`
+            },
+            {
+                ...updateClientCharacter(character),
+                meta
+            }
+        ])
+    })
+}
 
 function cmdSay(socket, params) {
     const position = socket.user.position;
@@ -27,7 +130,7 @@ function cmdSay(socket, params) {
 
 function cmdWhisper(socket, params, callback) {
     if (params.length < 2) {
-        callback([{
+        return callback([{
             type: CLIENT_COMMAND_ERROR,
             subtype: SERVER_TO_CLIENT,
             payload: 'Invalid whisper. Syntax: /w <username> <message>'
@@ -122,8 +225,8 @@ export default function parseCommand(socket, action, getState) {
                 return resolve(cmdSay(socket, params))
                 break;
 
-            case '/give':
-                //return cmdGive(io, socket, params)
+            case '/heal':
+                return cmdHeal(socket, params, getState, command, resolve);
                 break;
 
             default:

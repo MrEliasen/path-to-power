@@ -23,14 +23,14 @@ export default async function (redis, server) {
         composeEnhancers(applyMiddleware(thunk.withExtraArgument(io), socketOut(io)))
     );
 
-    console.log('LOADING GAME DATA');
+    console.log('===== LOADING GAME DATA =====');
     await initialiseMaps(store.dispatch).then(() => {
         console.log('MAPS DONE');
     })
     await initialiseItems(store.dispatch).then(() => {
         console.log('ITEMS DONE');
     })
-    console.log('LOADING FINISHED');
+    console.log('===== ===== ===== ===== =====');
 
     socket(store, io);
     io.listen(config.server_port);
