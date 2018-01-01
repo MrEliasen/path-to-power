@@ -1,5 +1,5 @@
 import { CHARACTER_REMOVE } from '../../character/redux/types';
-import { CLIENT_AUTH_SUCCESS, SERVER_TO_CLIENT } from '../../socket/redux/types';
+import { CLIENT_AUTH_SUCCESS, SERVER_TO_CLIENT, CLIENT_LOAD_GAME_DATA } from '../../socket/redux/types';
 
 import { login } from '../db/controller';
 import { loadFromDb } from '../../character/db/controller';
@@ -15,6 +15,16 @@ export function accountLogin(action, socket) {
                     dispatch(createNotification(error.type, error.message, error.title))
                     return resolve();
                 }
+
+                // set the player in the online player list (server)
+                dispatch({
+                    type: CLIENT_LOAD_GAME_DATA,
+                    subtype: SERVER_TO_CLIENT,
+                    meta: action.meta,
+                    payload: {
+                        items: getState().items.list
+                    }
+                })
 
                 loadFromDb(account.user_id, (err, character) => {
                     dispatch({

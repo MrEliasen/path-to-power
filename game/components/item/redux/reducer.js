@@ -1,13 +1,57 @@
-import { SERVER_LOAD_ITEM } from './types';
+import { SERVER_LOAD_ITEM, SERVER_DROP_ITEM } from './types';
+
+const defaultState = {
+    list: {},
+    locations: []
+}
 
 export default function(state = {}, action) {
-    let items;
+    let list;
+    let locations;
 
     switch (action.type) {
         case SERVER_LOAD_ITEM:
-            items = {...state};
-            items[action.payload.id] = action.payload;
-            return items;
+            list = {...state.list};
+            list[action.payload.id] = action.payload;
+            return {
+                ...state,
+                list
+            };
+
+        case SERVER_DROP_ITEM:
+            locations = {...state.locations};
+
+            if (!locations[action.payload.location.map]) {
+                locations[action.payload.location.map] = {};
+            }
+            if (!locations[action.payload.location.map][action.payload.location.y]) {
+                locations[action.payload.location.map][action.payload.location.y] = {};
+            }
+            if (!locations[action.payload.location.map][action.payload.location.y][action.payload.location.x]) {
+                locations[action.payload.location.map][action.payload.location.y][action.payload.location.x] = [];
+            }
+
+            locations[action.payload.location.map][action.payload.location.y][action.payload.location.x] = action.payload;
+            return {
+                ...state,
+                locations
+            };
+
+        /*case SERVER_PICKUP_ITEM:
+            locations = {...state.locations};
+
+            if (locations[action.payload.location.map]) {
+                if (locations[action.payload.location.map][action.payload.location.y]) {
+                    if (locations[action.payload.location.map][action.payload.location.y][action.payload.location.x]) {
+
+                    }
+                }
+            }
+
+            return {
+                ...state,
+                locations
+            };*/
     }
 
     return state;

@@ -43,6 +43,13 @@ export function fetchOnlineCharacters(characterList) {
     }
 }
 
+export function updateCharacter(character) {
+    return {
+        type: CHARACTER_UPDATE,
+        payload: character
+    }
+}
+
 export function broadcastOnlineCharacter(character) {
     return {
         type: CLIENT_ADD_TO_PLAYERLIST,
@@ -119,10 +126,7 @@ export function moveCharacter(action, socket) {
             character.location.y = validMove.y;
 
             // dispatch character update to store
-            dispatch({
-                type: CHARACTER_UPDATE,
-                payload: character
-            })
+            dispatch(updateCharacter(character))
 
             // dispatch a broadcast to the new grid
             const oldGrid = `${old_location.map}_${old_location.x}_${old_location.y}`;

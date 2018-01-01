@@ -25,7 +25,7 @@ var CharacterSchema = new mongoose.Schema({
         type: {}
     },
     inventory: {
-        type: {}
+        type: []
     },
     date_added: String,
     date_updated: String

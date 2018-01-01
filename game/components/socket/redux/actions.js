@@ -1,4 +1,4 @@
-import { CLIENT_NOTIFICATION, SERVER_TO_CLIENT } from './types';
+import { CLIENT_NOTIFICATION, SERVER_TO_CLIENT, CLIENT_NEW_EVENT } from './types';
 
 export function createNotification(type, message, title) {
     return {
@@ -9,5 +9,13 @@ export function createNotification(type, message, title) {
             message,
             title
         }
+    }
+}
+
+export function newEvent(payload) {
+    return {
+        type: CLIENT_NEW_EVENT,
+        subtype: SERVER_TO_CLIENT,
+        payload
     }
 }

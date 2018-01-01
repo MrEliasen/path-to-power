@@ -1,0 +1,61 @@
+[
+    {
+        "id": "redapple",
+        "name": "Red Apple",
+        "type": "consumable",
+        "subtype": "food",
+        "stats": {
+            "price": 2,
+            "stackable": true,
+            "durability": 1
+        }
+    },
+    {
+        "id": "bodyarmor",
+        "name": "Body Armor",
+        "type": "armour",
+        "subtype": "body",
+        "stats": {
+            "price": 20,
+            "stackable": false,
+            "durability": 1000
+        }
+    },
+    {
+        "id": "mushrooms",
+        "name": "Mushrooms",
+        "type": "consumable",
+        "subtype": "drug",
+        "stats": {
+            "price": 2,
+            "stackable": true,
+            "durability": 1
+        }
+    },
+    {
+        "id": "pistol",
+        "name": "Pistol",
+        "type": "weapon",
+        "subtype": "ranged",
+        "stats": {
+            "price": 35,
+            "stackable": false,
+            "durability": 50,
+            "damage_min": 6,
+            "damage_max": 8
+        }
+    },
+    {
+        "id": "pocketknife",
+        "name": "Pocket Knife",
+        "type": "weapon",
+        "subtype": "melee",
+        "stat": {
+            "price": 12,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 2,
+            "damage_max": 3
+        }
+    }
+]

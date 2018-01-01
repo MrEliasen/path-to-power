@@ -1,4 +1,4 @@
-import fs from 'fs';
+import items from '../../data/items.json';
 import { SERVER_LOAD_ITEM } from './redux/types';
 
 /*
@@ -80,7 +80,7 @@ export default class Item {
         return this.stats.durability;
     }
 
-    set durability(amount) {
+    setDurability(amount) {
         this.stats.durability = parseInt(amount);
     }
 }
@@ -97,13 +97,10 @@ export function createItem(data) {
 
 export function initialiseItems(dispatch) {
     return new Promise((resolve, rejecte) => {
-        const items = fs.readdirSync(`${__dirname}/../../data/items`);
         let loadeditems = 0;
 
-        items.map((itemfile) => {
-            let itemData = require(`${__dirname}/../../data/items/${itemfile}`);
-
-            createItem(itemData).then((loadedItem) => {
+        items.map((item) => {
+            createItem(item).then((loadedItem) => {
                 loadeditems++;
 
                 dispatch({

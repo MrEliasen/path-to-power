@@ -26,6 +26,7 @@ export function saveCharacter(data, callback) {
 
         character.stats = data.stats;
         character.location = data.location;
+        character.inventory = data.inventory;
         character.save((err) => {
             if (err) {
                 console.log(err);
@@ -134,7 +135,7 @@ exports.create = function(user_id, action, cities, callback) {
             money: config.game.character.defaults.money,
             bank: config.game.character.defaults.bank
         },
-        inventory: {},
+        inventory: [],
         location: {
             map: city,
             ...cities[city].spawn

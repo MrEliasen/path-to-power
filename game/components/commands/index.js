@@ -1,17 +1,17 @@
-import { CLIENT_NEW_MESSAGE, CLIENT_COMMAND_ERROR } from './redux/types';
-import { SERVER_TO_CLIENT, CLIENT_NEW_EVENT } from '../socket/redux/types';
-import { CHARACTER_UPDATE } from '../character/redux/types';
+import { CLIENT_NEW_MESSAGE } from './redux/types';
+import { clientCommandError } from './redux/actions';
+import { SERVER_TO_CLIENT } from '../socket/redux/types';
+import { newEvent } from '../socket/redux/actions';
 import { getCharacterByName } from '../character/db/controller';
-import { updateClientCharacter } from '../character/redux/actions';
+import { updateClientCharacter, updateCharacter } from '../character/redux/actions';
+import { dropItem } from '../item/redux/actions';
 
 function checkCommandAtLocation(socket, getState, command, callback) {
     const character = getState().characters.list[socket.user.user_id] || null;
 
     if (!character) {
         return callback([{
-            type: CLIENT_COMMAND_ERROR,
-            subtype: SERVER_TO_CLIENT,
-            payload: 'Invalid character. Please logout and back in.',
+            ...clientCommandError('Invalid character. Please logout and back in.'),
             meta: {
                 socket_id: socket.id
             }
@@ -24,9 +24,7 @@ function checkCommandAtLocation(socket, getState, command, callback) {
     // check if the command is available
     if (!Object.keys(location.actions).includes(command)) {
         return callback([{
-            type: CLIENT_COMMAND_ERROR,
-            subtype: SERVER_TO_CLIENT,
-            payload: 'There is nowhere to do that.',
+            ...clientCommandError('There is nowhere to do that.'),
             meta: {
                 socket_id: socket.id
             }
@@ -35,6 +33,100 @@ function checkCommandAtLocation(socket, getState, command, callback) {
 
     const actionModifiers = location.actions[command];
     callback(null, character, location, actionModifiers)
+}
+
+function cmdGive(socket, params, getState, resolve) {
+    if (!params[0]) {
+        return resolve();
+    }
+
+    const itemKey = params[0];
+    const amount = parseInt(params[1]) || 1;
+    const character = getState().characters.list[socket.user.user_id] || null;
+    const item = getState().items.list[itemKey];
+    const meta = {
+        socket_id: socket.id
+    }
+
+    if (!character) {
+        return callback([{
+            ...clientCommandError('Invalid character. Please logout and back in.'),
+            meta
+        }]);
+    }
+
+    if (!item) {
+        return resolve([{
+            ...clientCommandError('Invalid items.'),
+            meta
+        }]);
+    }
+
+    character.giveItem(item, amount);
+
+    return resolve([
+        updateCharacter(character),
+        {
+            ...newEvent(`Your received ${amount}x ${item.name}`),
+            meta,
+        },
+        {
+            ...updateClientCharacter(character),
+            meta
+        }
+    ])
+}
+
+function cmdDrop(socket, params, getState, resolve) {
+    if (!params[0]) {
+        return resolve();
+    }
+
+    // [red, apple, 5]
+
+    const character = getState().characters.list[socket.user.user_id] || null;
+    const meta = {
+        socket_id: socket.id
+    }
+    let amount = params.pop();
+    let item = params;
+
+    // If the last parameter is not considered a number
+    // assume its part of the item name, and set amount default 1
+    if (parseInt(amount) <= 0) {
+        item.push(amount);
+        amount = 1;
+    }
+
+    item = item.join(' ').toLowerCase();
+
+    if (!character) {
+        return callback([{
+            ...clientCommandError('Invalid character. Please logout and back in.'),
+            meta
+        }]);
+    }
+
+    const itemList = getState().items.list;
+    let droppedItem = character.dropItem(item, amount, itemList);
+
+    resolve([
+        updateCharacter(character),
+        {
+            ...newEvent(`Your dropped ${(droppedItem.stats.stackable ? 'a' : `${amount}x`)} ${droppedItem.name} on the ground`),
+            meta,
+        },
+        {
+            ...newEvent(`${character.name} dropped ${(droppedItem.stats.stackable ? 'a' : `${amount}x`)} ${droppedItem.name} on the ground`),
+            meta: {
+                target: `${character.location.map}_${character.location.x}_${character.location.y}`
+            }
+        },
+        {
+            ...updateClientCharacter(character),
+            meta
+        }
+    ])
 }
 
 function cmdHeal(socket, params, getState, command, resolve) {
@@ -46,9 +138,7 @@ function cmdHeal(socket, params, getState, command, resolve) {
     // Check if the healAmount is valid
     if (!healAmount || healAmount < 1) {
         return resolve([{
-            type: CLIENT_COMMAND_ERROR,
-            subtype: SERVER_TO_CLIENT,
-            payload: 'Invalid heal amount. Syntax: /heal <amount>',
+            ...clientCommandError('Invalid heal amount. Syntax: /heal <amount>'),
             meta
         }]);
     }
@@ -61,9 +151,7 @@ function cmdHeal(socket, params, getState, command, resolve) {
         // Check if full health
         if (character.stats.health === character.stats.health_max) {
             return resolve([{
-                type: CLIENT_COMMAND_ERROR,
-                subtype: SERVER_TO_CLIENT,
-                payload: 'You are already at full health!',
+                ...clientCommandError('You are already at full health!'),
                 meta
             }]);
         }
@@ -77,9 +165,7 @@ function cmdHeal(socket, params, getState, command, resolve) {
         const price = healAmount * actionModifiers.cost;
         if (actionModifiers.cost && price > character.stats.money) {
             return resolve([{
-                type: CLIENT_COMMAND_ERROR,
-                subtype: SERVER_TO_CLIENT,
-                payload: 'You do not have enough money to heal that amount.',
+                ...clientCommandError('You do not have enough money to heal that amount.'),
                 meta
             }]);
         }
@@ -88,15 +174,11 @@ function cmdHeal(socket, params, getState, command, resolve) {
         character.stats.money = character.stats.money - price;
         character.stats.health = character.stats.health + healAmount;
 
-        return resolve([{
-                type: CHARACTER_UPDATE,
-                payload: character
-            },
+        return resolve([
+            updateCharacter(character),
             {
-                type: CLIENT_NEW_EVENT,
-                subtype: SERVER_TO_CLIENT,
+                ...newEvent(`You healed ${healAmount}, costing you ${price}`),
                 meta,
-                payload: `You healed ${healAmount}, costing you ${price}`
             },
             {
                 ...updateClientCharacter(character),
@@ -106,34 +188,33 @@ function cmdHeal(socket, params, getState, command, resolve) {
     })
 }
 
-function cmdSay(socket, params) {
-    const position = socket.user.position;
+function cmdSay(socket, params, getState) {
+    const character = getState().characters.list[socket.user.user_id] || null;
     let message = params.join(' ').trim();
 
-    if (!message) {
+    if (!message || !character) {
         return [];
     }
 
     return [{
-        type: CLIENT_NEW_EVENT,
-        subtype: SERVER_TO_CLIENT,
-        meta: {
-            target: `grid_${position.mapId}_${position.x}_${position.y}`
-        },
-        payload: {
+        ...newEvent({
             type: 'local',
             name: socket.user.name,
             message: message
-        }
+        }),
+        meta: {
+            target: `${character.location.map}_${character.location.x}_${character.location.y}`
+        } 
     }];
 }
 
 function cmdWhisper(socket, params, callback) {
     if (params.length < 2) {
         return callback([{
-            type: CLIENT_COMMAND_ERROR,
-            subtype: SERVER_TO_CLIENT,
-            payload: 'Invalid whisper. Syntax: /w <username> <message>'
+            ...clientCommandError('Invalid whisper. Syntax: /w <username> <message>'),
+            meta: {
+                socket_id: socket.id
+            }
         }]);
     }
 
@@ -146,9 +227,10 @@ function cmdWhisper(socket, params, callback) {
 
         if (!character) {
             return callback([{
-                type: CLIENT_COMMAND_ERROR,
-                subtype: SERVER_TO_CLIENT,
-                payload: 'Invalid whisper target.'
+                ...clientCommandError('Invalid whisper target.'),
+                meta: {
+                    socket_id: socket.id
+                }
             }]);
         }
 
@@ -222,11 +304,19 @@ export default function parseCommand(socket, action, getState) {
             case '/s':
                 // because the first word is removed from the command,
                 // we put it back, since its considered part of the message
-                return resolve(cmdSay(socket, params))
+                return resolve(cmdSay(socket, params, getState))
                 break;
 
             case '/heal':
                 return cmdHeal(socket, params, getState, command, resolve);
+                break;
+
+            case '/give':
+                return cmdGive(socket, params, getState, resolve);
+                break;
+
+            case '/drop':
+                return cmdDrop(socket, params, getState, resolve);
                 break;
 
             default:
@@ -234,7 +324,7 @@ export default function parseCommand(socket, action, getState) {
                     // because the first word is removed from the command,
                     // we put it back, since its considered part of the message
                     params.unshift(command);
-                    return resolve(cmdSay(socket, params))
+                    return resolve(cmdSay(socket, params, getState))
                 }
                 break;
         }
