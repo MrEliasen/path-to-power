@@ -1,1 +1,2 @@
 export const SERVER_LOAD_SHOP = 'SERVER_LOAD_SHOP';
+export const CLIENT_LOAD_SHOP = 'CLIENT_LOAD_SHOP';

@@ -2,6 +2,7 @@
     {
         "id": "redapple",
         "name": "Red Apple",
+        "description": "A shiny red apple. Does not contain poison.",
         "type": "consumable",
         "subtype": "food",
         "stats": {
@@ -13,6 +14,7 @@
     {
         "id": "bodyarmor",
         "name": "Body Armor",
+        "description": "Protectes the wearer from {durability} points of damage.",
         "type": "armour",
         "subtype": "body",
         "stats": {
@@ -24,6 +26,7 @@
     {
         "id": "mushrooms",
         "name": "Mushrooms",
+        "description": "Red kind, don't eat.",
         "type": "consumable",
         "subtype": "drug",
         "stats": {
@@ -35,6 +38,7 @@
     {
         "id": "pistol",
         "name": "Pistol",
+        "description": "Aim at target and squeeze trigger. Deals {damage_min}-{damage_max} damage on hit.",
         "type": "weapon",
         "subtype": "ranged",
         "stats": {
@@ -48,9 +52,10 @@
     {
         "id": "pocketknife",
         "name": "Pocket Knife",
+        "description": "You are a real boy, with a pocket knife. Deals {damage_min}-{damage_max} damage on hit.",
         "type": "weapon",
         "subtype": "melee",
-        "stat": {
+        "stats": {
             "price": 12,
             "stackable": false,
             "durability": 100,

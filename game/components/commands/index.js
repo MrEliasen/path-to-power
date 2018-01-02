@@ -5,6 +5,7 @@ import { newEvent } from '../socket/redux/actions';
 import { getCharacterByName } from '../character/db/controller';
 import { updateClientCharacter, updateCharacter } from '../character/redux/actions';
 import { dropItem, pickupItem, serverRecordItemDrop, serverRecordItemPickup } from '../item/redux/actions';
+import { loadShop } from '../shop/redux/actions';
 
 function checkCommandAtLocation(socket, getState, command, callback) {
     const character = getState().characters.list[socket.user.user_id] || null;
@@ -494,6 +495,10 @@ export default function parseCommand(socket, action, getState) {
             case '/pickup':
             case '/get':
                 return cmdPickup(socket, params, getState, resolve);
+                break;
+
+            case '/shop':
+                return loadShop(socket, params, getState, resolve);
                 break;
 
             default:
