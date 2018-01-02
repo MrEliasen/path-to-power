@@ -1,0 +1,11 @@
+{
+  "libs": [
+  ],
+  "plugins": {
+     "node": {},
+     "modules": {},
+     "requirejs": {},
+     "es_modules": {},
+     "jasmine": {}
+  }
+}

@@ -1,8 +1,12 @@
-{
-    "shop-pawn": {
+[
+    {
+        "id": "shop-pawn",
         "title": "Pawn Shop",
         "selling": [
-            "redapple"
+            "redapple",
+            "pistol",
+            "bodyarmor",
+            "pocketknife"
         ]
     }
-}
+]

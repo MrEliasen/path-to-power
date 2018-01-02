@@ -122,6 +122,7 @@ export function moveCharacter(action, socket) {
                 return resolve();
             }
 
+            // if they didnt move after validating the input, ignore the input
             if (validMove.x == character.location.x && validMove.y == character.location.y) {
                 return resolve();
             }

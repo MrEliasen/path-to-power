@@ -12,7 +12,7 @@
         "title": "Pawn Shop",
         "colour": "#9e2f00", 
         "commands": {
-            "/buy": {
+            "/shop": {
                 "shop": "shop-pawn"
             }
         }

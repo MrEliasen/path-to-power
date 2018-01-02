@@ -1,0 +1,1 @@
+export const SERVER_LOAD_SHOP = 'SERVER_LOAD_SHOP';

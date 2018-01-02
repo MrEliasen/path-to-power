@@ -13,6 +13,7 @@ import { composeWithDevTools } from 'remote-redux-devtools';
 // components
 import { initialiseMaps } from './components/map';
 import { initialiseItems } from './components/item';
+import { initialiseShops } from './components/shop';
 import { autoSave } from './components/character/db/controller';
 
 export default async function (redis, server) {
@@ -29,6 +30,9 @@ export default async function (redis, server) {
     })
     await initialiseItems(store.dispatch).then(() => {
         console.log('ITEMS DONE');
+    })
+    await initialiseShops(store.dispatch).then(() => {
+        console.log('SHOPS DONE');
     })
     console.log('===== ===== ===== ===== =====');
 
