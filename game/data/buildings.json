@@ -7,5 +7,14 @@
                 "cost": 1
             }
         }
+    },
+    "pawnshop": {
+        "title": "Pawn Shop",
+        "colour": "#9e2f00", 
+        "commands": {
+            "/buy": {
+                "shop": "shop-pawn"
+            }
+        }
     }
 }

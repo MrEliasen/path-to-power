@@ -1,4 +1,4 @@
-import { SERVER_LOAD_ITEM, SERVER_DROP_ITEM } from './types';
+import { SERVER_LOAD_ITEM, SERVER_DROP_ITEM, SERVER_PICKUP_ITEM } from './types';
 
 const defaultState = {
     list: {},
@@ -7,6 +7,7 @@ const defaultState = {
 
 export default function(state = defaultState, action) {
     let list;
+    let grid;
     let locations;
 
     switch (action.type) {
@@ -19,7 +20,7 @@ export default function(state = defaultState, action) {
             };
 
         case SERVER_DROP_ITEM:
-            let grid = action.payload.location;
+            grid = action.payload.location;
             locations = {...state.locations};
 
             if (!locations[grid.map]) {
@@ -53,13 +54,18 @@ export default function(state = defaultState, action) {
                 locations
             };
 
-        /*case SERVER_PICKUP_ITEM:
+        case SERVER_PICKUP_ITEM:
+            grid = action.payload.location;
             locations = {...state.locations};
 
-            if (locations[action.payload.location.map]) {
-                if (locations[action.payload.location.map][action.payload.location.y]) {
-                    if (locations[action.payload.location.map][action.payload.location.y][action.payload.location.x]) {
-
+            if (locations[grid.map]) {
+                if (locations[grid.map][grid.y]) {
+                    if (locations[grid.map][grid.y][grid.x]) {
+                        if (action.payload.item.remove) {
+                            locations[grid.map][grid.y][grid.x].splice(action.payload.item.index, 1);
+                        } else {
+                            locations[grid.map][grid.y][grid.x][action.payload.item.index].durability = action.payload.item.durability;
+                        }
                     }
                 }
             }
@@ -67,7 +73,7 @@ export default function(state = defaultState, action) {
             return {
                 ...state,
                 locations
-            };*/
+            };
     }
 
     return state;

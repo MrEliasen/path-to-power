@@ -5,16 +5,20 @@
         [
             {},
             {
-                "description": "",
                 "buildings": [
                     "hospital"
-                ],
-                "actions": {}
+                ]
             },
             {}
         ],
         [
-            {}, {}, {}
+            {},
+            {
+                "buildings": [
+                    "pawnshop"
+                ]
+            },
+            {}
         ],
         [
             {}, {}, {}
