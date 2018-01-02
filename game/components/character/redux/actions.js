@@ -122,6 +122,10 @@ export function moveCharacter(action, socket) {
                 return resolve();
             }
 
+            if (validMove.x == character.location.x && validMove.y == character.location.y) {
+                return resolve();
+            }
+
             // update the character location
             character.location.x = validMove.x;
             character.location.y = validMove.y;

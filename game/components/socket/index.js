@@ -6,6 +6,10 @@ import requestParser from '../../requests';
 export default function(store, io) {
     io.on('connection', function(socket) {
         socket.on('dispatch', (action) => {
+            if (!action.payload || !action.type) {
+                return;
+            }
+
             action.meta = {
                 socket_id: socket.id,
             }

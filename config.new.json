@@ -1,12 +1,12 @@
 {
     "mongo_db": "mongodb://localhost:27017/rtl",
-    "redis_server": "localhost",
+    "redis_server": "//localhost:6379",
     "session": {
         "ttl": 604800,
         "key": ""
     },
     "twitch": {
-        "clientId": ""
+        "clientId": "tka1ecssl1k4t8xaee3h240i6dwqb7"
     },
     "rfc2822": "ddd, D MMM YYYY H:mm:ss [GMT]",
     "server_port": 8086,
@@ -24,7 +24,9 @@
                 "health_max": 100
             }
         },
-        "mapDescription": [
-        ]
+        "autosave": {
+            "enabled": true,
+            "interval": 5000
+        }
     }
 }
