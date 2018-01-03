@@ -25,8 +25,12 @@ export default function(store, io) {
                 return store.dispatch(request)
             }
 
+            // TODO add socket.user check within commands, actions etc. in case of staggered actions firing before client reconnet.
+
             store
-                .dispatch(request)
+                .dispatch((request) => {
+                    console.log(request);
+                })
                 .catch(console.log);
         });
 

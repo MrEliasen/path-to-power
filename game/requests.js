@@ -10,11 +10,16 @@ import { createCharacter, moveCharacter } from './components/character/redux/act
 import { COMMAND_FROM_CLIENT } from './components/commands/redux/types';
 import { execCommand } from './components/commands/redux/actions';
 
+// shops
+import { SHOP_BUY } from './components/shop/redux/types';
+import { shopPurchase } from './components/shop/redux/actions';
+
 const parsers = {
     [ACCOUNT_AUTHENTICATE]: accountLogin,
     [CLIENT_CREATE_CHARACTER]: createCharacter,
     [COMMAND_FROM_CLIENT]: execCommand,
-    [CLIENT_MOVE_CHARACTER]: moveCharacter
+    [CLIENT_MOVE_CHARACTER]: moveCharacter,
+    [SHOP_BUY]: shopPurchase,
 };
 
 export default parsers;
