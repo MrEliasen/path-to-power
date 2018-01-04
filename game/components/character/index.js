@@ -1,5 +1,3 @@
-import uuid from 'uuid/v4';
-
 class Character {
     constructor(character) {
         Object.assign(this, character);

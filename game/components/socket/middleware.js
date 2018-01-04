@@ -1,9 +1,15 @@
 import { SERVER_TO_CLIENT, CLIENT_TO_SERVER } from './redux/types';
 
-function dispatchToClient(io, socket_id, action) {
+/**
+ * Emits an event to the client/room/server
+ * @param  {Object} io     Socket.io server
+ * @param  {Mixed}  meta   Tells the function where or who to emit the event to
+ * @param  {Object} action Redux action object
+ */
+function dispatchToClient(io, meta, action) {
     // dispatch to client socket only, if no target is set
-    if (socket_id && (!action.meta || !action.meta.target)) {
-        return io.to(socket_id).emit('dispatch', action);
+    if (meta.socket_id && (!action.meta || !action.meta.target)) {
+        return io.to(meta.socket_id).emit('dispatch', action);
     }
 
     // check if we need to dispatch to a specific room
@@ -15,10 +21,15 @@ function dispatchToClient(io, socket_id, action) {
     io.emit('dispatch', action);
 }
 
+/**
+ * Checks if an action is meant to be emited to the client or not 
+ * @param  {Object} io Socket.io server, passed from the Thunk middleware
+ */
 exports.socketOut = function(io) {
     return (store) => {
         return next => action => {
-            // if the action if not the one we want, move along
+            // This middleware only check for the SERVER_TO_CLIENT type. If an action
+            // is not of this type, we pass it along.
             if (!action.subtype || action.subtype !== SERVER_TO_CLIENT) {
                 return next(action);
             }
@@ -26,25 +37,11 @@ exports.socketOut = function(io) {
             // remove subtype so the action does not trigger this middleware again
             delete action.subtype;
 
-            // pass along to the server reducers
+            // pass the action along to the server reducers, should we need to do anything.
             next(action);
 
-            // dispatch to client(s)
-            dispatchToClient(io, (action.meta ? action.meta.socket_id : null), action);
+            // Dispatch the action to the client(s), based on the meta data.
+            dispatchToClient(io, action.meta || {}, action);
         }
     }
 }
-
-/*
-    {
-        type: <server defined action type>,
-        subtype: SERVER_TO_CLIENT,
-        meta(option): {
-            target: 'server|grid_key',
-            socket_id: 123123
-        }
-        payload: {
-            ...
-        }
-    }
-*/

@@ -1,37 +1,37 @@
 import items from '../../data/items.json';
 import { SERVER_LOAD_ITEM } from './redux/types';
 
-/*
-    {
-        name: "",
-        type: "weapon|armour|consumable",
-        subtype: "[melee|ranged]|[body]|[food|drug]",
-        stats: {
-            price: 123,
-            stackable: true|false,
-            // armour: it would be max damage item can soak before getting ruined/useless
-            // consumables: it would be the number of uses left
-            // weapons: TBD
-            durability: 123,
-            durability_max: 123, // for non-consumable
-
-            // Type: weapon
-            damage_min: 123,
-            damage_max: 321,
-
-            // Type: armour
-            damage_reduction: 123,
-
-            // Type: consumable
-            effect: [
-                "effect-id"
-            ],
-            effect_duration: 123
-        }
-    }
-*/
-export default class Item {
+class Item {
     constructor(item) {
+        /*
+        {
+            name: "",
+            type: "weapon|armour|consumable",
+            subtype: "[melee|ranged]|[body]|[food|drug]",
+            stats: {
+                price: 123,
+                stackable: true|false,
+                // armour: it would be max damage item can soak before getting ruined/useless
+                // consumables: it would be the number of uses left
+                // weapons: TBD
+                durability: 123,
+                durability_max: 123, // for non-consumable
+
+                // Type: weapon
+                damage_min: 123,
+                damage_max: 321,
+
+                // Type: armour
+                damage_reduction: 123,
+
+                // Type: consumable
+                effect: [
+                    "effect-id"
+                ],
+                effect_duration: 123
+            }
+        }
+        */
         this.loaded = new Promise((resolve, rejecte) => {
             Object.assign(this, item)
 
@@ -85,33 +85,4 @@ export default class Item {
     }
 }
 
-export function createItem(data) {
-    return new Promise((resolve, rejecte) => {
-        const newItem = new Item(data);
-
-        newItem.loaded.then(() => {
-            resolve(newItem);
-        })
-    })
-}
-
-export function initialiseItems(dispatch) {
-    return new Promise((resolve, rejecte) => {
-        let loadeditems = 0;
-
-        items.map((item) => {
-            createItem(item).then((loadedItem) => {
-                loadeditems++;
-
-                dispatch({
-                    type: SERVER_LOAD_ITEM,
-                    payload: loadedItem
-                })
-
-                if (loadeditems === items.length) {
-                    resolve();
-                }
-            })
-        })
-    })
-}
+export default Item;

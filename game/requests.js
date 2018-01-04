@@ -1,20 +1,22 @@
-// authentication
+// Authentication
 import { ACCOUNT_AUTHENTICATE } from './components/account/redux/types';
 import { accountLogin } from './components/account/redux/actions';
 
-// character creation
+// Character creation
 import { CLIENT_CREATE_CHARACTER, CLIENT_MOVE_CHARACTER } from './components/character/redux/types';
 import { createCharacter, moveCharacter } from './components/character/redux/actions';
 
-// commands
+// Commands
 import { COMMAND_FROM_CLIENT } from './components/commands/redux/types';
 import { execCommand } from './components/commands/redux/actions';
 
-// shops
+// Shops
 import { SHOP_BUY } from './components/shop/redux/types';
 import { shopPurchase } from './components/shop/redux/actions';
 
-const parsers = {
+// The socket will check the ACTION_TYPE of any actions from the client,
+// and pass on the action to the matching function here. 
+const requestParsers = {
     [ACCOUNT_AUTHENTICATE]: accountLogin,
     [CLIENT_CREATE_CHARACTER]: createCharacter,
     [COMMAND_FROM_CLIENT]: execCommand,
@@ -22,4 +24,4 @@ const parsers = {
     [SHOP_BUY]: shopPurchase,
 };
 
-export default parsers;
+export default requestParsers;
