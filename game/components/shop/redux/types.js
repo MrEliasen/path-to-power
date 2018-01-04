@@ -2,5 +2,6 @@ export const SERVER_LOAD_SHOP = 'SERVER_LOAD_SHOP';
 export const CLIENT_LOAD_SHOP = 'CLIENT_LOAD_SHOP';
 export const SHOP_NOTIFICATION = 'SHOP_NOTIFICATION';
 export const SHOP_BUY = 'SHOP_BUY';
+export const SHOP_SELL = 'SHOP_SELL';
 export const SHOP_UPDATE = 'SHOP_UPDATE';
 export const CLIENT_UPDATE_SHOP = 'CLIENT_UPDATE_SHOP';

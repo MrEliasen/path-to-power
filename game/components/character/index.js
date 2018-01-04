@@ -22,6 +22,32 @@ class Character {
         return this.inventory;
     }
 
+    takeItem(inventoryIndex, amount = 1, itemList) {
+        let selectedItem = this.inventory[inventoryIndex];
+        const item = itemList[selectedItem.id];
+
+        if (!item.stats.stackable) {
+            return this.inventory.splice(inventoryIndex, 1)[0];
+        }
+
+        // check if they have enough of the specific item to drop
+        if (selectedItem.durability < amount) {
+            return null;
+        }
+
+        const takenItem = {...selectedItem};
+        takenItem.durability = amount;
+
+        // if the item (after accounting for the amount to drop), is 0, remove it
+        selectedItem.durability = selectedItem.durability - amount;
+
+        if (selectedItem.durability <= 0) {
+            this.inventory.splice(inventoryIndex, 1);
+        }
+
+        return takenItem;
+    }
+
     dropItem (itemName, amount = 1, itemlist) {
         amount = parseInt(amount);
         const inventoryItemCount = this.inventory.length;

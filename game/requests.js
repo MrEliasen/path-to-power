@@ -10,9 +10,9 @@ import { createCharacter, moveCharacter } from './components/character/redux/act
 import { COMMAND_FROM_CLIENT } from './components/commands/redux/types';
 import { execCommand } from './components/commands/redux/actions';
 
-// Shops
-import { SHOP_BUY } from './components/shop/redux/types';
-import { shopPurchase } from './components/shop/redux/actions';
+// shops
+import { SHOP_BUY, SHOP_SELL } from './components/shop/redux/types';
+import { shopPurchase, shopSell } from './components/shop/redux/actions';
 
 // The socket will check the ACTION_TYPE of any actions from the client,
 // and pass on the action to the matching function here. 
@@ -22,6 +22,7 @@ const requestParsers = {
     [COMMAND_FROM_CLIENT]: execCommand,
     [CLIENT_MOVE_CHARACTER]: moveCharacter,
     [SHOP_BUY]: shopPurchase,
+    [SHOP_SELL]: shopSell
 };
 
 export default requestParsers;

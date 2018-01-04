@@ -3,11 +3,18 @@
         "id": "shop-pawn",
         "title": "Pawn Shop",
         "selling": [
-            { "id": "redapple", "quantity": 999 },
-            { "id": "pistol", "quantity": 999 },
+            { "id": "redapple", "quantity": 10 },
             { "id": "mushrooms", "quantity": 10 },
             { "id": "bodyarmor", "quantity": 999 },
             { "id": "pocketknife", "quantity": 999 }
-        ]
+        ],
+        "buying": {
+            "canBuy": true,
+            "resell": true,
+            "sellPricePercent": 0.5,
+            "list": [],
+            "ignoreType": "", 
+            "ignoreSubtype": "drug" 
+        }
     }
 ]
