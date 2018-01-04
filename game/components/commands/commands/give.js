@@ -1,6 +1,6 @@
-import { clientCommandError } from './redux/actions';
-import { updateClientCharacter, updateCharacter } from '../character/redux/actions';
-import { newEvent } from '../socket/redux/actions';
+import { clientCommandError } from '../redux/actions';
+import { updateClientCharacter, updateCharacter } from '../../character/redux/actions';
+import { newEvent } from '../../socket/redux/actions';
 
 export default function cmdGive(socket, params, getState, resolve) {
     if (!params[0]) {

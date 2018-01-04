@@ -1,7 +1,7 @@
-import { clientCommandError } from './redux/actions';
-import { updateClientCharacter, updateCharacter } from '../character/redux/actions';
-import { newEvent } from '../socket/redux/actions';
-import { pickupItem, serverRecordItemPickup } from '../item/redux/actions';
+import { clientCommandError } from '../redux/actions';
+import { updateClientCharacter, updateCharacter } from '../../character/redux/actions';
+import { newEvent } from '../../socket/redux/actions';
+import { pickupItem, serverRecordItemPickup } from '../../item/redux/actions';
 
 export default function cmdPickup(socket, params, getState, resolve) {
     if (!params[0]) {

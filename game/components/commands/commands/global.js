@@ -1,6 +1,6 @@
-import { SERVER_TO_CLIENT } from '../socket/redux/types';
-import { CLIENT_NEW_MESSAGE } from './redux/types';
-import { newEvent } from '../socket/redux/actions';
+import { SERVER_TO_CLIENT } from '../../socket/redux/types';
+import { CLIENT_NEW_MESSAGE } from '../redux/types';
+import { newEvent } from '../../socket/redux/actions';
 
 export default function cmdGlobal(socket, params) {
     return [{

@@ -2,6 +2,42 @@ import descriptions from '../../data/descriptions.json';
 import buildings from '../../data/buildings.json';
 import commands from '../../data/commands.json';
 
+export function loadLocalGrid(getState, location) {
+    return new Promise((resolve, reject) => {
+        let items = [];
+        let players = {};
+        let npcs = {};
+
+        const localplayers = getState().characters.locations;
+        if (localplayers) {
+            if (localplayers[location.map]) {
+                if (localplayers[location.map][location.y]) {
+                    if (localplayers[location.map][location.y][location.x]) {
+                        players = {
+                            ...localplayers[location.map][location.y][location.x]
+                        }
+                    }
+                }
+            }
+        }
+
+        const localitems = getState().items.locations;
+        if (localitems) {
+            if (localitems[location.map]) {
+                if (localitems[location.map][location.y]) {
+                    if (localitems[location.map][location.y][location.x]) {
+                        items = [
+                            ...localitems[location.map][location.y][location.x]
+                        ];
+                    }
+                }
+            }
+        }
+
+        resolve({players, items, npcs})
+    })
+}
+
 class GameMap {
     constructor(data) {
         // holds players and NPCs for the current players grid, locally.

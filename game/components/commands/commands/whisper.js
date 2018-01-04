@@ -1,7 +1,7 @@
-import { SERVER_TO_CLIENT } from '../socket/redux/types';
-import { CLIENT_NEW_MESSAGE } from './redux/types';
-import { clientCommandError } from './redux/actions';
-import { getCharacterByName } from '../character/db/controller';
+import { SERVER_TO_CLIENT } from '../../socket/redux/types';
+import { CLIENT_NEW_MESSAGE } from '../redux/types';
+import { clientCommandError } from '../redux/actions';
+import { getCharacterByName } from '../../character/db/controller';
 
 export default function cmdWhisper(socket, params, callback) {
     if (params.length < 2) {

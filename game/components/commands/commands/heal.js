@@ -1,7 +1,7 @@
-import { clientCommandError } from './redux/actions';
-import { updateClientCharacter, updateCharacter } from '../character/redux/actions';
-import { newEvent } from '../socket/redux/actions';
-import { checkCommandAtLocation } from '../socket';
+import { clientCommandError } from '../redux/actions';
+import { updateClientCharacter, updateCharacter } from '../../character/redux/actions';
+import { newEvent } from '../../socket/redux/actions';
+import { checkCommandAtLocation } from '../index';
 
 export default function cmdHeal(socket, params, getState, command, resolve) {
     let healAmount = parseInt(params[0]);

@@ -1,4 +1,4 @@
-import { newEvent } from '../socket/redux/actions';
+import { newEvent } from '../../socket/redux/actions';
 
 export default function cmdSay(socket, params, getState) {
     const character = getState().characters.list[socket.user.user_id] || null;

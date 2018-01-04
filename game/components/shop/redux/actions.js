@@ -152,7 +152,7 @@ export function shopPurchase(action, socket) {
         }
 
         // check player has enough money to buy the item
-        const item = getState().items.list[listItem.id];
+        const item = {...getState().items.list[listItem.id]};
 
         if (character.stats.money < item.stats.price) {
             return dispatch({
@@ -162,6 +162,17 @@ export function shopPurchase(action, socket) {
         }
 
         // TODO check if player has inventory space
+
+        // if the item is a non-stackable item, modify its stats, with the purchased items stats, should there be any.
+        if (!item.stats.stackable) {
+            Object.keys(listItem).map((statKey) => {
+                if (listItem.stats.hasOwnProperty(statKey)) {
+                    if (item.stats[statKey]) {
+                        item.stats[statKey] = listItem[statKey];
+                    }
+                }
+            })
+        }
 
         // give the item to the character
         character.giveItem(item, 1);
@@ -276,7 +287,7 @@ export function shopSell(action, socket) {
         // check if the shop wants to purchase the item
         const itemList = getState().items.list;
         const item = itemList[selectedItem.id];
-        const shop = {...getState().shops[action.payload.shop]};
+        const shop = getState().shops[action.payload.shop];
 
         // check if the shop buy anything
         if (!shop.buying.canBuy) {
@@ -309,6 +320,7 @@ export function shopSell(action, socket) {
             return;
         }
 
+        // TODO take item durability into account for sell price.
         // add the payment to the character
         const sellPrice = Math.floor(item.stats.price * shop.buying.sellPricePercent);
         character.stats.money = character.stats.money + sellPrice;
@@ -316,10 +328,10 @@ export function shopSell(action, socket) {
         // if the shop should resell the item, add it to its inventory
         if (shop.buying.resell) {
             // TODO create shop class, add helper methods like Stacking of items to resell.
-            shop.selling.push({
+            shop.addToInventory({
                 id: soldItem.id,
-                durability: soldItem.id
-            });
+                durability: soldItem.durability
+            }, amount, item);
         }
 
         dispatch(updateCharacter(character));

@@ -41,12 +41,7 @@ export default function(store, io) {
             // TODO add socket.user check within commands, actions etc. in case of staggered actions firing before client reconnet.
             // if the request parser did return a promise, we wait for it to finish,
             // and dispatch the request
-            store
-                .then((request) => {
-                    store.dispatch(request);
-                    console.log(request);
-                })
-                .catch(console.log);
+            request.catch(console.log);
         });
 
         socket.on('disconnect', function() {
