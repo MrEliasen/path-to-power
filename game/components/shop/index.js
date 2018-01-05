@@ -21,7 +21,7 @@ class Shop {
 
         // if the item is stackable, push it (incl modifiers) to the shop.
         if (itemObj.stats.stackable) {
-            const listItem = this.selling.find((item) => item.id === itemObj.id);
+            const listItem = this.sell.list.find((item) => item.id === itemObj.id);
 
             // if we find a matching item, increase the quantity.
             if (listItem) {
@@ -33,7 +33,7 @@ class Shop {
             delete addedItem.durability;
         }
 
-        this.selling.push(addedItem);
+        this.sell.list.push(addedItem);
         return addedItem;
     }
 }

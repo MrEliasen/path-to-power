@@ -2,16 +2,19 @@
     {
         "id": "shop-pawn",
         "title": "Pawn Shop",
-        "selling": [
-            { "id": "redapple", "quantity": 10 },
-            { "id": "mushrooms", "quantity": 10 },
-            { "id": "bodyarmor", "quantity": 999 },
-            { "id": "pocketknife", "quantity": 999 }
-        ],
-        "buying": {
-            "canBuy": true,
+        "sell": {
+            "selling": true,
+            "list": [
+                { "id": "redapple", "quantity": 10 },
+                { "id": "mushrooms", "quantity": 10 },
+                { "id": "bodyarmor", "quantity": 999 },
+                { "id": "pocketknife", "quantity": 999 }
+            ]
+        },
+        "buy": {
+            "buying": true,
             "resell": true,
-            "sellPricePercent": 0.5,
+            "sellPricePercent": 0.35,
             "list": [],
             "ignoreType": "", 
             "ignoreSubtype": "drug" 

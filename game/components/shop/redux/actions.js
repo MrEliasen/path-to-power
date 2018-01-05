@@ -132,14 +132,14 @@ export function shopPurchase(action, socket) {
 
         // Check the shop is carrying the selected item
         const shop = {...getState().shops[action.payload.shop]};
-        const totalItems = shop.selling.length;
+        const totalItems = shop.sell.list.length;
         let itemIndex = -1;
         let listItem;
 
         for (var i = 0; i < totalItems; i++) {
-            if (shop.selling[i].id === action.payload.item) {
+            if (shop.sell.list[i].id === action.payload.item) {
                 itemIndex = i;
-                listItem = shop.selling[i];
+                listItem = shop.sell.list[i];
                 break;
             }
         }
@@ -182,14 +182,14 @@ export function shopPurchase(action, socket) {
         // after the purchase remove the item
         if (listItem.quantity < 999) {
             if (listItem.quantity - amount <= 0) {
-                shop.selling.splice(itemIndex, 1);
+                shop.sell.list.splice(itemIndex, 1);
             } else {
-                shop.selling[itemIndex].quantity = shop.selling[itemIndex].quantity - amount;
+                shop.sell.list[itemIndex].quantity = shop.sell.list[itemIndex].quantity - amount;
             }
         }
 
         dispatch(updateCharacter(character));
-        dispatch(updateShop(shop.id, shop.selling));
+        dispatch(updateShop(shop.id, shop.sell.list));
         dispatch({
             ...updateClientCharacter(character),
             meta: {
@@ -204,7 +204,7 @@ export function shopPurchase(action, socket) {
         // no need to send the shop inventory update to clients, if the item is unlimited.
         if (listItem.quantity < 999) {
             dispatch({
-                ...updateClientShop(shop.id, shop.selling),
+                ...updateClientShop(shop.id, shop.sell.list),
                 meta: {
                     target: `${character.location.map}_${character.location.x}_${character.location.y}`
                 }
@@ -290,7 +290,7 @@ export function shopSell(action, socket) {
         const shop = getState().shops[action.payload.shop];
 
         // check if the shop buy anything
-        if (!shop.buying.canBuy) {
+        if (!shop.buy.buying) {
             return dispatch({
                 ...shopNotification(shop.id, {type: 'error', message: 'The shop won\'t buy any items.'}),
                 meta
@@ -298,14 +298,14 @@ export function shopSell(action, socket) {
         }
 
         // check if the shop does not want the item type
-        if (shop.buying.ignoreType.includes(item.type) || shop.buying.ignoreSubtype.includes(item.subtype)) {
+        if (shop.buy.ignoreType.includes(item.type) || shop.buy.ignoreSubtype.includes(item.subtype)) {
             return dispatch({
                 ...shopNotification(shop.id, {type: 'error', message: 'The shop is not interested in that type of item.'}),
                 meta
             });
         }
 
-        if (shop.buying.list.length && !shop.buying.list.includes(item.id)) {
+        if (shop.buy.list.length && !shop.buy.list.includes(item.id)) {
             return dispatch({
                 ...shopNotification(shop.id, {type: 'error', message: 'The shop is not interested in that item.'}),
                 meta
@@ -322,11 +322,11 @@ export function shopSell(action, socket) {
 
         // TODO take item durability into account for sell price.
         // add the payment to the character
-        const sellPrice = Math.floor(item.stats.price * shop.buying.sellPricePercent);
+        const sellPrice = Math.floor(item.stats.price * shop.buy.sellPricePercent);
         character.stats.money = character.stats.money + sellPrice;
 
         // if the shop should resell the item, add it to its inventory
-        if (shop.buying.resell) {
+        if (shop.buy.resell) {
             // TODO create shop class, add helper methods like Stacking of items to resell.
             shop.addToInventory({
                 id: soldItem.id,
@@ -335,7 +335,7 @@ export function shopSell(action, socket) {
         }
 
         dispatch(updateCharacter(character));
-        dispatch(updateShop(shop.id, shop.selling));
+        dispatch(updateShop(shop.id, shop.sell.list));
         dispatch({
             ...updateClientCharacter(character),
             meta: {
@@ -348,9 +348,9 @@ export function shopSell(action, socket) {
         })
 
         // no need to send the shop inventory update to clients, if the item is unlimited.
-        if (shop.buying.resell) {
+        if (shop.buy.resell) {
             dispatch({
-                ...updateClientShop(shop.id, shop.selling),
+                ...updateClientShop(shop.id, shop.sell.list),
                 meta: {
                     target: `${character.location.map}_${character.location.x}_${character.location.y}`
                 }
