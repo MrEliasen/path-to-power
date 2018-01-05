@@ -1,0 +1,32 @@
+{
+    "mongo_db": "mongodb://localhost:27017/rtl",
+    "redis_server": "//localhost:6379",
+    "session": {
+        "ttl": 604800,
+        "key": ""
+    },
+    "twitch": {
+        "clientId": ""
+    },
+    "rfc2822": "ddd, D MMM YYYY H:mm:ss [GMT]",
+    "server_port": 8086,
+    "game": {
+        "maps": [],
+        "spawn" : {
+            "map": "",
+            "x": 0,
+            "y": 0
+        },
+        "character": {
+            "name_length_min": 2,
+            "name_length_max": 25,
+            "defaults": {
+                "health_max": 100
+            }
+        },
+        "autosave": {
+            "enabled": true,
+            "interval": 5000
+        }
+    }
+}
