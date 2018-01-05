@@ -6,6 +6,7 @@ import cmdHeal from './commands/heal';
 import cmdSay from './commands/say';
 import cmdWhisper from './commands/whisper';
 import cmdGlobal from './commands/global';
+import cmdAim from './commands/aim';
 import { loadShop } from '../shop/redux/actions';
 
 export function checkCommandAtLocation(socket, getState, command, callback) {
@@ -90,6 +91,10 @@ export default function parseCommand(socket, action, getState) {
 
             case '/shop':
                 return loadShop(socket, params, getState, resolve);
+                break;
+
+            case '/aim':
+                return cmdAim(socket, params, getState, resolve);
                 break;
 
             default:

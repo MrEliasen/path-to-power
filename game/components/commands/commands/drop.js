@@ -13,16 +13,16 @@ export default function cmdDrop(socket, params, getState, resolve) {
         socket_id: socket.id
     }
     let amount = params.pop();
-    let needle = params || [];
+    let itemName = params || [];
 
     // If the last parameter is not considered a number
     // assume its part of the item name, and set amount default 1
     if (!parseInt(amount)) {
-        needle.push(amount);
+        itemName.push(amount);
         amount = 1;
     }
 
-    needle = needle.join(' ').toLowerCase();
+    itemName = itemName.join(' ').toLowerCase();
 
     if (!character) {
         return resolve([{
@@ -33,7 +33,7 @@ export default function cmdDrop(socket, params, getState, resolve) {
 
     const grid = `${character.location.map}_${character.location.x}_${character.location.y}`;
     const itemList = getState().items.list;
-    let droppedItem = character.dropItem(needle, amount, itemList);
+    let droppedItem = character.dropItem(itemName, amount, itemList);
 
     if (!droppedItem) {
         return resolve([{

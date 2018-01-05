@@ -58,19 +58,13 @@ export default function cmdPickup(socket, params, getState, resolve) {
 
     // search for the item in the grid
     const localItemList = [...localItems[character.location.map][character.location.y][character.location.x]];
-    const total = localItemList.length;
-    let itemIndex;
+    // get the item index of the first dropped items, which matches the string
+    let itemIndex = localItemList.findIndex((localItem) => itemList[localItem.id].name.toLowerCase().indexOf(needle) === 0)
     let removeFromItems = false;
     let pickedUpItem;
 
-    for (var i = 0; i < total; i++) {
-        if (itemList[localItemList[i].id].name.toLowerCase().indexOf(needle) === 0) {
-            itemIndex = i;
-            break;
-        }
-    }
-
-    if (!itemIndex && itemIndex !== 0) {
+    // If no item matched the string
+    if (itemIndex === -1) {
         return resolve([{
             ...clientCommandError('That item does not appear to be on the ground.'),
             meta

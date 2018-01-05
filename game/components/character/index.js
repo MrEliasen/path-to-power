@@ -50,28 +50,16 @@ class Character {
 
     dropItem (itemName, amount = 1, itemlist) {
         amount = parseInt(amount);
-        const inventoryItemCount = this.inventory.length;
-        let   inventoryItem;
-        let   itemIndex;
-
-        // Loop inventory to find item, by name
-        for (var i = 0; i < inventoryItemCount; i++) {
-            if (itemlist[this.inventory[i].id].name.toLowerCase() === itemName) {
-                // check if item is equipped
-                if (!this.inventory[i].equipped) {
-                    // return the array index of the item, in the inventory 
-                    // and to make life easier, create reference to the specific item in the inventory
-                    itemIndex = i;
-                    inventoryItem = this.inventory[i];
-                    break;
-                }
-            }
-        }
+        // get the first matching items from the inventory
+        let itemIndex = this.inventory.findIndex((inventoryItem) => itemlist[inventoryItem.id].name.toLowerCase().indexOf(itemName) === 0);
 
         // If no item was found
-        if (!inventoryItem) {
+        if (itemIndex === -1) {
             return null;
         }
+
+        // get the matching item object from the inventory
+        let inventoryItem = this.inventory[itemIndex];
 
         // Get the item object from the store
         const item = {...itemlist[inventoryItem.id]};
