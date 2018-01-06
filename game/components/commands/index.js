@@ -10,6 +10,7 @@ import cmdAim from './commands/aim';
 import cmdRelease from './commands/release';
 import cmdFlee from './commands/flee';
 import cmdPunch from './commands/punch';
+import cmdStrike from './commands/strike';
 import { loadShop } from '../shop/redux/actions';
 
 export function checkCommandAtLocation(socket, getState, command, callback) {
@@ -106,6 +107,10 @@ export default function parseCommand(socket, action, getState, dispatch) {
 
             case '/punch':
                 return cmdPunch(socket, params, getState, resolve);
+                break;
+
+            case '/strike':
+                return cmdStrike(socket, params, getState, resolve);
                 break;
 
             case '/release':

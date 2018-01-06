@@ -1,7 +1,7 @@
 import { newEvent } from '../../socket/redux/actions';
 import { updateCharacter, updateClientCharacter } from '../../character/redux/actions';
 
-export default function cmdPunch(socket, params, getState, resolve) {
+export default function cmdStrike(socket, params, getState, resolve) {
     const character = getState().characters.list[socket.user.user_id] || null;
 
     if (!character) {
@@ -35,8 +35,23 @@ export default function cmdPunch(socket, params, getState, resolve) {
         }]);
     }
 
+    // make sure they have a melee weapon equipped
+    if (!character.equipped.melee) {
+        return resolve([{
+            ...newEvent({
+                type: 'system',
+                message: 'You do not have a melee weapon equipped.'
+            }),
+            meta: {
+                socket_id: socket.id
+            }
+        }]);
+    }
+
     // deal damage to the target
-    const attack = target.dealDamage(2, getState().items.list, true);
+    const itemList = getState().items.list;
+    const weapon = itemList[character.equipped.melee.id].name;
+    const attack = target.dealDamage(character.getWeaponDamage('melee', itemList), itemList, false);
 
     resolve([
         // save the target character server-side
@@ -52,7 +67,7 @@ export default function cmdPunch(socket, params, getState, resolve) {
         {
             ...newEvent({
                 type: 'system',
-                message: `You punch ${target.name}, dealing ${attack.damageDealt} damage.`
+                message: `You strike ${target.name} with your ${weapon}, dealing ${attack.damageDealt} damage.`
             }),
             meta: {
                 socket_id: socket.id
@@ -62,7 +77,7 @@ export default function cmdPunch(socket, params, getState, resolve) {
         {
             ...newEvent({
                 type: 'system',
-                message: `${character.name} punch you, dealing ${attack.damageDealt} damage.`
+                message: `${character.name} strikes you with a ${weapon}, dealing ${attack.damageDealt} damage.`
             }),
             meta: {
                 target: target.user_id
@@ -72,7 +87,7 @@ export default function cmdPunch(socket, params, getState, resolve) {
         {
             ...newEvent({
                 type: 'system',
-                message: `You see ${character.name} punch ${target.name}.`
+                message: `You see ${character.name} strike ${target.name} with a ${weapon}.`
             }),
             meta: {
                 target: `${character.location.map}_${character.location.x}_${character.location.y}`,

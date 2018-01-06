@@ -37,6 +37,18 @@ class Character {
         return true;
     }
 
+    getWeaponDamage(slot, itemList) {
+        const equippedItem = this.equipped[slot];
+
+        if (!equippedItem) {
+            return 0;
+        }
+
+        const item = itemList[equippedItem.id];
+
+        return Math.floor(Math.random() * (item.stats.damage_max - item.stats.damage_min + 1)) + item.stats.damage_min;
+    }
+
     /**
      * Unequips slotted item, and adds it to the inventory
      * @param  {String} slot  The equipped slot to unequip
@@ -256,13 +268,13 @@ class Character {
         }
     }
 
-    dealDamage(damage, type, itemList) {
+    dealDamage(damage, itemList, ignoreArmor = false) {
         let armor = 0;
         let durability = 0;
         let health = this.stats.health;
         let armorRuined = false;
 
-        if (type !== 'melee' && this.equipped.armor) {
+        if (!ignoreArmor && this.equipped.armor) {
             durability = this.equipped.armor.durability;
             armor = itemList[this.equipped.armor.id].stats.damage_reduction;
         }
@@ -277,8 +289,12 @@ class Character {
         // Now full damage as you said, but keeping it at 0 if going negative
         let newDurability   = Math.max(0, durability - damage);
 
+        // update the durability of the equipped armor
+        if (!ignoreArmor && this.equipped.armor) {
+            this.equipped.armor.durability = newDurability;
+        }
+
         this.stats.health = newHealth;
-        this.equipped.armor.durability = newDurability;
 
         // if the armor durability is 0, remove the item as its broken.
         if (!newDurability && durability) {
