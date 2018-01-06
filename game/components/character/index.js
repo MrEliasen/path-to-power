@@ -5,6 +5,9 @@ class Character {
         // each ID in the gridlock, are players who are currently aiming at this character
         this.gridLocked = [];
 
+        // the user_id of the last targed who was /aim'ed' at
+        this.lastTarget = null;
+
         if (!this.inventory) {
             this.inventory = [];
         }
@@ -24,7 +27,6 @@ class Character {
     }
 
     gridRelease(user_id) {
-        console.log(this.user_id, ' => ', user_id);
         const playerIndex = this.gridLocked.findIndex((playerId) => playerId === user_id);
 
         if (playerIndex === -1) {
@@ -32,6 +34,27 @@ class Character {
         }
 
         this.gridLocked.splice(playerIndex, 1);
+        return true;
+    }
+
+    /**
+     * Unequips slotted item, and adds it to the inventory
+     * @param  {String} slot  The equipped slot to unequip
+     * @return {Boolean}      True on success.
+     */
+    unEquipItem(slot) {
+        const item = {...this.equipped[slot]};
+
+        // if there is no item in this slot, ignore
+        if (!item) {
+            return false;
+        }
+
+        // remove item from equipped list
+        this.equipped[slot] = null;
+
+        // add item to inventory
+        this.inventory.push(item);
         return true;
     }
 
@@ -122,13 +145,36 @@ class Character {
     }
 
     /**
+     * Selects a random item from the inventory to drop (used primarily for fleeing)
+     * @param  {Object} itemList Game items list
+     * @return {Mixed}           Null if no item is found, otherwise an Item Object of the inventory item.
+     */
+    dropRandomItem(itemList) {
+        // do we have items in the inventory
+        if (!this.inventory.length) {
+            return null;
+        }
+
+        // pick a random item
+        const item = this.inventory[Math.floor(Math.random() * this.inventory.length)];
+
+        if (!item) {
+            return null;
+        }
+
+        // return the dropped item
+        return this.dropItem(itemList[item.id].name.toLowerCase(), 1, itemList, true);
+    }
+
+    /**
      * Remove the first occurance of a given item from the inventory, based on name.
      * @param  {String} itemName    The name of the item (or first couple of letters) to search for
      * @param  {Number} amount      The number of a given item to drop (stackable items only)
      * @param  {Object} itemlist    The list of all items in the game
+     * @param  {Boolean} isFleeing  If the drop is caused by fleeing, random the amount dropped, if its a stackable item.
      * @return {Object}             The item (with amount if stackable) which has been removed from the inventory.
      */
-    dropItem (itemName, amount = 1, itemlist) {
+    dropItem (itemName, amount = 1, itemlist, isFleeing = false) {
         amount = parseInt(amount);
         // get the first matching items from the inventory
         let itemIndex = this.inventory.findIndex((inventoryItem) => itemlist[inventoryItem.id].name.toLowerCase().indexOf(itemName) === 0);
@@ -153,6 +199,11 @@ class Character {
         // Check if the character has enough of said item to drop
         if (inventoryItem.durability < amount) {
             return null;
+        }
+
+        // if the character drop the item because of fleeing, random the amount, based on what they have
+        if (isFleeing) {
+            amount = Math.floor(Math.random() * inventoryItem.durability) + 1;
         }
 
         // reduce the number of said item, in the inventory
@@ -203,6 +254,45 @@ class Character {
                 })
             }
         }
+    }
+
+    dealDamage(damage, type, itemList) {
+        let armor = 0;
+        let durability = 0;
+        let health = this.stats.health;
+        let armorRuined = false;
+
+        if (type !== 'melee' && this.equipped.armor) {
+            durability = this.equipped.armor.durability;
+            armor = itemList[this.equipped.armor.id].stats.damage_reduction;
+        }
+
+        // Either you block the damage dealt if it's lower than your armor/durability combo
+        // Or you block whatever you can afford to from either low armor or low durability
+        let damageBlocked   = Math.min(damage, armor, durability);
+        // The damage dealt after the block, but keeping it at 0 if going negative
+        let damageDealt     = Math.max(0, damage - damageBlocked);
+        // New health, but keeping it at 0 if going negative
+        let newHealth       = Math.max(0, health - damageDealt);
+        // Now full damage as you said, but keeping it at 0 if going negative
+        let newDurability   = Math.max(0, durability - damage);
+
+        this.stats.health = newHealth;
+        this.equipped.armor.durability = newDurability;
+
+        // if the armor durability is 0, remove the item as its broken.
+        if (!newDurability && durability) {
+            armorRuined = true;
+            this.equipped.armor = null;
+        }
+
+        return {
+            damageBlocked,
+            damageDealt,
+            newHealth,
+            newDurability,
+            armorRuined
+        };
     }
 }
 

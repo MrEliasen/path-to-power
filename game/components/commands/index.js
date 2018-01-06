@@ -7,6 +7,9 @@ import cmdSay from './commands/say';
 import cmdWhisper from './commands/whisper';
 import cmdGlobal from './commands/global';
 import cmdAim from './commands/aim';
+import cmdRelease from './commands/release';
+import cmdFlee from './commands/flee';
+import cmdPunch from './commands/punch';
 import { loadShop } from '../shop/redux/actions';
 
 export function checkCommandAtLocation(socket, getState, command, callback) {
@@ -38,7 +41,7 @@ export function checkCommandAtLocation(socket, getState, command, callback) {
     callback(null, character, location, actionModifiers)
 }
 
-export default function parseCommand(socket, action, getState) {
+export default function parseCommand(socket, action, getState, dispatch) {
     return new Promise((resolve, reject) => {
         const payload = action.payload.toString().trim().split(' ');
 
@@ -94,7 +97,19 @@ export default function parseCommand(socket, action, getState) {
                 break;
 
             case '/aim':
-                return cmdAim(socket, params, getState, resolve);
+                return cmdAim(socket, params, getState, resolve, dispatch);
+                break;
+
+            case '/flee':
+                return cmdFlee(socket, params, getState, resolve, dispatch);
+                break;
+
+            case '/punch':
+                return cmdPunch(socket, params, getState, resolve);
+                break;
+
+            case '/release':
+                return cmdRelease(socket, params, getState, resolve);
                 break;
 
             default:

@@ -4,7 +4,7 @@ import parseCommand from '../index';
 
 export function execCommand(action, socket) {
     return (dispatch, getState, io) => {
-        const request = parseCommand(socket, action, getState);
+        const request = parseCommand(socket, action, getState, dispatch);
 
         request
             .then((toDispatch) => {

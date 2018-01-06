@@ -97,30 +97,32 @@ export function saveAccountCharacter(user_id) {
     }
 }
 
-export function unequipItem(action, socket) {
+export function unEquipItem(action, socket) {
     return (dispatch, getState, io) => {
-        /* // fetch the character
+        // fetch the character
         const character = getState().characters.list[socket.user.user_id];
 
         if (!character) {
             return;
         }
 
-        const itemList = getState().items.list;
-        // equip the item, if it fails, return some error
-        if (!character.equipItem(itemIndex, itemList)) {
+        // NOTE: update this array if you want to change the equipment slots
+        if (!action.payload.slot  || !['ranged','melee','armor'].includes(action.payload.slot)) {
             return;
         }
 
+        // equip the item, if it fails, return some error
+        character.unEquipItem(action.payload.slot);
+
         // update the server-side character
-        dispatch(updateCharacter(character)),
+        dispatch(updateCharacter(character));
 
         // update the client character
         dispatch({
             ...updateClientCharacter(character),
             subtype: SERVER_TO_CLIENT,
             meta: action.meta
-        })*/
+        })
     }
 }
 
@@ -205,7 +207,6 @@ export function moveCharacter(action, socket) {
 
             // load the old grid inforamtion, so we can loop through all players in the grid, releasing them from gridlock, if they have been locked by the player
             const oldMapGrid = loadLocalGrid(getState, old_location);
-
             oldMapGrid
                 .then((gridData) => {
                     Object.keys(gridData.players).map((user_id) => {

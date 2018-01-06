@@ -1,8 +1,9 @@
 import { clientCommandError } from '../redux/actions';
 import { newEvent } from '../../socket/redux/actions';
+import { loadLocalGrid } from '../../map';
 import { updateClientCharacter, updateCharacter } from '../../character/redux/actions';
 
-export default function cmdAim(socket, params, getState, resolve) {
+export default function cmdAim(socket, params, getState, resolve, dispatch) {
     // fetch the client, create the target to search for and set the meta for default socket returns.
     const character = getState().characters.list[socket.user.user_id] || null;
     const target = params.join(' ').trim().toLowerCase();
@@ -67,6 +68,26 @@ export default function cmdAim(socket, params, getState, resolve) {
 
     // apply the "grid-lock" active effect to the character
     targetPlayer.gridLock(character.user_id);
+
+    // set the current target for the character
+    character.lastTarget = targetPlayer.user_id;
+
+    // Remove gridlock from any previous target
+    const characterList = getState().characters.list;
+    const oldMapGrid = loadLocalGrid(getState, character.location);
+    oldMapGrid
+        .then((gridData) => {
+            Object.keys(gridData.players).map((user_id) => {
+                if (targetPlayer.user_id !== user_id) {
+                    let target = characterList[user_id];
+
+                    if (target.gridRelease(character.user_id)) {
+                        dispatch(updateCharacter(target))
+                    }
+                }
+            })
+        })
+        .catch(console.log);
 
     // send event messages to the grid.
     return resolve([

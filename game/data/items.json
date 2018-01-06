@@ -20,7 +20,8 @@
         "stats": {
             "price": 20,
             "stackable": false,
-            "durability": 1000
+            "durability": 1000,
+            "damage_reduction": 2
         }
     },
     {
