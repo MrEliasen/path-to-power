@@ -165,13 +165,15 @@ export function shopPurchase(action, socket) {
 
         // if the item is a non-stackable item, modify its stats, with the purchased items stats, should there be any.
         if (!item.stats.stackable) {
-            Object.keys(listItem).map((statKey) => {
-                if (listItem.stats.hasOwnProperty(statKey)) {
-                    if (item.stats[statKey]) {
-                        item.stats[statKey] = listItem[statKey];
+            if (listItem.stats) {
+                Object.keys(listItem).map((statKey) => {
+                    if (listItem.stats.hasOwnProperty(statKey)) {
+                        if (item.stats[statKey]) {
+                            item.stats[statKey] = listItem[statKey];
+                        }
                     }
-                }
-            })
+                })
+            }
         }
 
         // give the item to the character

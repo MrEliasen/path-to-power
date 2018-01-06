@@ -14,10 +14,11 @@
     {
         "id": "bodyarmor",
         "name": "Body Armor",
-        "description": "Protectes the wearer from {durability} points of damage.",
+        "description": "Protectes the wearer from damage. Reducing damage taken by {damage_reduction}, soaking up to {durability} points of damage.",
         "type": "armour",
         "subtype": "body",
         "stats": {
+            "equipable": true,
             "price": 20,
             "stackable": false,
             "durability": 1000,
@@ -43,6 +44,7 @@
         "type": "weapon",
         "subtype": "ranged",
         "stats": {
+            "equipable": true,
             "price": 35,
             "stackable": false,
             "durability": 50,
@@ -57,6 +59,7 @@
         "type": "weapon",
         "subtype": "melee",
         "stats": {
+            "equipable": true,
             "price": 12,
             "stackable": false,
             "durability": 100,
@@ -71,6 +74,7 @@
         "type": "weapon",
         "subtype": "ranged",
         "stats": {
+            "equipable": true,
             "price": 35,
             "stackable": false,
             "durability": 50,
@@ -85,11 +89,26 @@
         "type": "weapon",
         "subtype": "melee",
         "stats": {
+            "equipable": true,
             "price": 12,
             "stackable": false,
             "durability": 100,
             "damage_min": 2,
             "damage_max": 3
+        }
+    },
+    {
+        "id": "ammo",
+        "name": "Basic Ammo",
+        "description": "Required for firing your ranged weapons. Adds an additional {damage_bonus} damage to your weapon.",
+        "type": "weapon",
+        "subtype": "ammo",
+        "stats": {
+            "equipable": true,
+            "price": 10,
+            "stackable": false,
+            "durability": 20,
+            "damage_bonus": 1
         }
     }
 ]

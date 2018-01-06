@@ -8,7 +8,8 @@
                 { "id": "redapple", "quantity": 10 },
                 { "id": "mushrooms", "quantity": 10 },
                 { "id": "bodyarmor", "quantity": 999 },
-                { "id": "pocketknife", "quantity": 999 }
+                { "id": "pocketknife", "quantity": 999 },
+                { "id": "ammo", "quantity": 999 }
             ]
         },
         "buy": {

@@ -26,6 +26,11 @@ class Character {
         }
     }
 
+    /**
+     * Removes a player from the gridlock, from when they have used /aim
+     * @param  {String} user_id User ID
+     * @return {Boolean}        True on success, false otherwise
+     */
     gridRelease(user_id) {
         const playerIndex = this.gridLocked.findIndex((playerId) => playerId === user_id);
 
@@ -37,8 +42,68 @@ class Character {
         return true;
     }
 
+    /**
+     * Returns the damage of the equipped ranged weapon + ammo, and reduces durability of ammo.
+     * @param  {Object} itemList List of all game items
+     * @return {Object}          the damage, -1 if the weapon cannot be fired.
+     */
+    fireRangedWeapon(itemList) {
+        const damage = this.getWeaponDamage('ranged', itemList);
+
+        if (!this.hasAmmo()) {
+            return -1;
+        }
+
+        // reduce ammo durability
+        this.equipped.ammo.durability = this.equipped.ammo.durability - 1;
+
+        // remove ammo if durability is 0
+        if (this.equipped.ammo.durability <= 0) {
+            this.equipped.ammo = null;
+        }
+
+        return damage;
+    }
+
+    /**
+     * Checks if the player any any ammo equipped, and if there are any rounds left.
+     * @return {Boolean}
+     */
+    hasAmmo() {
+        const equippedAmmo = this.equipped['ammo'];
+
+        if (!equippedAmmo) {
+            return false;
+        }
+
+        if (equippedAmmo.durability <= 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Gets the damage bonus of the equipped ammo
+     * @return {Number}
+     */
+    getAmmoDamage(itemList) {
+        if (!this.hasAmmo()) {
+            return -1;
+        }
+
+        return itemList[this.equipped.ammo.id].stats.damage_bonus;
+    }
+
+    /**
+     * Generates the weapon damage, based on the type equipped.
+     * @param  {String} slot     Any of the equipped weapon slots (melee|ranged)
+     * @param  {Object} itemList List of all game items
+     * @return {Number}          Damage of the weapon
+     */
     getWeaponDamage(slot, itemList) {
         const equippedItem = this.equipped[slot];
+        let bonusDamage = 0;
 
         if (!equippedItem) {
             return 0;
@@ -46,7 +111,11 @@ class Character {
 
         const item = itemList[equippedItem.id];
 
-        return Math.floor(Math.random() * (item.stats.damage_max - item.stats.damage_min + 1)) + item.stats.damage_min;
+        if (slot === 'ranged') {
+            bonusDamage = this.getAmmoDamage(itemList);
+        }
+
+        return Math.floor(Math.random() * (item.stats.damage_max - item.stats.damage_min + 1)) + item.stats.damage_min + bonusDamage;
     }
 
     /**
@@ -85,11 +154,11 @@ class Character {
             return false;
         }
 
-        // NOTE: change this line of code, should you wish to update which items can be equipped
-        if (!['weapon', 'armour'].includes(item.type)) {
+        if (!item.stats.equipable) {
             return false;
         }
 
+        // NOTE: change this line of code, should you wish to update which items can be equipped
         // Check which slot the item will be equipped into
         let slot;
         switch (item.subtype) {
@@ -103,6 +172,10 @@ class Character {
 
             case 'body':
                 slot = 'armor';
+                break;
+
+            case 'ammo':
+                slot = 'ammo';
                 break;
 
             default:

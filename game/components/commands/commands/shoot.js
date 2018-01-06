@@ -1,7 +1,7 @@
 import { newEvent } from '../../socket/redux/actions';
 import { updateCharacter, updateClientCharacter } from '../../character/redux/actions';
 
-export default function cmdStrike(socket, params, getState, resolve) {
+export default function cmdShoot(socket, params, getState, resolve) {
     const character = getState().characters.list[socket.user.user_id] || null;
 
     if (!character) {
@@ -36,11 +36,24 @@ export default function cmdStrike(socket, params, getState, resolve) {
     }
 
     // make sure they have a melee weapon equipped
-    if (!character.equipped.melee) {
+    if (!character.equipped.ranged) {
         return resolve([{
             ...newEvent({
                 type: 'system',
-                message: 'You do not have a melee weapon equipped.'
+                message: 'You do not have a ranged weapon equipped.'
+            }),
+            meta: {
+                socket_id: socket.id
+            }
+        }]);
+    }
+
+    // check the character has any ammo equipped
+    if (!character.hasAmmo()) {
+        return resolve([{
+            ...newEvent({
+                type: 'system',
+                message: 'You do not have any ammunition equipped.'
             }),
             meta: {
                 socket_id: socket.id
@@ -50,10 +63,12 @@ export default function cmdStrike(socket, params, getState, resolve) {
 
     // deal damage to the target
     const itemList = getState().items.list;
-    const weapon = itemList[character.equipped.melee.id].name;
-    const attack = target.dealDamage(character.getWeaponDamage('melee', itemList), itemList, true);
+    const weapon = itemList[character.equipped.ranged.id].name;
+    const attack = target.dealDamage(character.fireRangedWeapon(itemList), itemList);
 
     resolve([
+        // save the attacking character server-side
+        updateCharacter(character),
         // save the target character server-side
         updateCharacter(target),
         // update the target client's character info
@@ -63,11 +78,18 @@ export default function cmdStrike(socket, params, getState, resolve) {
                 target: target.user_id,
             }
         },
+        // update the attacking client's character info
+        {
+            ...updateClientCharacter(character),
+            meta: {
+                socket_id: socket.id
+            }
+        },
         // send attack event to attacker/character
         {
             ...newEvent({
                 type: 'system',
-                message: `You strike ${target.name} with your ${weapon}, dealing ${attack.damageDealt} damage.`
+                message: `You shoot ${target.name} with your ${weapon}, dealing ${attack.damageDealt} damage.`
             }),
             meta: {
                 socket_id: socket.id
@@ -77,7 +99,7 @@ export default function cmdStrike(socket, params, getState, resolve) {
         {
             ...newEvent({
                 type: 'system',
-                message: `${character.name} strikes you with a ${weapon}, dealing ${attack.damageDealt} damage.`
+                message: `${character.name} shoots you with a ${weapon}, dealing ${attack.damageDealt} damage.`
             }),
             meta: {
                 target: target.user_id
@@ -87,7 +109,7 @@ export default function cmdStrike(socket, params, getState, resolve) {
         {
             ...newEvent({
                 type: 'system',
-                message: `You see ${character.name} strike ${target.name} with a ${weapon}.`
+                message: `You see ${character.name} shoot ${target.name} with a ${weapon}.`
             }),
             meta: {
                 target: `${character.location.map}_${character.location.x}_${character.location.y}`,

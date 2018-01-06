@@ -7,7 +7,7 @@ class Item {
             id: "",
             name: "",
             type: "weapon|armour|consumable",
-            subtype: "[melee|ranged]|[body]|[food|drug]",
+            subtype: "[melee|ranged|ammo]|[body]|[food|drug]",
             stats: {
                 price: 123,
                 stackable: true|false,
@@ -20,6 +20,9 @@ class Item {
                 // Type: weapon
                 damage_min: 123,
                 damage_max: 321,
+
+                // subtype: ammo
+                damage_bonus: 123,
 
                 // Type: armour
                 damage_reduction: 123,
