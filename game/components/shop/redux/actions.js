@@ -75,7 +75,7 @@ export function loadShop(socket, params, getState, resolve) {
 
 export function shopPurchase(action, socket) {
     return (dispatch, getState, io) => {
-        // TODO allow to buy more than one at the same time.
+        // TODO: allow to buy more than one at the same time.
         const amount = 1;
         // the default client response meta (target client only)
         const meta = {
@@ -161,7 +161,7 @@ export function shopPurchase(action, socket) {
             });
         }
 
-        // TODO check if player has inventory space
+        // TODO: check if player has inventory space
 
         // if the item is a non-stackable item, modify its stats, with the purchased items stats, should there be any.
         if (!item.stats.stackable) {
@@ -215,7 +215,7 @@ export function shopPurchase(action, socket) {
 
 export function shopSell(action, socket) {
     return (dispatch, getState, io) => {
-        // TODO allow to buy more than one at the same time.
+        // TODO: allow to buy more than one at the same time.
         const amount = 1;
         // the default client response meta (target client only)
         const meta = {
@@ -320,14 +320,14 @@ export function shopSell(action, socket) {
             return;
         }
 
-        // TODO take item durability into account for sell price.
+        // TODO: take item durability into account for sell price.
         // add the payment to the character
         const sellPrice = Math.floor(item.stats.price * shop.buy.sellPricePercent);
         character.stats.money = character.stats.money + sellPrice;
 
         // if the shop should resell the item, add it to its inventory
         if (shop.buy.resell) {
-            // TODO create shop class, add helper methods like Stacking of items to resell.
+            // TODO: create shop class, add helper methods like Stacking of items to resell.
             shop.addToInventory({
                 id: soldItem.id,
                 durability: soldItem.durability

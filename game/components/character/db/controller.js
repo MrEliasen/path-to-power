@@ -24,9 +24,11 @@ export function saveCharacter(data, callback) {
             return callback();
         }
 
+        // NOTE: add any information you want to save here.
         character.stats = data.stats;
         character.location = data.location;
         character.inventory = data.inventory;
+        character.equipped = data.equipped;
         character.save((err) => {
             if (err) {
                 console.log(err);
@@ -65,7 +67,8 @@ exports.loadFromDb = function(user_id, callback) {
         name: 1,
         stats: 1,
         location: 1,
-        inventory: 1
+        inventory: 1,
+        equipped: 1
     };
 
     Character.findOne({ user_id: user_id }, fetchData, function(err, character) {

@@ -97,6 +97,64 @@ export function saveAccountCharacter(user_id) {
     }
 }
 
+export function unequipItem(action, socket) {
+    return (dispatch, getState, io) => {
+        /* // fetch the character
+        const character = getState().characters.list[socket.user.user_id];
+
+        if (!character) {
+            return;
+        }
+
+        const itemList = getState().items.list;
+        // equip the item, if it fails, return some error
+        if (!character.equipItem(itemIndex, itemList)) {
+            return;
+        }
+
+        // update the server-side character
+        dispatch(updateCharacter(character)),
+
+        // update the client character
+        dispatch({
+            ...updateClientCharacter(character),
+            subtype: SERVER_TO_CLIENT,
+            meta: action.meta
+        })*/
+    }
+}
+
+export function equipItem(action, socket) {
+    return (dispatch, getState, io) => {
+        // check we received the inventory index from the client
+        if (!action.payload.index) {
+        }
+
+        // fetch the character
+        const character = getState().characters.list[socket.user.user_id];
+
+        if (!character) {
+            return;
+        }
+
+        const itemList = getState().items.list;
+        // equip the item, if it fails, return some error
+        if (!character.equipItem(action.payload.index, itemList)) {
+            return;
+        }
+
+        // update the server-side character
+        dispatch(updateCharacter(character)),
+
+        // update the client character
+        dispatch({
+            ...updateClientCharacter(character),
+            subtype: SERVER_TO_CLIENT,
+            meta: action.meta
+        })
+    }
+}
+
 export function moveCharacter(action, socket) {
     return (dispatch, getState, io) => {
         return new Promise((resolve, reject) => {
@@ -104,6 +162,11 @@ export function moveCharacter(action, socket) {
             const character = getState().characters.list[socket.user.user_id];
 
             if (!character) {
+                return resolve();
+            }
+
+            // check if player is gridlocked
+            if (character.gridLocked.length) {
                 return resolve();
             }
 
@@ -137,42 +200,59 @@ export function moveCharacter(action, socket) {
             // dispatch a broadcast to the new grid
             const oldGrid = `${old_location.map}_${old_location.x}_${old_location.y}`;
             const grid = `${character.location.map}_${character.location.x}_${character.location.y}`;
-            const load = loadLocalGrid(getState, character.location)
+            const newMapGrid = loadLocalGrid(getState, character.location);
+            const characterList = getState().characters.list;
 
-            load.then((gridData) => {
-                // dispatch a broadcast to old grid
-                socket.leave(oldGrid)
-                dispatch({
-                    ...leaveGrid({user_id: character.user_id, name: character.name, location: old_location }),
-                    subtype: SERVER_TO_CLIENT,
-                    meta: {
-                        target: oldGrid
-                    }
-                })
-                // load the grid data
-                dispatch({
-                    ...loadGrid(gridData),
-                    subtype: SERVER_TO_CLIENT,
-                    meta: action.meta
-                })
-                // dispatch a broadcast to the new grid
-                dispatch({
-                    ...joinGrid({user_id: character.user_id, name: character.name, location: character.location }),
-                    subtype: SERVER_TO_CLIENT,
-                    meta: {
-                        target: grid
-                    }
-                })
-                socket.join(grid)
+            // load the old grid inforamtion, so we can loop through all players in the grid, releasing them from gridlock, if they have been locked by the player
+            const oldMapGrid = loadLocalGrid(getState, old_location);
 
-                // dispatch players in current grid
-                dispatch({
-                    ...updateClientCharacter(character),
-                    subtype: SERVER_TO_CLIENT,
-                    meta: action.meta
+            oldMapGrid
+                .then((gridData) => {
+                    Object.keys(gridData.players).map((user_id) => {
+                        let target = characterList[user_id];
+
+                        if (target.gridRelease(character.user_id)) {
+                            dispatch(updateCharacter(target))
+                        }
+                    })
                 })
-            })
-            .catch(console.log)
+                .catch(console.log);
+
+            newMapGrid
+                .then((gridData) => {
+                    // dispatch a broadcast to old grid
+                    socket.leave(oldGrid)
+                    dispatch({
+                        ...leaveGrid({user_id: character.user_id, name: character.name, location: old_location }),
+                        subtype: SERVER_TO_CLIENT,
+                        meta: {
+                            target: oldGrid
+                        }
+                    })
+                    // load the grid data
+                    dispatch({
+                        ...loadGrid(gridData),
+                        subtype: SERVER_TO_CLIENT,
+                        meta: action.meta
+                    })
+                    // dispatch a broadcast to the new grid
+                    dispatch({
+                        ...joinGrid({user_id: character.user_id, name: character.name, location: character.location }),
+                        subtype: SERVER_TO_CLIENT,
+                        meta: {
+                            target: grid
+                        }
+                    })
+                    socket.join(grid)
+
+                    // dispatch players in current grid
+                    dispatch({
+                        ...updateClientCharacter(character),
+                        subtype: SERVER_TO_CLIENT,
+                        meta: action.meta
+                    })
+                })
+                .catch(console.log)
         })
     }
 }

@@ -62,5 +62,33 @@
             "damage_min": 2,
             "damage_max": 3
         }
+    },
+    {
+        "id": "uzi",
+        "name": "Uzi",
+        "description": "Deals {damage_min}-{damage_max} damage on hit.",
+        "type": "weapon",
+        "subtype": "ranged",
+        "stats": {
+            "price": 35,
+            "stackable": false,
+            "durability": 50,
+            "damage_min": 6,
+            "damage_max": 8
+        }
+    },
+    {
+        "id": "sword",
+        "name": "Sword",
+        "description": "Go medevil, on somebody. Deals {damage_min}-{damage_max} damage on hit.",
+        "type": "weapon",
+        "subtype": "melee",
+        "stats": {
+            "price": 12,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 2,
+            "damage_max": 3
+        }
     }
 ]

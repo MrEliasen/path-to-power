@@ -3,8 +3,8 @@ import { SERVER_LOAD_ITEM } from './redux/types';
 
 class Item {
     constructor(item) {
-        /*
-        {
+        /*{
+            id: "",
             name: "",
             type: "weapon|armour|consumable",
             subtype: "[melee|ranged]|[body]|[food|drug]",
@@ -30,8 +30,8 @@ class Item {
                 ],
                 effect_duration: 123
             }
-        }
-        */
+        }*/
+        
         this.loaded = new Promise((resolve, rejecte) => {
             Object.assign(this, item)
 

@@ -3,8 +3,8 @@ import { ACCOUNT_AUTHENTICATE } from './components/account/redux/types';
 import { accountLogin } from './components/account/redux/actions';
 
 // Character creation
-import { CLIENT_CREATE_CHARACTER, CLIENT_MOVE_CHARACTER } from './components/character/redux/types';
-import { createCharacter, moveCharacter } from './components/character/redux/actions';
+import { CLIENT_CREATE_CHARACTER, CLIENT_MOVE_CHARACTER, CLIENT_EQUIP_ITEM } from './components/character/redux/types';
+import { createCharacter, moveCharacter, equipItem } from './components/character/redux/actions';
 
 // Commands
 import { COMMAND_FROM_CLIENT } from './components/commands/redux/types';
@@ -22,7 +22,8 @@ const requestParsers = {
     [COMMAND_FROM_CLIENT]: execCommand,
     [CLIENT_MOVE_CHARACTER]: moveCharacter,
     [SHOP_BUY]: shopPurchase,
-    [SHOP_SELL]: shopSell
+    [SHOP_SELL]: shopSell,
+    [CLIENT_EQUIP_ITEM]: equipItem
 };
 
 export default requestParsers;

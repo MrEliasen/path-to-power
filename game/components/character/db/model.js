@@ -24,6 +24,9 @@ var CharacterSchema = new mongoose.Schema({
     stats: {
         type: {}
     },
+    equipped: {
+        type: {}
+    },
     inventory: {
         type: []
     },

@@ -38,7 +38,7 @@ export default function(store, io) {
                 return store.dispatch(request)
             }
 
-            // TODO add socket.user check within commands, actions etc. in case of staggered actions firing before client reconnet.
+            // TODO: add socket.user check within commands, actions etc. in case of staggered actions firing before client reconnet.
             // if the request parser did return a promise, we wait for it to finish,
             // and dispatch the request
             request.catch(console.log);
