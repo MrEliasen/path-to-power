@@ -9,9 +9,10 @@ import {
     CLIENT_UPDATE_CHARACTER,
     CHARACTER_UPDATE } from './types';
 import { SERVER_TO_CLIENT } from '../../socket/redux/types';
-import { createNotification } from '../../socket/redux/actions';
+import { createNotification, newEvent } from '../../socket/redux/actions';
 import { joinGrid, leaveGrid, loadGrid } from '../../map/redux/actions';
 import { loadLocalGrid } from '../../map';
+import { serverRecordItemDrop, dropMultipleItems } from '../../item/redux/actions';
 import { create, loadFromDb, autoSave } from '../db/controller';
 import Character from '../index';
 
@@ -78,6 +79,132 @@ export function updateClientCharacter(character) {
         type: CLIENT_UPDATE_CHARACTER,
         subtype: SERVER_TO_CLIENT,
         payload: character
+    }
+}
+
+export function killCharacter(character, target, socket, messages) {
+    return (dispatch, getState, io) => {
+        const deathLocation = {...target.location};
+        const currentMap = getState().maps[target.location.map];
+        const itemList = getState().items.list
+        const dropped = target.kill(currentMap);
+
+        // update the target character in our store
+        dispatch(updateCharacter(target));
+
+        // load the spawn grid information for the targeted character
+        const oldGrid = `${deathLocation.map}_${deathLocation.x}_${deathLocation.y}`;
+        const newGrid = `${target.location.map}_${target.location.x}_${target.location.y}`;
+        const newMapGrid = loadLocalGrid(getState, target.location);
+        newMapGrid
+            .then((gridData) => {
+                io.sockets[target.user_id].leave(oldGrid)
+
+                dispatch({
+                    ...leaveGrid({user_id: target.user_id, name: target.name, location: deathLocation }),
+                    subtype: SERVER_TO_CLIENT,
+                    meta: {
+                        target: oldGrid
+                    }
+                })
+                // load the grid data
+                dispatch({
+                    ...loadGrid(gridData),
+                    subtype: SERVER_TO_CLIENT,
+                    meta: {
+                        target: target.user_id
+                    }
+                })
+                // dispatch a broadcast to the new grid
+                dispatch({
+                    ...joinGrid({user_id: target.user_id, name: target.name, location: target.location }),
+                    subtype: SERVER_TO_CLIENT,
+                    meta: {
+                        target: newGrid
+                    }
+                })
+
+                io.sockets[target.user_id].join(newGrid)
+            })
+            .catch(console.log)
+        // update the client character information
+        dispatch({
+            ...updateClientCharacter(target),
+            meta: {
+                target: target.user_id
+            }
+        });
+
+        // record all dropped items in our store
+        let droppedItem;
+        const dropList = [];
+        dropped.items.map((item) => {
+            droppedItem = {
+                ...item,
+                stackable: itemList[item.id].stats.stackable
+            }
+
+            dropList.push(droppedItem);
+
+            dispatch(serverRecordItemDrop({
+                stackable: droppedItem.stackable,
+                item: {
+                    id: droppedItem.id,
+                    durability: droppedItem.durability
+                },
+                location: {
+                    map: deathLocation.map,
+                    x: deathLocation.x,
+                    y: deathLocation.y
+                }
+            }));
+        });
+        // TODO: figure out what to do with the cash.
+
+        // let the players in the grid see all the dropped items.
+        dispatch({
+            ...dropMultipleItems(dropList),
+            meta: {
+                target: `${deathLocation.map}_${deathLocation.x}_${deathLocation.y}`
+            }
+        });
+
+        // send attack event to attacker/character
+        dispatch({
+            ...newEvent({
+                type: 'system',
+                message: messages.killer
+            }),
+            meta: {
+                socket_id: socket.id
+            }
+        });
+
+        // send attack'ed event to target
+        dispatch({
+            ...newEvent({
+                type: 'system',
+                message: messages.victim
+            }),
+            meta: {
+                target: target.user_id
+            } 
+        })
+
+        // send attack event to grid
+        dispatch({
+            ...newEvent({
+                type: 'system',
+                message: messages.bystander
+            }),
+            meta: {
+                target: `${deathLocation.map}_${deathLocation.x}_${deathLocation.y}`,
+                ignore: [
+                    target.user_id,
+                    character.user_id
+                ]
+            } 
+        })
     }
 }
 

@@ -51,6 +51,9 @@ export function accountLogin(action, socket) {
                         name: account.name
                     }
 
+                    // push the socket object to out socket handler
+                    io.sockets[account.user_id] = socket;
+
                     if (character) {
                         // convery mongodb obj to plain obj
                         character = character.toObject(); 
@@ -118,7 +121,7 @@ export function accountLogout(user_id) {
             }
         });
 
-        io.sockets.in(user_id).emit('dispatch', {
+        io.server.sockets.in(user_id).emit('dispatch', {
             type: 'some-dc-type',
             payload: {}
         });

@@ -1,7 +1,7 @@
 import { newEvent } from '../../socket/redux/actions';
-import { updateCharacter, updateClientCharacter } from '../../character/redux/actions';
+import { updateCharacter, updateClientCharacter, killCharacter } from '../../character/redux/actions';
 
-export default function cmdPunch(socket, params, getState, resolve) {
+export default function cmdPunch(socket, params, getState, resolve, dispatch) {
     const character = getState().characters.list[socket.user.user_id] || null;
 
     if (!character) {
@@ -37,6 +37,16 @@ export default function cmdPunch(socket, params, getState, resolve) {
 
     // deal damage to the target
     const attack = target.dealDamage(2, getState().items.list, true);
+
+    if (!attack.healthLeft) {
+        const messages = {
+            killer: `You land a killing blow on ${target.name}.`,
+            victim: `${character.name} punches you, dealing ${attack.damageDealt} damage, killing you.`,
+            bystander: `You see ${character.name} kill ${target.name} his their fists.`
+        }
+        dispatch(killCharacter(character, target, socket, messages));
+        return resolve();
+    }
 
     resolve([
         // save the target character server-side

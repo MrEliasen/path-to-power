@@ -23,11 +23,12 @@ import { autoSave } from './components/character/db/controller';
  */
 export default async function (redis, server) {
     // Setup the socket.io server and setup remote Redux dev tools
+    const sockets = {};
     const io = socketIo(server);
     const composeEnhancers = composeWithDevTools({realtime: true, port: 8000});
     const store = createStore(
         rootReducer,
-        composeEnhancers(applyMiddleware(thunk.withExtraArgument(io), socketOut(io)))
+        composeEnhancers(applyMiddleware(thunk.withExtraArgument({server:io, sockets}), socketOut(io)))
     );
 
     // Load all of the requred game data before we allow clients to connect.

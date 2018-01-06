@@ -1,7 +1,7 @@
 import { newEvent } from '../../socket/redux/actions';
-import { updateCharacter, updateClientCharacter } from '../../character/redux/actions';
+import { updateCharacter, updateClientCharacter, killCharacter } from '../../character/redux/actions';
 
-export default function cmdShoot(socket, params, getState, resolve) {
+export default function cmdShoot(socket, params, getState, resolve, dispatch) {
     const character = getState().characters.list[socket.user.user_id] || null;
 
     if (!character) {
@@ -65,6 +65,25 @@ export default function cmdShoot(socket, params, getState, resolve) {
     const itemList = getState().items.list;
     const weapon = itemList[character.equipped.ranged.id].name;
     const attack = target.dealDamage(character.fireRangedWeapon(itemList), itemList);
+
+    if (!attack.healthLeft) {
+        const messages = {
+            killer: `You shoot ${target.name} with your ${weapon}, killing them.`,
+            victim: `${character.name} shoots you with their ${weapon}, killing you.`,
+            bystander: `You see ${character.name} kill ${target.name} with their ${weapon}`
+        }
+        dispatch(killCharacter(character, target, socket, messages));
+        // update the clients character information, to update the ammo.
+        return resolve([
+            updateCharacter(character),
+            {
+                ...updateClientCharacter(character),
+                meta: {
+                    socket_id: socket.id
+                }
+            }
+        ]);
+    }
 
     resolve([
         // save the attacking character server-side

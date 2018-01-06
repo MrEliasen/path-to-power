@@ -107,15 +107,15 @@ export default function parseCommand(socket, action, getState, dispatch) {
                 break;
 
             case '/punch':
-                return cmdPunch(socket, params, getState, resolve);
+                return cmdPunch(socket, params, getState, resolve, dispatch);
                 break;
 
             case '/strike':
-                return cmdStrike(socket, params, getState, resolve);
+                return cmdStrike(socket, params, getState, resolve, dispatch);
                 break;
 
             case '/shoot':
-                return cmdShoot(socket, params, getState, resolve);
+                return cmdShoot(socket, params, getState, resolve, dispatch);
                 break;
 
             case '/release':

@@ -1,7 +1,7 @@
 import { newEvent } from '../../socket/redux/actions';
-import { updateCharacter, updateClientCharacter } from '../../character/redux/actions';
+import { updateCharacter, updateClientCharacter, killCharacter } from '../../character/redux/actions';
 
-export default function cmdStrike(socket, params, getState, resolve) {
+export default function cmdStrike(socket, params, getState, resolve, dispatch) {
     const character = getState().characters.list[socket.user.user_id] || null;
 
     if (!character) {
@@ -52,6 +52,16 @@ export default function cmdStrike(socket, params, getState, resolve) {
     const itemList = getState().items.list;
     const weapon = itemList[character.equipped.melee.id].name;
     const attack = target.dealDamage(character.getWeaponDamage('melee', itemList), itemList, true);
+
+    if (!attack.healthLeft) {
+        const messages = {
+            killer: `You land a lethal blow on ${target.name} with your ${weapon}, killing them.`,
+            victim: `${character.name} lands a lethal blow with their ${weapon}, killing you.`,
+            bystander: `You see ${character.name} kill ${target.name} with their ${weapon}`
+        }
+        dispatch(killCharacter(character, target, socket, messages));
+        return resolve();
+    }
 
     resolve([
         // save the target character server-side

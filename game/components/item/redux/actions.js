@@ -1,4 +1,4 @@
-import { CLIENT_DROP_ITEM, CLIENT_PICKUP_ITEM, SERVER_DROP_ITEM, SERVER_PICKUP_ITEM } from './types';
+import { CLIENT_DROP_ITEM, CLIENT_PICKUP_ITEM, SERVER_DROP_ITEM, SERVER_PICKUP_ITEM, CLIENT_DROP_MULTIPLE_ITEMS } from './types';
 import { SERVER_TO_CLIENT } from '../../socket/redux/types';
 
 export function dropItem(item) {
@@ -30,3 +30,12 @@ export function serverRecordItemPickup(iteminfo) {
         payload: iteminfo
     }
 }
+
+export function dropMultipleItems(itemArray) {
+    return {
+        type: CLIENT_DROP_MULTIPLE_ITEMS,
+        subtype: SERVER_TO_CLIENT,
+        payload: itemArray
+    }
+}
+

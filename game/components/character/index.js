@@ -43,6 +43,43 @@ class Character {
     }
 
     /**
+     * Will kill the player and reset their location to the maps spawn point
+     * @param  {Map object} currentMap  The Map Object of the current map
+     * @return {object}                 Object with items and cash the player dropped
+     */
+    kill(currentMap) {
+        const items = [...this.inventory];
+        const equipped = {...this.equipped};
+        const cash = this.stats.money;
+
+        // drop all items and cash
+        this.equipped = {};
+        this.inventory = [];
+        this.stats.money = 0;
+        this.gridLocked = [];
+        this.stats.health = this.stats.health_max;
+
+        // reset location to the map spawn location
+        this.location.x = currentMap.spawn.x;
+        this.location.y = currentMap.spawn.y;
+
+        // TODO: add reputation penalty when getting killed.
+
+        if (equipped) {
+            Object.keys(equipped).map((slot) => {
+                if (equipped[slot] && equipped[slot].id) {
+                    items.push(equipped[slot]);
+                }
+            })
+        }
+
+        return {
+            items,
+            cash
+        }
+    }
+
+    /**
      * Returns the damage of the equipped ranged weapon + ammo, and reduces durability of ammo.
      * @param  {Object} itemList List of all game items
      * @return {Object}          the damage, -1 if the weapon cannot be fired.
@@ -275,7 +312,7 @@ class Character {
         // Get the item object from the store
         const item = {...itemlist[inventoryItem.id]};
 
-        // If the item is not stackable, just delete the item from the iventory, can return it
+        // If the item is not stackable, just delete the item from the inventory, can return it
         if (!item.stats.stackable) {
             this.inventory.splice(itemIndex, 1);
             return item;
@@ -358,19 +395,19 @@ class Character {
         // The damage dealt after the block, but keeping it at 0 if going negative
         let damageDealt     = Math.max(0, damage - damageBlocked);
         // New health, but keeping it at 0 if going negative
-        let newHealth       = Math.max(0, health - damageDealt);
+        let healthLeft       = Math.max(0, health - damageDealt);
         // Now full damage as you said, but keeping it at 0 if going negative
-        let newDurability   = Math.max(0, durability - damage);
+        let durabilityLeft   = Math.max(0, durability - damage);
 
         // update the durability of the equipped armor
         if (!ignoreArmor && this.equipped.armor) {
-            this.equipped.armor.durability = newDurability;
+            this.equipped.armor.durability = durabilityLeft;
         }
 
-        this.stats.health = newHealth;
+        this.stats.health = healthLeft;
 
         // if the armor durability is 0, remove the item as its broken.
-        if (!newDurability && durability) {
+        if (!durabilityLeft && durability) {
             armorRuined = true;
             this.equipped.armor = null;
         }
@@ -378,8 +415,8 @@ class Character {
         return {
             damageBlocked,
             damageDealt,
-            newHealth,
-            newDurability,
+            healthLeft,
+            durabilityLeft,
             armorRuined
         };
     }
