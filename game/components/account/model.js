@@ -2,7 +2,7 @@
 var mongoose = require('mongoose'),
     moment = require('moment'),
     uuid = require('uuid/v4'),
-    config = require('../../../../config.json');
+    config = require('../../../config.json');
 
 // Define our product schema
 var AccountSchema = new mongoose.Schema({

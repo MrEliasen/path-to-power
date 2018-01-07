@@ -1,6 +1,6 @@
 // Load required packages
 var mongoose = require('mongoose'),
-    config = require('../../../../config.json'),
+    config = require('../../../config.json'),
     moment = require('moment');
 
 // Define our product schema

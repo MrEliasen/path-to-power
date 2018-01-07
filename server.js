@@ -15,19 +15,9 @@ import fs from 'fs';
 import filter from 'content-filter';
 import helmet from 'helmet';
 import redis from 'redis';
-import winston from 'winston';
 import Game from './game';
 
 const config = require('./config');
-
-/************************************
- *              LOGGER              *
- ************************************/
-winston.level = process.env.LOG_LEVEL;
-winston.add(winston.transports.File, {
-    filename: 'error.log'
-});
-winston.remove(winston.transports.Console);
 
 /************************************
  *          INITIALISATION          *

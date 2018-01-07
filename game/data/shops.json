@@ -1,5 +1,5 @@
-[
-    {
+{
+    "shop-pawn": {
         "id": "shop-pawn",
         "title": "Pawn Shop",
         "sell": {
@@ -21,4 +21,4 @@
             "ignoreSubtype": "drug" 
         }
     }
-]
+}

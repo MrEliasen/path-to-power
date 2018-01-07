@@ -25,10 +25,18 @@ export default class SocketManager extends EventEmitter {
         this.io.listen(this.Game.config.server_port);
     }
 
+    /**
+     * Add a socket to track in the list
+     * @param {Socket.Io object} socket The socket object to track
+     */
     addClient(socket) {
         this.clients[socket.user.user_id] = socket;
     }
 
+    /**
+     * Removes a tracked socket reference from the list
+     * @param  {String} user_id  User Id of the socket to delete
+     */
     removeSocket(user_id) {
         delete this.clients[user_id];
     }

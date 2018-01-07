@@ -1,5 +1,6 @@
 export default class Character {
-    constructor(character) {
+    constructor(Game, character) {
+        this.Game = Game;
         Object.assign(this, character);
 
         // each ID in the gridlock, are players who are currently aiming at this character

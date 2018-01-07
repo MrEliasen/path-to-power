@@ -1,16 +1,7 @@
-class Shop {
-    constructor(data) {
-        this.loaded = new Promise((resolve, rejecte) => {
-            Object.assign(this, data);
-
-            this.loadShop(() => {
-                resolve(this);
-            });
-        });
-    }
-
-    loadShop(callback) {
-        callback()
+export default class Shop {
+    constructor(Game, shopData) {
+        this.Game = Game;
+        Object.assign(this, shopData);
     }
 
     addToInventory(itemModifiers, amount, itemObj) {
@@ -37,5 +28,3 @@ class Shop {
         return addedItem;
     }
 }
-
-export default Shop;

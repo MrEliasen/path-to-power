@@ -1,8 +1,5 @@
-import items from '../../data/items.json';
-import { SERVER_LOAD_ITEM } from './redux/types';
-
-class Item {
-    constructor(item) {
+export default class Item {
+    constructor(Game, item) {
         /*{
             id: "",
             name: "",
@@ -34,18 +31,6 @@ class Item {
                 effect_duration: 123
             }
         }*/
-        
-        this.loaded = new Promise((resolve, rejecte) => {
-            Object.assign(this, item)
-
-            this.loadItem(() => {
-                resolve(this);
-            });
-        });
-    }
-
-    loadItem(callback) {
-        callback()
     }
 
     consume() {
@@ -87,5 +72,3 @@ class Item {
         this.stats.durability = parseInt(amount);
     }
 }
-
-export default Item;
