@@ -1,29 +1,10 @@
 {
     "id" : "london",
     "title": "London",
-    "grid": [
-        [
-            {},
-            {
-                "buildings": [
-                    "hospital"
-                ]
-            },
-            {}
-        ],
-        [
-            {},
-            {
-                "buildings": [
-                    "pawnshop"
-                ]
-            },
-            {}
-        ],
-        [
-            {}, {}, {}
-       ]
-    ],
+    "grid": {
+        "width": 30,
+        "height": 20,
+    },
     "spawn": {
        "y": 0,
        "x": 1 

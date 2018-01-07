@@ -1,4 +1,4 @@
-class Character {
+export default class Character {
     constructor(character) {
         Object.assign(this, character);
 
@@ -421,5 +421,3 @@ class Character {
         };
     }
 }
-
-export default Character;

@@ -29,6 +29,7 @@
         "body-parser": "^1.18.2",
         "content-filter": "^1.1.2",
         "escape-string-regexp": "^1.0.5",
+        "event": "^1.0.0",
         "express": "^4.16.2",
         "express-limiter": "^1.6.1",
         "helmet": "^3.9.0",

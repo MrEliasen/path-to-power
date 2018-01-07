@@ -1,9 +1,6 @@
 import Account from './model';
-import Character from '../../character/db/controller';
 import request from 'superagent';
 import config from '../../../../config.json';
-
-import { CLIENT_NEW_CHARACTER, SERVER_TO_CLIENT, CLIENT_NOTIFICATION } from '../../socket/redux/types';
 
 export function login(action, callback) {
     request.get('https://api.twitch.tv/helix/users')
@@ -21,7 +18,7 @@ export function login(action, callback) {
 
         const twitchData = JSON.parse(twitchRes.text).data[0];
 
-        Account.findOne({ twitch_id: escape(twitchData.id) }, { _id: 1, session_token: 1 }, function (err, user) {
+        Account.findOne({ twitch_id: escape(twitchData.id) }, { _id: 1 }, function (err, user) {
             if (err) {
                 return callback({
                     type: 'error',
@@ -47,7 +44,7 @@ export function login(action, callback) {
 
                 callback(null, {
                     user_id: user._id,
-                    name: user.display_name,
+                    display_name: twitchData.display_name,
                     profile_image: twitchData.profile_image_url
                 });
             });
