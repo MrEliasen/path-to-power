@@ -53,11 +53,19 @@ export default class AccountManager {
             // add the authenticated use to the socket object
             socket.user = account;
             // add the socket to the list of active clients
-            this.Game.socketManager.addClient(socket);
+            this.Game.socketManager.add(socket);
+
+            // game data we will send to the client, with the autentication success
+            const gameData = {
+                maps: this.Game.mapManager.getList(),
+                items: this.Game.itemManager.getTemplates(),
+                players: this.Game.characterManager.getOnline()
+            }
+
             // attempt to load the character from the database
             this.Game.characterManager.load(socket.user.user_id,(error, character) => {
                 if (error) {
-                    return this.Game.socketManager.dispatchToUser(socket.user.user_id, {
+                    return this.Game.socketManager.dispatchToSocket(socket, {
                         type: ACCOUNT_AUTHENTICATE_ERROR,
                         payload: error
                     });
@@ -65,24 +73,30 @@ export default class AccountManager {
 
                 // If they already have a character, send them the character and authenticate
                 if (character) {
-                    return this.Game.socketManager.dispatchToUser(socket.user.user_id, {
+                    return this.Game.socketManager.dispatchToSocket(socket, {
                         type: ACCOUNT_AUTHENTICATE_SUCCESS,
-                        payload: character
+                        payload: {
+                            character: character.exportToClient(),
+                            gameData
+                        }
                     })
                 }
 
                 // create a new character
                 this.Game.characterManager.create(socket.user.user_id, socket.user.display_name, 'london', (error, newCharacter) => {
                      if (error) {
-                        return this.Game.socketManager.dispatchToUser(socket.user.user_id, {
+                        return this.Game.socketManager.dispatchToSocket(socket, {
                             type: ACCOUNT_AUTHENTICATE_ERROR,
                             payload: error
                         });
                     }
 
-                    return this.Game.socketManager.dispatchToUser(socket.user.user_id, {
+                    return this.Game.socketManager.dispatchToSocket(socket, {
                         type: ACCOUNT_AUTHENTICATE_SUCCESS,
-                        payload: newCharacter
+                        payload: {
+                            character: newCharacter.exportToClient(),
+                            gameData
+                        }
                     })
                 });
             })

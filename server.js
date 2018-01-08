@@ -24,10 +24,11 @@ const config = require('./config');
  ************************************/
 // Create our Express application
 const app = express();
+let GameServer;
 
 // Connect to the MongoDB
 mongoose.Promise = global.Promise;
-mongoose.connect(config.mongo_db, async function(err) {
+mongoose.connect(config.mongo_db, async (err) => {
     if (err) {
         console.log(err);
         return;
@@ -43,7 +44,7 @@ mongoose.connect(config.mongo_db, async function(err) {
     const webServer = http.createServer(app)
 
     // load the different versions of the API. Keep them separated for backwards compatibility. Once the API is live, you do NOT change that version.
-    const GameServer = new Game(webServer, config);
+    GameServer = new Game(webServer, config);
 
     // On shutdown signal, gracefully close all connections and clear the memory store.
     /*process.on('SIGTERM', function () {

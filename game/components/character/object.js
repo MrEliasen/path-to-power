@@ -17,6 +17,17 @@ export default class Character {
         }
     }
 
+    exportToClient() {
+        return {
+            user_id: this.user_id,
+            name: this.name,
+            inventory: this.inventory,
+            equipped: this.equipped,
+            stats: this.stats,
+            location: this.location
+        }
+    }
+
     /**
      * Adds the user id to the gridlock array
      * @param  {String} user_id  the user id of the player gridlocking the character.
@@ -161,7 +172,11 @@ export default class Character {
      * @param  {String} slot  The equipped slot to unequip
      * @return {Boolean}      True on success.
      */
-    unEquipItem(slot) {
+    unEquip(slot) {
+        if (!slot) {
+            return false;
+        }
+
         const item = {...this.equipped[slot]};
 
         // if there is no item in this slot, ignore
@@ -180,12 +195,11 @@ export default class Character {
     /**
      * Equips selected item from inventory, moving the other item (if any) to the inventory.
      * @param  {Number} inventoryIndex The inventory array index of the item to equip
-     * @param  {Object} itemList       The list of game items 
      * @return {Boolean}               True on success, false otherwise.
      */
-    equipItem(inventoryIndex, itemList) {
-        const selectedItem = this.inventory[inventoryIndex];
-        const item = itemList[selectedItem.id];
+    equip(inventoryIndex) {
+        const selectedItem = {...this.inventory[inventoryIndex]};
+        const item = this.Game.itemManager.get(selectedItem.id);
         const equipped = {...this.equipped};
 
         if (!item) {
@@ -222,10 +236,10 @@ export default class Character {
         }
 
         // equip the item
-        this.equipped[slot] = {...selectedItem};
+        this.equipped[slot] = selectedItem;
         // take the previously equipped item, and replace the newly equipped item in the inventory.
         if (equipped[slot]) {
-            this.inventory[inventoryIndex] = {...equipped[slot]};
+            this.inventory[inventoryIndex] = equipped[slot];
         } else {
         // if no item was equipped already, simply remove it from the inventory.
             this.inventory.splice(inventoryIndex, 1);

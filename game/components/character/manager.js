@@ -1,4 +1,5 @@
 // Manager specific imports
+import { ADD_ONLINE_PLAYER, REMOVE_ONLINE_PLAYER, EQUIP_ITEM, UNEQUIP_ITEM, UPDATE_CHARACTER } from './types';
 import Character from './object';
 import CharacterModel from './model';
 
@@ -10,6 +11,97 @@ export default class CharacterManager {
 
         // log manager progress
         this.Game.logger.debug('CharacterManager::constructor Loaded');
+
+        // listen for dispatches from the socket manager
+        this.Game.socketManager.on('dispatch', this.onDispatch.bind(this));
+    }
+
+    /**
+     * checks for dispatches, and reacts only if the type is listend to
+     * @param  {Socket.IO Socket} socket Client who dispatched the action
+     * @param  {Object} action The redux action
+     */
+    onDispatch(socket, action) {
+        switch (action.type) {
+            case UNEQUIP_ITEM:
+                return this.get(socket.user.user_id).then((character) => {
+                    character.unEquip(action.payload.slot);
+                    this.updateClient(character.user_id);
+                });
+            case EQUIP_ITEM:
+                return this.get(socket.user.user_id).then((character) => {
+                    character.equip(action.payload.index);
+                    this.updateClient(character.user_id);
+                });
+        }
+    }
+
+    /**
+     * Updates the client character information, in part or in full
+     * @param  {String} user_id  User Id of client to update
+     * @param  {Mixed} property (optional) if only a part of the character needs updating
+     */
+    updateClient(user_id, property = null) {
+        this.get(user_id).then((character) => {
+            const characterData = character.exportToClient();
+
+            this.Game.socketManager.dispatchToUser(user_id, {
+                type: UPDATE_CHARACTER,
+                payload: property ? {[property]: characterData[property]} : characterData
+            });
+        });
+    }
+
+    /**
+     * gets the character of the user ID, if one exists
+     * @param  {String} user_id User ID
+     * @return {Promise}
+     */
+    get(user_id) {
+        return new Promise((resolve, reject) => {
+            const character = this.characters[user_id];
+
+            if (!character) {
+                return reject();
+            }
+
+            resolve(character);
+        })
+    }
+
+    /**
+     * Dispatches an event to all sockets, adding/removing a player to/from the playerlist
+     * @param  {String} user_id The user ID 
+     * @param  {String} name    Name of the character, leave out to remove from list
+     */
+    dispatchUpdatePlayerList(user_id, name = null) {
+        // update the clients online player list
+        this.Game.socketManager.dispatchToServer({
+            type: (!name ? REMOVE_ONLINE_PLAYER : ADD_ONLINE_PLAYER),
+            payload: {
+                user_id,
+                name
+            }
+        })
+    }
+
+    /**
+     * Adds a character class object to the managed list
+     * @param  {Character Obj} character The character object to manage
+     */
+    manage(character) {
+        // add the character object to the managed list of characters
+        this.characters[character.user_id] = character;
+        this.dispatchUpdatePlayerList(character.user_id, character.name);
+    }
+
+    /**
+     * Remove a managed character from the list
+     * @param  {String} user_id User ID
+     */
+    remove(user_id) {
+        delete this.character[user_id];
+        this.dispatchUpdatePlayerList(user_id);
     }
 
     /**
@@ -28,9 +120,24 @@ export default class CharacterManager {
                 return callback(null, null);
             }
 
-            this.characters[user_id] = new Character(character.toObject());
-            callback(null, this.characters[user_id]);
+            const newCharacter = new Character(this.Game, character.toObject());
+            this.manage(newCharacter);
+
+            callback(null, newCharacter);
         })
+    }
+
+    /**
+     * Get the list of all online characterss
+     * @return {Object} Object containing user_id => name objects
+     */
+    getOnline() {
+        const online = {};
+        Object.keys(this.characters).map((user_id) => {
+            online[user_id] = this.characters[user_id].name;
+        })
+
+        return online;
     }
 
     /**
@@ -66,8 +173,10 @@ export default class CharacterManager {
                 return callback(error)
             }
 
-            // convery mongodb obj to plain obj before returning it
-            return callback(null, character.toObject());
+            const newCharacter = new Character(this.Game, character.toObject());
+            this.manage(newCharacter);
+
+            callback(null, newCharacter);
         })
     }
 

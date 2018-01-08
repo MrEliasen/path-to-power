@@ -58,8 +58,12 @@ class Game {
     }
 
     async init() {
-        await this.mapManager.load().then(() => {
-            console.log('MAPS LOADED');
+        await this.mapManager.load().then((count) => {
+            console.log(`${count} MAPS LOADED`);
+        });
+
+        await this.itemManager.load().then((count) => {
+            console.log(`${count} ITEMS LOADED`);
         });
 
         /*await this.npcManager.load().then(() => {

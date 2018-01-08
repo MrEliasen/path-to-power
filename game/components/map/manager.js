@@ -31,11 +31,20 @@ export default class MapManager {
                         loadedmaps++;
 
                         if (loadedmaps === maplist.length) {
-                            resolve();
+                            resolve(maplist.length);
                         }
                     })
                     .catch(console.log)
             })
         })
+    }
+
+    getList() {
+        const list = {};
+        Object.keys(this.maps).map((mapId) => {
+            list[mapId] = this.maps[mapId].name;
+        })
+
+        return list;
     }
 }

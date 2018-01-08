@@ -4,7 +4,6 @@ import EventEmitter from 'events';
 export default class SocketManager extends EventEmitter {
     constructor(Game, server) {
         super(Game, server);
-        console.log('SocketManager')
 
         this.Game = Game;
         // holds the active socket clients, for logged in users
@@ -17,6 +16,7 @@ export default class SocketManager extends EventEmitter {
      * Will make the IO server start listening for connections
      */
     listen() {
+        this.Game.logger.info(`Socket is listing on port ${this.Game.config.server_port}`)
         // setup event listeners
         this.io.on('connection', this.onConnection.bind(this));
         this.io.on('disconnect', this.onDisconnect.bind(this));
@@ -29,7 +29,7 @@ export default class SocketManager extends EventEmitter {
      * Add a socket to track in the list
      * @param {Socket.Io object} socket The socket object to track
      */
-    addClient(socket) {
+    add(socket) {
         this.clients[socket.user.user_id] = socket;
     }
 
@@ -37,7 +37,7 @@ export default class SocketManager extends EventEmitter {
      * Removes a tracked socket reference from the list
      * @param  {String} user_id  User Id of the socket to delete
      */
-    removeSocket(user_id) {
+    remove(user_id) {
         delete this.clients[user_id];
     }
 
@@ -46,8 +46,6 @@ export default class SocketManager extends EventEmitter {
      * @param  {Socket.IO Socket} socket
      */
     onConnection(socket) {
-        console.log('New Connection');
-
         socket.on('dispatch', (action) => {
             this.onClientDispatch(socket, action)
         });
@@ -66,8 +64,7 @@ export default class SocketManager extends EventEmitter {
      * @param  {Object} action Redux-action object
      */
     onClientDispatch(socket, action) {
-        console.log(action);
-
+        this.Game.logger.info('New action', action);
         // Make sure actions have the right composition
         if (!action.payload || !action.type) {
             return;
