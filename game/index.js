@@ -44,8 +44,21 @@ class Game {
             level: (process.env.NODE_ENV !== 'production' ? 'info' : 'warning'),
             format: winston.format.json(),
             transports: [
-                new winston.transports.File({ filename: 'error.log', level: 'error' }),
-                new winston.transports.File({ filename: 'combined.log' })
+                new winston.transports.File({
+                    filename: 'error.log',
+                    level: 'error',
+                    timestamp: true
+                }),
+                new winston.transports.File({
+                    filename: 'combined.log',
+                    level: 'warning',
+                    timestamp: true
+                }),
+                new winston.transports.File({
+                    filename: 'debug.log',
+                    level: 'debug',
+                    timestamp: true
+                })
             ]
         });
 
@@ -97,8 +110,14 @@ class Game {
      * saves all character progress and items
      * @return {Promise} The promise returned from the saveAll method
      */
-    save() {
-        this.characterManager.saveAll();
+    setupAutosave() {
+        if (!this.config.game.autosave.enabled) {
+            return;
+        }
+
+        setInterval(() => {
+            this.characterManager.saveAll();
+        }, this.config.game.autosave.interval)
     }
 
     async init() {
@@ -115,7 +134,10 @@ class Game {
         })*/
 
         // Listen for connections
-        this.socketManager.listen()
+        this.socketManager.listen();
+
+        // setup autosave
+        this.setupAutosave();
     }
 }
 

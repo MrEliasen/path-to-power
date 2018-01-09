@@ -58,11 +58,12 @@ export default class CharacterManager {
      * @return {Promise}
      */
     get(user_id) {
+        this.Game.logger.debug(`fetching user ${user_id || 'unknown'}..`)
         return new Promise((resolve, reject) => {
             const character = this.characters[user_id];
 
             if (!character) {
-                return reject();
+                return reject(`Character ${user_id} was not found.`);
             }
 
             resolve(character);
@@ -123,7 +124,17 @@ export default class CharacterManager {
             const newCharacter = new Character(this.Game, character.toObject());
             this.manage(newCharacter);
 
-            callback(null, newCharacter);
+            this.Game.itemManager.loadInventory(newCharacter)
+                .then((items) => {
+                    if (items) {
+                        items.map((item) => {
+                            newCharacter.giveItem(item, item.getAmount());
+                        })
+                        newCharacter.setInventory(items);
+                    }
+                    callback(null, newCharacter);
+                })
+                .catch((error) => this.Game.logger.error(error));
         })
     }
 
@@ -261,11 +272,19 @@ export default class CharacterManager {
      * @return {Promise}
      */
     save(user_id) {
-        // Save the character information (stats/location/etc)
-        const saveCharacter = this.dbSave(this.get(user_id));
-        const saveInventory = this.Game.itemManager.saveInventory(character);
-        //this.Game.logger.info(`(user_id: ${user_id}) Character save results:`, values);
-        return Promise.all([saveInventory, saveCharacter])
+        return new Promise((resolve, reject) => {
+            this.get(user_id).then((character) => {
+                this.Game.logger.debug(`Saving character ${user_id}`);
+
+                // Save the character information (stats/location/etc)
+                const saveCharacter = this.dbSave(character);
+                const saveInventory = this.Game.itemManager.saveInventory(character);
+                Promise.all([saveCharacter, saveInventory]).then((values) => {
+                    this.Game.logger.debug(`Saved ${user_id}`, values);
+                    resolve();
+                });
+            });
+        });
     }
 
     dbSave(character) {

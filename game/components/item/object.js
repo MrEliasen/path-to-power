@@ -31,9 +31,17 @@
 }*/
 
 export default class Item {
-    constructor(Game, itemData) {
-        this.Game = Game;
+    constructor(template = null, itemData, modifiers = {}) {
+        this.template = template;
         Object.assign(this, itemData);
+        Object.assign(this.stats, modifiers);
+    }
+
+    /**
+     * removes the item from the game
+     */
+    destroy() {
+        this.remove = true;
     }
 
     /**
@@ -56,15 +64,40 @@ export default class Item {
      * @return {Object} Object with stats
      */
     getModifiers() {
-        const modifiers = {};
-        const template = this.Game.itemManager.getTemplate(this.id);
+        const modifiers = {
+            durability: this.stats.durability
+        };
+        /*const template = this.template;
 
         Object.keys(template.stats).map((stat_key) => {
             if (template.stats[stat_key] !== this.stats[stat_key]) {
                 modifiers[stat_key] = this.stats[stat_key];
             }
-        })
+        })*/
 
         return modifiers;
+    }
+
+    /**
+     * Returns the number of items in the item (1 for non-stackable, otherwise durability)
+     */
+    getAmount() {
+        return (this.stats.stackable ? this.stats.durability : 1);
+    }
+
+    /**
+     * Sets the durability to the specified amount
+     * @param {Number} amount
+     */
+    setDurability(amount) {
+        this.stats.durability = amount;
+    }
+
+    /**
+     * Adds the amount to the current item durability
+     * @param {Number} amount
+     */
+    addDurability(amount) {
+        this.stats.durability += amount;
     }
 }

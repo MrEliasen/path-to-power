@@ -36,6 +36,14 @@ export default class Character {
         }
     }
 
+    /**
+     * sets the character inventory items to list of items passed
+     * @param {Array} items array of items references from the itemManager.
+     */
+    setInventory(items) {
+        this.inventory = items;
+    }
+
     exportToClient() {
         return {
             user_id: this.user_id,
@@ -196,18 +204,8 @@ export default class Character {
             return false;
         }
 
-        const item = {...this.equipped[slot]};
-
-        // if there is no item in this slot, ignore
-        if (!item) {
-            return false;
-        }
-
-        // remove item from equipped list
+        this.equipped[slot].slot = null;
         this.equipped[slot] = null;
-
-        // add item to inventory
-        this.inventory.push(item);
         return true;
     }
 
@@ -217,9 +215,7 @@ export default class Character {
      * @return {Boolean}               True on success, false otherwise.
      */
     equip(inventoryIndex) {
-        const selectedItem = {...this.inventory[inventoryIndex]};
-        const item = this.Game.itemManager.get(selectedItem.id);
-        const equipped = {...this.equipped};
+        const item = this.inventory[inventoryIndex];
 
         if (!item) {
             return false;
@@ -255,15 +251,8 @@ export default class Character {
         }
 
         // equip the item
-        this.equipped[slot] = selectedItem;
-        // take the previously equipped item, and replace the newly equipped item in the inventory.
-        if (equipped[slot]) {
-            this.inventory[inventoryIndex] = equipped[slot];
-        } else {
-        // if no item was equipped already, simply remove it from the inventory.
-            this.inventory.splice(inventoryIndex, 1);
-        }
-
+        item.slot = slot;
+        this.equipped[slot] = item;
         return true;
     }
 
@@ -395,19 +384,24 @@ export default class Character {
             }
 
             if (itemIndex || itemIndex === 0) {
-                this.inventory[itemIndex].durability = (this.inventory[itemIndex].durability || 0) + amount;
+                this.inventory[itemIndex].addDurability(amount);
+                this.Game.itemManager.remove(itemObj);
             } else {
-                this.inventory.push({
-                    id: itemObj.id,
-                    durability: amount
-                })
+                // set the amount of the item to the correct amount, before adding to the inventory
+                itemObj.setDurability(amount);
+                this.inventory.push(itemObj)
             }
         } else {
-            for (var i = amount; i > 0; i--) {
-                this.inventory.push({
-                    id: itemObj.id,
-                    durability: itemObj.stats.durability
-                })
+            this.inventory.push(itemObj);
+
+            // if we just added one, kill it here.
+            if (amount === 1) {
+                return;
+            }
+
+            // if its non-stackable, we have to create the item several items.
+            for (var i = amount - 1; i > 0; i--) {
+                this.giveItem(this.Game.itemManager.add(itemObj.id), 1);
             }
         }
     }
