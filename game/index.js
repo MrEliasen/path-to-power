@@ -12,6 +12,8 @@ import shopManager from './components/shop/manager';
 import commandManager from './components/command/manager';
 //import npcManager from './components/npc/manager';
 
+import { newEvent } from './actions';
+
 class Game {
     constructor(server, config) {
         this.config = config;
@@ -55,6 +57,48 @@ class Game {
         }
 
         this.logger.info('Logger initiated.');
+    }
+
+    /**
+     * dispatch an event to a specific socket
+     * @param  {Socket.IO Socket} socket  Socket to dispatch to
+     * @param  {String} type    Event type
+     * @param  {String} message Event message
+     */
+    eventToSocket(socket, type, message) {
+        this.logger.debug('Socket Event', {socket: (socket.user || null), type, message});
+        this.socketManager.dispatchToSocket(socket, newEvent(type, message));
+    }
+
+    /**
+     * dispatch an event to a specific room
+     * @param  {String} room    The room id
+     * @param  {String} type    Event type
+     * @param  {String} message Event message
+     * @param  {Array} ignore list of user_ids who should ignore the message
+     */
+    eventToRoom(room, type, message, ignore) {
+        this.logger.debug('Room Event', {room, type, message, ignore});
+        this.socketManager.dispatchToRoom(room, newEvent(type, message, ignore));
+    }
+
+    /**
+     * dispatch an event to the server
+     * @param  {String} type    Event type
+     * @param  {String} message Event message
+     * @param  {Array} ignore list of user_ids who should ignore the message
+     */
+    eventToServer(type, message, ignore) {
+        this.logger.debug('Server Event', {type, message, ignore});
+        this.socketManager.dispatchToServer(newEvent(type, message, ignore));
+    }
+
+    /**
+     * saves all character progress and items
+     * @return {Promise} The promise returned from the saveAll method
+     */
+    save() {
+        this.characterManager.saveAll();
     }
 
     async init() {

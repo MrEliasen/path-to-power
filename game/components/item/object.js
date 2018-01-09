@@ -36,6 +36,10 @@ export default class Item {
         Object.assign(this, itemData);
     }
 
+    /**
+     * Converts the items from an Item Object, to a plain text object.
+     * @return {Object}
+     */
     toObject() {
         return {
             id: this.id,
@@ -45,5 +49,22 @@ export default class Item {
             subtype: this.subtype,
             stats: {...this.stats},
         }
+    }
+
+    /**
+     * Retrives all the stats which differ from the template.
+     * @return {Object} Object with stats
+     */
+    getModifiers() {
+        const modifiers = {};
+        const template = this.Game.itemManager.getTemplate(this.id);
+
+        Object.keys(template.stats).map((stat_key) => {
+            if (template.stats[stat_key] !== this.stats[stat_key]) {
+                modifiers[stat_key] = this.stats[stat_key];
+            }
+        })
+
+        return modifiers;
     }
 }

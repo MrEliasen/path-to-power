@@ -1,5 +1,4 @@
-/*import cmdGive from './commands/give';
-import cmdPickup from './commands/pickup';
+/*import cmdPickup from './commands/pickup';
 import cmdDrop from './commands/drop';
 import cmdHeal from './commands/heal';
 import cmdSay from './commands/say';
@@ -11,93 +10,30 @@ import cmdFlee from './commands/flee';
 import cmdPunch from './commands/punch';
 import cmdStrike from './commands/strike';
 import cmdShoot from './commands/shoot';*/
+import cmdGive from './commands/give';
+import { GAME_COMMAND } from './types';
 
 export default class CommandManager {
     constructor(Game) {
         this.Game = Game;
+
+        // log manager progress
+        this.Game.logger.debug('CommandManager::constructor Loaded');
+
+        // listen for dispatches from the socket manager
+        this.Game.socketManager.on('dispatch', this.onDispatch.bind(this));
     }
 
-    exec(command, params) {
-        return this.Game.logger.info('CommandManager::exec', {command, params});
-
-        // Global commands, no grid restriction.
-        switch(command) {
-            case '/global':
-            case '/g':
-                return cmdGlobal(params)
-                break;
-
-            case '/whisper':
-            case '/w':
-            case '/tell':
-            case '/pm':
-                return cmdWhisper(params)
-                break;
-
-            case '/say':
-            case '/s':
-                // because the first word is removed from the command,
-                // we put it back, since its considered part of the message
-                return cmdSay(params)
-                break;
-
-            case '/heal':
-                return cmdHeal(params, command);
-                break;
-
-            case '/give':
-                return cmdGive(params);
-                break;
-
-            case '/drop':
-                return cmdDrop(params);
-                break;
-
-            case '/pickup':
-            case '/get':
-                return cmdPickup(params);
-                break;
-
-            case '/shop':
-                return loadShop(params);
-                break;
-
-            case '/aim':
-                return cmdAim(params);
-                break;
-
-            case '/flee':
-                return cmdFlee(params);
-                break;
-
-            case '/punch':
-                return cmdPunch(params);
-                break;
-
-            case '/strike':
-                return cmdStrike(params);
-                break;
-
-            case '/shoot':
-                return cmdShoot(params);
-                break;
-
-            case '/release':
-                return cmdRelease(params);
-                break;
-
-            default:
-                if (command && command[0] !== '/') {
-                    // because the first word is removed from the command,
-                    // we put it back, since its considered part of the message
-                    params.unshift(command);
-                    return cmdSay(params)
-                }
-                break;
+    /**
+     * checks for dispatches, and reacts only if the type is listend to
+     * @param  {Socket.IO Socket} socket Client who dispatched the action
+     * @param  {Object} action The redux action
+     */
+    onDispatch(socket, action) {
+        if (action.type !== GAME_COMMAND) {
+            return;
         }
-    }
 
-    parse(action) {
         const payload = action.payload.toString().trim().split(' ');
 
         if (!payload[0]) {
@@ -107,7 +43,87 @@ export default class CommandManager {
         const command = payload.shift().toLowerCase();
         const params = payload;
 
-        return this.exec(command, params);
+        return this.exec(socket, command, params);
+    }
+
+    exec(socket, command, params) {
+        this.Game.logger.info('CommandManager::exec', {command, params});
+
+        // Global commands, no grid restriction.
+        switch(command) {
+            case '/global':
+            case '/g':
+                return cmdGlobal(socket, command, params, this.Game)
+                break;
+
+            case '/whisper':
+            case '/w':
+            case '/tell':
+            case '/pm':
+                return cmdWhisper(socket, command, params, this.Game)
+                break;
+
+            case '/say':
+            case '/s':
+                // because the first word is removed from the command,
+                // we put it back, since its considered part of the message
+                return cmdSay(socket, command, params, this.Game)
+                break;
+
+            case '/heal':
+                return cmdHeal(socket, command, params, this.Game);
+                break;
+
+            case '/give':
+                return cmdGive(socket, command, params, this.Game);
+                break;
+
+            case '/drop':
+                return cmdDrop(socket, command, params, this.Game);
+                break;
+
+            case '/pickup':
+            case '/get':
+                return cmdPickup(socket, command, params, this.Game);
+                break;
+
+            case '/shop':
+                return loadShop(socket, command, params, this.Game);
+                break;
+
+            case '/aim':
+                return cmdAim(socket, command, params, this.Game);
+                break;
+
+            case '/flee':
+                return cmdFlee(socket, command, params, this.Game);
+                break;
+
+            case '/punch':
+                return cmdPunch(socket, command, params, this.Game);
+                break;
+
+            case '/strike':
+                return cmdStrike(socket, command, params, this.Game);
+                break;
+
+            case '/shoot':
+                return cmdShoot(socket, command, params, this.Game);
+                break;
+
+            case '/release':
+                return cmdRelease(socket, command, params, this.Game);
+                break;
+
+            default:
+                if (command && command[0] !== '/') {
+                    // because the first word is removed from the command,
+                    // we put it back, since its considered part of the message
+                    params.unshift(command);
+                    return cmdSay(socket, command, params, this.Game)
+                }
+                break;
+        }
     }
 }
 /*

@@ -1,0 +1,1 @@
+export const GAME_COMMAND = "GAME_COMMAND";

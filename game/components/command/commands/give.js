@@ -1,45 +1,23 @@
-import { clientCommandError } from '../redux/actions';
-import { updateClientCharacter, updateCharacter } from '../../character/redux/actions';
-import { newEvent } from '../../socket/redux/actions';
-
-export default function cmdGive(socket, params, getState, resolve) {
+export default function cmdGive(socket, command, params, Game) {
     if (!params[0]) {
-        return resolve();
+        return;
     }
 
     const itemKey = params[0];
     const amount = parseInt(params[1]) || 1;
-    const character = getState().characters.list[socket.user.user_id] || null;
-    const item = getState().items.list[itemKey];
-    const meta = {
-        socket_id: socket.id
-    }
-
-    if (!character) {
-        return callback([{
-            ...clientCommandError('Invalid character. Please logout and back in.'),
-            meta
-        }]);
-    }
+    const item = Game.itemManager.getTemplate(itemKey);
 
     if (!item) {
-        return resolve([{
-            ...clientCommandError('Invalid items.'),
-            meta
-        }]);
+        return Game.eventToSocket(socket, 'error',  'Invalid item.');
     }
 
-    character.giveItem(item, amount);
-
-    return resolve([
-        updateCharacter(character),
-        {
-            ...newEvent(`Your received ${amount}x ${item.name}`),
-            meta,
-        },
-        {
-            ...updateClientCharacter(character),
-            meta
-        }
-    ])
+    Game.characterManager.get(socket.user.user_id)
+        .then((character) => {
+            character.giveItem(item, amount);
+            Game.eventToSocket(socket, 'info',  `Your received ${amount}x ${item.name}`);
+            Game.characterManager.updateClient(socket.user.user_id, 'inventory');
+        })
+        .catch(() => {
+            Game.eventToSocket(socket, 'error',  'Invalid character. Please logout and back in.')
+        });
 }

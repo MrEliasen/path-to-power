@@ -39,6 +39,10 @@ export default class MapManager {
         })
     }
 
+    /**
+     * Get a list of all map names by ID
+     * @return {Object} {"mapId": "map name", ...}
+     */
     getList() {
         const list = {};
         Object.keys(this.maps).map((mapId) => {
@@ -46,5 +50,20 @@ export default class MapManager {
         })
 
         return list;
+    }
+
+    /**
+     * Returns the spawn location (x,y,map) of a given map
+     * @param  {String} map_id Map Id
+     * @return {Object}        object containing {x,y,map}
+     */
+    getSpawn(map_id) {
+        const gameMap = this.maps[map_id];
+
+        if (!gameMap) {
+            return null;
+        }
+
+        return gameMap.respawn;
     }
 }

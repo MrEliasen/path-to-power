@@ -13,10 +13,10 @@ var ItemSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    stat_modifiers: {
+    modifiers: {
         type: {},
     },
-    slot: {
+    equipped_slot: {
         type: String
     },
     date_added: String,

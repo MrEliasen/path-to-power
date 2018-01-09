@@ -9,11 +9,30 @@ export default class Character {
         // the user_id of the last targed who was /aim'ed' at
         this.lastTarget = null;
 
+        // create the inventory and equipped objects
         if (!this.inventory) {
             this.inventory = [];
         }
         if (!this.equipped) {
             this.equipped = {};
+        }
+
+        // if the character is new, they won't have stats, set the default here.
+        if (!this.stats) {
+            this.stats = {
+                health: 100,
+                health_max: 100,
+                money: 0,
+                bank: 200
+            }
+        }
+
+        // if the location does not have an X or Y coordinate, set the location to the
+        // map spawn location
+        if (!this.location.x || !this.location.y) {
+            const spawn = this.Game.mapManager.getSpawn(this.location.map);
+            this.location.x = spawn.x;
+            this.location.y = spawn.y;
         }
     }
 

@@ -225,25 +225,71 @@ export default class CharacterManager {
         });
     }
 
-    dbSave(character, callback) {
-        CharacterModel.findOnethis.Game.logger.error('CharacterManager::dbSave', err);({ user_id: character.user_id }, (err, dbCharacter) => {
-            if (err) {
-                this.Game.logger.error('CharacterManager::dbSave', err);
-                return callback();
-            }
+    /**
+     * Save the progress and items of all managed characters
+     * @return {Promise}
+     */
+    saveAll() {
+        return new Promise((resolve, reject) => {
+            const characters = Object.keys(this.characters);
+            const total = characters.length;
+            let saves = 0;
 
-            // NOTE: add any information you want to save here.
-            dbCharacter.stats = data.stats;
-            dbCharacter.location = data.location;
-            dbCharacter.inventory = data.inventory;
-            dbCharacter.equipped = data.equipped;
-            dbCharacter.save((err) => {
+            characters.map((user_id) => {
+                this.save(user_id)
+                    .then(() => {
+                        saves++;
+
+                        if (saves === total) {
+                            resolve();
+                        }
+                    })
+                    .catch(() => {
+                        saves++;
+
+                        if (saves === total) {
+                            resolve();
+                        }
+                    })
+            })
+        })
+    }
+
+    /**
+     * Saves a character's (by used id) progress and items
+     * @param  {String} user_id The user ID
+     * @return {Promise}
+     */
+    save(user_id) {
+        // Save the character information (stats/location/etc)
+        const saveCharacter = this.dbSave(this.get(user_id));
+        const saveInventory = this.Game.itemManager.saveInventory(character);
+        //this.Game.logger.info(`(user_id: ${user_id}) Character save results:`, values);
+        return Promise.all([saveInventory, saveCharacter])
+    }
+
+    dbSave(character) {
+        return new Promise((resolve, reject) => {
+            CharacterModel.findOne({ user_id: character.user_id }, (err, dbCharacter) => {
                 if (err) {
-                    console.log(err);
+                    this.Game.logger.error('CharacterManager::dbSave', err);
+                    return reject(err);
                 }
 
-                callback();
+                // update the character db object, and save the changes
+                // NOTE: add any information you want to save here.
+                dbCharacter.stats = {...character.stats};
+                dbCharacter.location = {...character.location};
+
+                dbCharacter.save((err) => {
+                    if (err) {
+                        this.Game.logger.error('CharacterManager::dbSave', err);
+                        return reject(err);
+                    }
+
+                    resolve(dbCharacter);
+                });
             });
-        });
+        })
     }
 }

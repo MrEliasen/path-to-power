@@ -57,14 +57,117 @@ export default class ItemManager {
         return list;
     }
 
-    dbLoad(user_id) {
+    /**
+     * Retrives an item template, from an item id
+     * @param  {String} item_id Item ID
+     * @return {Object}         Plain object of the item template
+     */
+    getTemplate(item_id) {
+        return this.templates[item_id];
+    }
+
+    saveInventory(character) {
         return new Promise((resolve, reject) => {
-            ItemModel.find({ user_id }, (error, items) => {
+            const numOfItems = character.inventory.length;
+            let succeeded = 0;
+            let failed = 0;
+
+            character.inventory.map((item) => {
+                this.dbSave(character.user_id, item)
+                    .then((itemDbObject) => {
+                        succeeded++;
+
+                        if ((succeeded + failed) === numOfItems) {
+                            resolve(failed, succeeded);
+                        }
+                    })
+                    .catch((error) => {
+                        failed++;
+                        this.Game.logger.error(error);
+
+                        if ((succeeded + failed) === numOfItems) {
+                                resolve(failed, succeeded);
+                            }
+                    })
+            })
+        });
+    }
+
+    /**
+     * Saves the item in the databse
+     * @param  {Item Object} item the Item object to save
+     * @return {Mongoose Object}      The mongoose object of the newly saved item
+     */
+    dbCreate(item) {
+        return new Promise((resolve, reject) => {
+            // create a new item model
+            const newItem = new ItemModel({
+                user_id,
+                item_id: item.id,
+                modifiers: item.getModifiers(),
+                equipped_slot: item.equipped_slot
+            })
+
+            newItem.save((error) => {
                 if (error) {
-                    return;
+                    return reject(error);
                 }
 
-                console.log(items);
+                resolve(newItem);
+            })
+        })
+    }
+
+    /**
+     * Saves an Item Object in the DB, creates a new entry if no existing is found for the item.
+     * @param  {String} user_id  User ID of the item owner
+     * @param  {Item Object} item    
+     * @return {[type]}         [description]
+     */
+    dbSave(user_id, item) {
+        return new Promise((resolve, reject) => {
+            if (!user_id) {
+                return reject('Missing user_id');
+            }
+
+            // retrive item from database if it has a "_id", so we can update it.
+            dbLoad(item._id)
+                .then((loadedItem) => {
+                    if (!loadedItem) {
+                        return this.dbCreate(item);
+                    }
+
+                    loadedItem.modifiers - item.getModifiers();
+                    loadedItem.equipped_slot - item.equipped_slot;
+
+                    loadedItem.save((error) => {
+                        if (error) {
+                            return reject(error);
+                        }
+
+                        resolve(loadedItem);
+                    })
+                })
+        })
+    }
+
+    /**
+     * Loads an item from the DB, by item DB _id. 
+     * @param  {String} item_db_id The _id mongo has assigned to the item
+     * @return {Object}
+     */
+    dbLoad(item_db_id) {
+        return new Promise((resolve, reject) => {
+            if (!item_db_id) {
+                return resolve();
+            }
+
+            ItemModel.find({ _id: item_db_id }, (error, item) => {
+                if (error) {
+                    return reject(error);
+                }
+
+                resolve(item);
             })
         })
     }
