@@ -1,57 +1,36 @@
-import { SERVER_TO_CLIENT } from '../../socket/redux/types';
-import { CLIENT_NEW_MESSAGE } from '../redux/types';
-import { clientCommandError } from '../redux/actions';
-import { getCharacterByName } from '../../character/db/controller';
+import { CHAT_MESSAGE } from '../types';
 
-export default function cmdWhisper(socket, params, callback) {
+export default function cmdWhisper(socket, command, params, Game) {
     if (params.length < 2) {
-        return callback([{
-            ...clientCommandError('Invalid whisper. Syntax: /w <username> <message>'),
-            meta: {
-                socket_id: socket.id
-            }
-        }]);
+        return Game.eventToSocket(socket, 'error',  'Invalid whisper. Syntax: /w <username> <message>');
     }
 
-    const playername = params.shift();
+    Game.characterManager.get(socket.user.user_id).then((sender) => {
+        const target = params.shift();
 
-    getCharacterByName(playername, function(err, character) {
-        if (err) {
-            return callback([err]);
-        }
-
-        if (!character) {
-            return callback([{
-                ...clientCommandError('Invalid whisper target.'),
-                meta: {
-                    socket_id: socket.id
+        Game.characterManager.findByName(target).then((whisperTarget) => {
+            // send message to the socket
+            Game.socketManager.dispatchToSocket(socket, {
+                type: CHAT_MESSAGE,
+                payload: {
+                    type: 'whisper-out',
+                    name: whisperTarget.name,
+                    message: params.join(' ')
                 }
-            }]);
-        }
-
-        callback([{
-            type: CLIENT_NEW_MESSAGE,
-            subtype: SERVER_TO_CLIENT,
-            meta: {
-                target: character.user_id
-            },
-            payload: {
-                type: 'whisper-in',
-                name: socket.user.name,
-                message: params.join(' ')
-            }
-        },
-        {
-            type: CLIENT_NEW_MESSAGE,
-            subtype: SERVER_TO_CLIENT,
-            meta: {
-                socket_id: socket.id
-            },
-            payload: {
-                type: 'whisper-out',
-                name: character.name,
-                message: params.join(' ')
-            }
-        }]);
-    });
+            });
+            // send message to the target user
+            Game.socketManager.dispatchToUser(whisperTarget.user_id, {
+                type: CHAT_MESSAGE,
+                payload: {
+                    type: 'whisper-in',
+                    name: sender.name,
+                    message: params.join(' ')
+                }
+            });
+        })
+        .catch(() => {
+            Game.eventToSocket(socket, 'error',  'Invalid whisper target.')
+        });
+    })
+    .catch();
 }

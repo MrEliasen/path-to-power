@@ -2,8 +2,6 @@
 import cmdDrop from './commands/drop';
 import cmdHeal from './commands/heal';
 import cmdSay from './commands/say';
-import cmdWhisper from './commands/whisper';
-import cmdGlobal from './commands/global';
 import cmdAim from './commands/aim';
 import cmdRelease from './commands/release';
 import cmdFlee from './commands/flee';
@@ -11,6 +9,8 @@ import cmdPunch from './commands/punch';
 import cmdStrike from './commands/strike';
 import cmdShoot from './commands/shoot';*/
 import cmdGive from './commands/give';
+import cmdGlobal from './commands/global';
+import cmdWhisper from './commands/whisper';
 import { GAME_COMMAND } from './types';
 
 export default class CommandManager {

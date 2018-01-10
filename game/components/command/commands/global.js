@@ -1,15 +1,16 @@
-import { SERVER_TO_CLIENT } from '../../socket/redux/types';
-import { CLIENT_NEW_MESSAGE } from '../redux/types';
-import { newEvent } from '../../socket/redux/actions';
+import { CHAT_MESSAGE } from '../types';
 
-export default function cmdGlobal(socket, params) {
-    return [{
-        type: CLIENT_NEW_MESSAGE,
-        subtype: SERVER_TO_CLIENT,
-        payload: {
-            name: socket.user.name,
-            message: params.join(' '),
-            type: 'global'
-        }
-    }];
+export default function cmdGlobal(socket, command, params, Game) {
+    Game.characterManager.get(socket.user.user_id)
+        .then((character) => {
+            Game.socketManager.dispatchToServer({
+                type: CHAT_MESSAGE,
+                payload: {
+                    name: character.name,
+                    message: params.join(' '),
+                    type: 'global'
+                }
+            })
+        })
+        .catch(Game.logger.error)
 }

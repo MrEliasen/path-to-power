@@ -58,7 +58,6 @@ export default class CharacterManager {
      * @return {Promise}
      */
     get(user_id) {
-        this.Game.logger.debug(`fetching user ${user_id || 'unknown'}..`)
         return new Promise((resolve, reject) => {
             const character = this.characters[user_id];
 
@@ -309,6 +308,30 @@ export default class CharacterManager {
                     resolve(dbCharacter);
                 });
             });
+        })
+    }
+
+    /**
+     * Find a character by their name
+     * @param  {Strng} characterName  Name to search for
+     * @return {Character Obj}        Character obj if found.
+     */
+    findByName(targetName) {
+        return new Promise((resolve, reject) => {
+            targetName = targetName.toLowerCase();
+
+            let found;
+            Object.keys(this.characters).map((user_id) => {
+                if (this.characters[user_id].name.toLowerCase() === targetName) {
+                    found = this.characters[user_id];
+                }
+            })
+
+            if (!found) {
+                return reject('Character not found')
+            }
+
+            resolve(found);
         })
     }
 }
