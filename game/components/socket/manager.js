@@ -10,6 +10,23 @@ export default class SocketManager extends EventEmitter {
         this.clients = {};
         // setup the socket server
         this.io = io(server);
+        // disconnect timers (for DC events)
+        this.timers = {};
+
+        this.onDisconnect = this.onDisconnect.bind(this)
+        this.clearTimer = this.clearTimer.bind(this);
+    }
+
+    get(user_id) {
+        return new Promise((resolve, reject) => {
+            const socket = this.clients[user_id];
+
+            if (!socket) {
+                return reject(`No socket found for user: ${user_id}`);
+            }
+
+            resolve(socket);
+        })
     }
 
     /**
@@ -19,7 +36,6 @@ export default class SocketManager extends EventEmitter {
         this.Game.logger.info(`Socket is listing on port ${this.Game.config.server_port}`)
         // setup event listeners
         this.io.on('connection', this.onConnection.bind(this));
-        this.io.on('disconnect', this.onDisconnect.bind(this));
 
         // listen for connections
         this.io.listen(this.Game.config.server_port);
@@ -42,12 +58,31 @@ export default class SocketManager extends EventEmitter {
     }
 
     /**
+     * Removes a disconnection timer
+     * @param  {String} user_id User Id
+     */
+    clearTimer(user_id) {
+        if (this.timers[user_id]) {
+            clearTimeout(this.timers[user_id]);
+            delete this.timers[user_id];
+        }
+    }
+
+    /**
      * Handles new connections
      * @param  {Socket.IO Socket} socket
      */
     onConnection(socket) {
+        // check if the same socket reconnects after a DC
+        if (socket.user) {
+            this.clearTimer(socket.user.user_id)
+        }
+
         socket.on('dispatch', (action) => {
             this.onClientDispatch(socket, action)
+        });
+        socket.on('disconnect', () => {
+            this.onDisconnect(socket);
         });
     }
 
@@ -56,7 +91,16 @@ export default class SocketManager extends EventEmitter {
      * @param  {Socket.IO Socket} socket
      */
     onDisconnect(socket) {
+        this.Game.logger.info('Socket disconnected', socket.user);
 
+        // if the user is logged in, set a timer for when we remove them from the game.
+        if (socket.user) {
+            const user = {...socket.user};
+
+            this.timers[socket.user.user_id] = setTimeout(() =>{
+                this.emit('disconnect', user)
+            }, this.Game.config.game.logout_timer)
+        }
     }
 
     /**
@@ -106,7 +150,7 @@ export default class SocketManager extends EventEmitter {
             console.log('Missing roomId from dispatchToRoom?:', roomId, ' for action:', action);
         }
 
-        this.io.socket.in(roomId).emit('dispatch', action);
+        this.io.sockets.in(roomId).emit('dispatch', action);
     }
 
     /**

@@ -1,9 +1,9 @@
 {
     "id" : "london",
     "name": "London",
-    "grid": {
-        "width": 30,
-        "height": 30
+    "grid_size": {
+        "y": 30,
+        "x": 30
     },
     "buildings": [
         {"id": "hospital", "x": 5, "y": 5},

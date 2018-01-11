@@ -37,6 +37,25 @@ export default class Character {
     }
 
     /**
+     * generates the grid "room" ID of the characters currect location
+     * @return {String}
+     */
+    getLocationId() {
+        return `${this.location.map}_${this.location.y}_${this.location.x}`;
+    }
+
+    /**
+     * Updates the character location
+     * @param  {String} map  Map ID
+     * @param  {Number} x   East coordinate
+     * @param  {Number} y   North coordinate
+     */
+    updateLocation(map, x, y) {
+        map = map || this.location.map;
+        this.location = { map, x, y };
+    }
+
+    /**
      * sets the character inventory items to list of items passed
      * @param {Array} items array of items references from the itemManager.
      */
@@ -44,6 +63,10 @@ export default class Character {
         this.inventory = items;
     }
 
+    /**
+     * Export a plain object of the important character data, to be dispatched to the client.
+     * @return {Object} Character data
+     */
     exportToClient() {
         return {
             user_id: this.user_id,

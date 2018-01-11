@@ -8,12 +8,15 @@ export default class CharacterManager {
         this.Game = Game;
         // keeps track of all current in-game characters
         this.characters = {};
-
+        // keeps track of character locations on the maps
+        this.locations = {}
         // log manager progress
         this.Game.logger.debug('CharacterManager::constructor Loaded');
-
         // listen for dispatches from the socket manager
         this.Game.socketManager.on('dispatch', this.onDispatch.bind(this));
+        this.Game.socketManager.on('disconnect', (user) => {
+            this.remove(user.user_id);
+        })
     }
 
     /**
@@ -93,6 +96,18 @@ export default class CharacterManager {
         // add the character object to the managed list of characters
         this.characters[character.user_id] = character;
         this.dispatchUpdatePlayerList(character.user_id, character.name);
+
+        this.Game.socketManager.get(character.user_id).then((socket) => {
+            // track the character location
+            this.changeLocation(character, character.location);
+            // dispatch join event to grid
+            this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} emerges from a nearby building`, [character.user_id]);
+            // join the grid room
+            socket.join(character.getLocationId());
+            // removes disconnect timer, if one is sec (eg if refreshing the page)
+            this.Game.socketManager.clearTimer(character.user_id);
+        })
+        .catch(this.Game.logger.error);
     }
 
     /**
@@ -100,8 +115,14 @@ export default class CharacterManager {
      * @param  {String} user_id User ID
      */
     remove(user_id) {
-        delete this.character[user_id];
-        this.dispatchUpdatePlayerList(user_id);
+        this.get(user_id).then((character) => {
+            // dispatch join event to grid
+            this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} disappears into a nearby building`, [character.user_id]);
+
+            delete this.characters[user_id];
+            this.dispatchUpdatePlayerList(user_id);
+        })
+        .catch(this.Game.logger.error);
     }
 
     /**
@@ -333,5 +354,134 @@ export default class CharacterManager {
 
             resolve(found);
         })
+    }
+
+    /**
+     * Get the list of players at a given location
+     * @param  {String} map Map Id
+     * @param  {Number} x
+     * @param  {Number} y
+     * @return {Array}     Array of players
+     */
+    getLocationList(map, x, y, ignore = null) {
+        const players = this.locations[`${map}_${y}_${x}`] || [];
+        const list = [];
+
+        players.map((character) => {
+            if (character.user_id !== ignore) {
+                list.push({
+                    user_id: character.user_id,
+                    name: character.name
+                })
+            }
+        })
+
+        return list;
+    }
+
+    /**
+     * Updated the tracked characters location
+     * @param  {Character Obj} character   The character reference
+     * @param  {Object} oldLocation {map, x, y}
+     * @param  {Object} newLocation {map, x ,y}
+     */
+    changeLocation(character, newLocation = {}, oldLocation = {}) {
+        const old_position = this.locations[`${oldLocation.map}_${oldLocation.y}_${oldLocation.x}`];
+        const new_position_key = `${newLocation.map}_${newLocation.y}_${newLocation.x}`;
+
+        // if the old location does not exist, we dont need to remove the player from it
+        if (old_position) {
+            // find index of the play
+            const index = old_position.findIndex((char) => char.user_id === character.user_id);
+
+            // and remove the player from the list, if found
+            if (index) {
+                old_position.splice(index, 1);
+            }
+        }
+
+        // if the location array is not set yet, make it
+        if (!this.locations[new_position_key]) {
+            this.locations[new_position_key] = [];
+        }
+
+        // if they are already on the list, ignore.
+        if (this.locations[new_position_key].findIndex((char) => char.user_id === character.user_id) !== -1) {
+            return;
+        }
+
+        this.locations[new_position_key].push(character);
+    }
+
+    /**
+     * Moves a character to the specific location, emitting related events on the way to and from
+     * @param  {Socket.IO Socket} socket    The socket of the character moving
+     * @param  {Object} moveAction {grid: 'y|x', direction: 1|-1}
+     * @return {Promise}
+     */
+    move(socket, moveAction) {
+        // get the socket character
+        this.get(socket.user.user_id).then((character) => {
+            let newLocation = {...character.location};
+            let directionOut;
+            let directionIn;
+
+            // set the location we intend to move the character to
+            newLocation[moveAction.grid] = newLocation[moveAction.grid] + moveAction.direction;
+
+            // make sure the move is valid
+            this.Game.mapManager.isValidLocation(newLocation.map, newLocation.x, newLocation.y)
+                .then((newLocation) => {
+                    // determin the direction names for the JOIN/LEAVE events
+                    switch(moveAction.grid) {
+                        case 'y':
+                            if (moveAction.direction) {
+                                directionOut = 'South';
+                                directionIn = 'North';
+                            } else {
+                                directionOut = 'North';
+                                directionIn = 'South';
+                            }
+                        case 'x':
+                            if (moveAction.direction) {
+                                directionOut = 'East';
+                                directionIn = 'West';
+                            } else {
+                                directionOut = 'West';
+                                directionIn = 'East';
+                            }
+                    }
+
+                    // join the new map grid
+                    this.Game.mapManager.get(character.location.map).then((gameMap) => {
+                        // leave the old grid room
+                        socket.leave(character.getLocationId());
+
+                        // save the old location
+                        const oldLocation = {...character.location};
+
+                        // update character location
+                        character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
+                        
+                        // change location on the map
+                        this.changeLocation(character, newLocation, oldLocation)
+
+                        // update the socket room
+                        socket.join(character.getLocationId());
+
+                        // dispatch leave message to grid
+                        this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} leaves to the ${directionOut}`, [character.user_id])
+                        // dispatch join message to new grid
+                        this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} strolls in from the ${directionIn}`, [character.user_id])
+
+                        // update client/socket character and location information
+                        this.updateClient(character.user_id);
+                        // send the new grid details to the client
+                        this.Game.mapManager.updateClient(character.user_id);
+                    })
+                })
+                .catch();
+        })
+        .catch(this.Game.logger.error)
     }
 }

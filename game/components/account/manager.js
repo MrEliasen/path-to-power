@@ -73,6 +73,9 @@ export default class AccountManager {
 
                 // If they already have a character, send them the character and authenticate
                 if (character) {
+                    // Update the client f
+                    this.Game.mapManager.updateClient(character.user_id);
+
                     return this.Game.socketManager.dispatchToSocket(socket, {
                         type: ACCOUNT_AUTHENTICATE_SUCCESS,
                         payload: {
@@ -90,6 +93,9 @@ export default class AccountManager {
                             payload: error
                         });
                     }
+
+                    // Update the client f
+                    this.Game.mapManager.updateClient(character.user_id);
 
                     return this.Game.socketManager.dispatchToSocket(socket, {
                         type: ACCOUNT_AUTHENTICATE_SUCCESS,

@@ -2,6 +2,8 @@ import fs from 'fs';
 
 // manager specific imports
 import GameMap from './object';
+import descriptionList from '../../data/descriptions.json'; 
+import { JOIN_GRID } from './types';
 
 export default class MapManager {
     constructor(Game) {
@@ -40,6 +42,58 @@ export default class MapManager {
     }
 
     /**
+     * Generate a "random" description from the list
+     * @return {String} the generated description
+     */
+    generateDescription() {
+        return descriptionList[Math.floor(Math.random() * descriptionList.length)];
+    }
+
+    /**
+     * Updates the client map location information
+     * @param  {String} user_id  User Id of client to update
+     */
+    updateClient(user_id) {
+        // Get the character object
+        this.Game.characterManager.get(user_id).then((character) => {
+            // dispatch to client
+            this.Game.socketManager.dispatchToUser(user_id, {
+                type: JOIN_GRID,
+                payload: {
+                    description: this.generateDescription(),
+                    players: this.Game.characterManager.getLocationList(
+                        character.location.map,
+                        character.location.x,
+                        character.location.y,
+                        character.user_id
+                    ),
+                    npcs: [],
+                    items: [],
+                    buildings: []
+                }
+            });
+        })
+        .catch();
+    }
+
+    /**
+     * Fetches the game map, if found
+     * @param  {String} map_id Map Id of map to fetch
+     * @return {Promise}
+     */
+    get(map_id) {
+        return new Promise((resolve, reject) => {
+            const gameMap = this.maps[map_id];
+
+            if (!gameMap) {
+                return reject(`Map with id ${map_id} was not found`);
+            }
+
+            resolve(gameMap);
+        })
+    }
+
+    /**
      * Get a list of all map names by ID
      * @return {Object} {"mapId": "map name", ...}
      */
@@ -65,5 +119,29 @@ export default class MapManager {
         }
 
         return gameMap.respawn;
+    }
+
+    /**
+     * Checks the specific map, if the location is valid.
+     * @param  {String}  map_id Map Id
+     * @param  {Number}  x 
+     * @param  {Number}  y   
+     * @return {Promise}
+     */
+    isValidLocation(map_id, x, y) {
+        return new Promise((resolve, reject) => {
+            this.get(map_id).then((gameMap) => {
+                if (!gameMap.isValidPostion(x, y)) {
+                    return reject();
+                }
+
+                resolve({
+                    map: gameMap.id,
+                    x: parseInt(x, 10),
+                    y: parseInt(y, 10)
+                })
+            })
+            .catch(this.Game.logger.error)
+        })
     }
 }

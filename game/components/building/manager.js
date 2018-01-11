@@ -9,11 +9,11 @@ export default class BuildingManager {
         this.buildings = [];
     }
 
-    add(mapId, x, y, buildingId) {
-        this.Game.logger.info('BuildingManager::add', {mapId, buildingId, x, y})
+    add(map_id, x, y, building_id) {
+        this.Game.logger.info('BuildingManager::add', {map_id, building_id, x, y})
 
-        const buildingData = buildings[buildingId];
-        const newBuilding = new Building(this.Game, buildingData, {map: mapId, x, y}); 
+        const buildingData = buildings[building_id];
+        const newBuilding = new Building(this.Game, buildingData, {map: map_id, x, y}); 
         // add building to the managed buildings array
         this.buildings.push(newBuilding);
 

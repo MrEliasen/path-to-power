@@ -4,6 +4,10 @@ export default class GameMap {
         Object.assign(this, data);
     }
 
+    /**
+     * Generates the map object's buildings
+     * @return {Promise}
+     */
     generate() {
         return new Promise((resolve, reject) => {
             // generate the map grid?
@@ -15,41 +19,21 @@ export default class GameMap {
         });
     }
 
-    isValidNewLocation(location, move) {
-        // move = { grid: 'x', direction: -1 }
-        // location =  { map: 'newyork', y: 1, x: 1 }
-
-        const newPostion = {
-            x: location.x,
-            y: location.y
-        }
-
-        if (move.grid === 'x') {
-            newPostion.x = newPostion.x + move.direction;
-        } else {
-            newPostion.y = newPostion.y + move.direction;
-        }
-
-        return (this.isValidPostion(newPostion.x, newPostion.y) ? newPostion : null);
-    }
-
+    /**
+     * Validates if the given x/y position is out of bounds
+     * @param  {Number}  x
+     * @param  {Number}  y
+     * @return {Boolean}
+     */
     isValidPostion (x, y) {
-        if (!this.grid[y]) {
+        if (y < 0 || y > this.grid_size.y) {
             return false;
         }
 
-        if (!this.grid[y][x]) {
+        if (x < 0 || x > this.grid_size.x) {
             return false;
         }
 
         return true;
-    }
-
-    getPosition(x, y) {
-        if (!this.isValidPostion(x,y)) {
-            return null;
-        }
-
-        return this.grid[y][x];
     }
 }
