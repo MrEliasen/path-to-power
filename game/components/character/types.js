@@ -4,3 +4,4 @@ export const UPDATE_CHARACTER = 'UPDATE_CHARACTER';
 export const EQUIP_ITEM = 'EQUIP_ITEM';
 export const UNEQUIP_ITEM = 'UNEQUIP_ITEM';
 export const JOIN_GRID = 'JOIN_GRID';
+export const MOVE_CHARACTER = 'MOVE_CHARACTER';

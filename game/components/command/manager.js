@@ -12,6 +12,7 @@ import cmdGive from './commands/give';
 import cmdGlobal from './commands/global';
 import cmdWhisper from './commands/whisper';
 import { GAME_COMMAND } from './types';
+import commandList from '../../data/commands.json';
 
 export default class CommandManager {
     constructor(Game) {
@@ -46,6 +47,20 @@ export default class CommandManager {
         return this.exec(socket, command, params);
     }
 
+    /**
+     * returns a list of all available commands in game
+     * @return {Object}
+     */
+    getList() {
+        return commandList || {};
+    }
+
+    /**
+     * Executes a command, should we have it
+     * @param  {Socket.IO socket} socket  client socket
+     * @param  {String} command           Command string eg. '/give'
+     * @param  {Array} params             List of additionl parameters 
+     */
     exec(socket, command, params) {
         this.Game.logger.info('CommandManager::exec', {command, params});
 

@@ -5,15 +5,15 @@ export default class GameMap {
     }
 
     /**
-     * Generates the map object's buildings
+     * Generates the map object's Structures
      * @return {Promise}
      */
     generate() {
         return new Promise((resolve, reject) => {
             // generate the map grid?
-            // Load all builds for map (with the BuildingManager)
-            this.buildings.map((building) => {
-                this.Game.buildingManager.add(this.id, building.x, building.y, building.id);
+            // Load all structures for map
+            this.structures.map((structure) => {
+                this.Game.structureManager.add(this.id, structure.x, structure.y, structure.id);
             })
             resolve();
         });

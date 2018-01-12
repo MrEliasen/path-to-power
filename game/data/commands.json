@@ -1,7 +1,10 @@
 {
     "/heal": {
-        "description": "Regain health. Costs {cost} per point to heal. Usage: /heal <points-to-heal>",
-        "cost": 1
+        "description": "Regain health. Costs {cost} per {heal_amount} point(s) of health to heal. Usage: /heal <points-to-heal>",
+        "modifiers": {
+            "cost": 10,
+            "heal_amount": 5
+        }
     },
     "/shop": {
         "description": "View the shop. Usage: /shop <building name>. If there is only one shop at a location, you can omit the building name."

@@ -1,6 +1,6 @@
 {
     "hospital": {
-        "title": "Hospital",
+        "name": "Hospital",
         "colour": "#1769ed", 
         "commands": {
             "/heal": {
@@ -9,7 +9,7 @@
         }
     },
     "pawnshop": {
-        "title": "Pawn Shop",
+        "name": "Pawn Shop",
         "colour": "#9e2f00", 
         "commands": {
             "/shop": {

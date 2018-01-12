@@ -1,5 +1,12 @@
 // Manager specific imports
-import { ADD_ONLINE_PLAYER, REMOVE_ONLINE_PLAYER, EQUIP_ITEM, UNEQUIP_ITEM, UPDATE_CHARACTER } from './types';
+import {
+    ADD_ONLINE_PLAYER,
+    REMOVE_ONLINE_PLAYER,
+    EQUIP_ITEM,
+    UNEQUIP_ITEM,
+    UPDATE_CHARACTER,
+    MOVE_CHARACTER
+} from './types';
 import Character from './object';
 import CharacterModel from './model';
 
@@ -36,6 +43,8 @@ export default class CharacterManager {
                     character.equip(action.payload.index);
                     this.updateClient(character.user_id);
                 });
+            case MOVE_CHARACTER:
+                return this.move(socket, action.payload);
         }
     }
 
@@ -480,7 +489,9 @@ export default class CharacterManager {
                         this.Game.mapManager.updateClient(character.user_id);
                     })
                 })
-                .catch();
+                .catch(() => {
+                    this.Game.logger.debug(`Invalid move by character ${socket.user.user_id}`, newLocation);
+                });
         })
         .catch(this.Game.logger.error)
     }

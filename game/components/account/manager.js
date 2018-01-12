@@ -59,7 +59,8 @@ export default class AccountManager {
             const gameData = {
                 maps: this.Game.mapManager.getList(),
                 items: this.Game.itemManager.getTemplates(),
-                players: this.Game.characterManager.getOnline()
+                players: this.Game.characterManager.getOnline(),
+                commands: this.Game.commandManager.getList()
             }
 
             // attempt to load the character from the database

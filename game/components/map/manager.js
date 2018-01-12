@@ -36,7 +36,7 @@ export default class MapManager {
                             resolve(maplist.length);
                         }
                     })
-                    .catch(console.log)
+                    .catch(this.Game.logger.error)
             })
         })
     }
@@ -56,20 +56,21 @@ export default class MapManager {
     updateClient(user_id) {
         // Get the character object
         this.Game.characterManager.get(user_id).then((character) => {
+            const location = [
+                character.location.map,
+                character.location.x,
+                character.location.y
+            ]
+
             // dispatch to client
             this.Game.socketManager.dispatchToUser(user_id, {
                 type: JOIN_GRID,
                 payload: {
                     description: this.generateDescription(),
-                    players: this.Game.characterManager.getLocationList(
-                        character.location.map,
-                        character.location.x,
-                        character.location.y,
-                        character.user_id
-                    ),
+                    players: this.Game.characterManager.getLocationList(...location, character.user_id),
                     npcs: [],
                     items: [],
-                    buildings: []
+                    structures: this.Game.structureManager.getGrid(...location)
                 }
             });
         })

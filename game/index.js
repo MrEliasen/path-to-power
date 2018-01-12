@@ -6,7 +6,7 @@ import accountManager from './components/account/manager';
 import characterManager from './components/character/manager';
 import socketManager from './components/socket/manager';
 import mapManager from './components/map/manager';
-import buildingManager from './components/building/manager';
+import structureManager from './components/structure/manager';
 import itemManager from './components/item/manager';
 import shopManager from './components/shop/manager';
 import commandManager from './components/command/manager';
@@ -26,7 +26,7 @@ class Game {
         this.accountManager = new accountManager(this);
         this.characterManager = new characterManager(this);
         this.mapManager = new mapManager(this);
-        this.buildingManager = new buildingManager(this);
+        this.structureManager = new structureManager(this);
         this.itemManager = new itemManager(this);
         this.shopManager = new shopManager(this);
         this.commandManager = new commandManager(this);
