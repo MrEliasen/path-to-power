@@ -1,12 +1,12 @@
 /*import cmdPickup from './commands/pickup';
 import cmdDrop from './commands/drop';
-import cmdHeal from './commands/heal';
 import cmdAim from './commands/aim';
 import cmdRelease from './commands/release';
 import cmdFlee from './commands/flee';
 import cmdPunch from './commands/punch';
 import cmdStrike from './commands/strike';
 import cmdShoot from './commands/shoot';*/
+import cmdHeal from './commands/heal';
 import cmdSay from './commands/say';
 import cmdGive from './commands/give';
 import cmdGlobal from './commands/global';
@@ -23,6 +23,9 @@ export default class CommandManager {
 
         // listen for dispatches from the socket manager
         this.Game.socketManager.on('dispatch', this.onDispatch.bind(this));
+
+        // list of managed actions
+        this.commands = {...commandList};
     }
 
     /**
@@ -48,11 +51,28 @@ export default class CommandManager {
     }
 
     /**
+     * Returns the details for the specified command, if it exists
+     * @param  {String} command Command
+     * @return {Objct}
+     */
+    get(command) {
+        return new Promise((resolve, reject) => {
+            const cmd = this.commands[command];
+            
+            if (!cmd) {
+                return reject(`Command ${command} was not found.`);
+            }
+
+            resolve(cmd);
+        })
+    }
+
+    /**
      * returns a list of all available commands in game
      * @return {Object}
      */
     getList() {
-        return commandList || {};
+        return this.commands;
     }
 
     /**
