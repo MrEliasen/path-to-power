@@ -35,7 +35,8 @@ export default function cmdDrop(socket, command, params, Game) {
             const items_ground = items_list.map((obj) => {
                 return {
                     id: obj.id,
-                    ...obj.getModifiers()
+                    ...obj.getModifiers(),
+                    fingerprint: obj.fingerprint
                 }
             });
 

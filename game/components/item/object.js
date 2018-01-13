@@ -1,3 +1,4 @@
+import uuid from 'uuid/v4';
 /*{
     id: "",
     name: "",
@@ -32,9 +33,11 @@
 
 export default class Item {
     constructor(template = null, itemData, modifiers = {}) {
-        this.template = template;
         Object.assign(this, itemData);
         Object.assign(this.stats, modifiers);
+
+        this.template = template;
+        this.fingerprint = uuid();
     }
 
     /**
@@ -66,7 +69,7 @@ export default class Item {
     getModifiers() {
         // TODO: optimise this so it is not a manually set list
         const modifiers = {
-            durability: this.stats.durability
+            durability: parseInt(this.stats.durability, 10)
         };
         /*const template = this.template;
 
@@ -83,7 +86,7 @@ export default class Item {
      * Returns the number of items in the item (1 for non-stackable, otherwise durability)
      */
     getAmount() {
-        return (this.stats.stackable ? this.stats.durability : 1);
+        return (this.stats.stackable ? parseInt(this.stats.durability, 10) : 1);
     }
 
     /**
@@ -91,7 +94,7 @@ export default class Item {
      * @param {Number} amount
      */
     setDurability(amount) {
-        this.stats.durability = amount;
+        this.stats.durability = parseInt(amount,10);
     }
 
     /**
@@ -99,6 +102,14 @@ export default class Item {
      * @param {Number} amount
      */
     addDurability(amount) {
-        this.stats.durability += amount;
+        this.stats.durability = parseInt(this.stats.durability, 10) + parseInt(amount,10);
+    }
+
+    /**
+     * Removes the amount to the current item durability
+     * @param {Number} amount
+     */
+    removeDurability(amount) {
+        this.stats.durability = parseInt(this.stats.durability, 10) - parseInt(amount,10);
     }
 }

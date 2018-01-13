@@ -371,11 +371,12 @@ export default class Character {
 
         // if there is not 0 items left, delete the item completely
         if ((inventoryItem.stats.durability - amount) <= 0) {
-            return this.inventory.splice(itemIndex, 1);
+            return this.inventory.splice(itemIndex, 1)[0];
         }
 
         // reduce the number of said item, in the inventory
-        inventoryItem.stats.durability = inventoryItem.stats.durability - amount;
+        inventoryItem.removeDurability(amount);
+
         // return a new item, with the dropped amount
         return this.Game.itemManager.add(inventoryItem.id, { durability: amount });
     }

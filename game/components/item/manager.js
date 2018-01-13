@@ -68,15 +68,30 @@ export default class ItemManager {
      * @return {Array}            List of items at the given location
      */
     drop(map_id, x, y, itemObject) {
-        this.Game.logger.debug('ItemManager::drop', {map_id, x, y, itemObject});
+        this.Game.logger.info('ItemManager::drop', {map_id, x, y, itemObject});
 
         // Generate the item location, should it not exist.
         this.dropped_items[map_id] = this.dropped_items[map_id] || {};
         this.dropped_items[map_id][y] = this.dropped_items[map_id][y] || {};
         this.dropped_items[map_id][y][x] = this.dropped_items[map_id][y][x] || [];
 
-        // add item to the dropped items array
-        this.dropped_items[map_id][y][x].push(itemObject);
+        // stack items if possible
+        let itemIndex = -1;
+
+        if (itemObject.stats.stackable) {
+            itemIndex = this.dropped_items[map_id][y][x].findIndex((item) => item.id === itemObject.id);
+
+            if (itemIndex !== -1) {
+                this.dropped_items[map_id][y][x][itemIndex].addDurability(itemObject.stats.durability);
+                this.remove(itemObject);
+            }
+        }
+
+        // add item to the dropped items array, if the item was not stacked or if its
+        // a non-stackable item
+        if (itemIndex === -1) {
+            this.dropped_items[map_id][y][x].push(itemObject);
+        }
 
         return this.dropped_items[map_id][y][x];
     }
@@ -130,11 +145,14 @@ export default class ItemManager {
     add(itemId, modifiers = null, dbId = null) {
         this.Game.logger.info('ItemManager::add', {itemId})
 
-        const itemData = this.getTemplate(itemId);
-        const NewItem = new Item(this.getTemplate(itemData.id), itemData, modifiers);
+        const template = this.getTemplate(itemId);
+        const itemData = {...template};
+        // nested objects are still copied as reference, so we have to make a "sub-copy" of the stats.
+        itemData.stats = {...template.stats};
+
+        const NewItem = new Item(null, {...itemData}, modifiers);
         // set the database ID
         NewItem._id = dbId;
-
         // add building to the managed buildings array
         this.items.push(NewItem);
 
@@ -192,11 +210,7 @@ export default class ItemManager {
                     return reject(err);
                 }
 
-                const inventory = [];
-                items.map((item) => {
-                    inventory.push(this.add(item.item_id, item.modifiers, item._id))
-                })
-
+                const inventory = items.map((item) => this.add(item.item_id, item.modifiers, item._id));
                 resolve(inventory);
             })
         })
