@@ -60,12 +60,16 @@ export default class SocketManager extends EventEmitter {
     /**
      * Removes a disconnection timer
      * @param  {String} user_id User Id
+     * @return {Boolean} true is a timer was killed.
      */
     clearTimer(user_id) {
         if (this.timers[user_id]) {
             clearTimeout(this.timers[user_id]);
             delete this.timers[user_id];
+            return true;
         }
+
+        return false;
     }
 
     /**
@@ -73,11 +77,6 @@ export default class SocketManager extends EventEmitter {
      * @param  {Socket.IO Socket} socket
      */
     onConnection(socket) {
-        // check if the same socket reconnects after a DC
-        if (socket.user) {
-            this.clearTimer(socket.user.user_id)
-        }
-
         socket.on('dispatch', (action) => {
             this.onClientDispatch(socket, action)
         });
@@ -90,12 +89,16 @@ export default class SocketManager extends EventEmitter {
      * Handles socket disconnections
      * @param  {Socket.IO Socket} socket
      */
-    onDisconnect(socket) {
+    onDisconnect(socket, forced = false) {
         this.Game.logger.info('Socket disconnected', socket.user);
 
         // if the user is logged in, set a timer for when we remove them from the game.
         if (socket.user) {
             const user = {...socket.user};
+
+            if (forced) {
+                return this.emit('disconnect', user);
+            }
 
             this.timers[socket.user.user_id] = setTimeout(() =>{
                 this.emit('disconnect', user)

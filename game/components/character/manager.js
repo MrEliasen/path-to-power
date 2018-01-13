@@ -103,7 +103,18 @@ export default class CharacterManager {
      * Adds a character class object to the managed list
      * @param  {Character Obj} character The character object to manage
      */
-    manage(character) {
+    async manage(character) {
+        // removes disconnect timer, if one is sec (eg if refreshing the page)
+        const wasLoggedIn = this.Game.socketManager.clearTimer(character.user_id);
+
+        if (wasLoggedIn && this.characters[character.user_id]) {
+            await this.remove(character.user_id, true);
+            // re-add targetedBy, if the player has any
+            this.characters[character.user_id].targetedBy.map((user) => {
+                character.gridLock(user);
+            })
+        }
+
         // add the character object to the managed list of characters
         this.characters[character.user_id] = character;
         this.dispatchUpdatePlayerList(character.user_id, character.name);
@@ -113,10 +124,16 @@ export default class CharacterManager {
             this.changeLocation(character, character.location);
             // dispatch join event to grid
             this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} emerges from a nearby building`, [character.user_id]);
+            // update the grid's player list
+            this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
+                type: JOINED_GRID,
+                payload: {
+                    name: character.name,
+                    user_id: character.user_id
+                }
+            });
             // join the grid room
             socket.join(character.getLocationId());
-            // removes disconnect timer, if one is sec (eg if refreshing the page)
-            this.Game.socketManager.clearTimer(character.user_id);
         })
         .catch(this.Game.logger.error);
     }
@@ -125,15 +142,30 @@ export default class CharacterManager {
      * Remove a managed character from the list
      * @param  {String} user_id User ID
      */
-    remove(user_id) {
-        this.get(user_id).then((character) => {
-            // dispatch join event to grid
-            this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} disappears into a nearby building`, [character.user_id]);
+    remove(user_id, reconnect = false) {
+        return new Promise((resolve, reject) => {
+            this.get(user_id)
+                .then((character) => {
+                    // dispatch join event to grid
+                    this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} disappears into a nearby building`, [character.user_id]);
+                    // remove player from the grid list of players
+                    this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
+                        type: LEFT_GRID,
+                        payload: character.user_id
+                    });
 
-            delete this.characters[user_id];
-            this.dispatchUpdatePlayerList(user_id);
-        })
-        .catch(this.Game.logger.error);
+                    if (!reconnect) {
+                        delete this.characters[user_id];
+                    }
+
+                    this.dispatchUpdatePlayerList(user_id);
+                    resolve();
+                })
+                .catch((err) => {
+                    this.Game.logger.error(err);
+                    resolve()
+                });
+        });
     }
 
     /**
@@ -372,22 +404,25 @@ export default class CharacterManager {
      * @param  {String} map Map Id
      * @param  {Number} x
      * @param  {Number} y
+     * @param  {String} ignore      Ignored a specific user_id, used for returning lists to the user.
+     * @param  {Boolean} toClient   Whether to return the references or list of user_ids and names (to be sent to client)
      * @return {Array}     Array of players
      */
-    getLocationList(map, x, y, ignore = null) {
+    getLocationList(map, x, y, ignore = null, toClient = false) {
         const players = this.locations[`${map}_${y}_${x}`] || [];
-        const list = [];
 
-        players.map((character) => {
-            if (character.user_id !== ignore) {
-                list.push({
+        if (!toClient) {
+            return players;
+        }
+
+        return players
+            .filter((obj) => obj.user_id !== ignore)
+            .map((character) => {
+                return {
                     user_id: character.user_id,
                     name: character.name
-                })
-            }
-        })
-
-        return list;
+                }
+            });
     }
 
     /**
@@ -437,6 +472,15 @@ export default class CharacterManager {
             let directionOut;
             let directionIn;
 
+            // check if character is gridlocked/being targeted by other players
+            if (character.targetedBy.length) {
+                const list = character.targetedBy.map((obj) => {
+                    return obj.name;
+                }).join(', ');
+
+                return this.Game.eventToSocket(socket, 'warning', `You can't move as the following players are aiming at you: ${list}`)
+            }
+
             // set the location we intend to move the character to
             newLocation[moveAction.grid] = newLocation[moveAction.grid] + moveAction.direction;
 
@@ -467,6 +511,11 @@ export default class CharacterManager {
 
                     // join the new map grid
                     this.Game.mapManager.get(character.location.map).then((gameMap) => {
+                        // remove aim from current target, if set
+                        if (character.target) {
+                            character.releaseTarget();
+                        }
+
                         // leave the old grid room
                         socket.leave(character.getLocationId());
 

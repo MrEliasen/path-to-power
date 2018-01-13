@@ -67,7 +67,7 @@ export default class MapManager {
                 type: JOIN_GRID,
                 payload: {
                     description: this.generateDescription(),
-                    players: this.Game.characterManager.getLocationList(...location, character.user_id),
+                    players: this.Game.characterManager.getLocationList(...location, character.user_id, true),
                     npcs: [],
                     items: this.Game.itemManager.getLocationList(...location, true),
                     structures: this.Game.structureManager.getGrid(...location)

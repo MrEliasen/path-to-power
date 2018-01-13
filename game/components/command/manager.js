@@ -1,9 +1,10 @@
-/*import cmdAim from './commands/aim';
+/*
 import cmdRelease from './commands/release';
 import cmdFlee from './commands/flee';
 import cmdPunch from './commands/punch';
 import cmdStrike from './commands/strike';
 import cmdShoot from './commands/shoot';*/
+import cmdAim from './commands/aim';
 import cmdPickup from './commands/pickup';
 import cmdDrop from './commands/drop';
 import cmdHeal from './commands/heal';

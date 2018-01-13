@@ -3,11 +3,11 @@ export default class Character {
         this.Game = Game;
         Object.assign(this, character);
 
-        // each ID in the gridlock, are players who are currently aiming at this character
-        this.gridLocked = [];
+        // the character objest of the characters who are currently aiming at this character
+        this.targetedBy = [];
 
-        // the user_id of the last targed who was /aim'ed' at
-        this.lastTarget = null;
+        // the character object of the current targed character
+        this.target = null;
 
         // create the inventory and equipped objects
         if (!this.inventory) {
@@ -79,29 +79,55 @@ export default class Character {
     }
 
     /**
-     * Adds the user id to the gridlock array
-     * @param  {String} user_id  the user id of the player gridlocking the character.
+     * Sets the target of the character and gridlocks the target (while clearing gridlock on previous target)
+     * @param {[type]} targetCharacter [description]
      */
-    gridLock(user_id) {
-        if (!this.gridLocked.includes(user_id)) {
-            this.gridLocked.push(user_id);
+    setTarget(targetCharacter) {
+        // release the gridlock of the current target, if set
+        this.releaseTarget()
+
+        // and gridlock them
+        targetCharacter.gridLock(this);
+
+        // set the new target
+        this.target = targetCharacter;
+    }
+
+    /**
+     * Removes gridlock from target
+     * @return {[type]} [description]
+     */
+    releaseTarget() {
+        // release the gridlock of the current target, if set
+        if (this.target) {
+            this.target.gridRelease(this.user_id);
+        }
+
+        this.target = null;
+    }
+
+    /**
+     * Adds the user id to the gridlock array
+     * @param  {Character Obj} character  the character objest of the character gridlocking the character.
+     */
+    gridLock(character) {
+        if (this.targetedBy.findIndex((obj) => obj.user_id === character.user_id) === -1) {
+            this.targetedBy.push(character);
         }
     }
 
     /**
      * Removes a player from the gridlock, from when they have used /aim
      * @param  {String} user_id User ID
-     * @return {Boolean}        True on success, false otherwise
      */
     gridRelease(user_id) {
-        const playerIndex = this.gridLocked.findIndex((playerId) => playerId === user_id);
+        const playerIndex = this.targetedBy.findIndex((obj) => obj.user_id === user_id);
 
         if (playerIndex === -1) {
-            return false;
+            return;
         }
 
-        this.gridLocked.splice(playerIndex, 1);
-        return true;
+        this.targetedBy.splice(playerIndex, 1);
     }
 
     /**
@@ -118,7 +144,7 @@ export default class Character {
         this.equipped = {};
         this.inventory = [];
         this.stats.money = 0;
-        this.gridLocked = [];
+        this.targetedBy = [];
         this.stats.health = this.stats.health_max;
 
         // reset location to the map spawn location

@@ -37,21 +37,17 @@ export default class ItemManager {
      * @return {Array}     Array of items
      */
     getLocationList(map_id, x, y, toClient = false) {
-        if (!this.dropped_items[map_id]) {
-            return [];
-        }
-        if (!this.dropped_items[map_id][y]) {
-            return [];
-        }
-        if (!this.dropped_items[map_id][y][x]) {
+        const location = this.dropped_items[`${map_id}_${y}_${x}`];
+
+        if (!location) {
             return [];
         }
 
         if (!toClient) {
-            return this.dropped_items[map_id][y][x];
+            return location;
         }
 
-        return this.dropped_items[map_id][y][x].map((item) => {
+        return location.map((item) => {
             return {
                 id: item.id,
                 ...item.getModifiers()
@@ -68,21 +64,20 @@ export default class ItemManager {
      * @return {Array}            List of items at the given location
      */
     drop(map_id, x, y, itemObject) {
+        const gridId = `${map_id}_${y}_${x}`;
         this.Game.logger.info('ItemManager::drop', {map_id, x, y, itemObject});
 
         // Generate the item location, should it not exist.
-        this.dropped_items[map_id] = this.dropped_items[map_id] || {};
-        this.dropped_items[map_id][y] = this.dropped_items[map_id][y] || {};
-        this.dropped_items[map_id][y][x] = this.dropped_items[map_id][y][x] || [];
+        this.dropped_items[gridId] = this.dropped_items[gridId] || [];
 
         // stack items if possible
         let itemIndex = -1;
 
         if (itemObject.stats.stackable) {
-            itemIndex = this.dropped_items[map_id][y][x].findIndex((item) => item.id === itemObject.id);
+            itemIndex = this.dropped_items[gridId].findIndex((item) => item.id === itemObject.id);
 
             if (itemIndex !== -1) {
-                this.dropped_items[map_id][y][x][itemIndex].addDurability(itemObject.stats.durability);
+                this.dropped_items[gridId][itemIndex].addDurability(itemObject.stats.durability);
                 this.remove(itemObject);
             }
         }
@@ -90,10 +85,10 @@ export default class ItemManager {
         // add item to the dropped items array, if the item was not stacked or if its
         // a non-stackable item
         if (itemIndex === -1) {
-            this.dropped_items[map_id][y][x].push(itemObject);
+            this.dropped_items[gridId].push(itemObject);
         }
 
-        return this.dropped_items[map_id][y][x];
+        return this.dropped_items[gridId];
     }
 
     /**

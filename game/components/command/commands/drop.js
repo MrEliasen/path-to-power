@@ -27,8 +27,6 @@ export default function cmdDrop(socket, command, params, Game) {
                 return Game.eventToSocket(socket, 'error', `You do not have any items, which name begins with ${item_name}.`);
             }
 
-            // FIXME: Stackable items, reference inventory items once dropped.
-
             // add the item to the grid location
             const items_list = Game.itemManager.drop(character.location.map, character.location.x, character.location.y, droppedItem);
             // holds the items data we will send to the rooms
