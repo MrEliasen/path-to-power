@@ -64,6 +64,7 @@ export default class Item {
      * @return {Object} Object with stats
      */
     getModifiers() {
+        // TODO: optimise this so it is not a manually set list
         const modifiers = {
             durability: this.stats.durability
         };

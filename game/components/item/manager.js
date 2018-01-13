@@ -10,6 +10,8 @@ export default class ItemManager {
         this.templates = {};
         // list of items managed by the item manager
         this.items = [];
+        // dropped items, references items from the items list
+        this.dropped_items = {};
     }
 
     /**
@@ -24,6 +26,99 @@ export default class ItemManager {
 
             resolve(ItemList.length);
         })
+    }
+
+    /**
+     * Get a list of items at the grid location
+     * @param  {String} map        Map Id
+     * @param  {Number} x
+     * @param  {Number} y
+     * @param  {Boolean} toClient  If true, will return a new object with minimal info (for clients) 
+     * @return {Array}     Array of items
+     */
+    getLocationList(map_id, x, y, toClient = false) {
+        if (!this.dropped_items[map_id]) {
+            return [];
+        }
+        if (!this.dropped_items[map_id][y]) {
+            return [];
+        }
+        if (!this.dropped_items[map_id][y][x]) {
+            return [];
+        }
+
+        if (!toClient) {
+            return this.dropped_items[map_id][y][x];
+        }
+
+        return this.dropped_items[map_id][y][x].map((item) => {
+            return {
+                id: item.id,
+                ...item.getModifiers()
+            }
+        });
+    }
+
+    /**
+     * Adds an item to the ground at the given location.
+     * @param  {String} map_id     Map ID
+     * @param  {Number} x          East
+     * @param  {Number} y          North
+     * @param  {Item Object} itemObject The item reference
+     * @return {Array}            List of items at the given location
+     */
+    drop(map_id, x, y, itemObject) {
+        this.Game.logger.debug('ItemManager::drop', {map_id, x, y, itemObject});
+
+        // Generate the item location, should it not exist.
+        this.dropped_items[map_id] = this.dropped_items[map_id] || {};
+        this.dropped_items[map_id][y] = this.dropped_items[map_id][y] || {};
+        this.dropped_items[map_id][y][x] = this.dropped_items[map_id][y][x] || [];
+
+        // add item to the dropped items array
+        this.dropped_items[map_id][y][x].push(itemObject);
+
+        return this.dropped_items[map_id][y][x];
+    }
+
+    /**
+     * Remove an item (or an amount of an item) on the ground, at the specified location
+     * @param  {String} map_id   Map ID
+     * @param  {Number} x        East
+     * @param  {Number} y        North
+     * @param  {String} itemName Item to search for
+     * @param  {Number} amount   Stackable items only
+     * @return {Item Obj}        Item object which was remove.
+     */
+    pickup(map_id, x, y, itemName, amount) {
+        return new Promise((resolve, reject) => {
+            // get the list of items at the location
+            const locationItems = this.getLocationList(map_id, x, y);
+            // find the item at the location, the user wants to pickup
+            const foundItemIndex = locationItems.findIndex((obj) => obj.name.toLowerCase().indexOf(itemName) !== -1);
+
+            // if not found, let them know
+            if (foundItemIndex === -1) {
+                return reject(); //Game.eventToSocket(socket, 'error', 'There are no items on the ground, matching that name.')
+            }
+
+            const foundItem = locationItems[foundItemIndex];
+
+            // If the item is a non-stackable item, we remove it and return it.
+            if (!foundItem.stats.stackable) {
+                return resolve(locationItems.splice(foundItemIndex, 1)[0]);
+            }
+
+            // if the amount of less or equal to what we need, just return the whole item
+            if (foundItem.stats.durability <= amount) {
+                return resolve(locationItems.splice(foundItemIndex, 1)[0]);
+            }
+
+            // reduce durability of the item on the ground
+            foundItem.stats.durability = foundItem.stats.durability - amount;
+            // return a new items, with the durability we need
+            return resolve(this.add(foundItem.id, {durability: amount}));
+        });
     }
 
     /**

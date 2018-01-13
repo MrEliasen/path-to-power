@@ -69,7 +69,7 @@ export default class MapManager {
                     description: this.generateDescription(),
                     players: this.Game.characterManager.getLocationList(...location, character.user_id),
                     npcs: [],
-                    items: [],
+                    items: this.Game.itemManager.getLocationList(...location, true),
                     structures: this.Game.structureManager.getGrid(...location)
                 }
             });

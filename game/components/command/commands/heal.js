@@ -64,7 +64,7 @@ export default function cmdHeal(socket, command, params, Game) {
                             character.stats.health = character.stats.health + heal_amount;
 
                             // update the client
-                            Game.characterManager.updateClient(character.user_id);
+                            Game.characterManager.updateClient(character.user_id, 'stats');
                             Game.eventToSocket(socket, 'success', `You healed ${heal_amount}, costing you ${price}`);
                         })
                         .catch(Game.logger.debug)

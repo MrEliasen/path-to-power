@@ -338,14 +338,13 @@ export default class Character {
      * Remove the first occurance of a given item from the inventory, based on name.
      * @param  {String} itemName    The name of the item (or first couple of letters) to search for
      * @param  {Number} amount      The number of a given item to drop (stackable items only)
-     * @param  {Object} itemlist    The list of all items in the game
      * @param  {Boolean} isFleeing  If the drop is caused by fleeing, random the amount dropped, if its a stackable item.
      * @return {Object}             The item (with amount if stackable) which has been removed from the inventory.
      */
-    dropItem (itemName, amount = 1, itemlist, isFleeing = false) {
+    dropItem (itemName, amount = 1, isFleeing = false) {
         amount = parseInt(amount);
         // get the first matching items from the inventory
-        let itemIndex = this.inventory.findIndex((inventoryItem) => itemlist[inventoryItem.id].name.toLowerCase().indexOf(itemName) === 0);
+        let itemIndex = this.inventory.findIndex((item) => item.name.toLowerCase().indexOf(itemName) === 0);
 
         // If no item was found
         if (itemIndex === -1) {
@@ -355,35 +354,30 @@ export default class Character {
         // get the matching item object from the inventory
         let inventoryItem = this.inventory[itemIndex];
 
-        // Get the item object from the store
-        const item = {...itemlist[inventoryItem.id]};
-
         // If the item is not stackable, just delete the item from the inventory, can return it
-        if (!item.stats.stackable) {
-            this.inventory.splice(itemIndex, 1);
-            return item;
+        if (!inventoryItem.stats.stackable) {
+            return this.inventory.splice(itemIndex, 1)[0];
         }
 
         // Check if the character has enough of said item to drop
-        if (inventoryItem.durability < amount) {
+        if (inventoryItem.stats.durability < amount) {
             return null;
         }
 
         // if the character drop the item because of fleeing, random the amount, based on what they have
         if (isFleeing) {
-            amount = Math.floor(Math.random() * inventoryItem.durability) + 1;
+            amount = Math.floor(Math.random() * inventoryItem.stats.durability) + 1;
+        }
+
+        // if there is not 0 items left, delete the item completely
+        if ((inventoryItem.stats.durability - amount) <= 0) {
+            return this.inventory.splice(itemIndex, 1);
         }
 
         // reduce the number of said item, in the inventory
-        item.stats.durability = amount
-        inventoryItem.durability = inventoryItem.durability - amount;
-
-        // if there is not 0 items left, delete the item completely
-        if (inventoryItem.durability <= 0) {
-            this.inventory.splice(itemIndex, 1);
-        }
-
-        return item;
+        inventoryItem.stats.durability = inventoryItem.stats.durability - amount;
+        // return a new item, with the dropped amount
+        return this.Game.itemManager.add(inventoryItem.id, { durability: amount });
     }
 
     /**
@@ -391,23 +385,15 @@ export default class Character {
      * @param  {Item Object} itemObj The item object for the item which will be given to the character
      * @param  {Number} amount       The number of a given item to give to the player (non-stackable as well)
      */
-    giveItem(itemObj, amount = 1) {
-        amount = parseInt(amount);
-
+    giveItem(itemObj, amount = null) {
         // check if item is stackable, and if so, see if we have that item in the inventory already
         if (itemObj.stats.stackable) {
-            const inventoryItemCount = this.inventory.length;
-            let   itemIndex;
+            amount = amount || itemObj.stats.durability;
 
-            for (var i = 0; i < inventoryItemCount; i++) {
-                if (this.inventory[i].id === itemObj.id) {
-                    itemIndex = i;
-                    break;
-                }
-            }
+            const inventoryItem = this.inventory.find((obj) => obj.id === itemObj.id);
 
-            if (itemIndex || itemIndex === 0) {
-                this.inventory[itemIndex].addDurability(amount);
+            if (inventoryItem) {
+                inventoryItem.addDurability(amount);
                 this.Game.itemManager.remove(itemObj);
             } else {
                 // set the amount of the item to the correct amount, before adding to the inventory
@@ -418,7 +404,7 @@ export default class Character {
             this.inventory.push(itemObj);
 
             // if we just added one, kill it here.
-            if (amount === 1) {
+            if (!amount) {
                 return;
             }
 

@@ -5,7 +5,9 @@ import {
     EQUIP_ITEM,
     UNEQUIP_ITEM,
     UPDATE_CHARACTER,
-    MOVE_CHARACTER
+    MOVE_CHARACTER,
+    LEFT_GRID,
+    JOINED_GRID
 } from './types';
 import Character from './object';
 import CharacterModel from './model';
@@ -444,27 +446,37 @@ export default class CharacterManager {
                     // determin the direction names for the JOIN/LEAVE events
                     switch(moveAction.grid) {
                         case 'y':
-                            if (moveAction.direction) {
+                            if (moveAction.direction === 1) {
                                 directionOut = 'South';
                                 directionIn = 'North';
                             } else {
                                 directionOut = 'North';
                                 directionIn = 'South';
                             }
+                            break;
                         case 'x':
-                            if (moveAction.direction) {
+                            if (moveAction.direction === 1) {
                                 directionOut = 'East';
                                 directionIn = 'West';
                             } else {
                                 directionOut = 'West';
                                 directionIn = 'East';
                             }
+                            break;
                     }
 
                     // join the new map grid
                     this.Game.mapManager.get(character.location.map).then((gameMap) => {
                         // leave the old grid room
                         socket.leave(character.getLocationId());
+
+                        // dispatch leave message to grid
+                        this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} leaves to the ${directionOut}`, [character.user_id])
+                        // remove player from the grid list of players
+                        this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
+                            type: LEFT_GRID,
+                            payload: character.user_id
+                        });
 
                         // save the old location
                         const oldLocation = {...character.location};
@@ -473,18 +485,25 @@ export default class CharacterManager {
                         character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
                         
                         // change location on the map
-                        this.changeLocation(character, newLocation, oldLocation)
+                        this.changeLocation(character, newLocation, oldLocation);
+
+                        // dispatch join message to new grid
+                        this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} strolls in from the ${directionIn}`, [character.user_id]);
+                        // add player from the grid list of players
+                        this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
+                            type: JOINED_GRID,
+                            payload: {
+                                name: character.name,
+                                user_id: character.user_id
+                            }
+                        });
 
                         // update the socket room
                         socket.join(character.getLocationId());
 
-                        // dispatch leave message to grid
-                        this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} leaves to the ${directionOut}`, [character.user_id])
-                        // dispatch join message to new grid
-                        this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} strolls in from the ${directionIn}`, [character.user_id])
-
                         // update client/socket character and location information
                         this.updateClient(character.user_id);
+
                         // send the new grid details to the client
                         this.Game.mapManager.updateClient(character.user_id);
                     })
