@@ -78,6 +78,17 @@ class Game {
      * @param  {String} type    Event type
      * @param  {String} message Event message
      */
+    eventToUser(user_id, type, message) {
+        this.logger.debug('User Event', {user_id, type, message});
+        this.socketManager.dispatchToUser(user_id, newEvent(type, message));
+    }
+
+    /**
+     * dispatch an event to a specific socket
+     * @param  {Socket.IO Socket} socket  Socket to dispatch to
+     * @param  {String} type    Event type
+     * @param  {String} message Event message
+     */
     eventToSocket(socket, type, message) {
         this.logger.debug('Socket Event', {socket: (socket.user || null), type, message});
         this.socketManager.dispatchToSocket(socket, newEvent(type, message));

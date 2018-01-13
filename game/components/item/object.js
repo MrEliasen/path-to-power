@@ -24,10 +24,9 @@ import uuid from 'uuid/v4';
         damage_reduction: 123,
 
         // Type: consumable
-        effect: [
-            "effect-id"
-        ],
-        effect_duration: 123
+        effects: [
+            {"effect-id": 123123}
+        ]
     }
 }*/
 

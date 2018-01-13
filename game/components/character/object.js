@@ -107,6 +107,15 @@ export default class Character {
     }
 
     /**
+     * Checks if the user is targeted by the user specified
+     * @param  {String}  user_id user id
+     * @return {Boolean}
+     */
+    isTargetedBy(user_id) {
+        return this.targetedBy.find((user) => user.user_id === user_id) ? true : false;
+    }
+
+    /**
      * Adds the user id to the gridlock array
      * @param  {Character Obj} character  the character objest of the character gridlocking the character.
      */
@@ -442,7 +451,13 @@ export default class Character {
         }
     }
 
-    dealDamage(damage, itemList, ignoreArmor = false) {
+    /**
+     * Deal damage to the player
+     * @param  {Number}  damage      Amount of damage to deal
+     * @param  {Boolean} ignoreArmor Whether armor should reduce the damange
+     * @return {Object}              damageBlocked, damageDealt, healthLeft, durabilityLeft, armorRuined.
+     */
+    dealDamage(damage, ignoreArmor = false) {
         let armor = 0;
         let durability = 0;
         let health = this.stats.health;
@@ -450,7 +465,7 @@ export default class Character {
 
         if (!ignoreArmor && this.equipped.armor) {
             durability = this.equipped.armor.durability;
-            armor = itemList[this.equipped.armor.id].stats.damage_reduction;
+            armor = this.equipped.armor.stats.damage_reduction;
         }
 
         // Either you block the damage dealt if it's lower than your armor/durability combo
@@ -473,7 +488,7 @@ export default class Character {
         // if the armor durability is 0, remove the item as its broken.
         if (!durabilityLeft && durability) {
             armorRuined = true;
-            this.equipped.armor = null;
+            this.Game.itemManager.remove(this.equipped.armor);
         }
 
         return {
