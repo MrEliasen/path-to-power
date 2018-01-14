@@ -147,40 +147,31 @@ export default class Character {
     }
 
     /**
-     * Will kill the player and reset their location to the maps spawn point
-     * @param  {Map object} currentMap  The Map Object of the current map
-     * @return {object}                 Object with items and cash the player dropped
+     * Kills the character and updates the position to the map spawn position
+     * @return {object} Plain object with the items, and cash dropped
      */
-    kill(currentMap) {
-        const items = [...this.inventory];
-        const equipped = {...this.equipped};
-        const cash = this.stats.money;
+    die() {
+        return new Promise((resolve, reject) => {
+            // release the target from the gridlock/aim
+            this.releaseTarget()
+                .then(() => {
+                     // drop all items and cash
+                    const items = this.inventory.splice(0, this.inventory.length);
+                    const cash = this.stats.money;
 
-        // drop all items and cash
-        this.equipped = {};
-        this.inventory = [];
-        this.stats.money = 0;
-        this.targetedBy = [];
-        this.stats.health = this.stats.health_max;
+                    // reset the character inventory, money, gridlock etc.
+                    this.equipped = {};
+                    this.stats.money = 0;
+                    this.targetedBy = [];
+                    this.stats.health = this.stats.health_max;
 
-        // reset location to the map spawn location
-        this.location.x = currentMap.spawn.x;
-        this.location.y = currentMap.spawn.y;
-
-        // TODO: add reputation penalty when getting killed.
-
-        if (equipped) {
-            Object.keys(equipped).map((slot) => {
-                if (equipped[slot] && equipped[slot].id) {
-                    items.push(equipped[slot]);
-                }
-            })
-        }
-
-        return {
-            items,
-            cash
-        }
+                    // return what is dropped by the character
+                    resolve({ items, cash })
+                })
+                .catch((err) => {
+                    reject(err)
+                });
+        });
     }
 
     /**

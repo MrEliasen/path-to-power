@@ -9,6 +9,7 @@ import {
     LEFT_GRID,
     JOINED_GRID
 } from './types';
+import { UPDATE_GROUND_ITEMS } from '../item/types';
 import Character from './object';
 import CharacterModel from './model';
 
@@ -511,56 +512,130 @@ export default class CharacterManager {
                     }
 
                     // remove aim from current target, if set
-                    if (character.target) {
-                        character.releaseTarget()
-                            .then(() => {})
-                            .error(Game.logger.error);
-                    }
+                    character.releaseTarget().then(() => {
+                        // leave the old grid room
+                        socket.leave(character.getLocationId());
 
-                    // leave the old grid room
-                    socket.leave(character.getLocationId());
+                        // dispatch leave message to grid
+                        this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} leaves to the ${directionOut}`, [character.user_id])
+                        // remove player from the grid list of players
+                        this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
+                            type: LEFT_GRID,
+                            payload: character.user_id
+                        });
 
-                    // dispatch leave message to grid
-                    this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} leaves to the ${directionOut}`, [character.user_id])
-                    // remove player from the grid list of players
-                    this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                        type: LEFT_GRID,
-                        payload: character.user_id
-                    });
+                        // save the old location
+                        const oldLocation = {...character.location};
 
-                    // save the old location
-                    const oldLocation = {...character.location};
+                        // update character location
+                        character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
+                        
+                        // change location on the map
+                        this.changeLocation(character, newLocation, oldLocation);
 
-                    // update character location
-                    character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
-                    
-                    // change location on the map
-                    this.changeLocation(character, newLocation, oldLocation);
+                        // dispatch join message to new grid
+                        this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} strolls in from the ${directionIn}`, [character.user_id]);
+                        // add player from the grid list of players
+                        this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
+                            type: JOINED_GRID,
+                            payload: {
+                                name: character.name,
+                                user_id: character.user_id
+                            }
+                        });
 
-                    // dispatch join message to new grid
-                    this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} strolls in from the ${directionIn}`, [character.user_id]);
-                    // add player from the grid list of players
-                    this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                        type: JOINED_GRID,
-                        payload: {
-                            name: character.name,
-                            user_id: character.user_id
-                        }
-                    });
+                        // update the socket room
+                        socket.join(character.getLocationId());
 
-                    // update the socket room
-                    socket.join(character.getLocationId());
+                        // update client/socket character and location information
+                        this.updateClient(character.user_id);
 
-                    // update client/socket character and location information
-                    this.updateClient(character.user_id);
-
-                    // send the new grid details to the client
-                    this.Game.mapManager.updateClient(character.user_id);
+                        // send the new grid details to the client
+                        this.Game.mapManager.updateClient(character.user_id);
+                    })
+                    .error(Game.logger.error);
                 })
                 .catch(() => {
                     this.Game.logger.debug(`Invalid move by character ${socket.user.user_id}`, newLocation);
                 });
         })
         .catch(this.Game.logger.error)
+    }
+
+    /**
+     * Kills a character, drops their loot, and respawns them at the map respawn location
+     * @param  {String} user_id The user ID of the character to kill
+     * @return {Promise}
+     */
+    kill(user_id) {
+        return new Promise((resolve, reject) => {
+            // fetch the character who got killed
+            this.get(user_id).then((character) => {
+                // get the map so we know where to respawn the player
+                this.Game.mapManager.get(character.location.map).then((gameMap) => {
+                    // kill the character
+                    character.die().then((droppedLoot) => {
+                        // save the old location before it is overwritten by the die() method on the character
+                        const oldLocationId = character.getLocationId();
+                        // save the old location
+                        const oldLocation = {...character.location};
+                        // the respawn location
+                        const newLocation = {
+                            map: gameMap.id,
+                            ...gameMap.respawn
+                        };
+
+                        // leave the old grid room
+                        this.Game.socketManager.userLeaveRoom(character.user_id, character.getLocationId());
+
+                        // remove player from the grid list of players
+                        this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
+                            type: LEFT_GRID,
+                            payload: character.user_id
+                        });
+
+                        // update character location
+                        character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
+                        
+                        // change location on the map
+                        this.changeLocation(character, newLocation, oldLocation);
+
+                        // drop all items on the ground
+                        droppedLoot.items.forEach((item) => {
+                            this.Game.itemManager.drop(oldLocation.map, oldLocation.x, oldLocation.y, item);
+                        });
+
+                        // update the client's ground look at the location
+                        this.Game.socketManager.dispatchToRoom(oldLocationId, {
+                            type: UPDATE_GROUND_ITEMS,
+                            payload: this.Game.itemManager.getLocationList(oldLocation.map, oldLocation.x, oldLocation.y, true)
+                        })
+
+                        // add player from the grid list of players
+                        this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
+                            type: JOINED_GRID,
+                            payload: {
+                                name: character.name,
+                                user_id: character.user_id
+                            }
+                        });
+
+                        // update the socket room
+                        this.Game.socketManager.userJoinRoom(character.user_id, character.getLocationId());
+
+                        // update client/socket character and location information
+                        this.updateClient(character.user_id);
+
+                        // send the new grid details to the client
+                        this.Game.mapManager.updateClient(character.user_id);
+
+                        resolve(oldLocationId);
+                    })
+                    .catch(reject);
+                })
+                .catch(reject);
+            })
+            .catch(reject);
+        });
     }
 }

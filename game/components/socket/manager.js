@@ -163,4 +163,30 @@ export default class SocketManager extends EventEmitter {
     dispatchToServer(action) {
         this.io.emit('dispatch', action);
     }
+
+    /**
+     * Get the socket of the user, and join the specific room
+     * @param  {String} user_id User ID
+     * @param  {String} roomId  Room ID to join
+     */
+    userJoinRoom(user_id, roomId) {
+        this.get(user_id)
+            .then((socket) => {
+                socket.join(roomId);
+            })
+            .catch(this.Game.logger.error);
+    }
+
+    /**
+     * Get the socket of the user, and leaves the specific room
+     * @param  {String} user_id User ID
+     * @param  {String} roomId  Room ID to leaves
+     */
+    userLeaveRoom(user_id, roomId) {
+        this.get(user_id)
+            .then((socket) => {
+                socket.leave(roomId);
+            })
+            .catch(this.Game.logger.error);
+    }
 }

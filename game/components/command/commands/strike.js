@@ -24,12 +24,16 @@ export default function cmdStrike(socket, command, params, Game) {
 
             // if the target died
             if (!attack.healthLeft) {
-                /*const messages = {
-                    killer: `You land a killing blow on ${target.name}.`,
-                    victim: `${character.name} punches you, dealing ${attack.damageDealt} damage, killing you.`,
-                    bystander: `You see ${character.name} kill ${target.name} his their fists.`
-                }
-                dispatch(killCharacter(character, target, socket, messages));*/
+                return Game.characterManager.kill(target.user_id)
+                    .then((oldLocationId) => {
+                        // send event to the attacker
+                        Game.eventToSocket(socket, 'info', `You land the killing blow on ${target.name}, with your ${weapon}. They fall to the ground, dropping everything they carried.`);
+                        // send event to the target
+                        Game.eventToUser(target.user_id, 'info', `${character.name} strikes you with their ${weapon}, dealing ${attack.damageDealt} damage, killing you.`);
+                        // send event to the bystanders
+                        Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} with a ${weapon}. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
+                    })
+                    .catch(Game.logger.error);
             }
 
             // update the target client's character inforamtion
