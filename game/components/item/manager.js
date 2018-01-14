@@ -164,15 +164,15 @@ export default class ItemManager {
      * @return {Promise}
      */
     remove(item) {
-        const itemDbId = item._id;
+        const itemClone = {...item};
         item.destroy();
 
         const newItemList = this.items.filter((managedItem) => !managedItem.remove);
         this.items = newItemList;
 
         // if the item is in the DB, delete it.
-        if (itemDbId) {
-            this.dbLoad(itemDbId).then((dbItem) => {
+        if (itemClone._id) {
+            this.dbLoad(itemClone).then((dbItem) => {
                 dbItem.remove();
             })
         }
@@ -228,6 +228,7 @@ export default class ItemManager {
 
             // if the character has no items, resolve right away
             if (!numOfItems) {
+                this.cleanupDbInventory(character);
                 return resolve();
             }
 
@@ -237,6 +238,7 @@ export default class ItemManager {
                         succeeded++;
 
                         if ((succeeded + failed) === numOfItems) {
+                            this.cleanupDbInventory(character);
                             resolve(failed, succeeded);
                         }
                     })
@@ -245,10 +247,27 @@ export default class ItemManager {
                         this.Game.logger.error('Error saving inventory item:', error);
 
                         if ((succeeded + failed) === numOfItems) {
+                                this.cleanupDbInventory(character);
                                 resolve(failed, succeeded);
                             }
                     })
             })
+        });
+    }
+
+    cleanupDbInventory(character) {
+        const itemDbIds = character.inventory.map((obj) => {
+            return obj._id.toString();
+        });
+
+        ItemModel.deleteMany({ user_id: character.user_id, _id: { $nin: itemDbIds }}, (err, deleted) => {
+            if (err) {
+                return this.Game.logger.error(err);
+            }
+
+            if (deleted.deletedCount) {
+                this.Game.logger.info(`Deleted ${deleted.deletedCount} items, no longer owned by user ${character.user_id}`);
+            }
         });
     }
 
@@ -323,9 +342,13 @@ export default class ItemManager {
                 return resolve(null);
             }
 
-            ItemModel.findOne({ _id: item._id }, (error, item) => {
+            ItemModel.findOne({ _id: item._id.toString() }, (error, item) => {
                 if (error) {
                     return reject(error);
+                }
+
+                if (!item) {
+                    reject();
                 }
 
                 resolve(item);

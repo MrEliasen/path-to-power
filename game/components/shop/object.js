@@ -1,9 +1,13 @@
+import uuid from 'uuid/v4';
 import { SHOP_UPDATE } from './types';
 
 export default class Shop {
     constructor(Game, shopData) {
         this.Game = Game;
         Object.assign(this, shopData);
+
+        // useful if you want to load a specific shop without going through the structure manager and map manager.
+        this.fingerprint = uuid();
     }
 
     /**
@@ -76,6 +80,7 @@ export default class Shop {
     toObject() {
         return {
             id: this.id,
+            fingerprint: this.fingerprint,
             name: this.name,
             sell: {
                 ...this.sell,
@@ -85,6 +90,126 @@ export default class Shop {
                 ...this.buy,
                 list: this.getBuyList(true)
             }
+        }
+    }
+
+    sellItem(user_id, index) {
+        // get the character of the player
+        this.Game.characterManager.get(user_id)
+            .then((character) => {
+                const amount = 1;
+
+                // check if shop is buying anything
+                if (!this.buy.buying) {
+                    return this.Game.eventToUser(user_id, 'error', 'They are not interested in buying anything.');
+                }
+
+                // get the item from the inventory
+                const item = character.inventory[index];
+
+                // check if the item exists
+                if (!item) {
+                    return this.Game.eventToUser(user_id, 'error', 'Invalid item.');
+                }
+
+                // check if the shop is only interested in specific items, and if its on the list
+                if (this.buy.list.length && !this.buy.list.includes(item.id)) {
+                    return this.Game.eventToUser(user_id, 'error', 'They are not interested in buying that item.');
+                }
+
+                // check the item is one the shop wants to buy
+                if (this.buy.ignoreType.includes(item.type) || this.buy.ignoreSubtype.includes(item.subtype)) {
+                    return this.Game.eventToUser(user_id, 'error', 'They are not interested in buying this type of item.');
+                }
+
+                // make sure, if its a stackable item, have enough to sell.
+                if (item.stats.stackable) {
+                    if (item.stats.durability < amount) {
+                        return this.Game.eventToUser(user_id, 'error', 'You do not have any more of that item.');
+                    }
+                }
+
+                // will hold the item, which was sold
+                let soldItem;
+                let pricePerUnit = item.stats.price * this.buy.buyPricePercent;
+
+                // remove item from inventory/reduce amount
+                if (item.stats.stackable) {
+                    soldItem = this.Game.itemManager.add(item.id, {durability: amount});
+                    item.removeDurability(amount);
+
+                    // if the item has 0 durability, remove it
+                    if (item.stats.durability <= 0) {
+                        this.Game.itemManager.remove(item);
+                    }
+                } else {
+                    soldItem = character.inventory.splice(index, 1)[0];
+                }
+
+                // add money to character
+                character.stats.money = (character.stats.money + (amount * pricePerUnit));
+
+                // add item to shop inventory (if resell is enabled)
+                if (this.buy.resell) {
+                    this.addToInventory(soldItem);
+                } else {
+                    this.Game.itemManager.remove(soldItem);
+                }
+
+                // update client character object
+                this.Game.characterManager.updateClient(character.user_id);
+
+                // update grid, with the shop update
+                this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
+                    type: SHOP_UPDATE,
+                    payload: {
+                        shopId: this.id,
+                        inventory: this.getSellList(true)
+                    }
+                });
+            })
+            .catch(this.Game.logger.error);
+    }
+
+    addToInventory(itemObj, amount = null) {
+        let inventoryItem;
+
+        // check if item is stackable, and if so, see if we have that item in the inventory already
+        if (itemObj.stats.stackable) {
+            amount = amount || itemObj.stats.durability;
+
+            inventoryItem = this.sell.list.find((obj) => obj.id === itemObj.id);
+
+            if (inventoryItem) {
+                inventoryItem.shopQuantity = inventoryItem.shopQuantity + amount;
+                this.Game.itemManager.remove(itemObj);
+            } else {
+                // set the amount of the item to the correct amount, before adding to the inventory
+                itemObj.shopQuantity = amount;
+                this.sell.list.push(itemObj)
+            }
+        } else {
+            // check if the item is already sold as a unlimited quantity item.
+            inventoryItem = this.sell.list.find((obj) => obj.id === itemObj.id && obj.shopQuantity >= 999);
+            // if once exists, delete the player item
+            if (inventoryItem) {
+                return this.Game.itemManager.remove(itemObj);
+            }
+
+            // check if we have other items with the same durability, then we can stack those.
+            inventoryItem = this.sell.list.find((obj) => obj.id === itemObj.id && obj.stats.durability === itemObj.stats.durability);
+
+            // stack the items if found
+            if (inventoryItem) {
+                inventoryItem.shopQuantity = inventoryItem.shopQuantity + 1;
+                return this.Game.itemManager.remove(itemObj);
+            }
+
+            // otherwise push the new item to the stack 
+            // set quantity to 1, since its a new item
+            itemObj.shopQuantity = amount || 1;
+            // otherwise, add it to the list
+            this.sell.list.push(itemObj);
         }
     }
 
@@ -105,9 +230,14 @@ export default class Shop {
                 }
 
                 // check if the shop has the item
-                const item = this.selling.list[parseInt(index, 10)];
+                const item = this.sell.list[parseInt(index, 10)];
                 if (!item) {
                     return this.Game.eventToUser(user_id, 'error', 'They do not appear to have that item anymore');
+                }
+
+                // make sure the item is what they where afte, in case the array has shifted
+                if (item.id !== itemId) {
+                    return this.Game.eventToUser(user_id, 'error', 'The item you where after is no longer available.');
                 }
 
                 const price = (item.stats.price * this.sell.sellPricePercent);
@@ -156,29 +286,5 @@ export default class Shop {
                 }
             })
             .catch(this.Game.logger.error);
-    }
-
-    addToInventory(itemModifiers, amount, itemObj) {
-        let addedItem = {
-            ...itemModifiers,
-            quantity: amount
-        };
-
-        // if the item is stackable, push it (incl modifiers) to the shop.
-        if (itemObj.stats.stackable) {
-            const listItem = this.sell.list.find((item) => item.id === itemObj.id);
-
-            // if we find a matching item, increase the quantity.
-            if (listItem) {
-                listItem.quantity = listItem.quantity + amount;
-                return {...listItem};
-            }
-
-            // remove durability from stackable items
-            delete addedItem.durability;
-        }
-
-        this.sell.list.push(addedItem);
-        return addedItem;
     }
 }

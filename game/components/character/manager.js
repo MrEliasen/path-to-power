@@ -352,6 +352,11 @@ export default class CharacterManager {
         });
     }
 
+    /**
+     * Save the character stats, location etc to permanent storage
+     * @param  {Character Obj} character The character to save
+     * @return {Promise}
+     */
     dbSave(character) {
         return new Promise((resolve, reject) => {
             CharacterModel.findOne({ user_id: character.user_id }, (err, dbCharacter) => {
