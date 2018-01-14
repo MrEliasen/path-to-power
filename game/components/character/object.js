@@ -85,12 +85,14 @@ export default class Character {
     setTarget(targetCharacter) {
         // release the gridlock of the current target, if set
         this.releaseTarget()
+            .then(() => {
+                // set the new target
+                this.target = targetCharacter;
+                // and gridlock them
+                this.target.gridLock(this);
 
-        // and gridlock them
-        targetCharacter.gridLock(this);
-
-        // set the new target
-        this.target = targetCharacter;
+            })
+            .catch(this.Game.logger.error);
     }
 
     /**
@@ -98,12 +100,15 @@ export default class Character {
      * @return {[type]} [description]
      */
     releaseTarget() {
-        // release the gridlock of the current target, if set
-        if (this.target) {
-            this.target.gridRelease(this.user_id);
-        }
+        return new Promise((resolve, reject) => {
+            // release the gridlock of the current target, if set
+            if (this.target) {
+                this.target.gridRelease(this.user_id);
+            }
 
-        this.target = null;
+            this.target = null;
+            resolve();
+        });
     }
 
     /**
@@ -120,7 +125,9 @@ export default class Character {
      * @param  {Character Obj} character  the character objest of the character gridlocking the character.
      */
     gridLock(character) {
+        console.log(`${this.name} getting gridlocked by ${character.name}`);
         if (this.targetedBy.findIndex((obj) => obj.user_id === character.user_id) === -1) {
+            console.log('GRIDLOCKED');
             this.targetedBy.push(character);
         }
     }
@@ -349,10 +356,9 @@ export default class Character {
 
     /**
      * Selects a random item from the inventory to drop (used primarily for fleeing)
-     * @param  {Object} itemList Game items list
      * @return {Mixed}           Null if no item is found, otherwise an Item Object of the inventory item.
      */
-    dropRandomItem(itemList) {
+    dropRandomItem() {
         // do we have items in the inventory
         if (!this.inventory.length) {
             return null;
@@ -366,7 +372,7 @@ export default class Character {
         }
 
         // return the dropped item
-        return this.dropItem(itemList[item.id].name.toLowerCase(), 1, itemList, true);
+        return this.dropItem(item.name.toLowerCase(), 1, true);
     }
 
     /**
@@ -377,7 +383,7 @@ export default class Character {
      * @return {Object}             The item (with amount if stackable) which has been removed from the inventory.
      */
     dropItem (itemName, amount = 1, isFleeing = false) {
-        amount = parseInt(amount);
+        amount = parseInt(amount, 10);
         // get the first matching items from the inventory
         let itemIndex = this.inventory.findIndex((item) => item.name.toLowerCase().indexOf(itemName) === 0);
 
@@ -389,10 +395,23 @@ export default class Character {
         // get the matching item object from the inventory
         let inventoryItem = this.inventory[itemIndex];
 
+        // if they are fleeing, unequip the item
+        if (isFleeing && inventoryItem.slot) {
+            this.unEquip(inventoryItem.slot);
+        }
+
+        // they cannot drop items which are equipped
+        if (inventoryItem.slot && !isFleeing) {
+            return null;
+        }
+
         // If the item is not stackable, just delete the item from the inventory, can return it
         if (!inventoryItem.stats.stackable) {
             return this.inventory.splice(itemIndex, 1)[0];
         }
+
+        // sanitify check, make sure the durability is a number
+        inventoryItem.stats.durability = parseInt(inventoryItem.stats.durability, 10);
 
         // Check if the character has enough of said item to drop
         if (inventoryItem.stats.durability < amount) {

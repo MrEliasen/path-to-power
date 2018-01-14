@@ -1,8 +1,8 @@
 /*
-import cmdRelease from './commands/release';
-import cmdFlee from './commands/flee';
 import cmdStrike from './commands/strike';
 import cmdShoot from './commands/shoot';*/
+import cmdFlee from './commands/flee';
+import cmdRelease from './commands/release';
 import cmdPunch from './commands/punch';
 import cmdAim from './commands/aim';
 import cmdPickup from './commands/pickup';

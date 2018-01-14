@@ -111,7 +111,7 @@ export default class SocketManager extends EventEmitter {
      * @param  {Object} action Redux-action object
      */
     onClientDispatch(socket, action) {
-        this.Game.logger.info('New action', action);
+        this.Game.logger.info('New action', {type: action.type});
         // Make sure actions have the right composition
         if (!action.payload || !action.type) {
             return;
