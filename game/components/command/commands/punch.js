@@ -25,6 +25,8 @@ export default function cmdPunch(socket, command, params, Game) {
                 dispatch(killCharacter(character, target, socket, messages));*/
             }
 
+            // update the target client's character inforamtion
+            Game.characterManager.updateClient(target.user_id, 'stats');
             // send event to the attacker
             Game.eventToSocket(socket, 'info', `You punch ${target.name}, dealing ${attack.damageDealt} damage.`);
             // send event to the target

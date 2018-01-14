@@ -185,22 +185,21 @@ export default class Character {
 
     /**
      * Returns the damage of the equipped ranged weapon + ammo, and reduces durability of ammo.
-     * @param  {Object} itemList List of all game items
      * @return {Object}          the damage, -1 if the weapon cannot be fired.
      */
-    fireRangedWeapon(itemList) {
-        const damage = this.getWeaponDamage('ranged', itemList);
+    fireRangedWeapon() {
+        const damage = this.getWeaponDamage('ranged');
 
         if (!this.hasAmmo()) {
-            return -1;
+            return 0;
         }
 
         // reduce ammo durability
-        this.equipped.ammo.durability = this.equipped.ammo.durability - 1;
+        this.equipped.ammo.stats.durability = this.equipped.ammo.removeDurability(1);
 
         // remove ammo if durability is 0
         if (this.equipped.ammo.durability <= 0) {
-            this.equipped.ammo = null;
+            this.Game.itemManager.remove(this.equipped.ammo);
         }
 
         return damage;
@@ -228,12 +227,12 @@ export default class Character {
      * Gets the damage bonus of the equipped ammo
      * @return {Number}
      */
-    getAmmoDamage(itemList) {
+    getAmmoDamage() {
         if (!this.hasAmmo()) {
-            return -1;
+            return 0;
         }
 
-        return itemList[this.equipped.ammo.id].stats.damage_bonus;
+        return this.equipped.ammo.stats.damage_bonus;
     }
 
     /**
@@ -242,7 +241,7 @@ export default class Character {
      * @param  {Object} itemList List of all game items
      * @return {Number}          Damage of the weapon
      */
-    getWeaponDamage(slot, itemList) {
+    getWeaponDamage(slot) {
         const equippedItem = this.equipped[slot];
         let bonusDamage = 0;
 
@@ -250,13 +249,11 @@ export default class Character {
             return 0;
         }
 
-        const item = itemList[equippedItem.id];
-
         if (slot === 'ranged') {
-            bonusDamage = this.getAmmoDamage(itemList);
+            bonusDamage = this.getAmmoDamage();
         }
 
-        return Math.floor(Math.random() * (item.stats.damage_max - item.stats.damage_min + 1)) + item.stats.damage_min + bonusDamage;
+        return Math.floor(Math.random() * (equippedItem.stats.damage_max - equippedItem.stats.damage_min + 1)) + equippedItem.stats.damage_min + bonusDamage;
     }
 
     /**

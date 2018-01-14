@@ -1,142 +1,50 @@
-import { newEvent } from '../../socket/redux/actions';
-import { updateCharacter, updateClientCharacter, killCharacter } from '../../character/redux/actions';
-
-export default function cmdShoot(socket, params, getState, resolve, dispatch) {
-    const character = getState().characters.list[socket.user.user_id] || null;
-
-    if (!character) {
-        return [];
-    }
-
-    if (!character.lastTarget) {
-        return resolve([{
-            ...newEvent({
-                type: 'system',
-                message: 'You do not have a target.'
-            }),
-            meta: {
-                socket_id: socket.id
+export default function cmdStrike(socket, command, params, Game) {
+    Game.characterManager.get(socket.user.user_id)
+        .then((character) => {
+            const target = character.target;
+            // check if they have a target
+            if (!target) {
+                return Game.eventToSocket(socket, 'error', 'You do not have a target.');
             }
-        }]);
-    }
 
-    const target = getState().characters.list[character.lastTarget];
-
-    // if the target is not gridlocked by the character, we cannot proceed.
-    if (!target.gridLocked.includes(character.user_id)) {
-        return resolve([{
-            ...newEvent({
-                type: 'system',
-                message: 'You do not have a target.'
-            }),
-            meta: {
-                socket_id: socket.id
+            // check the target is gridlocked by the player
+            if (!target.isTargetedBy(character.user_id)) {
+                return Game.eventToSocket(socket, 'error', 'You do not have a target.');
             }
-        }]);
-    }
 
-    // make sure they have a melee weapon equipped
-    if (!character.equipped.ranged) {
-        return resolve([{
-            ...newEvent({
-                type: 'system',
-                message: 'You do not have a ranged weapon equipped.'
-            }),
-            meta: {
-                socket_id: socket.id
+            // check if they have a melee weapon equipped
+            if (!character.equipped.ranged) {
+                return Game.eventToSocket(socket, 'error', 'You do not have a ranged weapon equipped.');
             }
-        }]);
-    }
 
-    // check the character has any ammo equipped
-    if (!character.hasAmmo()) {
-        return resolve([{
-            ...newEvent({
-                type: 'system',
-                message: 'You do not have any ammunition equipped.'
-            }),
-            meta: {
-                socket_id: socket.id
+            // check if they have a melee weapon equipped
+            if (!character.hasAmmo()) {
+                return Game.eventToSocket(socket, 'error', 'You do not have any ammunition equipped.');
             }
-        }]);
-    }
 
-    // deal damage to the target
-    const itemList = getState().items.list;
-    const weapon = itemList[character.equipped.ranged.id].name;
-    const attack = target.dealDamage(character.fireRangedWeapon(itemList), itemList);
+            // deal damage to the target
+            const weapon = character.equipped.ranged.name;
+            const damage = character.fireRangedWeapon();
+            const attack = target.dealDamage(damage, true);
 
-    if (!attack.healthLeft) {
-        const messages = {
-            killer: `You shoot ${target.name} with your ${weapon}, killing them.`,
-            victim: `${character.name} shoots you with their ${weapon}, killing you.`,
-            bystander: `You see ${character.name} kill ${target.name} with their ${weapon}`
-        }
-        dispatch(killCharacter(character, target, socket, messages));
-        // update the clients character information, to update the ammo.
-        return resolve([
-            updateCharacter(character),
-            {
-                ...updateClientCharacter(character),
-                meta: {
-                    socket_id: socket.id
+            // if the target died
+            if (!attack.healthLeft) {
+                /*const messages = {
+                    killer: `You land a killing blow on ${target.name}.`,
+                    victim: `${character.name} punches you, dealing ${attack.damageDealt} damage, killing you.`,
+                    bystander: `You see ${character.name} kill ${target.name} his their fists.`
                 }
+                dispatch(killCharacter(character, target, socket, messages));*/
             }
-        ]);
-    }
 
-    resolve([
-        // save the attacking character server-side
-        updateCharacter(character),
-        // save the target character server-side
-        updateCharacter(target),
-        // update the target client's character info
-        {
-            ...updateClientCharacter(target),
-            meta: {
-                target: target.user_id,
-            }
-        },
-        // update the attacking client's character info
-        {
-            ...updateClientCharacter(character),
-            meta: {
-                socket_id: socket.id
-            }
-        },
-        // send attack event to attacker/character
-        {
-            ...newEvent({
-                type: 'system',
-                message: `You shoot ${target.name} with your ${weapon}, dealing ${attack.damageDealt} damage.`
-            }),
-            meta: {
-                socket_id: socket.id
-            }
-        },
-        // send attack'ed event to target
-        {
-            ...newEvent({
-                type: 'system',
-                message: `${character.name} shoots you with a ${weapon}, dealing ${attack.damageDealt} damage.`
-            }),
-            meta: {
-                target: target.user_id
-            } 
-        },
-        // send attack event to grid
-        {
-            ...newEvent({
-                type: 'system',
-                message: `You see ${character.name} shoot ${target.name} with a ${weapon}.`
-            }),
-            meta: {
-                target: `${character.location.map}_${character.location.x}_${character.location.y}`,
-                ignore: [
-                    target.user_id,
-                    character.user_id
-                ]
-            } 
-        }
-    ]);
+            // update the target client's character inforamtion
+            Game.characterManager.updateClient(target.user_id, 'stats');
+            // send event to the attacker
+            Game.eventToSocket(socket, 'info', `You shoot ${target.name} with your ${weapon}, dealing ${attack.damageDealt} damage.`);
+            // send event to the target
+            Game.eventToUser(target.user_id, 'info', `${character.name} shoots you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
+            // send event to the bystanders
+            Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} shoot ${target.name} with a ${weapon}.`, [character.user_id, target.user_id]);
+        })
+        .catch(Game.logger.error);
 }

@@ -1,6 +1,9 @@
-/*
+import { GAME_COMMAND } from './types';
+import commandList from '../../data/commands.json';
+
+// COMMANDS
+import cmdShoot from './commands/shoot';
 import cmdStrike from './commands/strike';
-import cmdShoot from './commands/shoot';*/
 import cmdFlee from './commands/flee';
 import cmdRelease from './commands/release';
 import cmdPunch from './commands/punch';
@@ -12,8 +15,6 @@ import cmdSay from './commands/say';
 import cmdGive from './commands/give';
 import cmdGlobal from './commands/global';
 import cmdWhisper from './commands/whisper';
-import { GAME_COMMAND } from './types';
-import commandList from '../../data/commands.json';
 
 export default class CommandManager {
     constructor(Game) {
@@ -162,32 +163,3 @@ export default class CommandManager {
         }
     }
 }
-/*
-export function checkCommandAtLocation(socket, getState, command, callback) {
-    const character = getState().characters.list[socket.user.user_id] || null;
-
-    if (!character) {
-        return callback([{
-            ...clientCommandError('Invalid character. Please logout and back in.'),
-            meta: {
-                socket_id: socket.id
-            }
-        }]);
-    }
-
-    const map = getState().maps[character.location.map];
-    const location = map.getPosition(character.location.x, character.location.y);
-
-    // check if the command is available
-    if (!Object.keys(location.actions).includes(command)) {
-        return callback([{
-            ...clientCommandError('There is nowhere to do that.'),
-            meta: {
-                socket_id: socket.id
-            }
-        }]);
-    }
-
-    const actionModifiers = location.actions[command];
-    callback(null, character, location, actionModifiers)
-}*/
