@@ -17,11 +17,6 @@ export default function cmdHeal(socket, command, params, Game) {
                             // set the first structure by default
                             let structure = structures[0];
 
-                            // if there are more than 1 structure and we 
-                            if (structures.length > 1) {
-                                structure = structures.find((obj) => obj.name.toLowerCase().indexOf(params[1].toLowerCase()) === 0);
-                            }
-
                             // overwrite if they specified a structure, and its name didn't match their criteria
                             if (params.length > 1 && structure.name.toLowerCase().indexOf(structures[1].toLowerCase()) !== 0) {
                                 structure = structures.find((structureItem) => structureItem.name.toLowerCase().indexOf(params[1].toLowerCase()) === 0);

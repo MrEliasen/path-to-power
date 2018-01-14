@@ -15,6 +15,7 @@ import cmdSay from './commands/say';
 import cmdGive from './commands/give';
 import cmdGlobal from './commands/global';
 import cmdWhisper from './commands/whisper';
+import cmdShop from './commands/shop';
 
 export default class CommandManager {
     constructor(Game) {
@@ -124,10 +125,6 @@ export default class CommandManager {
                 return cmdPickup(socket, command, params, this.Game);
                 break;
 
-            case '/shop':
-                return loadShop(socket, command, params, this.Game);
-                break;
-
             case '/aim':
                 return cmdAim(socket, command, params, this.Game);
                 break;
@@ -150,6 +147,10 @@ export default class CommandManager {
 
             case '/release':
                 return cmdRelease(socket, command, params, this.Game);
+                break;
+
+            case '/shop':
+                return cmdShop(socket, command, params, this.Game);
                 break;
 
             default:

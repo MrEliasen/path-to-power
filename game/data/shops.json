@@ -1,12 +1,11 @@
 {
     "shop-pawn": {
         "id": "shop-pawn",
-        "title": "Pawn Shop",
+        "name": "Pawn Shop",
+        "description": "They will buy and sell almost anything.",
         "sell": {
             "selling": true,
             "list": [
-                { "id": "redapple", "quantity": 10 },
-                { "id": "mushrooms", "quantity": 10 },
                 { "id": "bodyarmor", "quantity": 999 },
                 { "id": "pocketknife", "quantity": 999 },
                 { "id": "ammo", "quantity": 999 }
@@ -17,8 +16,30 @@
             "resell": true,
             "sellPricePercent": 0.35,
             "list": [],
-            "ignoreType": "", 
-            "ignoreSubtype": "drug" 
+            "ignoreType": ["consumable"], 
+            "ignoreSubtype": []
+        }
+    },
+    "shop-food": {
+        "id": "shop-food",
+        "name": "Food Shop",
+        "description": "You can buy and sell food and other consumables.",
+        "sell": {
+            "selling": true,
+            "list": [
+                { "id": "redapple", "quantity": 10 },
+                { "id": "mushrooms", "quantity": 10 }
+            ]
+        },
+        "buy": {
+            "buying": true,
+            "resell": true,
+            "sellPricePercent": 0.35,
+            "list": [
+                "redapple"
+            ],
+            "ignoreType": [], 
+            "ignoreSubtype": [] 
         }
     }
 }

@@ -8,8 +8,8 @@
     "structures": [
         {"id": "hospital", "x": 5, "y": 5},
         {"id": "pawnshop", "x": 10, "y": 10},
-        {"id": "hospital", "x": 15, "y": 15},
-        {"id": "pawnshop", "x": 20, "y": 20}
+        {"id": "mallshop", "x": 11, "y": 11},
+        {"id": "hospital", "x": 15, "y": 15}
     ],
     "respawn": {
        "y": 0,

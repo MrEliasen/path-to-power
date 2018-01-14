@@ -24,13 +24,15 @@ export default class StructureManager {
         const newStructure = new Structure(this.Game, structureData, {map: map_id, x, y});
 
         // Generate the structure location, should it not exist.
-        this.structures[map_id] = this.structures[map_id] || {};
-        this.structures[map_id][y] = this.structures[map_id][y] || {};
-        this.structures[map_id][y][x] = this.structures[map_id][y][x] || [];
+        this.structures[`${map_id}_${y}_${x}`] = this.structures[`${map_id}_${y}_${x}`] || [];
 
         // add structure to the managed structures array
-        this.structures[map_id][y][x].push(newStructure);
+        this.structures[`${map_id}_${y}_${x}`].push(newStructure);
 
+        // load any shops which are set for this structure
+        newStructure.loadShop();
+
+        // return the new structure object
         return newStructure;
     }
 
@@ -49,11 +51,7 @@ export default class StructureManager {
             let matches = [];
 
             if (structures.length) {
-                structures.map((structure) => {
-                    if (structure.commands[command]) {
-                        matches.push(structure);
-                    }
-                })
+                matches = structures.filter((structure) => structure.commands[command])
             }
 
             // if we didn't find any matching buildings..
@@ -66,24 +64,67 @@ export default class StructureManager {
     }
 
     /**
+     * returns a list of buildings, at a given location, which has shops
+     * @param  {String} map_id  Map ID
+     * @param  {Number} x
+     * @param  {Number} y
+     * @return {Promise}
+     */
+    getWithShop(map_id, x, y) {
+        return new Promise((resolve, reject) => {
+            //check if a structure at the given location has the command
+            const structures = this.getGrid(map_id, x, y);
+            let shops = [];
+
+            if (structures.length) {
+                const buildings = structures.filter((structure) => structure.shops && structure.shops.length);
+
+                // if there are buildings with shops, generate the array of shops to send back to the function caller
+                if (buildings.length) {
+                    buildings.forEach((building) => {
+                        shops = shops.concat(building.shops);
+                    })
+                }
+            }
+
+            // if we didn't find any matching buildings..
+            if (!shops.length) {
+                return reject(`No buildings at ${map_id}/${y}/${x}, matching command ${command}`);
+            }
+
+            resolve(shops);
+        })
+    }
+
+    /**
      * Returns the list of structures at a given position
      * @param  {String} map_id Map Id
      * @param  {Number} x      
      * @param  {Number} y      
+     * @param  {Boolean} forClient Whether the structure objects should be returns or a plain obj
      * @return {Array}        list of buildings
      */
-    getGrid(map_id, x, y) {
-        // check if the location is even set to have structures
-        if (!this.structures[map_id]) {
-            return [];
-        }
-        if (!this.structures[map_id][y]) {
-            return [];
-        }
-        if (!this.structures[map_id][y][x]) {
-            return [];
+    getGrid(map_id, x, y, forClient = false) {
+        const structures = this.structures[`${map_id}_${y}_${x}`] || [];
+
+        if (!forClient) {
+            return structures;
         }
 
-        return this.structures[map_id][y][x];
+        // return a plain object of the structures and their shops
+        return structures.map((structure) => {
+            return {
+                name: structure.name,
+                colour: structure.colour,
+                commands: structure.commands,
+                shops: structure.shops.map((shop) => {
+                    return {
+                        id: shop.id,
+                        name: shop.name,
+                        description: shop.description
+                    }
+                }),
+            }
+        })
     }
 }

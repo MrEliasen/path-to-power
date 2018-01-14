@@ -10,9 +10,8 @@ export default class GameMap {
      */
     generate() {
         return new Promise((resolve, reject) => {
-            // generate the map grid?
             // Load all structures for map
-            this.structures.map((structure) => {
+            this.structures.forEach((structure) => {
                 this.Game.structureManager.add(this.id, structure.x, structure.y, structure.id);
             })
             resolve();

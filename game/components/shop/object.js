@@ -4,6 +4,25 @@ export default class Shop {
         Object.assign(this, shopData);
     }
 
+    toObject() {
+        return {
+            id: this.id,
+            name: this.name,
+            sell: {
+                ...this.sell,
+                list: [
+                    ...this.sell.list
+                ]
+            },
+            buy: {
+                ...this.buy,
+                list: [
+                    ...this.buy.list
+                ]
+            }
+        }
+    }
+
     addToInventory(itemModifiers, amount, itemObj) {
         let addedItem = {
             ...itemModifiers,

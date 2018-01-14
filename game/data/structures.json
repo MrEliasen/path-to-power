@@ -1,7 +1,8 @@
 {
     "hospital": {
         "name": "Hospital",
-        "colour": "#1769ed", 
+        "colour": "#1769ed",
+        "shops": [],
         "commands": {
             "/heal": {
                 "cost": 1
@@ -10,11 +11,19 @@
     },
     "pawnshop": {
         "name": "Pawn Shop",
-        "colour": "#9e2f00", 
-        "commands": {
-            "/shop": {
-                "shop": "shop-pawn"
-            }
-        }
+        "colour": "#9e2f00",
+        "commands": null,
+        "shops": [
+            "shop-pawn"
+        ]
+    },
+    "mallshop": {
+        "name": "Mall",
+        "colour": "#d1400b",
+        "commands": null,
+        "shops": [
+            "shop-pawn",
+            "shop-food"
+        ]
     }
 }
