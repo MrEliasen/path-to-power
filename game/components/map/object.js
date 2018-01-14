@@ -11,8 +11,8 @@ export default class GameMap {
     generate() {
         return new Promise((resolve, reject) => {
             // Load all structures for map
-            this.structures.forEach((structure) => {
-                this.Game.structureManager.add(this.id, structure.x, structure.y, structure.id);
+            this.structures.forEach(async (structure) => {
+                return await this.Game.structureManager.add(this.id, structure.x, structure.y, structure.id);
             })
             resolve();
         });

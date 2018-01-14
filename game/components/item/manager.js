@@ -137,10 +137,14 @@ export default class ItemManager {
      * @param {Object} modifiers  The list of stats overwrites to the template, for the item.
      * @param {String} dbId       Database _id of the item, used for saving the item later.
      */
-    add(itemId, modifiers = null, dbId = null) {
+    add(itemId, modifiers = {}, dbId = null) {
         this.Game.logger.info('ItemManager::add', {itemId})
-
         const template = this.getTemplate(itemId);
+
+        if (!template) {
+            return null;
+        }
+
         const itemData = {...template};
         // nested objects are still copied as reference, so we have to make a "sub-copy" of the stats.
         itemData.stats = {...template.stats};

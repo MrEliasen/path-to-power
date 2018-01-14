@@ -7,13 +7,17 @@ export default class Structure {
         this.location = location;
     }
 
-    loadShop() {
-        if (!this.shops || !this.shops.length) {
-            return;
-        }
+    loadShops() {
+        return new Promise((resolve, reject) => {
+            if (!this.shops || !this.shops.length) {
+                return resolve();
+            }
 
-        this.shops = this.shops.map((shopId) => {
-            return this.Game.shopManager.add(shopId);
-        })
+            this.shops.forEach(async (shopId, index) => {
+                return this.shops[index] = await this.Game.shopManager.add(shopId);
+            });
+
+            resolve();
+        });
     }
 }

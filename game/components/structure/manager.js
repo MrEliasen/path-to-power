@@ -17,7 +17,7 @@ export default class StructureManager {
      * @param {String} structure_id Structure ID
      * @return {Structure Obj} The new structure object.
      */
-    add(map_id, x, y, structure_id) {
+    async add(map_id, x, y, structure_id) {
         this.Game.logger.info('StructureManager::add', {map_id, structure_id, x, y});
 
         const structureData = structureList[structure_id];
@@ -26,11 +26,11 @@ export default class StructureManager {
         // Generate the structure location, should it not exist.
         this.structures[`${map_id}_${y}_${x}`] = this.structures[`${map_id}_${y}_${x}`] || [];
 
+        // load any shops which are set for this structure
+        await newStructure.loadShops();
+
         // add structure to the managed structures array
         this.structures[`${map_id}_${y}_${x}`].push(newStructure);
-
-        // load any shops which are set for this structure
-        newStructure.loadShop();
 
         // return the new structure object
         return newStructure;

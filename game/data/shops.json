@@ -5,16 +5,17 @@
         "description": "They will buy and sell almost anything.",
         "sell": {
             "selling": true,
+            "sellPricePercent": 1.0,
             "list": [
-                { "id": "bodyarmor", "quantity": 999 },
-                { "id": "pocketknife", "quantity": 999 },
-                { "id": "ammo", "quantity": 999 }
+                { "id": "bodyarmor", "shopQuantity": 999 },
+                { "id": "pocketknife", "shopQuantity": 999 },
+                { "id": "ammo", "shopQuantity": 999 }
             ]
         },
         "buy": {
             "buying": true,
             "resell": true,
-            "sellPricePercent": 0.35,
+            "buyPricePercent": 0.35,
             "list": [],
             "ignoreType": ["consumable"], 
             "ignoreSubtype": []
@@ -26,15 +27,16 @@
         "description": "You can buy and sell food and other consumables.",
         "sell": {
             "selling": true,
+            "sellPricePercent": 1.0,
             "list": [
-                { "id": "redapple", "quantity": 10 },
-                { "id": "mushrooms", "quantity": 10 }
+                { "id": "redapple", "shopQuantity": 10 },
+                { "id": "mushrooms", "shopQuantity": 10 }
             ]
         },
         "buy": {
             "buying": true,
             "resell": true,
-            "sellPricePercent": 0.35,
+            "buyPricePercent": 0.35,
             "list": [
                 "redapple"
             ],

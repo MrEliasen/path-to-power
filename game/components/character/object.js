@@ -71,7 +71,9 @@ export default class Character {
         return {
             user_id: this.user_id,
             name: this.name,
-            inventory: this.inventory,
+            inventory: this.inventory.map((item) => {
+                return item.toObject();
+            }),
             equipped: this.equipped,
             stats: this.stats,
             location: this.location
