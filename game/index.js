@@ -10,6 +10,7 @@ import structureManager from './components/structure/manager';
 import itemManager from './components/item/manager';
 import shopManager from './components/shop/manager';
 import commandManager from './components/command/manager';
+import factionManager from './components/faction/manager';
 //import npcManager from './components/npc/manager';
 
 import { newEvent } from './actions';
@@ -30,6 +31,7 @@ class Game {
         this.itemManager = new itemManager(this);
         this.shopManager = new shopManager(this);
         this.commandManager = new commandManager(this);
+        this.factionManager = new factionManager(this);
         //this.npcManager = new npcManager(this);
 
         // load game data
@@ -70,6 +72,44 @@ class Game {
         }
 
         this.logger.info('Logger initiated.');
+    }
+
+    async init() {
+        await this.itemManager.load().then((count) => {
+            console.log(`${count} ITEMS LOADED`);
+        });
+
+        await this.mapManager.load().then((count) => {
+            console.log(`${count} MAPS LOADED`);
+        });
+
+        await this.factionManager.load().then((count) => {
+            console.log(`${count} FACTIONS LOADED`);
+        });
+
+        /*await this.npcManager.load().then(() => {
+            console.log('NPCS LOADED');
+        })*/
+
+        // Listen for connections
+        this.socketManager.listen();
+
+        // setup autosave
+        this.setupAutosave();
+    }
+
+    /**
+     * saves all character progress and items
+     * @return {Promise} The promise returned from the saveAll method
+     */
+    setupAutosave() {
+        if (!this.config.game.autosave.enabled) {
+            return;
+        }
+
+        setInterval(() => {
+            this.characterManager.saveAll();
+        }, this.config.game.autosave.interval)
     }
 
     /**
@@ -115,40 +155,6 @@ class Game {
     eventToServer(type, message, ignore) {
         this.logger.debug('Server Event', {type, message, ignore});
         this.socketManager.dispatchToServer(newEvent(type, message, ignore));
-    }
-
-    /**
-     * saves all character progress and items
-     * @return {Promise} The promise returned from the saveAll method
-     */
-    setupAutosave() {
-        if (!this.config.game.autosave.enabled) {
-            return;
-        }
-
-        setInterval(() => {
-            this.characterManager.saveAll();
-        }, this.config.game.autosave.interval)
-    }
-
-    async init() {
-        await this.itemManager.load().then((count) => {
-            console.log(`${count} ITEMS LOADED`);
-        });
-
-        await this.mapManager.load().then((count) => {
-            console.log(`${count} MAPS LOADED`);
-        });
-
-        /*await this.npcManager.load().then(() => {
-            console.log('NPCS LOADED');
-        })*/
-
-        // Listen for connections
-        this.socketManager.listen();
-
-        // setup autosave
-        this.setupAutosave();
     }
 }
 

@@ -4,8 +4,8 @@ var mongoose = require('mongoose'),
     moment = require('moment');
 
 // Define our product schema
-var CharacterSchema = new mongoose.Schema({
-    user_id: {
+var FactionSchema = new mongoose.Schema({
+    faction_id: {
         type: String,
         required: true,
         unique: true
@@ -15,22 +15,24 @@ var CharacterSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    name_lowercase: {
+    name_lowercase: String,
+    tag: {
         type: String,
+        required: true,
+        unique: true
     },
-    location: {
-        type: {}
+    tag_lowercase: String,
+    leader_id: {
+        type: String,
+        unique: true,
+        required: true
     },
-    stats: {
-        type: {}
-    },
-    faction_id: String,
     date_added: String,
     date_updated: String
 });
 
 // Execute before each user.save() call
-CharacterSchema.pre('save', function (callback) {
+FactionSchema.pre('save', function (callback) {
     if (!this.date_added) {
         // set the date for when it was created
         this.date_added = moment().format(config.rfc2822);
@@ -38,13 +40,12 @@ CharacterSchema.pre('save', function (callback) {
 
     // set the date for when it was updated
     this.date_updated = moment().format(config.rfc2822);
-
-    if (this.name) {
-        this.name_lowercase = this.name.toLowerCase();
-    }
+    // create a lower-case version of the name and tag, to make it easier to find.
+    this.name_lowercase = this.name.toLowerCase();
+    this.tag_lowercase = this.tag.toLowerCase();
 
     callback();
 });
 
 // Export the Mongoose model
-module.exports = mongoose.model('Character', CharacterSchema);
+module.exports = mongoose.model('Faction', FactionSchema);

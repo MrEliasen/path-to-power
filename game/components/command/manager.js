@@ -13,9 +13,13 @@ import cmdDrop from './commands/drop';
 import cmdHeal from './commands/heal';
 import cmdSay from './commands/say';
 import cmdGive from './commands/give';
+import cmdGiveItem from './commands/giveitem';
 import cmdGlobal from './commands/global';
 import cmdWhisper from './commands/whisper';
 import cmdShop from './commands/shop';
+
+// Faction commands
+import { cmdFactionCreate } from '../faction/commands';
 
 export default class CommandManager {
     constructor(Game) {
@@ -92,66 +96,58 @@ export default class CommandManager {
             case '/global':
             case '/g':
                 return cmdGlobal(socket, command, params, this.Game)
-                break;
 
             case '/whisper':
             case '/w':
             case '/tell':
             case '/pm':
                 return cmdWhisper(socket, command, params, this.Game)
-                break;
 
             case '/say':
             case '/s':
                 // because the first word is removed from the command,
                 // we put it back, since its considered part of the message
                 return cmdSay(socket, command, params, this.Game)
-                break;
 
             case '/heal':
                 return cmdHeal(socket, command, params, this.Game);
-                break;
+
+            case '/giveitem':
+                return cmdGiveItem(socket, command, params, this.Game);
 
             case '/give':
                 return cmdGive(socket, command, params, this.Game);
-                break;
 
             case '/drop':
                 return cmdDrop(socket, command, params, this.Game);
-                break;
 
             case '/pickup':
             case '/get':
                 return cmdPickup(socket, command, params, this.Game);
-                break;
 
             case '/aim':
                 return cmdAim(socket, command, params, this.Game);
-                break;
 
             case '/flee':
                 return cmdFlee(socket, command, params, this.Game);
-                break;
 
             case '/punch':
                 return cmdPunch(socket, command, params, this.Game);
-                break;
 
             case '/strike':
                 return cmdStrike(socket, command, params, this.Game);
-                break;
 
             case '/shoot':
                 return cmdShoot(socket, command, params, this.Game);
-                break;
 
             case '/release':
                 return cmdRelease(socket, command, params, this.Game);
-                break;
 
             case '/shop':
                 return cmdShop(socket, command, params, this.Game);
-                break;
+
+            case '/factioncreate':
+                return cmdFactionCreate(socket, command, params, this.Game);
 
             default:
                 if (command && command[0] !== '/') {
@@ -160,7 +156,6 @@ export default class CommandManager {
                     params.unshift(command);
                     return cmdSay(socket, command, params, this.Game)
                 }
-                break;
         }
     }
 }

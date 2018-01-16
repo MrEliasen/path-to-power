@@ -1,10 +1,3 @@
-/*
-    This project is based on the original Streetwars Online 2 MUD, but B.Smith aka Wuzzbent.
-    I would not have become a developer, if he had not open souced this game.
-
-    Thanks you.
-*/
-
 // Load required packages
 import express from 'express';
 import mongoose from 'mongoose';
