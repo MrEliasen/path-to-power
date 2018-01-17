@@ -9,18 +9,24 @@ export default class Faction {
         this.onlineMembers = [];
     }
 
+    linkCharacter(character) {
+        // check if the character already is in the faction
+        this.onlineMembers.push(character);
+        // add the faction to the character.
+        character.faction = this;
+    }
+
     addMember(character) {
         return new Promise((resolve, reject) => {
             // check if the character already is in the faction
             if (character.faction_id === this.faction_id) {
-                // then simply add them to the list
-                this.onlineMembers.push(character);
+                this.linkCharacter(character);
                 return resolve(character.user_id);
             }
 
             this.Game.factionManager.characterAddTo(character.user_id, this.faction_id)
                 .then(() => {
-                    this.onlineMembers.push(character);
+                    this.linkCharacter(character);
                     resolve(character.user_id);
                 })
                 .catch((err) => {
@@ -69,7 +75,19 @@ export default class Faction {
     }
 
     disband() {
-        this.remove = true;
+        return new Promise((resolve, reject) => {
+            this.remove = true;
+
+            this.onlineMembers.forEach((member) => {
+                member.faction = null;
+                // let the online member know the faction was disbanded
+                this.Game.eventToUser(member.user_id, 'warning', `Your faction ${this.name}, was disbanded.`);
+                // remove the faction tag from the name, in the online list
+                this.Game.characterManager.dispatchUpdatePlayerList(member.user_id);
+            });
+
+            resolve();
+        });
     }
 
     toObject() {

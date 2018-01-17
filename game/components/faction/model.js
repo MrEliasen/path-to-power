@@ -7,24 +7,20 @@ var mongoose = require('mongoose'),
 var FactionSchema = new mongoose.Schema({
     faction_id: {
         type: String,
-        required: true,
         unique: true
     },
     name: {
         type: String,
-        required: true,
         unique: true
     },
     name_lowercase: String,
     tag: {
         type: String,
-        required: true,
         unique: true
     },
     tag_lowercase: String,
     leader_id: {
         type: String,
-        unique: true,
         required: true
     },
     date_added: String,

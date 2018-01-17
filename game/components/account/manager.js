@@ -64,7 +64,7 @@ export default class AccountManager {
             }
 
             // attempt to load the character from the database
-            this.Game.characterManager.load(socket.user.user_id,(error, character) => {
+            this.Game.characterManager.load(socket.user.user_id, async (error, character) => {
                 if (error) {
                     return this.Game.socketManager.dispatchToSocket(socket, {
                         type: ACCOUNT_AUTHENTICATE_ERROR,
@@ -74,6 +74,15 @@ export default class AccountManager {
 
                 // If they already have a character, send them the character and authenticate
                 if (character) {
+                    // check if they are in a faction, and load the faction if so
+                    const faction = await this.Game.factionManager.get(character.faction_id).catch(() => {});
+
+                    // if they are in a faction, add them to the online list in the faction, and 
+                    // add the faction object to the character
+                    if (faction) {
+                        faction.addMember(character);
+                    }
+
                     // Update the client f
                     this.Game.mapManager.updateClient(character.user_id);
 

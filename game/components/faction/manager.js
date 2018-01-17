@@ -89,10 +89,14 @@ export default class FactionManager {
      */
     get(factionId) {
         return new Promise((resolve, reject) => {
+            if (!factionId) {
+                return reject();
+            }
+
             const faction = this.factions.find((obj) => obj.faction_id === factionId);
 
             if (!faction) {
-                return reject(`No factions with the id: ${factionId} exists.`);
+                return reject();
             }
 
             resolve(faction);
@@ -149,46 +153,59 @@ export default class FactionManager {
      * @return {Promise}
      */
     create(user_id, factionName, factionTag) {
+        user_id = user_id.toString();
+
         return new Promise((resolve, reject) => {
-            FactionModel.find({
-                $or: [
-                    {name_lowercase: factionName.toLowerCase()},
-                    {tag_lowercase: factionTag.toLowerCase()},
-                    {leader_id: user_id}
-                ]
-            }, (err, factions) => {
-                if (err) {
-                    this.Game.logger.error(err);
-                    return reject();
-                }
+            this.Game.characterManager.get(user_id).then((character) => {
+                FactionModel.find({
+                    $or: [
+                        {name_lowercase: factionName.toLowerCase()},
+                        {tag_lowercase: factionTag.toLowerCase()},
+                        {leader_id: user_id}
+                    ]
+                }, (err, factions) => {
+                    if (err) {
+                        this.Game.logger.error(err);
+                        return reject();
+                    }
 
-                // faction(s) with same name, tag or leader was found
-                if (factions.length) {
-                    return reject(factions)
-                }
+                    // faction(s) with same name, tag or leader was found
+                    if (factions.length) {
+                        return reject(factions)
+                    }
 
-                // no duplicates found, create new faction
-                const newFaction = this.add({
-                    faction_id: uuid(),
-                    name: factionName,
-                    tag: factionTag,
-                    leader_id: user_id.toString()
+                    // no duplicates found, create new faction
+                    const newFaction = this.add({
+                        faction_id: uuid(),
+                        name: factionName,
+                        tag: factionTag,
+                        leader_id: user_id
+                    });
+
+                    if (!newFaction) {
+                        this.Game.logger.error(`Error creating faction object`);
+                        return reject();
+                    }
+
+                    const dbFaction = new FactionModel({
+                        ...newFaction.toObject()
+                    });
+
+                    dbFaction.save((err) => {
+                        if (err) {
+                            this.Game.logger.error(`Error saving new faction in DB`, err);
+                            return this.Game.logger.error(err);
+                        }
+                        // Add the faction object to the character
+                        newFaction.addMember(character);
+                        // let them know it succeeded
+                        this.Game.logger.debug(`New faction ${newFaction.faction_id} created.`);
+                        // resolve back to caller
+                        resolve(newFaction);
+                    });
                 });
-
-                if (!newFaction) {
-                    this.Game.logger.error(`Error creating faction object`);
-                    return reject();
-                }
-
-                const dbFaction = new FactionModel({
-                    ...newFaction.toObject()
-                });
-
-                dbFaction.save((err) => {
-                    this.Game.logger.debug(`New faction ${newFaction.faction_id} created.`);
-                    resolve(newFaction);
-                });
-            });
+            })
+            .catch(() => {})
         });
     }
 
@@ -206,11 +223,13 @@ export default class FactionManager {
                     await faction.disband();
 
                     // remove from managed list
-                    this.faction = this.factions.filter((obj) => !obj.remove);
+                    this.factions = this.factions.filter((obj) => !obj.remove);
 
                     // remove from databse
-                    FactionModel.delete({ faction_id: factionId }, (err, deleted) => {
+                    FactionModel.remove({ faction_id: factionId }, (err, deleted) => {
                         if (err) {
+                            this.Game.logger.error(err);
+                            reject();
                             return this.Game.logger.error(err);
                         }
 

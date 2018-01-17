@@ -39,7 +39,7 @@ export function cmdFactionCreate(socket, command, params, Game) {
         .then((newFaction) => {
             Game.eventToSocket(socket, 'success', 'Your new faction has been created!');
             // update the clients with the new player name
-            // TODO: Update player name on character list with the new faction name.
+            Game.characterManager.dispatchUpdatePlayerList(socket.user.user_id);
         })
         .catch((factions) => {
             // we had an error
@@ -62,4 +62,87 @@ export function cmdFactionCreate(socket, command, params, Game) {
                 return Game.eventToSocket(socket, 'error', 'The faction tag is already taken.');
             }
         })
+}
+
+export function cmdFactionDisband(socket, command, params, Game) {
+    // check we got 1 parameter
+    if (params.length != 1) {
+        return Game.eventToSocket(socket, 'error', 'To try avoid accidental faction disbands, you must specify your faction name (case sensitive) as the first argument eg: /factiondisband MyfactionName');
+    }
+
+    Game.characterManager.get(socket.user.user_id)
+        .then((character) => {
+            // make sure they are in a faction
+            if (!character.faction) {
+                return Game.eventToSocket(socket, 'error', 'You are not in a faction.');
+            }
+
+            // make sure they are the leader
+            if (character.faction.leader_id !== character.user_id) {
+                return Game.eventToSocket(socket, 'error', 'You are not the leader of your faction.');
+            }
+
+            // make sure the faction name is identical
+            if (character.faction.name !== params[0]) {
+                return Game.eventToSocket(socket, 'error', 'The faction name you typed does not match the faction you are in (case sensitive).');
+            }
+
+            // remove all members from the faction and delete it
+            Game.factionManager.delete(character.faction.faction_id)
+                .then(() => {
+                    Game.eventToSocket(socket, 'success', 'Your faction was disbanded.');
+                })
+                .catch(() => {
+                    Game.eventToSocket(socket, 'error', 'Something went wrong, when trying to disband your faction.');
+                });
+        })
+        .catch(()=>{
+            Game.eventToSocket(socket, 'error', 'Something went wrong, when trying to disband your faction.');
+        });
+}
+
+export function cmdFactionInvite(socket, command, params, Game) {
+    // check we got 1 parameter
+    if (params.length != 1) {
+        return Game.eventToSocket(socket, 'error', 'You must specify a player name eg: /factioninvite PlayerName');
+    }
+
+    Game.characterManager.get(socket.user.user_id)
+        .then((character) => {
+            // make sure they are in a faction
+            if (!character.faction) {
+                return Game.eventToSocket(socket, 'error', 'You are not in a faction.');
+            }
+
+            // make sure they are the leader
+            if (character.faction.leader_id !== character.user_id) {
+                return Game.eventToSocket(socket, 'error', 'You are not the leader of your faction.');
+            }
+
+            // get the target character we are trying to invite
+            const targetCharacter = Game.characterManager.getByName(params[0]);
+
+            // if they where not online/didn't exist
+            if (!targetCharacter) {
+                return Game.eventToSocket(socket, 'error', 'There are no players online by that name');
+            }
+
+            // make sure the target is not in a faction already
+            if (targetCharacter.faction) {
+                return Game.eventToSocket(socket, 'error', 'That player is already in a faction. They must leave they current faction before they can join a new.');
+            }
+
+            character.faction.addMember(targetCharacter).
+                then(() => {
+                    // let the leader know the invite succeeded.
+                    Game.eventToSocket(socket, 'success', `${targetCharacter.name} as joined the faction!`);
+                    // send a welcome notification to the new member
+                    Game.eventToUser(targetCharacter.user_id, 'success', `You just joined the faction ${character.faction.name}!`);
+                    // update their presence on the online player list
+                    Game.characterManager.dispatchUpdatePlayerList(targetCharacter.user_id);
+                })
+        })
+        .catch(()=>{
+            Game.eventToSocket(socket, 'error', 'Something went wrong.');
+        });
 }

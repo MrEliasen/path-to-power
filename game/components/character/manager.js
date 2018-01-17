@@ -68,6 +68,21 @@ export default class CharacterManager {
     }
 
     /**
+     * Return a player object, matching the name
+     * @param  {Strinmg} characterName name or part of name to search for
+     * @return {Character Obj}
+     */
+    getByName(characterName) {
+        let user_id = Object.keys(this.characters).find((user_id) => {
+            if (this.characters[user_id].name_lowercase.indexOf(characterName) === 0){
+                return true;
+            }
+        });
+
+        return this.characters[user_id];
+    }
+
+    /**
      * gets the character of the user ID, if one exists
      * @param  {String} user_id User ID
      * @return {Promise}
@@ -85,17 +100,46 @@ export default class CharacterManager {
     }
 
     /**
-     * Dispatches an event to all sockets, adding/removing a player to/from the playerlist
+     * Dispatches an event to all sockets, adding a player to the playerlist
      * @param  {String} user_id The user ID 
-     * @param  {String} name    Name of the character, leave out to remove from list
+     * @param  {String} name    Name of the character
      */
-    dispatchUpdatePlayerList(user_id, name = null) {
+    dispatchUpdatePlayerList(user_id) {
+        // get the player
+        this.get(user_id)
+            .then((character) => {
+                let faction = null;
+
+                // only add faction data if they are in a faction, and it is not disbanded
+                if (character.faction && !character.faction.remove) {
+                    faction = {
+                        tag: character.faction.tag,
+                        name: character.faction.name
+                    }
+                }
+
+                // update the clients online player list
+                this.Game.socketManager.dispatchToServer({
+                    type: ADD_ONLINE_PLAYER,
+                    payload: {
+                        user_id: character.user_id,
+                        name: character.name,
+                        faction: faction
+                    }
+                });
+            });
+    }
+
+    /**
+     * Dispatches an event to all sockets, removing a player tfrom the playerlist
+     * @param  {String} user_id The user ID
+     */
+    dispatchRemoveFromPlayerList(user_id) {
         // update the clients online player list
         this.Game.socketManager.dispatchToServer({
-            type: (!name ? REMOVE_ONLINE_PLAYER : ADD_ONLINE_PLAYER),
+            type: REMOVE_ONLINE_PLAYER,
             payload: {
-                user_id,
-                name
+                user_id
             }
         })
     }
@@ -119,7 +163,7 @@ export default class CharacterManager {
 
         // add the character object to the managed list of characters
         this.characters[character.user_id] = character;
-        this.dispatchUpdatePlayerList(character.user_id, character.name);
+        this.dispatchUpdatePlayerList(character.user_id);
 
         this.Game.socketManager.get(character.user_id).then((socket) => {
             // track the character location
@@ -160,7 +204,7 @@ export default class CharacterManager {
                         delete this.characters[user_id];
                     }
 
-                    this.dispatchUpdatePlayerList(user_id);
+                    this.dispatchRemoveFromPlayerList(user_id);
                     resolve();
                 })
                 .catch((err) => {
@@ -177,7 +221,7 @@ export default class CharacterManager {
      * @return {Object}            Object with the character details.
      */
     load(user_id, callback) {
-        this.dbLoad(user_id, (error, character) => {
+        this.dbLoad(user_id, async (error, character) => {
             if (error) {
                 return callback(error);
             }
@@ -187,6 +231,8 @@ export default class CharacterManager {
             }
 
             const newCharacter = new Character(this.Game, character.toObject());
+            newCharacter.faction = await this.Game.factionManager.get(character.faction_id).catch(() => {});
+
             this.manage(newCharacter);
 
             this.Game.itemManager.loadInventory(newCharacter)
@@ -210,7 +256,14 @@ export default class CharacterManager {
     getOnline() {
         const online = {};
         Object.keys(this.characters).map((user_id) => {
-            online[user_id] = this.characters[user_id].name;
+            online[user_id] = {
+                name: this.characters[user_id].name,
+                user_id: this.characters[user_id].user_id,
+                faction: this.characters[user_id].faction ? {
+                    tag: this.characters[user_id].faction.tag,
+                    name: this.characters[user_id].faction.name
+                } : null
+            }
         })
 
         return online;
@@ -369,6 +422,7 @@ export default class CharacterManager {
                 // NOTE: add any information you want to save here.
                 dbCharacter.stats = {...character.stats};
                 dbCharacter.location = {...character.location};
+                dbCharacter.faction_id = character.faction ? character.faction.faction_id : '';
 
                 dbCharacter.save((err) => {
                     if (err) {

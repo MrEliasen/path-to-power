@@ -19,7 +19,7 @@ import cmdWhisper from './commands/whisper';
 import cmdShop from './commands/shop';
 
 // Faction commands
-import { cmdFactionCreate } from '../faction/commands';
+import { cmdFactionCreate, cmdFactionDisband, cmdFactionInvite } from '../faction/commands';
 
 export default class CommandManager {
     constructor(Game) {
@@ -148,6 +148,12 @@ export default class CommandManager {
 
             case '/factioncreate':
                 return cmdFactionCreate(socket, command, params, this.Game);
+
+            case '/factiondisband':
+                return cmdFactionDisband(socket, command, params, this.Game);
+
+            case '/factioninvite':
+                return cmdFactionInvite(socket, command, params, this.Game);
 
             default:
                 if (command && command[0] !== '/') {

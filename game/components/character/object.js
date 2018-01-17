@@ -9,6 +9,9 @@ export default class Character {
         // the character object of the current targed character
         this.target = null;
 
+        // holds the faction object of the player
+        this.faction = null;
+
         // create the inventory and equipped objects
         if (!this.inventory) {
             this.inventory = [];
