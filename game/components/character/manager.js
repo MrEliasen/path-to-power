@@ -391,6 +391,10 @@ export default class CharacterManager {
      */
     save(user_id) {
         return new Promise((resolve, reject) => {
+            if (!user_id) {
+                return reject();
+            }
+
             this.get(user_id).then((character) => {
                 this.Game.logger.debug(`Saving character ${user_id}`);
 

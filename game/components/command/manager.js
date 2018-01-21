@@ -19,7 +19,13 @@ import cmdWhisper from './commands/whisper';
 import cmdShop from './commands/shop';
 
 // Faction commands
-import { cmdFactionCreate, cmdFactionDisband, cmdFactionInvite } from '../faction/commands';
+import {
+    cmdFactionCreate,
+    cmdFactionDisband,
+    cmdFactionInvite,
+    cmdFactionAcceptInvite,
+    cmdFactionSay
+} from '../faction/commands';
 
 export default class CommandManager {
     constructor(Game) {
@@ -109,6 +115,12 @@ export default class CommandManager {
                 // we put it back, since its considered part of the message
                 return cmdSay(socket, command, params, this.Game)
 
+            case '/faction':
+            case '/f':
+                // because the first word is removed from the command,
+                // we put it back, since its considered part of the message
+                return cmdFactionSay(socket, command, params, this.Game)
+
             case '/heal':
                 return cmdHeal(socket, command, params, this.Game);
 
@@ -154,6 +166,9 @@ export default class CommandManager {
 
             case '/factioninvite':
                 return cmdFactionInvite(socket, command, params, this.Game);
+
+            case '/factionjoin':
+                return cmdFactionAcceptInvite(socket, command, params, this.Game);
 
             default:
                 if (command && command[0] !== '/') {

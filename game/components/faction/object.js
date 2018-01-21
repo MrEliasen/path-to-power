@@ -7,20 +7,71 @@ export default class Faction {
         this.remove = false;
         // holds all members of the faction, who are online
         this.onlineMembers = [];
+        // keeps tracks of all active faction invtes. The list will contain the user_id's
+        // of anyone whos been invited.
+        this.invites = [];
     }
 
+    /**
+     * Check if there is an outstanding invite for the character
+     * @param  {Character Obj}  character The character to check
+     * @return {Boolean}           
+     */
+    isInvited(character) {
+        if (this.invites.findIndex((user_id) => user_id === character.user_id) === -1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Sends an invite to the Character
+     * @param  {Character Obj} character The character to invite
+     */
+    inviteMember(character) {
+        if (this.invites.findIndex((user_id) => user_id === character.user_id) === -1) {
+            this.invites.push(character.user_id);
+        }
+    }
+
+    /**
+     * Adds the Character to the faction online list and bind the factio obj to the character
+     * @param  {Character Obj} character The Character to "link"
+     */
     linkCharacter(character) {
-        // check if the character already is in the faction
-        this.onlineMembers.push(character);
         // add the faction to the character.
         character.faction = this;
+
+        if (!this.onlineMembers.find((obj) => obj.user_id === character.user_id)) {
+            // check if the character already is in the faction
+            this.onlineMembers.push(character);
+        }
+
+        // join the faction-only room
+        this.Game.socketManager.get(character.user_id)
+            .then((socket) => {
+                socket.join(this.faction_id);
+            })
+            .catch((err) => {
+
+            });
     }
 
+    /**
+     * Adds a character to the faction
+     * @param {Character Obj} character Character to add to the faction
+     */
     addMember(character) {
         return new Promise((resolve, reject) => {
+            // remove outstanding invites if found
+            if (this.invites.findIndex((user_id) => user_id === character.user_id) !== -1) {
+                this.invites.splice(this.invites.findIndex((user_id) => user_id === character.user_id), 1);
+            }
+
             // check if the character already is in the faction
             if (character.faction_id === this.faction_id) {
-                this.linkCharacter(character);
+                //this.linkCharacter(character);
                 return resolve(character.user_id);
             }
 
@@ -33,13 +84,14 @@ export default class Faction {
                     this.Game.logger.error(err);
                     reject();
                 });
-        })
-        .catch((err) => {
-            this.Game.logger.error(err);
-            reject();
         });
     }
 
+    /**
+     * Removes a character from the fraction
+     * @param  {Character Obj} character The character to remove from the faction
+     * @return {Promise}
+     */
     removeMember(character) {
         return new Promise((resolve, reject) => {
             // make sure the character is in the faction
@@ -50,7 +102,18 @@ export default class Faction {
             this.Game.factionManager.characterRemoveFrom(character.user_id)
                 .then(() => {
                     this.onlineMembers = this.onlineMembers.filter((obj) => obj.user_id !== character.user_id);
-                    resolve(character.user_id);
+
+                    // remove the character from the faction-only room
+                    this.Game.socketManager.get(character.user_id)
+                        .then((socket) => {
+                            socket.leave(this.faction_id);
+                            resolve(character.user_id);
+                        })
+                        .catch((err) => {
+                            // if the character is not online, we just resolve without needing to 
+                            // make the socket leave the chat room.
+                            resolve(character.user_id);
+                        });
                 })
                 .catch((err) => {
                     this.Game.logger.error(err);
@@ -63,6 +126,11 @@ export default class Faction {
         });
     }
 
+    /**
+     * Changes the faction leader to the specified character
+     * @param  {Character Obj} character The character who should be the new leader
+     * @return {Boolan} whether the leader change was successful
+     */
     makeLeader(character) {
         // make sure the character is in the faction
         if (character.faction_id !== this.faction_id) {
@@ -74,6 +142,10 @@ export default class Faction {
         return true;
     }
 
+    /**
+     * Disbands a faction, removing all members from the list
+     * @return {Promise}
+     */
     disband() {
         return new Promise((resolve, reject) => {
             this.remove = true;
@@ -90,6 +162,10 @@ export default class Faction {
         });
     }
 
+    /**
+     * Exports the faction to a plain object
+     * @return {Object}
+     */
     toObject() {
         return {
             faction_id: this.faction_id,

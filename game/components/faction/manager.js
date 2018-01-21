@@ -104,6 +104,29 @@ export default class FactionManager {
     }
 
     /**
+     * Get a faction object by name
+     * @param  {String} factionName The name of the faction
+     * @return {Promise}
+     */
+    getByName(factionName) {
+        factionName = factionName.toLowerCase();
+
+        return new Promise((resolve, reject) => {
+            if (!factionName) {
+                return reject();
+            }
+
+            const faction = this.factions.find((obj) => obj.name_lowercase === factionName);
+
+            if (!faction) {
+                return reject();
+            }
+
+            resolve(faction);
+        })
+    }
+
+    /**
      * Get the list of all factions
      * @param {Boolean} toClient Wheter to return the list of references of plain objects
      * @return {Array} List of factions
@@ -179,7 +202,7 @@ export default class FactionManager {
                         faction_id: uuid(),
                         name: factionName,
                         tag: factionTag,
-                        leader_id: user_id
+                        leader_id: user_id.toString()
                     });
 
                     if (!newFaction) {
@@ -191,13 +214,13 @@ export default class FactionManager {
                         ...newFaction.toObject()
                     });
 
-                    dbFaction.save((err) => {
+                    dbFaction.save(async (err) => {
                         if (err) {
                             this.Game.logger.error(`Error saving new faction in DB`, err);
                             return this.Game.logger.error(err);
                         }
                         // Add the faction object to the character
-                        newFaction.addMember(character);
+                        await newFaction.addMember(character);
                         // let them know it succeeded
                         this.Game.logger.debug(`New faction ${newFaction.faction_id} created.`);
                         // resolve back to caller

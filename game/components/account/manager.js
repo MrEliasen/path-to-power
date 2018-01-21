@@ -80,10 +80,10 @@ export default class AccountManager {
                     // if they are in a faction, add them to the online list in the faction, and 
                     // add the faction object to the character
                     if (faction) {
-                        faction.addMember(character);
+                        faction.linkCharacter(character);
                     }
 
-                    // Update the client f
+                    // Update the client
                     this.Game.mapManager.updateClient(character.user_id);
 
                     return this.Game.socketManager.dispatchToSocket(socket, {

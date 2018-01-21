@@ -1,4 +1,5 @@
 import escapeStringRegex from 'escape-string-regexp';
+import { CHAT_MESSAGE } from '../command/types';
 
 // TODO: Create a config for the variables
 const name = {
@@ -132,15 +133,101 @@ export function cmdFactionInvite(socket, command, params, Game) {
                 return Game.eventToSocket(socket, 'error', 'That player is already in a faction. They must leave they current faction before they can join a new.');
             }
 
-            character.faction.addMember(targetCharacter).
-                then(() => {
-                    // let the leader know the invite succeeded.
-                    Game.eventToSocket(socket, 'success', `${targetCharacter.name} as joined the faction!`);
-                    // send a welcome notification to the new member
-                    Game.eventToUser(targetCharacter.user_id, 'success', `You just joined the faction ${character.faction.name}!`);
-                    // update their presence on the online player list
-                    Game.characterManager.dispatchUpdatePlayerList(targetCharacter.user_id);
+            // Create the invite
+            character.faction.inviteMember(targetCharacter);
+
+            // let the leader know the invite succeeded.
+            Game.eventToSocket(socket, 'success', `${targetCharacter.name} has been invited to your faction!`);
+            // send a welcome notification to the new member
+            Game.eventToUser(targetCharacter.user_id, 'info', `You have been invited to join the faction ${character.faction.name}. To join type: /factionjoin ${character.faction.name}`);
+        })
+        .catch(()=>{
+            Game.eventToSocket(socket, 'error', 'Something went wrong.');
+        });
+}
+
+export function cmdFactionAcceptInvite(socket, command, params, Game) {
+    // check we got 1 parameter
+    if (params.length != 1) {
+        return Game.eventToSocket(socket, 'error', 'You must specify the faction you want to join eg: /factionjoin FactionName');
+    }
+
+    // Get the character whom sent the join request
+    Game.characterManager.get(socket.user.user_id)
+        .then((character) => {
+            // get the faction they want to join
+            Game.factionManager.getByName(params[0])
+                .then((faction) => {
+                    // make sure there is an outstanding invite for the character
+                    if (!faction.isInvited(character)) {
+                        return Game.eventToSocket(socket, 'error', 'There is no invite pending from that faction.')
+                    }
+
+                    faction.addMember(character).
+                        then(() => {
+                            // let the faction know, a new memeber joined
+                            Game.socketManager.dispatchToRoom(character.faction.faction_id, {
+                                type: CHAT_MESSAGE,
+                                payload: {
+                                    name: null,
+                                    message: `${character.name} has joined ${character.faction.name}!`,
+                                    type: 'faction'
+                                }
+                            })
+                            // update their presence on the online player list
+                            Game.characterManager.dispatchUpdatePlayerList(character.user_id);
+                        })
+                        .catch(() => {
+
+                        })
                 })
+                .catch(Game.logger.info);
+        })
+        .catch((err) => {
+            Game.logger.info(err);
+        });
+}
+
+export function cmdFactionSay(socket, command, params, Game) {
+    Game.characterManager.get(socket.user.user_id)
+        .then((character) => {
+            // make sure they are in a faction
+            if (!character.faction) {
+                return Game.eventToSocket(socket, 'error', 'You are not a member of a faction.');
+            }
+
+            Game.socketManager.dispatchToRoom(character.faction.faction_id, {
+                type: CHAT_MESSAGE,
+                payload: {
+                    name: character.name,
+                    message: params.join(' '),
+                    type: 'faction'
+                }
+            });
+        })
+        .catch(Game.logger.error)
+}
+
+export function cmdFactionKick(socket, command, params, Game) {
+    // check we got 1 parameter
+    if (params.length != 1) {
+        return Game.eventToSocket(socket, 'error', 'You must specify a player name eg: /factionkick PlayerName');
+    }
+
+    Game.characterManager.get(socket.user.user_id)
+        .then((character) => {
+            // make sure they are in a faction
+            if (!character.faction) {
+                return Game.eventToSocket(socket, 'error', 'You are not in a faction.');
+            }
+
+            // make sure they are the leader
+            if (character.faction.leader_id !== character.user_id) {
+                return Game.eventToSocket(socket, 'error', 'You are not the leader of your faction.');
+            }
+
+            // remove character from faction in the database only, if they are not online
+            // if they are online, run them through the faction.removeMember()
         })
         .catch(()=>{
             Game.eventToSocket(socket, 'error', 'Something went wrong.');
