@@ -42,6 +42,10 @@ export default class AccountManager {
             }
         });
 
+        if (!action.payload.twitch_token) {
+            return;
+        }
+
         this.dbLogin(action, (error, account) => {
             if (error) {
                 return this.Game.socketManager.dispatchToSocket(socket, {

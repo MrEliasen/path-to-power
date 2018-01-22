@@ -99,8 +99,13 @@ export default class Faction {
                 return reject();
             }
 
-            this.Game.factionManager.characterRemoveFrom(character.user_id)
+            // remove the faction reference from the character
+            character.faction = null;
+            character.faction_id = '';
+
+            this.Game.factionManager.dbCharacterRemove(character.user_id)
                 .then(() => {
+                    // remove member from faction online list
                     this.onlineMembers = this.onlineMembers.filter((obj) => obj.user_id !== character.user_id);
 
                     // remove the character from the faction-only room
@@ -132,14 +137,28 @@ export default class Faction {
      * @return {Boolan} whether the leader change was successful
      */
     makeLeader(character) {
-        // make sure the character is in the faction
-        if (character.faction_id !== this.faction_id) {
-            return false;
-        }
+        return new Promise((resolve, reject) => {
+            // make sure the character is in the faction
+            if (character.faction_id !== this.faction_id) {
+                return reject('The player is not in the same faction.');
+            }
 
-        // set the leader to the new user ID
-        this.leader_id = character.user_id;
-        return true;
+            // make sure the character is in the faction
+            if (character.user_id === this.leader_id) {
+                return reject('You are already the leader of this faction.');
+            }
+
+            // set the leader to the new user ID
+            this.leader_id = character.user_id;
+            // save the changes to the faction
+            this.Game.factionManager.save(this)
+                .then(() => {
+                    resolve();
+                })
+                .catch((err) => {
+                    reject(err);
+                })
+        });
     }
 
     /**

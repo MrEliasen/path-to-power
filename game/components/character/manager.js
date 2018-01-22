@@ -441,26 +441,24 @@ export default class CharacterManager {
     }
 
     /**
-     * Find a character by their name
+     * Find a character in the database, by name
      * @param  {Strng} characterName  Name to search for
-     * @return {Character Obj}        Character obj if found.
+     * @return {Object}               Plain object of character.
      */
-    findByName(targetName) {
+    dbGetByName(targetName) {
         return new Promise((resolve, reject) => {
-            targetName = targetName.toLowerCase();
-
-            let found;
-            Object.keys(this.characters).map((user_id) => {
-                if (this.characters[user_id].name.toLowerCase() === targetName) {
-                    found = this.characters[user_id];
+            CharacterModel.findOne({ name_lowercase: targetName.toLowerCase() }, function(err, character) {
+                if (err) {
+                    this.Game.logger.error('CharacterManager::dbGetByName', err);
+                    return reject('Internal server error.');
                 }
-            })
 
-            if (!found) {
-                return reject('Character not found')
-            }
+                if (!character) {
+                    return reject(null);
+                }
 
-            resolve(found);
+                resolve(character.toObject());
+            });
         })
     }
 

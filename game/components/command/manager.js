@@ -24,7 +24,9 @@ import {
     cmdFactionDisband,
     cmdFactionInvite,
     cmdFactionAcceptInvite,
-    cmdFactionSay
+    cmdFactionSay,
+    cmdFactionKick,
+    cmdFactionMakeLeader
 } from '../faction/commands';
 
 export default class CommandManager {
@@ -169,6 +171,12 @@ export default class CommandManager {
 
             case '/factionjoin':
                 return cmdFactionAcceptInvite(socket, command, params, this.Game);
+
+            case '/factionkick':
+                return cmdFactionKick(socket, command, params, this.Game);
+
+            case '/factionpromote':
+                return cmdFactionMakeLeader(socket, command, params, this.Game);
 
             default:
                 if (command && command[0] !== '/') {

@@ -56,14 +56,14 @@ export default class FactionManager {
      * @param  {String} user_id     Id of the user we remove from the faction
      * @return {Promise}
      */
-    characterRemoveFrom(user_id) {
+    dbCharacterRemove(user_id) {
         return new Promise((resolve, reject) => {
             CharacterModel.update({_id: user_id }, { $set: { faction_id: '' }}, (err, updated) => {
                 if (err) {
                     return reject(err);
                 }
 
-                resolve({ user_id, faction_id });
+                resolve({ user_id });
             });
         });
     }
@@ -147,13 +147,14 @@ export default class FactionManager {
 
     save(faction) {
         return new Promise((resolve, reject) => {
-            if (!faction._id) {
-                return reject('Missing faction DB _id');
-            }
-
-            FactionModel.find({ faction_id: faction.faction_id }, (err, dbFaction) => {
+            FactionModel.findOne({ faction_id: faction.faction_id }, (err, dbFaction) => {
                 if (err) {
-                    return reject(err);
+                    this.Game.logger.error(err);
+                    return reject('Something went wrong.');
+                }
+
+                if (!dbFaction) {
+                    return reject('Something went wrong.');
                 }
 
                 dbFaction.name = faction.name;
@@ -161,8 +162,13 @@ export default class FactionManager {
                 dbFaction.leader_id = faction.leader_id;
 
                 dbFaction.save((err) => {
+                    if (err) {
+                        this.Game.logger.error(err);
+                        return reject('Something went wrong.');
+                    }
+
                     this.Game.logger.debug(`Faction ${faction._id} saved.`);
-                    resolve(faction);
+                    resolve();
                 });
             });
         });

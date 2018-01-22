@@ -8,7 +8,7 @@ export default function cmdWhisper(socket, command, params, Game) {
     Game.characterManager.get(socket.user.user_id).then((sender) => {
         const target = params.shift();
 
-        Game.characterManager.findByName(target).then((whisperTarget) => {
+        Game.characterManager.getByName(target).then((whisperTarget) => {
             // send message to the socket
             Game.socketManager.dispatchToSocket(socket, {
                 type: CHAT_MESSAGE,

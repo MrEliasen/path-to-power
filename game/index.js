@@ -107,9 +107,10 @@ class Game {
             return;
         }
 
+        // NOTE: if you want to add anything to the auto save, do it here
         setInterval(() => {
             this.characterManager.saveAll();
-        }, this.config.game.autosave.interval)
+        }, this.config.game.autosave.interval);
     }
 
     /**

@@ -173,7 +173,7 @@ export function cmdFactionAcceptInvite(socket, command, params, Game) {
                                     message: `${character.name} has joined ${character.faction.name}!`,
                                     type: 'faction'
                                 }
-                            })
+                            });
                             // update their presence on the online player list
                             Game.characterManager.dispatchUpdatePlayerList(character.user_id);
                         })
@@ -181,7 +181,9 @@ export function cmdFactionAcceptInvite(socket, command, params, Game) {
 
                         })
                 })
-                .catch(Game.logger.info);
+                .catch(()=>{
+                    Game.eventToSocket(socket, 'error', 'No invite for that faction was found. Make sure you spelled the faction name correct.');
+                });
         })
         .catch((err) => {
             Game.logger.info(err);
@@ -226,10 +228,128 @@ export function cmdFactionKick(socket, command, params, Game) {
                 return Game.eventToSocket(socket, 'error', 'You are not the leader of your faction.');
             }
 
-            // remove character from faction in the database only, if they are not online
+            const targetCharacter = Game.characterManager.getByName(params[0]);
+
             // if they are online, run them through the faction.removeMember()
+            if (targetCharacter) {
+                return character.faction.removeMember(targetCharacter)
+                            .then(() => {
+                                // let the faction know, a member was removed
+                                Game.socketManager.dispatchToRoom(character.faction.faction_id, {
+                                    type: CHAT_MESSAGE,
+                                    payload: {
+                                        name: null,
+                                        message: `${targetCharacter.name} was removed from ${character.faction.name}!`,
+                                        type: 'faction'
+                                    }
+                                });
+                                // let the member know they where removed from the faction
+                                Game.socketManager.dispatchToUser(targetCharacter.user_id, {
+                                    type: CHAT_MESSAGE,
+                                    payload: {
+                                        name: null,
+                                        message: `You have been kicked/removed from ${character.faction.name}!`,
+                                        type: 'faction'
+                                    }
+                                });
+
+                                // update their presence on the online player list
+                                Game.characterManager.dispatchUpdatePlayerList(targetCharacter.user_id);
+                            })
+                            .catch(() => {
+                                Game.eventToSocket(socket, 'error', 'Something went wrong.');
+                            });
+            }
+
+            // if they are not online, remove character from faction in the database only
+            Game.characterManager.dbGetByName(params[0])
+                .then((dbCharacter) => {
+                    // make sure the character is in the same faction
+                    if (dbCharacter.faction_id !== character.faction.faction_id) {
+                        return Game.eventToSocket(socket, 'error', 'This player is not part of your faction.');
+                    }
+                    // remove them from the faction
+                    Game.factionManager.dbCharacterRemove(dbCharacter.user_id)
+                        .then(() => {
+                            // let the faction know, a member was removed
+                            Game.socketManager.dispatchToRoom(character.faction.faction_id, {
+                                type: CHAT_MESSAGE,
+                                payload: {
+                                    name: null,
+                                    message: `${dbCharacter.name} was removed from ${character.faction.name}!`,
+                                    type: 'faction'
+                                }
+                            });
+                        })
+                        .catch(() => {
+                            Game.eventToSocket(socket, 'error', 'Something went wrong.');
+                        });
+                })
+                .catch((err) => {
+                    if (err) {
+                        return Game.eventToSocket(socket, 'error', err);
+                    }
+
+                    Game.eventToSocket(socket, 'error', 'No player found by that name.');
+                })
         })
         .catch(()=>{
             Game.eventToSocket(socket, 'error', 'Something went wrong.');
+        });
+}
+
+
+
+export function cmdFactionMakeLeader(socket, command, params, Game) {
+    // check we got 1 parameter
+    if (params.length != 1) {
+        return Game.eventToSocket(socket, 'error', 'You must specify the name of the faction member you want to promote to leader eg: /factionpromote MemberName');
+    }
+
+    // Get the character whom sent the join request
+    Game.characterManager.get(socket.user.user_id)
+        .then((character) => {
+            // make sure they are in a faction
+            if (!character.faction) {
+                return Game.eventToSocket(socket, 'error', 'You are not in a faction.');
+            }
+
+            // make sure they are the leader
+            if (character.faction.leader_id !== character.user_id) {
+                return Game.eventToSocket(socket, 'error', 'You are not the leader of your faction.');
+            }
+
+            // get the target character we are trying to invite
+            const targetCharacter = Game.characterManager.getByName(params[0]);
+
+            // if they where not online/didn't exist
+            if (!targetCharacter) {
+                return Game.eventToSocket(socket, 'error', 'There are no players online by that name');
+            }
+
+            // make sure the target is not in a faction already
+            if (!targetCharacter.faction || targetCharacter.faction.faction_id !== character.faction.faction_id) {
+                return Game.eventToSocket(socket, 'error', 'That player is not a member of your faction. They must be a member of your faction in order for you to promote them.');
+            }
+
+            // promote the new player
+            character.faction.makeLeader(targetCharacter)
+                .then(() => {
+                    // let the faction know a new leader was assigned
+                    Game.socketManager.dispatchToRoom(character.faction.faction_id, {
+                        type: CHAT_MESSAGE,
+                        payload: {
+                            name: null,
+                            message: `${targetCharacter.name} has been promoted to the new leader of ${character.faction.name}!`,
+                            type: 'faction'
+                        }
+                    });
+                })
+                .catch((err) => {
+                    Game.eventToSocket(socket, 'error', err);
+                })
+        })
+        .catch((err) => {
+            Game.logger.info(err);
         });
 }
