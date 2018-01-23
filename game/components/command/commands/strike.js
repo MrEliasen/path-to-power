@@ -24,7 +24,7 @@ export default function cmdStrike(socket, command, params, Game) {
 
             // if the target died
             if (!attack.healthLeft) {
-                return Game.characterManager.kill(target.user_id)
+                return Game.characterManager.kill(target.user_id, character)
                     .then((oldLocationId) => {
                         // send event to the attacker
                         Game.eventToSocket(socket, 'info', `You land the killing blow on ${target.name}, with your ${weapon}. They fall to the ground, dropping everything they carried.`);

@@ -58,6 +58,7 @@ export default class Item {
             type: this.type,
             subtype: this.subtype,
             stats: {...this.stats},
+            equipped_slot: this.equipped_slot
         }
     }
 

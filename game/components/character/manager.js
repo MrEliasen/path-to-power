@@ -625,10 +625,11 @@ export default class CharacterManager {
 
     /**
      * Kills a character, drops their loot, and respawns them at the map respawn location
-     * @param  {String} user_id The user ID of the character to kill
+     * @param  {String} user_id   The user ID of the character to kill
+     * @param {Character} killer  The character obj of the killer.
      * @return {Promise}
      */
-    kill(user_id) {
+    kill(user_id, killer) {
         return new Promise((resolve, reject) => {
             // fetch the character who got killed
             this.get(user_id).then((character) => {
@@ -665,6 +666,15 @@ export default class CharacterManager {
                         droppedLoot.items.forEach((item) => {
                             this.Game.itemManager.drop(oldLocation.map, oldLocation.x, oldLocation.y, item);
                         });
+
+                        // give the cash to the killer
+                        killer.stats.money = killer.stats.money + droppedLoot.cash;
+
+                        // Update the killers character stats
+                        this.updateClient(killer.user_id);
+
+                        // Let the killer know how much money they received
+                        this.Game.eventToUser(killer.user_id, 'info', `You find ${droppedLoot.cash} money on ${character.name} body.`);
 
                         // update the client's ground look at the location
                         this.Game.socketManager.dispatchToRoom(oldLocationId, {

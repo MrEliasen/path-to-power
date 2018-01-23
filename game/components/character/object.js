@@ -77,7 +77,9 @@ export default class Character {
             inventory: this.inventory.map((item) => {
                 return item.toObject();
             }),
-            equipped: this.equipped,
+            equipped: Object.keys(this.equipped).map((slot) => {
+                return this.equipped[slot].toObject();
+            }),
             stats: this.stats,
             location: this.location
         }
@@ -262,7 +264,7 @@ export default class Character {
             return false;
         }
 
-        this.equipped[slot].slot = null;
+        this.equipped[slot].equipped_slot = null;
         this.equipped[slot] = null;
         return true;
     }
@@ -309,7 +311,7 @@ export default class Character {
         }
 
         // equip the item
-        item.slot = slot;
+        item.equipped_slot = slot;
         this.equipped[slot] = item;
         return true;
     }
