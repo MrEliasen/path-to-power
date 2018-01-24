@@ -78,15 +78,6 @@ export default class AccountManager {
 
                 // If they already have a character, send them the character and authenticate
                 if (character) {
-                    // check if they are in a faction, and load the faction if so
-                    const faction = await this.Game.factionManager.get(character.faction_id).catch(() => {});
-
-                    // if they are in a faction, add them to the online list in the faction, and 
-                    // add the faction object to the character
-                    if (faction) {
-                        faction.linkCharacter(character);
-                    }
-
                     // Update the client
                     this.Game.mapManager.updateClient(character.user_id);
 

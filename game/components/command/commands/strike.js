@@ -17,8 +17,19 @@ export default function cmdStrike(socket, command, params, Game) {
                 return Game.eventToSocket(socket, 'error', 'You do not have a melee weapon equipped.');
             }
 
-            // deal damage to the target
             const weapon = character.equipped.melee.name;
+
+            // check if the attack will hit
+            if (!character.attackHit()) {
+                // send event to the attacker
+                Game.eventToSocket(socket, 'info', `You take a swing at ${target.name}, with your ${weapon}, but miss.`);
+                // send event to the target
+                Game.eventToUser(target.user_id, 'info', `${character.name} swings their ${weapon} at you, but they miss.`);
+                // send event to the bystanders
+                return Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} swing their ${weapon} at ${target.name}, but missing.`, [character.user_id, target.user_id]);
+            }
+
+            // deal damage to the target
             const damage = character.getWeaponDamage('melee');
             const attack = target.dealDamage(damage, true);
 

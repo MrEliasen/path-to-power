@@ -11,6 +11,7 @@ import itemManager from './components/item/manager';
 import shopManager from './components/shop/manager';
 import commandManager from './components/command/manager';
 import factionManager from './components/faction/manager';
+import abilityManager from './components/ability/manager';
 //import npcManager from './components/npc/manager';
 
 import { newEvent } from './actions';
@@ -32,6 +33,7 @@ class Game {
         this.shopManager = new shopManager(this);
         this.commandManager = new commandManager(this);
         this.factionManager = new factionManager(this);
+        this.abilityManager = new abilityManager(this);
         //this.npcManager = new npcManager(this);
 
         // load game data

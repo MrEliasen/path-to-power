@@ -12,6 +12,15 @@ export default class Character {
         // holds the faction object of the player
         this.faction = null;
 
+        // holds all the skills for the character
+        this.skills = [];
+
+        // holds all the abilities for the character
+        // This is set in the object assign, if not set it to blank
+        if (!this.abilities) {
+            this.abilities = [];
+        }
+
         // create the inventory and equipped objects
         if (!this.inventory) {
             this.inventory = [];
@@ -37,6 +46,28 @@ export default class Character {
             this.location.x = spawn.x;
             this.location.y = spawn.y;
         }
+    }
+
+    /**
+     * Exports all abilities to a plain object
+     * @param  {Boolean} toClient If true, includes the name of the ability as well
+     * @return {Object}           The object with ability id as key.
+     */
+    exportAbilities(toClient = false) {
+        const abilities = {};
+
+        this.abilities.map((ability) => {
+            if (toClient) {
+                abilities[ability.id] = {
+                    value: ability.value,
+                    name: ability.name
+                };
+            } else {
+                abilities[ability.id] = ability.value;
+            }
+        });
+
+        return abilities;
     }
 
     /**
@@ -81,6 +112,7 @@ export default class Character {
                 return this.equipped[slot].toObject();
             }),
             stats: this.stats,
+            abilities: this.exportAbilities(true),
             location: this.location
         }
     }
@@ -463,6 +495,10 @@ export default class Character {
                 this.giveItem(this.Game.itemManager.add(itemObj.id), 1);
             }
         }
+    }
+
+    attackHit() {
+        return this.abilities.find((obj) => obj.id = 'acc').use();
     }
 
     /**

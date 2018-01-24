@@ -158,7 +158,19 @@ export default class CharacterManager {
             // NOTE: reapply any temporary effects here to avoid relogging to clear them
             this.characters[character.user_id].targetedBy.forEach((user) => {
                 character.gridLock(user);
-            })
+            });
+        }
+
+        // load the character abilities
+        await this.Game.abilityManager.load(character);
+
+        // check if they are in a faction, and load the faction if so
+        const faction = await this.Game.factionManager.get(character.faction_id).catch(() => {});
+
+        // if they are in a faction, add them to the online list in the faction, and 
+        // add the faction object to the character
+        if (faction) {
+            faction.linkCharacter(character);
         }
 
         // add the character object to the managed list of characters
@@ -425,6 +437,7 @@ export default class CharacterManager {
                 // update the character db object, and save the changes
                 // NOTE: add any information you want to save here.
                 dbCharacter.stats = {...character.stats};
+                dbCharacter.abilities = character.exportAbilities();
                 dbCharacter.location = {...character.location};
                 dbCharacter.faction_id = character.faction ? character.faction.faction_id : '';
 

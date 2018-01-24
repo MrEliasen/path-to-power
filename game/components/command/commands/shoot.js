@@ -1,4 +1,4 @@
-export default function cmdStrike(socket, command, params, Game) {
+export default function cmdShoot(socket, command, params, Game) {
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
             const target = character.target;
@@ -22,8 +22,19 @@ export default function cmdStrike(socket, command, params, Game) {
                 return Game.eventToSocket(socket, 'error', 'You do not have any ammunition equipped.');
             }
 
-            // deal damage to the target
             const weapon = character.equipped.ranged.name;
+
+            // check if the attack will hit
+            if (!character.attackHit()) {
+                // send event to the attacker
+                Game.eventToSocket(socket, 'info', `You shoot at ${target.name} with your ${weapon}, but misses the shot.`);
+                // send event to the target
+                Game.eventToUser(target.user_id, 'info', `${target.name} shoots their ${weapon} in your direction, but misses the shot.`);
+                // send event to the bystanders
+                return Game.eventToRoom(character.getLocationId(), 'info', `You see ${target.name} shoots their ${weapon} in ${target.name}'s direction, but misses.`, [character.user_id, target.user_id]);
+            }
+
+            // deal damage to the target
             const damage = character.fireRangedWeapon();
             const attack = target.dealDamage(damage, true);
 
