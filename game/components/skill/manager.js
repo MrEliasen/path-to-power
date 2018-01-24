@@ -13,6 +13,7 @@ export default class SkillManager {
      * @return {array}
      */
     getDefaults() {
+        // NOTE: set the default skills for new players here
         return [
             {
                 id: 'snoop',
@@ -35,7 +36,7 @@ export default class SkillManager {
             return null;
         }
 
-        return new skillTemplate(skill.modifiers);
+        return new skillTemplate(this.Game, skill.modifiers);
     }
 
     /**
