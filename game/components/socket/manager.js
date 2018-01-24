@@ -1,3 +1,4 @@
+import Promise from 'bluebird';
 import io from 'socket.io';
 import EventEmitter from 'events';
 

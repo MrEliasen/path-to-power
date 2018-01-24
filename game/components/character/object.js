@@ -1,7 +1,8 @@
+import Promise from 'bluebird';
+
 export default class Character {
     constructor(Game, character) {
         this.Game = Game;
-        Object.assign(this, character);
 
         // the character objest of the characters who are currently aiming at this character
         this.targetedBy = [];
@@ -13,31 +14,32 @@ export default class Character {
         this.faction = null;
 
         // holds all the skills for the character
-        this.skills = [];
+        this.skills = null;
 
         // holds all the abilities for the character
         // This is set in the object assign, if not set it to blank
-        if (!this.abilities) {
-            this.abilities = [];
-        }
+        this.abilities = [];
 
         // create the inventory and equipped objects
-        if (!this.inventory) {
-            this.inventory = [];
-        }
-        if (!this.equipped) {
-            this.equipped = {};
-        }
+        this.inventory = [];
+        this.equipped = {};
 
         // if the character is new, they won't have stats, set the default here.
-        if (!this.stats) {
-            this.stats = {
-                health: 100,
-                health_max: 100,
-                money: 0,
-                bank: 200
-            }
+        this.stats = {
+            health: 100,
+            health_max: 100,
+            money: 0,
+            bank: 200
         }
+
+        // assign all the character modifiers, and deep-copy the stats
+        Object.assign(this, {
+            ...character,
+            stats: {
+                ...this.stats,
+                ...character.stats
+            }
+        });
 
         // if the location does not have an X or Y coordinate, set the location to the
         // map spawn location
@@ -68,6 +70,31 @@ export default class Character {
         });
 
         return abilities;
+    }
+
+    /**
+     * Exports all abilities to a plain object
+     * @param  {Boolean} toClient If true, includes the name of the ability as well
+     * @return {Object}           The object with ability id as key.
+     */
+    exportSkills(toClient = false) {
+        const exportedSkills = {};
+
+        this.skills.forEach((skill) => {
+            if (toClient) {
+                exportedSkills[skill.id] = {
+                    name: skill.name,
+                    modifiers: skill.getModifiers()
+                };
+            } else {
+                exportedSkills[skill.id] = {
+                    id: skill.id,
+                    modifiers: skill.getModifiers()
+                }
+            }
+        });
+
+        return exportedSkills;
     }
 
     /**
@@ -113,6 +140,7 @@ export default class Character {
             }),
             stats: this.stats,
             abilities: this.exportAbilities(true),
+            skills: this.exportSkills(true),
             location: this.location
         }
     }

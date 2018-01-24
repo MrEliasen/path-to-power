@@ -1,3 +1,4 @@
+import Promise from 'bluebird';
 import uuid from 'uuid/v4';
 import { SHOP_UPDATE } from './types';
 

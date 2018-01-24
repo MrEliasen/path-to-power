@@ -1,3 +1,5 @@
+import Promise from 'bluebird';
+
 // manager specific imports
 import Structure from './object';
 import structureList from '../../data/structures.json' ;

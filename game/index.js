@@ -1,5 +1,6 @@
 // our logger
 import winston from 'winston';
+import Promise from 'bluebird';
 
 // component manager
 import accountManager from './components/account/manager';
@@ -12,6 +13,7 @@ import shopManager from './components/shop/manager';
 import commandManager from './components/command/manager';
 import factionManager from './components/faction/manager';
 import abilityManager from './components/ability/manager';
+import skillManager from './components/skill/manager';
 //import npcManager from './components/npc/manager';
 
 import { newEvent } from './actions';
@@ -34,6 +36,7 @@ class Game {
         this.commandManager = new commandManager(this);
         this.factionManager = new factionManager(this);
         this.abilityManager = new abilityManager(this);
+        this.skillManager = new skillManager(this);
         //this.npcManager = new npcManager(this);
 
         // load game data
@@ -71,6 +74,9 @@ class Game {
             this.logger.add(new winston.transports.Console({
                 format: winston.format.simple()
             }));
+
+            // enable long stack traces to promises, while in dev
+            Promise.longStackTraces();
         }
 
         this.logger.info('Logger initiated.');

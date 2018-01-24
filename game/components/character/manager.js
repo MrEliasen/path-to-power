@@ -1,3 +1,5 @@
+import Promise from 'bluebird';
+
 // Manager specific imports
 import {
     ADD_ONLINE_PLAYER,
@@ -164,6 +166,9 @@ export default class CharacterManager {
         // load the character abilities
         await this.Game.abilityManager.load(character);
 
+        // load the character skills
+        await this.Game.skillManager.load(character);
+
         // check if they are in a faction, and load the faction if so
         const faction = await this.Game.factionManager.get(character.faction_id).catch(() => {});
 
@@ -243,17 +248,18 @@ export default class CharacterManager {
             }
 
             const newCharacter = new Character(this.Game, character.toObject());
-            newCharacter.faction = await this.Game.factionManager.get(character.faction_id).catch(() => {});
 
             this.manage(newCharacter);
 
             this.Game.itemManager.loadInventory(newCharacter)
                 .then((items) => {
                     if (items) {
-                        items.map((item) => {
-                            newCharacter.giveItem(item, item.getAmount());
-                        })
                         newCharacter.setInventory(items);
+                        items.map((item, index) => {
+                            if (item.equipped_slot) {
+                                newCharacter.equip(index);
+                            }
+                        });
                     }
                     callback(null, newCharacter);
                 })
@@ -436,10 +442,11 @@ export default class CharacterManager {
 
                 // update the character db object, and save the changes
                 // NOTE: add any information you want to save here.
-                dbCharacter.stats = {...character.stats};
-                dbCharacter.abilities = character.exportAbilities();
-                dbCharacter.location = {...character.location};
-                dbCharacter.faction_id = character.faction ? character.faction.faction_id : '';
+                dbCharacter.stats       = {...character.stats};
+                dbCharacter.abilities   = character.exportAbilities();
+                dbCharacter.skills      = character.exportSkills();
+                dbCharacter.location    = {...character.location};
+                dbCharacter.faction_id  = character.faction ? character.faction.faction_id : '';
 
                 dbCharacter.save((err) => {
                     if (err) {

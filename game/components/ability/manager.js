@@ -1,3 +1,6 @@
+import Promise from 'bluebird';
+
+// manager specific imports
 import AbilityAccuracy from './abilities/accuracy';
 
 export default class AbilityManager {
@@ -8,6 +11,11 @@ export default class AbilityManager {
         this.abilities = [];
     }
 
+    /**
+     * Loads the characters abilities
+     * @param  {Character} character The character object to load abilities for
+     * @return {Promise}
+     */
     load(character) {
         return new Promise((resolve, reject) => {
             // save the abilities list
@@ -19,9 +27,5 @@ export default class AbilityManager {
 
             resolve();
         });
-    }
-
-    get(skillName) {
-        return this.abilities.find((obj) => obj.name === skillName);
     }
 }

@@ -1,3 +1,5 @@
+import Promise from 'bluebird';
+
 export default class Structure {
     constructor(Game, structureData, location) {
         this.Game = Game;

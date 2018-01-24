@@ -27,6 +27,9 @@ var CharacterSchema = new mongoose.Schema({
     abilities: {
         type: {}
     },
+    skills: {
+        type: {}
+    },
     faction_id: {
         type: String,
     },

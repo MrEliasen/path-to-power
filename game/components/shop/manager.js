@@ -1,3 +1,5 @@
+import Promise from 'bluebird';
+
 // manager specific imports
 import ShopList from '../../data/shops.json';
 import Shop from './object';

@@ -1,3 +1,5 @@
+import Promise from 'bluebird';
+
 // manager specific imports
 import ItemModel from './model';
 import ItemList from '../../data/items.json';
@@ -203,13 +205,19 @@ export default class ItemManager {
 
     loadInventory(character) {
         return new Promise((resolve, reject) => {
-            ItemModel.find({ user_id: character.user_id}, {_id: 1, item_id: 1, modifiers: 1}, (err, items) => {
+            ItemModel.find({ user_id: character.user_id}, {_id: 1, item_id: 1, modifiers: 1, equipped_slot: 1}, (err, items) => {
                 if (err) {
                     this.Game.logger.error(`Error loading inventory for user: ${user_id}`, err);
                     return reject(err);
                 }
 
-                const inventory = items.map((item) => this.add(item.item_id, item.modifiers, item._id));
+                const inventory = items.map((item) => {
+                    let newItem = this.add(item.item_id, item.modifiers, item._id);
+                    newItem.equipped_slot = item.equipped_slot;
+
+                    return newItem;
+                });
+
                 resolve(inventory);
             })
         })
@@ -317,8 +325,8 @@ export default class ItemManager {
                         return this.dbCreate(user_id, item);
                     }
 
-                    loadedItem.modifiers - item.getModifiers();
-                    loadedItem.equipped_slot - item.equipped_slot;
+                    loadedItem.modifiers = item.getModifiers();
+                    loadedItem.equipped_slot = item.equipped_slot;
 
                     loadedItem.save((error) => {
                         if (error) {

@@ -1,0 +1,82 @@
+import Promise from 'bluebird';
+import SkillList from './skills';
+
+export default class SkillManager {
+    constructor(Game) {
+        this.Game = Game;
+        // The list of all skills currently managed (Players and NPCs)
+        this.skills = [];
+    }
+
+    /**
+     * Returns a list of base skills all new characters begins with
+     * @return {array}
+     */
+    getDefaults() {
+        return [
+            {
+                id: 'snoop',
+                modifiers: {
+                    value: 10
+                }
+            }
+        ];
+    }
+
+    /**
+     * Generate a skill from its template.
+     * @param  {Object} skill The plain skill object for the skill
+     * @return {Skill Obj}    The skill object for the new skill
+     */
+    new(skill) {
+        const skillTemplate = SkillList[skill.id];
+
+        if (!skillTemplate) {
+            return null;
+        }
+
+        return new skillTemplate(skill.modifiers);
+    }
+
+    /**
+     * Loads a characters skills, or create a new setup if its the first time.
+     * @param  {Character} character The character obj to load skills for
+     * @return {Promise}
+     */
+    load(character) {
+        return new Promise((resolve, reject) => {
+            // save the players skills list 
+            const playerSkills = character.skills ? {...character.skills} : {};
+            // get the default skills, and overwrite their values (if any) with the value of the players matching skill
+            let skills = this.getDefaults().map((obj) => {
+                // check if the player has that skill already
+                if (playerSkills[obj.id]) {
+                    // if so, overwrite the default value
+                    Object.assign(obj.modifiers, {...playerSkills[obj.id].modifiers});
+                    // remove the skill from the list, so we dont end up with 2 of the same skill when we merge in the
+                    // rest of the skills the player might have, which are not part of the defaults
+                    delete playerSkills[obj.id];
+                } 
+
+                return obj;
+            });
+
+            // merge the rest of the player skills which are not part of the defaults
+            skills = skills.concat(Object.values(playerSkills));
+
+            // prepare the array for the instanciated skills
+            character.skills = [];
+
+            // clear the list and make an array, which will hold our skills
+            skills.forEach((skill) => {
+                let newSkill = this.new(skill);
+
+                if (newSkill) {
+                    character.skills.push(newSkill);
+                }
+            });
+
+            resolve();
+        });
+    }
+}

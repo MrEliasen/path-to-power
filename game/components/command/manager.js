@@ -1,3 +1,4 @@
+import Promise from 'bluebird';
 import { GAME_COMMAND } from './types';
 import commandList from '../../data/commands.json';
 

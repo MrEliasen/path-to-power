@@ -1,3 +1,5 @@
+import Promise from 'bluebird';
+
 export default class Faction {
     constructor(Game, faction) {
         this.Game = Game;
