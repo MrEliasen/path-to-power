@@ -1,34 +1,7 @@
 import Promise from 'bluebird';
 import { GAME_COMMAND } from './types';
 import commandList from '../../data/commands.json';
-
-// COMMANDS
-import cmdShoot from './commands/shoot';
-import cmdStrike from './commands/strike';
-import cmdFlee from './commands/flee';
-import cmdRelease from './commands/release';
-import cmdPunch from './commands/punch';
-import cmdAim from './commands/aim';
-import cmdPickup from './commands/pickup';
-import cmdDrop from './commands/drop';
-import cmdHeal from './commands/heal';
-import cmdSay from './commands/say';
-import cmdGive from './commands/give';
-import cmdGiveItem from './commands/giveitem';
-import cmdGlobal from './commands/global';
-import cmdWhisper from './commands/whisper';
-import cmdShop from './commands/shop';
-
-// Faction commands
-import {
-    cmdFactionCreate,
-    cmdFactionDisband,
-    cmdFactionInvite,
-    cmdFactionAcceptInvite,
-    cmdFactionSay,
-    cmdFactionKick,
-    cmdFactionMakeLeader
-} from '../faction/commands';
+import commandCommands from './commands';
 
 export default class CommandManager {
     constructor(Game) {
@@ -41,7 +14,44 @@ export default class CommandManager {
         this.Game.socketManager.on('dispatch', this.onDispatch.bind(this));
 
         // list of managed actions
-        this.commands = {...commandList};
+        this.commands = {};
+    }
+
+    /**
+     * Load all commands
+     * @return {Promise}
+     */
+    init() {
+        return new Promise((resolve, rejecte) => {
+            // load map commands
+            this.registerManager(commandCommands);
+            resolve();
+        });
+    }
+
+    registerManager(commandsList) {
+        commandsList.forEach((obj) => {
+            // and register every command key to the method
+            obj.commandKeys.forEach((cmdKey) => {
+                this.register(cmdKey, obj.method);
+            });
+        });
+    }
+
+    register(commandName, commandMethod) {
+        // in case the commandName didn't have a / in the beginning, add it.
+        if (commandName[0] !== '/') {
+            commandName = `/${commandName}`;
+        }
+
+        // check if a command is already registered to that key
+        if (this.commands[commandName]) {
+            return this.Game.logger.warning(`The command ${commandName}, is already registered to the method: ${this.commands[commandName].name}. Registration ignored.`);
+        }
+
+        // register the command and the method it should execute
+        this.commands[commandName] = commandMethod;
+        this.Game.logger.debug(`Registered command ${commandName} to method ${commandMethod.name}`)
     }
 
     /**
@@ -63,7 +73,12 @@ export default class CommandManager {
         const command = payload.shift().toLowerCase();
         const params = payload;
 
-        return this.exec(socket, command, params);
+        if (!this.commands[command]) {
+            return this.Game.eventToSocket(socket, 'error', `Command ${command} is not a valid command.`);
+        }
+
+        this.Game.logger.info('CommandManager::exec', {command, params});
+        this.commands[command](socket, command, params, this.Game);
     }
 
     /**
@@ -88,104 +103,6 @@ export default class CommandManager {
      * @return {Object}
      */
     getList() {
-        return this.commands;
-    }
-
-    /**
-     * Executes a command, should we have it
-     * @param  {Socket.IO socket} socket  client socket
-     * @param  {String} command           Command string eg. '/give'
-     * @param  {Array} params             List of additionl parameters 
-     */
-    exec(socket, command, params) {
-        this.Game.logger.info('CommandManager::exec', {command, params});
-
-        // Global commands, no grid restriction.
-        switch(command) {
-            case '/global':
-            case '/g':
-                return cmdGlobal(socket, command, params, this.Game)
-
-            case '/whisper':
-            case '/w':
-            case '/tell':
-            case '/pm':
-                return cmdWhisper(socket, command, params, this.Game)
-
-            case '/say':
-            case '/s':
-                // because the first word is removed from the command,
-                // we put it back, since its considered part of the message
-                return cmdSay(socket, command, params, this.Game)
-
-            case '/faction':
-            case '/f':
-                // because the first word is removed from the command,
-                // we put it back, since its considered part of the message
-                return cmdFactionSay(socket, command, params, this.Game)
-
-            case '/heal':
-                return cmdHeal(socket, command, params, this.Game);
-
-            case '/giveitem':
-                return cmdGiveItem(socket, command, params, this.Game);
-
-            case '/give':
-                return cmdGive(socket, command, params, this.Game);
-
-            case '/drop':
-                return cmdDrop(socket, command, params, this.Game);
-
-            case '/pickup':
-            case '/get':
-                return cmdPickup(socket, command, params, this.Game);
-
-            case '/aim':
-                return cmdAim(socket, command, params, this.Game);
-
-            case '/flee':
-                return cmdFlee(socket, command, params, this.Game);
-
-            case '/punch':
-                return cmdPunch(socket, command, params, this.Game);
-
-            case '/strike':
-                return cmdStrike(socket, command, params, this.Game);
-
-            case '/shoot':
-                return cmdShoot(socket, command, params, this.Game);
-
-            case '/release':
-                return cmdRelease(socket, command, params, this.Game);
-
-            case '/shop':
-                return cmdShop(socket, command, params, this.Game);
-
-            case '/factioncreate':
-                return cmdFactionCreate(socket, command, params, this.Game);
-
-            case '/factiondisband':
-                return cmdFactionDisband(socket, command, params, this.Game);
-
-            case '/factioninvite':
-                return cmdFactionInvite(socket, command, params, this.Game);
-
-            case '/factionjoin':
-                return cmdFactionAcceptInvite(socket, command, params, this.Game);
-
-            case '/factionkick':
-                return cmdFactionKick(socket, command, params, this.Game);
-
-            case '/factionpromote':
-                return cmdFactionMakeLeader(socket, command, params, this.Game);
-
-            default:
-                if (command && command[0] !== '/') {
-                    // because the first word is removed from the command,
-                    // we put it back, since its considered part of the message
-                    params.unshift(command);
-                    return cmdSay(socket, command, params, this.Game)
-                }
-        }
+        return this.commandList;
     }
 }

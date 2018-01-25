@@ -14,6 +14,7 @@ import {
 import { UPDATE_GROUND_ITEMS } from '../item/types';
 import Character from './object';
 import CharacterModel from './model';
+import characterCommands from './commands';
 
 export default class CharacterManager {
     constructor(Game) {
@@ -29,6 +30,18 @@ export default class CharacterManager {
         this.Game.socketManager.on('disconnect', (user) => {
             this.remove(user.user_id);
         })
+    }
+
+    /**
+     * Register all the character commands
+     * @return {Promise}
+     */
+    init() {
+        return new Promise((resolve, reject) => {
+            // register all the 
+            this.Game.commandManager.registerManager(characterCommands);
+            resolve();
+        });
     }
 
     /**
@@ -75,13 +88,19 @@ export default class CharacterManager {
      * @return {Character Obj}
      */
     getByName(characterName) {
-        let user_id = Object.keys(this.characters).find((user_id) => {
-            if (this.characters[user_id].name_lowercase.indexOf(characterName) === 0){
-                return true;
-            }
-        });
+        return new Promise((resolve, reject) =>{
+            let user_id = Object.keys(this.characters).find((user_id) => {
+                if (this.characters[user_id].name_lowercase.indexOf(characterName) === 0){
+                    return true;
+                }
+            });
 
-        return this.characters[user_id];
+            if (!user_id) {
+                return reject();
+            }
+
+            resolve(this.characters[user_id]);
+        });
     }
 
     /**

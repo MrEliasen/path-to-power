@@ -3,12 +3,25 @@ import Promise from 'bluebird';
 // manager specific imports
 import Structure from './object';
 import structureList from '../../data/structures.json' ;
+import structureCommands from './commands';
 
 export default class StructureManager {
     constructor(Game) {
         this.Game = Game;
         // list of structures to manage
         this.structures = {};
+    }
+
+    /**
+     * Load all structure commands
+     * @return {Promise}
+     */
+    init() {
+        return new Promise((resolve, rejecte) => {
+            // load map commands
+            this.Game.commandManager.registerManager(structureCommands);
+            resolve();
+        });
     }
 
     /**

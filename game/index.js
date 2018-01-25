@@ -83,21 +83,33 @@ class Game {
     }
 
     async init() {
-        await this.itemManager.load().then((count) => {
+        await this.itemManager.init().then((count) => {
             console.log(`${count} ITEMS LOADED`);
         });
 
-        await this.mapManager.load().then((count) => {
+        await this.mapManager.init().then((count) => {
             console.log(`${count} MAPS LOADED`);
         });
 
-        await this.factionManager.load().then((count) => {
+        await this.factionManager.init().then((count) => {
             console.log(`${count} FACTIONS LOADED`);
         });
 
-        /*await this.npcManager.load().then(() => {
-            console.log('NPCS LOADED');
-        })*/
+        await this.shopManager.init().then(() => {
+            console.log(`SHOPS LOADED`);
+        });
+
+        await this.structureManager.init().then(() => {
+            console.log(`STRUCTURES LOADED`);
+        });
+
+        await this.commandManager.init().then(() => {
+            console.log(`COMMANDS LOADED`);
+        });
+
+        await this.characterManager.init().then(() => {
+            console.log(`CHARACTERS LOADED`);
+        });
 
         // Listen for connections
         this.socketManager.listen();

@@ -4,6 +4,7 @@ import Promise from 'bluebird';
 import ShopList from '../../data/shops.json';
 import Shop from './object';
 import { SHOP_BUY, SHOP_SELL } from './types';
+import shopCommands from './commands';
 
 export default class ShopManager {
     constructor(Game) {
@@ -11,6 +12,18 @@ export default class ShopManager {
         this.shops = [];
 
         this.Game.socketManager.on('dispatch', this.onDispatch.bind(this));
+    }
+
+    /**
+     * Load all shop commands
+     * @return {Promise}
+     */
+    init() {
+        return new Promise((resolve, rejecte) => {
+            // load map commands
+            this.Game.commandManager.registerManager(shopCommands);
+            resolve();
+        });
     }
 
     /**

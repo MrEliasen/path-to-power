@@ -1,4 +1,4 @@
-export default function cmdHeal(socket, command, params, Game) {
+function cmdHeal(socket, command, params, Game) {
     // Fetch the character first
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
@@ -68,3 +68,12 @@ export default function cmdHeal(socket, command, params, Game) {
         })
         .catch(Game.logger.debug)
 }
+
+module.exports = [
+    {
+        commandKeys: [
+            '/heal'
+        ],
+        method: cmdHeal
+    }
+];

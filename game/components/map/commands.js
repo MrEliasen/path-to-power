@@ -1,5 +1,5 @@
-import { UPDATE_GROUND_ITEMS } from '../../item/types';
-import { LEFT_GRID, JOINED_GRID } from '../../character/types';
+import { UPDATE_GROUND_ITEMS } from '../item/types';
+import { LEFT_GRID, JOINED_GRID } from '../character/types';
 
 function getDirectionName(move) {
     if (move.grid === 'x') {
@@ -9,7 +9,7 @@ function getDirectionName(move) {
     return move.direction === 1 ? 'West' : 'East';
 }
 
-export default function cmdFlee(socket, command, params, Game) {
+function cmdFlee(socket, command, params, Game) {
     let direction = params.join('').trim();
     let moveAction = {grid: '', direction: 0};
 
@@ -145,3 +145,12 @@ export default function cmdFlee(socket, command, params, Game) {
         })
         .catch(Game.logger.error);
 }
+
+module.exports = [
+    {
+        commandKeys: [
+            '/flee'
+        ],
+        method: cmdFlee
+    }
+];

@@ -1,6 +1,6 @@
-import { SHOP_LOAD } from '../../shop/types';
+import { SHOP_LOAD } from './types';
 
-export default function cmdShop(socket, command, params, Game) {
+function cmdShop(socket, command, params, Game) {
     const shopName = params.join(' ').toLowerCase();
 
     // Fetch the character first
@@ -35,3 +35,12 @@ export default function cmdShop(socket, command, params, Game) {
         })
         .catch(Game.logger.error);
 }
+
+module.exports = [
+    {
+        commandKeys: [
+            '/shop'
+        ],
+        method: cmdShop
+    }
+];

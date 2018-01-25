@@ -3,6 +3,7 @@ import uuid from 'uuid/v4';
 import FactionModel from './model';
 import Faction from './object';
 import CharacterModel from '../character/model';
+import factionCommands from './commands';
 
 export default class FactionManager {
     constructor(Game) {
@@ -12,11 +13,15 @@ export default class FactionManager {
     }
 
     /**
-     * Load all factions
+     * Load all factions, and register commands
      * @return {Promise}
      */
-    load() {
+    init() {
         return new Promise((resolve, reject) => {
+            // register all the 
+            this.Game.commandManager.registerManager(factionCommands);
+
+            // load our factions
             FactionModel.find({}, (err, factions) => {
                 if (err) {
                     return reject(this.Game.logger.error(err));

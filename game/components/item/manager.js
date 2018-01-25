@@ -20,7 +20,7 @@ export default class ItemManager {
      * Load item templates
      * @return {Promise}
      */
-    load() {
+    init() {
         return new Promise((resolve, rejecte) => {
             ItemList.map((itemData) => {
                 this.templates[itemData.id] = new Item(this.getTemplate(itemData.id), itemData);

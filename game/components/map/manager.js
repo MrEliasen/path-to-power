@@ -5,6 +5,7 @@ import Promise from 'bluebird';
 import GameMap from './object';
 import descriptionList from '../../data/descriptions.json'; 
 import { JOIN_GRID } from './types';
+import mapCommands from './commands';
 
 export default class MapManager {
     constructor(Game) {
@@ -17,8 +18,11 @@ export default class MapManager {
      * Load all game maps
      * @return {Promise}
      */
-    load() {
+    init() {
         return new Promise((resolve, rejecte) => {
+            // load map commands
+            this.Game.commandManager.registerManager(mapCommands);
+
             // get the list of map files in our data maps directory
             const maplist = fs.readdirSync(`${__dirname}/../../data/maps`);
             let loadedmaps = 0;
