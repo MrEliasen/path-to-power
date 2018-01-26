@@ -20,7 +20,7 @@ export default class CharacterManager {
     constructor(Game) {
         this.Game = Game;
         // keeps track of all current in-game characters
-        this.characters = {};
+        this.characters = [];
         // keeps track of character locations on the maps
         this.locations = {}
         // log manager progress
@@ -89,17 +89,17 @@ export default class CharacterManager {
      */
     getByName(characterName) {
         return new Promise((resolve, reject) =>{
-            let user_id = Object.keys(this.characters).find((user_id) => {
-                if (this.characters[user_id].name_lowercase.indexOf(characterName) === 0){
+            let character = this.characters.find((obj) => {
+                if (obj.name_lowercase === characterName || obj.name_lowercase.indexOf(characterName) === 0) {
                     return true;
                 }
             });
 
-            if (!user_id) {
+            if (!character) {
                 return reject();
             }
 
-            resolve(this.characters[user_id]);
+            resolve(character);
         });
     }
 
@@ -110,7 +110,7 @@ export default class CharacterManager {
      */
     get(user_id) {
         return new Promise((resolve, reject) => {
-            const character = this.characters[user_id];
+            const character = this.characters.find((obj) => obj.user_id === user_id);
 
             if (!character) {
                 return reject(`Character ${user_id} was not found.`);
@@ -172,12 +172,13 @@ export default class CharacterManager {
     async manage(character) {
         // removes disconnect timer, if one is sec (eg if refreshing the page)
         const wasLoggedIn = this.Game.socketManager.clearTimer(character.user_id);
+        const existingCharacter = this.characters.find((obj) => obj.user_id === character.user_id);
 
-        if (wasLoggedIn && this.characters[character.user_id]) {
+        if (wasLoggedIn && existingCharacter) {
             await this.remove(character.user_id, true);
             // re-add targetedBy, if the player has any
             // NOTE: reapply any temporary effects here to avoid relogging to clear them
-            this.characters[character.user_id].targetedBy.forEach((user) => {
+            existingCharacter.targetedBy.forEach((user) => {
                 character.gridLock(user);
             });
         }
@@ -198,7 +199,7 @@ export default class CharacterManager {
         }
 
         // add the character object to the managed list of characters
-        this.characters[character.user_id] = character;
+        this.characters.push(character);
         this.dispatchUpdatePlayerList(character.user_id);
 
         this.Game.socketManager.get(character.user_id).then((socket) => {
@@ -237,7 +238,7 @@ export default class CharacterManager {
                     });
 
                     if (!reconnect) {
-                        delete this.characters[user_id];
+                        this.characters = this.characters.filter((obj) => obj.user_id !== user_id);
                     }
 
                     this.dispatchRemoveFromPlayerList(user_id);
@@ -292,13 +293,13 @@ export default class CharacterManager {
      */
     getOnline() {
         const online = {};
-        Object.keys(this.characters).map((user_id) => {
-            online[user_id] = {
-                name: this.characters[user_id].name,
-                user_id: this.characters[user_id].user_id,
-                faction: this.characters[user_id].faction ? {
-                    tag: this.characters[user_id].faction.tag,
-                    name: this.characters[user_id].faction.name
+        this.characters.forEach((character) => {
+            online[character.user_id] = {
+                name: character.name,
+                user_id: character.user_id,
+                faction: character.faction ? {
+                    tag: character.faction.tag,
+                    name: character.faction.name
                 } : null
             }
         })
@@ -397,12 +398,11 @@ export default class CharacterManager {
      */
     saveAll() {
         return new Promise((resolve, reject) => {
-            const characters = Object.keys(this.characters);
-            const total = characters.length;
+            const total = this.characters.length;
             let saves = 0;
 
-            characters.map((user_id) => {
-                this.save(user_id)
+            this.characters.forEach((character) => {
+                this.save(character.user_id)
                     .then(() => {
                         saves++;
 
@@ -695,7 +695,9 @@ export default class CharacterManager {
                     this.Game.logger.debug(`Invalid move by character ${socket.user.user_id}`, newLocation);
                 });
         })
-        .catch(this.Game.logger.error)
+        .catch((err) => {
+            this.Game.logger.error(err);
+        });
     }
 
     /**

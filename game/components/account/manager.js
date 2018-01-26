@@ -55,7 +55,11 @@ export default class AccountManager {
             }
 
             // add the authenticated use to the socket object
-            socket.user = account;
+            socket.user = {
+                ...account,
+                user_id: account.user_id.toString()
+            };
+
             // add the socket to the list of active clients
             this.Game.socketManager.add(socket);
 

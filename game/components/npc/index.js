@@ -1,11 +1,7 @@
-import Character from '../character';
+import Character from '../character/object';
 
-class NPC extends Character {
-    constructor(characterData) {
-        Object.keys(characterData).map((k) => {
-            this[k] = characterData[k];
-        });
+export default class NPC extends Character {
+    constructor(Game, character) {
+        super(Game, character);
     }
 }
-
-export default Character;
