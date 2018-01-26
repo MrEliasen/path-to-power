@@ -1,11 +1,25 @@
 import Promise from 'bluebird';
+
+// manager specific imports
 import SkillList from './skills';
+import skillCommands from './commands'; 
 
 export default class SkillManager {
     constructor(Game) {
         this.Game = Game;
         // The list of all skills currently managed (Players and NPCs)
         this.skills = [];
+    }
+
+    /**
+     * Load all skill commands
+     * @return {Promise}
+     */
+    init() {
+        return new Promise((resolve, reject) => {
+            this.Game.commandManager.registerManager(skillCommands);
+            resolve();
+        });
     }
 
     /**
@@ -18,7 +32,19 @@ export default class SkillManager {
             {
                 id: 'snoop',
                 modifiers: {
-                    value: 10
+                    value: 1
+                }
+            },
+            {
+                id: 'hide',
+                modifiers: {
+                    value: 1
+                }
+            },
+            {
+                id: 'search',
+                modifiers: {
+                    value: 1
                 }
             }
         ];

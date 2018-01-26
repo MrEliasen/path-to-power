@@ -11,7 +11,7 @@ function cmdAim(socket, command, params, Game) {
             // get he list of characters at the grid
             const playersAtGrid = Game.characterManager.getLocationList(character.location.map, character.location.x, character.location.y);
             // find if player is in the same grid
-            const targetCharacter = playersAtGrid.find((user) => user.name.toLowerCase().indexOf(userName) === 0);
+            const targetCharacter = playersAtGrid.find((user) => user.name.toLowerCase().indexOf(userName) === 0 && !user.hidden);
             if (!targetCharacter) {
                 return Game.eventToSocket(socket, 'error', 'There are nobody around with that name.');
             }
@@ -52,7 +52,7 @@ function cmdGive(socket, command, params, Game) {
             // get he list of characters at the grid
             const playersAtGrid = Game.characterManager.getLocationList(character.location.map, character.location.x, character.location.y);
             // find if player is in the same grid
-            const receiver = playersAtGrid.find((user) => user.name.toLowerCase().indexOf(playerName) === 0);
+            const receiver = playersAtGrid.find((user) => user.name.toLowerCase().indexOf(playerName) === 0 && !user.hidden);
 
             if (!receiver) {
                 return Game.eventToSocket(socket, 'error', 'There are nobody around with that name.');

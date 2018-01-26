@@ -511,14 +511,14 @@ export default class CharacterManager {
      * @return {Array}     Array of players
      */
     getLocationList(map, x, y, ignore = null, toClient = false) {
-        const players = this.locations[`${map}_${y}_${x}`] || [];
+        let players = this.locations[`${map}_${y}_${x}`] || [];
 
         if (!toClient) {
             return players;
         }
 
         return players
-            .filter((obj) => obj.user_id !== ignore)
+            .filter((obj) => obj.user_id !== ignore && !obj.hidden)
             .map((character) => {
                 return {
                     user_id: character.user_id,
@@ -528,37 +528,55 @@ export default class CharacterManager {
     }
 
     /**
+     * Removes a character from a given map grid
+     * @param  {Object} position     The position to remove the player from
+     * @param  {Character} character The character to remove
+     */
+    removeFromGrid(position, character) {
+        const playersInGrid = this.locations[`${position.map}_${position.y}_${position.x}`];
+
+        // if the old location does not exist, we dont need to remove the player from it
+        if (playersInGrid) {
+            // find index of the play
+            const index = playersInGrid.findIndex((char) => char.user_id === character.user_id);
+
+            // and remove the player from the list, if found
+            if (index !== -1) {
+                playersInGrid.splice(index, 1);
+            }
+        }
+    }
+
+    /**
+     * Adds a character to the specific map grid
+     * @param {Object} position     The location to add the character to
+     * @param {Character} character The character to add to the grid
+     */
+    addToGrid(position, character) {
+        const location_key = `${position.map}_${position.y}_${position.x}`;
+
+        // if the location array is not set yet, make it
+        if (!this.locations[location_key]) {
+            this.locations[location_key] = [];
+        }
+
+        // if they are already on the list, ignore.
+        if (this.locations[location_key].findIndex((char) => char.user_id === character.user_id) !== -1) {
+            return;
+        }
+
+        this.locations[location_key].push(character);
+    }
+
+    /**
      * Updated the tracked characters location
      * @param  {Character Obj} character   The character reference
      * @param  {Object} oldLocation {map, x, y}
      * @param  {Object} newLocation {map, x ,y}
      */
     changeLocation(character, newLocation = {}, oldLocation = {}) {
-        const old_position = this.locations[`${oldLocation.map}_${oldLocation.y}_${oldLocation.x}`];
-        const new_position_key = `${newLocation.map}_${newLocation.y}_${newLocation.x}`;
-
-        // if the old location does not exist, we dont need to remove the player from it
-        if (old_position) {
-            // find index of the play
-            const index = old_position.findIndex((char) => char.user_id === character.user_id);
-
-            // and remove the player from the list, if found
-            if (index !== -1) {
-                old_position.splice(index, 1);
-            }
-        }
-
-        // if the location array is not set yet, make it
-        if (!this.locations[new_position_key]) {
-            this.locations[new_position_key] = [];
-        }
-
-        // if they are already on the list, ignore.
-        if (this.locations[new_position_key].findIndex((char) => char.user_id === character.user_id) !== -1) {
-            return;
-        }
-
-        this.locations[new_position_key].push(character);
+        this.removeFromGrid(oldLocation, character);
+        this.addToGrid(newLocation, character);
     }
 
     /**
@@ -581,6 +599,11 @@ export default class CharacterManager {
                 }).join(', ');
 
                 return this.Game.eventToSocket(socket, 'warning', `You can't move as the following players are aiming at you: ${list}`)
+            }
+
+            // check if the player is hidden
+            if (character.hidden) {
+                return this.Game.eventToSocket(socket, 'warning', `You can't move as long as you are hidden. type /unhide to come out of hiding.`)
             }
 
             // set the location we intend to move the character to

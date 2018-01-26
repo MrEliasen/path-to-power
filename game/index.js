@@ -111,6 +111,10 @@ class Game {
             console.log(`CHARACTERS LOADED`);
         });
 
+        await this.skillManager.init().then(() => {
+            console.log(`SKILLS LOADED`);
+        });
+
         // Listen for connections
         this.socketManager.listen();
 
