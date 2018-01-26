@@ -15,6 +15,15 @@ function cmdSkillSnoop(socket, command, params, Game) {
 
             Game.characterManager.getByName(params[0])
                 .then((targetCharacter) => {
+                    // check if the character has an existing cooldown for this skill, if they are trying to hide
+                    const ticksLeft = Game.cooldownManager.ticksLeft(character, `skill_${skill.id}`);
+
+                    if (ticksLeft) {
+                        return Game.eventToUser(character.user_id, 'error', `You cannot snoop on anyone again so soon. You must wait another ${(ticksLeft / 10)} seconds.`);
+                    }
+                    // add the search cooldown to the character
+                    character.cooldowns.push(Game.cooldownManager.add(`skill_${skill.id}`, skill.cooldown, true));
+
                     const snoopInfo = skill.use(targetCharacter);
                     return Game.eventToSocket(socket, 'success', JSON.stringify(snoopInfo));
                 })
@@ -35,6 +44,18 @@ function cmdSkillHide(socket, command, params, Game) {
 
             if (!skill) {
                 return Game.eventToSocket(socket, 'error', 'You do not have this skill.');
+            }
+
+            // check if the character has an existing cooldown for this skill, if they are trying to hide
+            if (!character.hidden) {
+                const ticksLeft = Game.cooldownManager.ticksLeft(character, `skill_${skill.id}`);
+
+                if (ticksLeft) {
+                    return Game.eventToUser(character.user_id, 'error', `You cannot hide again so soon. You must wait another ${(ticksLeft / 10)} seconds.`);
+                }
+            } else {
+                // set the cooldown of the skill, when they come out of hiding
+                character.cooldowns.push(Game.cooldownManager.add(`skill_${skill.id}`, skill.cooldown, true));
             }
 
             skill.use(character);
@@ -59,6 +80,15 @@ function cmdSkillSearch(socket, command, params, Game) {
                 return Game.eventToSocket(socket, 'error', `Invalid search target. Skill syntax: /search username`);
             }
 
+            // check if the character has an existing cooldown for this skill, if they are trying to hide
+            const ticksLeft = Game.cooldownManager.ticksLeft(character, `skill_${skill.id}`);
+
+            if (ticksLeft) {
+                return Game.eventToUser(character.user_id, 'error', `You cannot search again so soon. You must wait another ${(ticksLeft / 10)} seconds.`);
+            }
+            // add the search cooldown to the character
+            character.cooldowns.push(Game.cooldownManager.add(`skill_${skill.id}`, skill.cooldown, true));
+
             // get he list of characters at the grid
             const playersAtGrid = Game.characterManager.getLocationList(character.location.map, character.location.x, character.location.y);
 
@@ -68,12 +98,12 @@ function cmdSkillSearch(socket, command, params, Game) {
 
             // check if they are even in the area.
             if (!targetCharacter) {
-                return Game.eventToSocket(socket, 'info', `You search the area for ${targetCharacter.name}, but without luck.`);
+                return Game.eventToSocket(socket, 'info', 'You search the area but without any luck.');
             }
 
             // check if they are hiding
             if (!targetCharacter.hidden) {
-                return this.Game.eventToSocket(socket, 'warning', 'This player is not hiding.')
+                return Game.eventToSocket(socket, 'warning', 'This player is not hiding.')
             }
 
             skill.use(character, targetCharacter);

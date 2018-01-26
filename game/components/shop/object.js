@@ -241,6 +241,13 @@ export default class Shop {
                     return this.Game.eventToUser(user_id, 'error', 'The item you where after is no longer available.');
                 }
 
+                const itemTemplate = this.Game.itemManager.getTemplate(item.id);
+
+                // Check the template exists
+                if (!itemTemplate) {
+                    return this.Game.eventToUser(user_id, 'error', 'Invalid item. The item might no longer be available.');
+                }
+
                 const price = (item.stats.price * this.sell.sellPricePercent);
 
                 // check if the character has enough money
@@ -268,7 +275,7 @@ export default class Shop {
                 this.Game.characterManager.updateClient(character.user_id);
 
                 // send event to client
-                this.Game.eventToUser(character.user_id, 'success', `You have purchased 1x ${item.name} for ${price}`);
+                this.Game.eventToUser(character.user_id, 'success', `You have purchased 1x ${itemTemplate.name} for ${price}`);
 
                 // update the shop content for all in the grid (only if the item is limited quantity)
                 if (item.shopQuantity < 999) {
@@ -286,6 +293,8 @@ export default class Shop {
                     this.Game.itemManager.remove(item);
                 }
             })
-            .catch(this.Game.logger.error);
+            .catch((err) => {
+                this.Game.logger.error(err);
+            });
     }
 }

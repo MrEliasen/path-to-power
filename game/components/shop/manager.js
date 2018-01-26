@@ -39,12 +39,13 @@ export default class ShopManager {
         switch(action.type) {
             case SHOP_BUY:
                 this.get(action.payload.shop)
-                    .then((shop) => shop.buyItem(socket.user.user_id, action.payload.index, action.payload.itemId))
+                    .then((shop) => shop.buyItem(socket.user.user_id, action.payload.index, action.payload.item))
                     .catch(this.Game.logger.error);
                 break;
+
             case SHOP_SELL:
                 this.get(action.payload.shop)
-                    .then((shop) => shop.sellItem(socket.user.user_id, action.payload.index, action.payload.itemId))
+                    .then((shop) => shop.sellItem(socket.user.user_id, action.payload.index, action.payload.item))
                     .catch(this.Game.logger.error);
                 break;
         }

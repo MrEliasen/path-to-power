@@ -14,7 +14,7 @@ import commandManager from './components/command/manager';
 import factionManager from './components/faction/manager';
 import abilityManager from './components/ability/manager';
 import skillManager from './components/skill/manager';
-//import npcManager from './components/npc/manager';
+import cooldownManager from './components/cooldown/manager';
 
 import { newEvent } from './actions';
 
@@ -37,6 +37,7 @@ class Game {
         this.factionManager = new factionManager(this);
         this.abilityManager = new abilityManager(this);
         this.skillManager = new skillManager(this);
+        this.cooldownManager = new cooldownManager(this);
         //this.npcManager = new npcManager(this);
 
         // load game data

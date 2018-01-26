@@ -1,3 +1,18 @@
+function checkAttackCooldown (character, Game, callback) {
+    // check if the character has an existing cooldown for this action, if they are trying to hide
+    const ticksLeft = Game.cooldownManager.ticksLeft(character, 'action_attack');
+
+    if (ticksLeft) {
+        return Game.eventToUser(character.user_id, 'error', `You cannot attack so fast. You must wait another ${(ticksLeft / 10)} seconds.`);
+    }
+
+    // add the search cooldown to the character
+    character.cooldowns.push(Game.cooldownManager.add('action_attack', 2, true));
+
+    // return the new cooldown 
+    callback();
+}
+
 function cmdAim(socket, command, params, Game) {
     if (!params[0]) {
         return;
@@ -16,6 +31,16 @@ function cmdAim(socket, command, params, Game) {
                 return Game.eventToSocket(socket, 'error', 'There are nobody around with that name.');
             }
 
+            // check if the character has an existing cooldown for this action, if they are trying to hide
+            const ticksLeft = Game.cooldownManager.ticksLeft(character, 'action_aim');
+
+            if (ticksLeft) {
+                return Game.eventToUser(character.user_id, 'error', `You cannot change target so quickly. You must wait another ${(ticksLeft / 10)} seconds.`);
+            }
+            // add the search cooldown to the character
+            const newCooldown = Game.cooldownManager.add('action_aim', 1);
+            character.cooldowns.push(newCooldown);
+
             // set the new target, releasing the old target's gridlock, and gridlocking the new target.
             character.setTarget(targetCharacter);
 
@@ -27,6 +52,8 @@ function cmdAim(socket, command, params, Game) {
                     // let the character know they have a target
                     Game.eventToSocket(socket, 'info', `You take aim at ${targetCharacter.name}. You can release your aim with /release`);
                     Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} take aim at ${targetCharacter.name}.`, [targetCharacter.user_id, character.user_id]);
+                    // start the cooldown
+                    newCooldown.start();
                 })
                 .catch(Game.logger.error);
         })
@@ -105,41 +132,44 @@ function cmdPunch(socket, command, params, Game) {
                 return Game.eventToSocket(socket, 'error', 'You do not have a target.');
             }
 
-            // check if the attack will hit
-            if (!character.attackHit()) {
+            // check if there is a cooldown
+            checkAttackCooldown(character, Game, () => {
+                // check if the attack will hit
+                if (!character.attackHit()) {
+                    // send event to the attacker
+                    Game.eventToSocket(socket, 'info', `You take a swing at ${target.name}, but miss.`);
+                    // send event to the target
+                    Game.eventToUser(target.user_id, 'info', `${character.name} takes a swing at you, but they miss.`);
+                    // send event to the bystanders
+                    return Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} take a swing at ${target.name}, but missing.`, [character.user_id, target.user_id]);
+                }
+
+                // deal damage to the target
+                const attack = target.dealDamage(2, true);
+
+                // if the target died
+                if (!attack.healthLeft) {
+                    return Game.characterManager.kill(target.user_id, character)
+                        .then((oldLocationId) => {
+                            // send event to the attacker
+                            Game.eventToSocket(socket, 'info', `You land the killing blow on ${target.name}. They fall to the ground, dropping everything they carried.`);
+                            // send event to the target
+                            Game.eventToUser(target.user_id, 'info', `${character.name} punches you, dealing ${attack.damageDealt} damage, killing you.`);
+                            // send event to the bystanders
+                            Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} his their fists. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
+                        })
+                        .catch(Game.logger.error);
+                }
+
+                // update the target client's character inforamtion
+                Game.characterManager.updateClient(target.user_id, 'stats');
                 // send event to the attacker
-                Game.eventToSocket(socket, 'info', `You take a swing at ${target.name}, but miss.`);
+                Game.eventToSocket(socket, 'info', `You punch ${target.name}, dealing ${attack.damageDealt} damage.`);
                 // send event to the target
-                Game.eventToUser(target.user_id, 'info', `${character.name} takes a swing at you, but they miss.`);
+                Game.eventToUser(target.user_id, 'info', `${character.name} punch you, dealing ${attack.damageDealt} damage.`);
                 // send event to the bystanders
-                return Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} take a swing at ${target.name}, but missing.`, [character.user_id, target.user_id]);
-            }
-
-            // deal damage to the target
-            const attack = target.dealDamage(2, true);
-
-            // if the target died
-            if (!attack.healthLeft) {
-                return Game.characterManager.kill(target.user_id, character)
-                    .then((oldLocationId) => {
-                        // send event to the attacker
-                        Game.eventToSocket(socket, 'info', `You land the killing blow on ${target.name}. They fall to the ground, dropping everything they carried.`);
-                        // send event to the target
-                        Game.eventToUser(target.user_id, 'info', `${character.name} punches you, dealing ${attack.damageDealt} damage, killing you.`);
-                        // send event to the bystanders
-                        Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} his their fists. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
-                    })
-                    .catch(Game.logger.error);
-            }
-
-            // update the target client's character inforamtion
-            Game.characterManager.updateClient(target.user_id, 'stats');
-            // send event to the attacker
-            Game.eventToSocket(socket, 'info', `You punch ${target.name}, dealing ${attack.damageDealt} damage.`);
-            // send event to the target
-            Game.eventToUser(target.user_id, 'info', `${character.name} punch you, dealing ${attack.damageDealt} damage.`);
-            // send event to the bystanders
-            Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} punch ${target.name}.`, [character.user_id, target.user_id]);
+                Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} punch ${target.name}.`, [character.user_id, target.user_id]);
+            });
         })
         .catch(Game.logger.error);
 }
@@ -194,44 +224,47 @@ function cmdShoot(socket, command, params, Game) {
                 return Game.eventToSocket(socket, 'error', 'You do not have any ammunition equipped.');
             }
 
-            const weapon = character.equipped.ranged.name;
+            // check if there is a cooldown
+            checkAttackCooldown(character, Game, () => {
+                const weapon = character.equipped.ranged.name;
 
-            // check if the attack will hit
-            if (!character.attackHit()) {
+                // check if the attack will hit
+                if (!character.attackHit()) {
+                    // send event to the attacker
+                    Game.eventToSocket(socket, 'info', `You shoot at ${target.name} with your ${weapon}, but misses the shot.`);
+                    // send event to the target
+                    Game.eventToUser(target.user_id, 'info', `${target.name} shoots their ${weapon} in your direction, but misses the shot.`);
+                    // send event to the bystanders
+                    return Game.eventToRoom(character.getLocationId(), 'info', `You see ${target.name} shoots their ${weapon} in ${target.name}'s direction, but misses.`, [character.user_id, target.user_id]);
+                }
+
+                // deal damage to the target
+                const damage = character.fireRangedWeapon();
+                const attack = target.dealDamage(damage, true);
+
+                // if the target died
+                if (!attack.healthLeft) {
+                    return Game.characterManager.kill(target.user_id, character)
+                        .then((oldLocationId) => {
+                            // send event to the attacker
+                            Game.eventToSocket(socket, 'info', `You hit ${target.name} with your ${weapon}, killing them. They fall to the ground, dropping everything they carried.`);
+                            // send event to the target
+                            Game.eventToUser(target.user_id, 'info', `${character.name} hits you with their ${weapon}, dealing ${attack.damageDealt} damage, killing you.`);
+                            // send event to the bystanders
+                            Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} with a ${weapon}. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
+                        })
+                        .catch(Game.logger.error);
+                }
+
+                // update the target client's character inforamtion
+                Game.characterManager.updateClient(target.user_id, 'stats');
                 // send event to the attacker
-                Game.eventToSocket(socket, 'info', `You shoot at ${target.name} with your ${weapon}, but misses the shot.`);
+                Game.eventToSocket(socket, 'info', `You shoot ${target.name} with your ${weapon}, dealing ${attack.damageDealt} damage.`);
                 // send event to the target
-                Game.eventToUser(target.user_id, 'info', `${target.name} shoots their ${weapon} in your direction, but misses the shot.`);
+                Game.eventToUser(target.user_id, 'info', `${character.name} shoots you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
                 // send event to the bystanders
-                return Game.eventToRoom(character.getLocationId(), 'info', `You see ${target.name} shoots their ${weapon} in ${target.name}'s direction, but misses.`, [character.user_id, target.user_id]);
-            }
-
-            // deal damage to the target
-            const damage = character.fireRangedWeapon();
-            const attack = target.dealDamage(damage, true);
-
-            // if the target died
-            if (!attack.healthLeft) {
-                return Game.characterManager.kill(target.user_id, character)
-                    .then((oldLocationId) => {
-                        // send event to the attacker
-                        Game.eventToSocket(socket, 'info', `You hit ${target.name} with your ${weapon}, killing them. They fall to the ground, dropping everything they carried.`);
-                        // send event to the target
-                        Game.eventToUser(target.user_id, 'info', `${character.name} hits you with their ${weapon}, dealing ${attack.damageDealt} damage, killing you.`);
-                        // send event to the bystanders
-                        Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} with a ${weapon}. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
-                    })
-                    .catch(Game.logger.error);
-            }
-
-            // update the target client's character inforamtion
-            Game.characterManager.updateClient(target.user_id, 'stats');
-            // send event to the attacker
-            Game.eventToSocket(socket, 'info', `You shoot ${target.name} with your ${weapon}, dealing ${attack.damageDealt} damage.`);
-            // send event to the target
-            Game.eventToUser(target.user_id, 'info', `${character.name} shoots you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
-            // send event to the bystanders
-            Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} shoot ${target.name} with a ${weapon}.`, [character.user_id, target.user_id]);
+                Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} shoot ${target.name} with a ${weapon}.`, [character.user_id, target.user_id]);
+            });
         })
         .catch(Game.logger.error);
 }
@@ -255,44 +288,47 @@ function cmdStrike(socket, command, params, Game) {
                 return Game.eventToSocket(socket, 'error', 'You do not have a melee weapon equipped.');
             }
 
-            const weapon = character.equipped.melee.name;
+            // check if there is a cooldown
+            checkAttackCooldown(character, Game, () => {
+                const weapon = character.equipped.melee.name;
 
-            // check if the attack will hit
-            if (!character.attackHit()) {
+                // check if the attack will hit
+                if (!character.attackHit()) {
+                    // send event to the attacker
+                    Game.eventToSocket(socket, 'info', `You take a swing at ${target.name}, with your ${weapon}, but miss.`);
+                    // send event to the target
+                    Game.eventToUser(target.user_id, 'info', `${character.name} swings their ${weapon} at you, but they miss.`);
+                    // send event to the bystanders
+                    return Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} swing their ${weapon} at ${target.name}, but missing.`, [character.user_id, target.user_id]);
+                }
+
+                // deal damage to the target
+                const damage = character.getWeaponDamage('melee');
+                const attack = target.dealDamage(damage, true);
+
+                // if the target died
+                if (!attack.healthLeft) {
+                    return Game.characterManager.kill(target.user_id, character)
+                        .then((oldLocationId) => {
+                            // send event to the attacker
+                            Game.eventToSocket(socket, 'info', `You land the killing blow on ${target.name}, with your ${weapon}. They fall to the ground, dropping everything they carried.`);
+                            // send event to the target
+                            Game.eventToUser(target.user_id, 'info', `${character.name} strikes you with their ${weapon}, dealing ${attack.damageDealt} damage, killing you.`);
+                            // send event to the bystanders
+                            Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} with a ${weapon}. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
+                        })
+                        .catch(Game.logger.error);
+                }
+
+                // update the target client's character inforamtion
+                Game.characterManager.updateClient(target.user_id, 'stats');
                 // send event to the attacker
-                Game.eventToSocket(socket, 'info', `You take a swing at ${target.name}, with your ${weapon}, but miss.`);
+                Game.eventToSocket(socket, 'info', `You strike ${target.name} with your ${weapon}, dealing ${attack.damageDealt} damage.`);
                 // send event to the target
-                Game.eventToUser(target.user_id, 'info', `${character.name} swings their ${weapon} at you, but they miss.`);
+                Game.eventToUser(target.user_id, 'info', `${character.name} strikes you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
                 // send event to the bystanders
-                return Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} swing their ${weapon} at ${target.name}, but missing.`, [character.user_id, target.user_id]);
-            }
-
-            // deal damage to the target
-            const damage = character.getWeaponDamage('melee');
-            const attack = target.dealDamage(damage, true);
-
-            // if the target died
-            if (!attack.healthLeft) {
-                return Game.characterManager.kill(target.user_id, character)
-                    .then((oldLocationId) => {
-                        // send event to the attacker
-                        Game.eventToSocket(socket, 'info', `You land the killing blow on ${target.name}, with your ${weapon}. They fall to the ground, dropping everything they carried.`);
-                        // send event to the target
-                        Game.eventToUser(target.user_id, 'info', `${character.name} strikes you with their ${weapon}, dealing ${attack.damageDealt} damage, killing you.`);
-                        // send event to the bystanders
-                        Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} with a ${weapon}. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
-                    })
-                    .catch(Game.logger.error);
-            }
-
-            // update the target client's character inforamtion
-            Game.characterManager.updateClient(target.user_id, 'stats');
-            // send event to the attacker
-            Game.eventToSocket(socket, 'info', `You strike ${target.name} with your ${weapon}, dealing ${attack.damageDealt} damage.`);
-            // send event to the target
-            Game.eventToUser(target.user_id, 'info', `${character.name} strikes you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
-            // send event to the bystanders
-            Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} strike ${target.name} with a ${weapon}.`, [character.user_id, target.user_id]);
+                Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} strike ${target.name} with a ${weapon}.`, [character.user_id, target.user_id]);
+            });
         })
         .catch(Game.logger.error);
 }

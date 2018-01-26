@@ -603,8 +603,18 @@ export default class CharacterManager {
 
             // check if the player is hidden
             if (character.hidden) {
-                return this.Game.eventToSocket(socket, 'warning', `You can't move as long as you are hidden. type /unhide to come out of hiding.`)
+                return this.Game.eventToSocket(socket, 'warning', `You can't move as long as you are hidden. type /unhide to come out of hiding.`);
             }
+
+            const cooldownAction = 'move';
+            // check if the character has an existing cooldown from moving
+            if (this.Game.cooldownManager.ticksLeft(character, cooldownAction)) {
+                return;
+            }
+
+            // set the cooldown of the move action
+            const newCooldown = this.Game.cooldownManager.add(cooldownAction, 0.3);
+            character.cooldowns.push(newCooldown);
 
             // set the location we intend to move the character to
             newLocation[moveAction.grid] = newLocation[moveAction.grid] + moveAction.direction;
@@ -675,6 +685,9 @@ export default class CharacterManager {
 
                         // send the new grid details to the client
                         this.Game.mapManager.updateClient(character.user_id);
+
+                        // start the cooldown timer
+                        newCooldown.start();
                     })
                     .error(Game.logger.error);
                 })

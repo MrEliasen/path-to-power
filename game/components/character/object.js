@@ -24,6 +24,9 @@ export default class Character {
         this.inventory = [];
         this.equipped = {};
 
+        // list of all active cooldowns for the character
+        this.cooldowns = [];
+
         // if the character is new, they won't have stats, set the default here.
         this.stats = {
             health: 100,

@@ -9,6 +9,7 @@ export default class SkillHide {
         this.name = 'Search';
         this.command = '/search';
         this.value = 1;
+        this.cooldown = 5; // seconds
 
         Object.assign(this, {...modifiers});
     }
@@ -39,7 +40,7 @@ export default class SkillHide {
         let chance = baseChance + bonus;
 
         if (Math.random() > chance) {
-            return this.Game.eventToUser(character.user_id, 'info', `You search the area for ${target.name}, but without luck.`);
+            return this.Game.eventToUser(character.user_id, 'info', 'You search the area but without any luck.');
         }
 
         // yank the player out of hiding
