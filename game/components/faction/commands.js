@@ -128,6 +128,16 @@ function cmdFactionInvite(socket, command, params, Game) {
                         return Game.eventToSocket(socket, 'error', 'That player is already in a faction. They must leave they current faction before they can join a new.');
                     }
 
+                    // check if the character has an existing cooldown for this action, if they are trying to hide
+                    const ticksLeft = Game.cooldownManager.ticksLeft(character, 'action_faction_invite');
+
+                    if (ticksLeft) {
+                        return Game.eventToUser(character.user_id, 'error', `You must wait another ${(ticksLeft / 10)} seconds before you can send another invite.`);
+                    }
+
+                    // add the search cooldown to the character
+                    character.cooldowns.push(Game.cooldownManager.add('action_faction_invite', 3, true));
+
                     // Create the invite
                     character.faction.inviteMember(targetCharacter);
 
@@ -196,6 +206,16 @@ function cmdFactionSay(socket, command, params, Game) {
             if (!character.faction) {
                 return Game.eventToSocket(socket, 'error', 'You are not a member of a faction.');
             }
+
+            // check if the character has an existing cooldown for this action, if they are trying to hide
+            const ticksLeft = Game.cooldownManager.ticksLeft(character, 'action_chat');
+
+            if (ticksLeft) {
+                return Game.eventToUser(character.user_id, 'error', `You must wait another ${(ticksLeft / 10)} seconds before you can send another message.`);
+            }
+
+            // add the search cooldown to the character
+            character.cooldowns.push(Game.cooldownManager.add('action_chat', 1, true));
 
             Game.socketManager.dispatchToRoom(character.faction.faction_id, {
                 type: CHAT_MESSAGE,
