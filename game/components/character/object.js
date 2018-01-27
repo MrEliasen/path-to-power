@@ -16,6 +16,9 @@ export default class Character {
         // holds all the skills for the character
         this.skills = null;
 
+        // Whether to ignore quantities on items, like ammo, so they dont run out of ammo etc.
+        this.ignoreQuantity = false
+
         // holds all the abilities for the character
         // This is set in the object assign, if not set it to blank
         this.abilities = [];
@@ -149,15 +152,15 @@ export default class Character {
     }
 
     /**
-     * Sets the target of the character and gridlocks the target (while clearing gridlock on previous target)
-     * @param {[type]} targetCharacter [description]
+     * Sets the target of the character, or NPC, and gridlocks the target (while clearing gridlock on previous target)
+     * @param {[type]} target [description]
      */
-    setTarget(targetCharacter) {
+    setTarget(target) {
         // release the gridlock of the current target, if set
         this.releaseTarget()
             .then(() => {
                 // set the new target
-                this.target = targetCharacter;
+                this.target = target;
                 // and gridlock them
                 this.target.gridLock(this);
 
@@ -195,9 +198,8 @@ export default class Character {
      * @param  {Character Obj} character  the character objest of the character gridlocking the character.
      */
     gridLock(character) {
-        console.log(`${this.name} getting gridlocked by ${character.name}`);
+        console.log('GRIDLOCKING', character.name, ' => ', this.name);
         if (this.targetedBy.findIndex((obj) => obj.user_id === character.user_id) === -1) {
-            console.log('GRIDLOCKED');
             this.targetedBy.push(character);
         }
     }
@@ -255,12 +257,14 @@ export default class Character {
             return 0;
         }
 
-        // reduce ammo durability
-        this.equipped.ammo.stats.durability = this.equipped.ammo.removeDurability(1);
+        if (!this.ignoreQuantity) {
+            // reduce ammo durability
+            this.equipped.ammo.stats.durability = this.equipped.ammo.removeDurability(1);
 
-        // remove ammo if durability is 0
-        if (this.equipped.ammo.durability <= 0) {
-            this.Game.itemManager.remove(this.equipped.ammo);
+            // remove ammo if durability is 0
+            if (this.equipped.ammo.durability <= 0) {
+                this.Game.itemManager.remove(this.equipped.ammo);
+            }
         }
 
         return damage;

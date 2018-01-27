@@ -137,8 +137,8 @@ export default class SocketManager extends EventEmitter {
      * @param  {Object} action   Redux action object
      */
     dispatchToUser(user_id, action) {
-        if (!user_id) {
-            console.log('Missing user_id from dispatchToUser?:', user_id, ' for action:', action);
+        if (!this.clients[user_id]) {
+            return;
         }
 
         this.clients[user_id].emit('dispatch', action);

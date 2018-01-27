@@ -105,4 +105,59 @@ export default class CommandManager {
     getList() {
         return this.commandList;
     }
+
+    /**
+     * Find a specific target at the given location, by name
+     * @param  {String} findName      The name, or part of, to search for
+     * @param  {Bool}   ignoreHiding  Whether to include hidden players or not
+     * @param  {Bool}   ignoreNPCs    Whether to include NPCs or not
+     * @param  {Object} location      A character/npc location object
+     * @return {Promise}
+     */
+    findAtLocation(findName, location, ignoreHiding = true, ignoreNPCs = false) {
+        return new Promise((resolve, reject) => {
+            // get he list of players and NPCS at the grid
+            const playersAtGrid = this.Game.characterManager.getLocationList(location.map, location.x, location.y);
+            const NPCsAtGrid = this.Game.npcManager.getLocationList(location.map, location.x, location.y);
+
+            // Find target matching the name
+            const characters = playersAtGrid.filter((user) => {
+                return user.name_lowercase.indexOf(findName) === 0 && (ignoreHiding ? true : !user.hidden);
+            });
+            const NPCs = ignoreNPCs ? [] : NPCsAtGrid.filter((npc) => {
+                return `${npc.name} the ${npc.type}`.toLowerCase().indexOf(findName) === 0;
+            });
+
+            // Check if there where any matches
+            if (!characters.length && !NPCs.length) {
+                return reject('There are nobody around with that name.');
+            }
+
+            // get the full list of potential targets
+            let matchingTargets = characters.concat(NPCs);
+            let target;
+
+            // If there are more than 1 match, see if there is anyone matching the name exactly
+            if (matchingTargets.length > 1) {
+                target = matchingTargets.find((user) => {
+                    // must be a player
+                    if (!user.type) {
+                        return user.name_lowercase === findName;
+                    } else {
+                        return `${npc.name} the ${npc.type}`.toLowerCase() === findName;
+                    }
+                });
+
+                // if there are noone matching the name exactly, tell them to spell out the full name
+                if (!target) {
+                    return reject('You must be more specific with who you want to target.');
+                }
+            } else {
+                // otherwise select the first and only one in the list
+                target = matchingTargets[0];
+            }
+
+            resolve(target);
+        });
+    }
 }

@@ -23,41 +23,44 @@ function cmdAim(socket, command, params, Game) {
     // get the character
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
-            // get he list of characters at the grid
-            const playersAtGrid = Game.characterManager.getLocationList(character.location.map, character.location.x, character.location.y);
-            // find if player is in the same grid
-            const targetCharacter = playersAtGrid.find((user) => user.name.toLowerCase().indexOf(userName) === 0 && !user.hidden);
-            if (!targetCharacter) {
-                return Game.eventToSocket(socket, 'error', 'There are nobody around with that name.');
-            }
+            Game.commandManager.findAtLocation(userName, character.location)
+                .then((target) => {
+                    // check if the character has an existing cooldown for this action, if they are trying to hide
+                    const ticksLeft = Game.cooldownManager.ticksLeft(character, 'action_aim');
 
-            // check if the character has an existing cooldown for this action, if they are trying to hide
-            const ticksLeft = Game.cooldownManager.ticksLeft(character, 'action_aim');
+                    if (ticksLeft) {
+                        return Game.eventToUser(character.user_id, 'error', `You cannot change target so quickly. You must wait another ${(ticksLeft / 10)} seconds.`);
+                    }
 
-            if (ticksLeft) {
-                return Game.eventToUser(character.user_id, 'error', `You cannot change target so quickly. You must wait another ${(ticksLeft / 10)} seconds.`);
-            }
-            // add the search cooldown to the character
-            const newCooldown = Game.cooldownManager.add('action_aim', 1);
-            character.cooldowns.push(newCooldown);
+                    // add the search cooldown to the character
+                    const newCooldown = Game.cooldownManager.add('action_aim', 1);
+                    character.cooldowns.push(newCooldown);
 
-            // set the new target, releasing the old target's gridlock, and gridlocking the new target.
-            character.setTarget(targetCharacter);
+                    // set the new target, releasing the old target's gridlock, and gridlocking the new target.
+                    character.setTarget(target);
 
-            // get the socket of the targeted character
-            Game.socketManager.get(targetCharacter.user_id)
-                .then((targetSocket) => {
-                    // let the player know they are aimed at
-                    Game.eventToSocket(targetSocket, 'warning', `${character.name} has taken aim at you. The only way get out of this, is to kill ${character.name} or /flee <n|s|w|e>`);
+                    // get the socket of the targeted character
+                    Game.socketManager.get(target.user_id)
+                        .then((targetSocket) => {
+                            // let the player know they are aimed at
+                            Game.eventToSocket(targetSocket, 'warning', `${character.name} has taken aim at you. The only way get out of this, is to kill ${character.name} or /flee <n|s|w|e>`);
+                        })
+                        .catch(() => {});
+
                     // let the character know they have a target
-                    Game.eventToSocket(socket, 'info', `You take aim at ${targetCharacter.name}. You can release your aim with /release`);
-                    Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} take aim at ${targetCharacter.name}.`, [targetCharacter.user_id, character.user_id]);
+                    Game.eventToSocket(socket, 'info', `You take aim at ${target.name}. You can release your aim with /release`);
+                    Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} take aim at ${target.name}.`, [target.user_id, character.user_id]);
+
                     // start the cooldown
                     newCooldown.start();
                 })
-                .catch(Game.logger.error);
+                .catch((message) => {
+                    Game.eventToSocket(socket, 'error', message);
+                });
         })
-        .catch(Game.logger.error);
+        .catch((err) => {
+            Game.logger.error(err)
+        });
 }
 
 function cmdGive(socket, command, params, Game) {
@@ -76,46 +79,43 @@ function cmdGive(socket, command, params, Game) {
     // get the character of the player
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
-            // get he list of characters at the grid
-            const playersAtGrid = Game.characterManager.getLocationList(character.location.map, character.location.x, character.location.y);
-            // find if player is in the same grid
-            const receiver = playersAtGrid.find((user) => user.name.toLowerCase().indexOf(playerName) === 0 && !user.hidden);
-
-            if (!receiver) {
-                return Game.eventToSocket(socket, 'error', 'There are nobody around with that name.');
-            }
-
-            // check if they have enough money (in cash)
-            if (character.stats.money < amount) {
-                return Game.eventToSocket(socket, 'error', `You do not have enough money on you, to give them that much.`);
-            }
-
-            let inSameLocation = true;
-            // make sure the receiver is at the same location
-            Object.keys(character.location).forEach((key) => {
-                if (character.location[key] !== receiver.location[key]) {
-                    inSameLocation = false;
+            Game.commandManager.findAtLocation(playerName, character.location, true, false)
+            .then((receiver) => {
+                // check if they have enough money (in cash)
+                if (character.stats.money < amount) {
+                    return Game.eventToSocket(socket, 'error', `You do not have enough money on you, to give them that much.`);
                 }
+
+                let inSameLocation = true;
+                // make sure the receiver is at the same location
+                Object.keys(character.location).forEach((key) => {
+                    if (character.location[key] !== receiver.location[key]) {
+                        inSameLocation = false;
+                    }
+                });
+
+                // if they are not in the same location, tell them
+                if (!inSameLocation) {
+                    return Game.eventToSocket(socket, 'error', 'You must be at the same location as the person you are giving money to.')
+                }
+
+                // remove money from giver, add it to the receiver
+                character.stats.money = character.stats.money - amount;
+                receiver.stats.money = receiver.stats.money + amount;
+
+                // let them both know what happened
+                Game.eventToSocket(socket, 'success', `You gave ${amount} to ${receiver.name}`);
+                Game.eventToUser(receiver.user_id, 'info', `${character.name} just gave you ${amount}!`);
+
+                // update the character stats of the two players
+                Game.characterManager.updateClient(character.user_id, 'stats');
+                Game.characterManager.updateClient(receiver.user_id, 'stats');
+            })
+            .catch((message) => {
+                Game.eventToSocket(socket, 'error', message);
             });
-
-            // if they are not in the same location, tell them
-            if (!inSameLocation) {
-                return Game.eventToSocket(socket, 'error', 'You must be at the same location as the person you are giving money to.')
-            }
-
-            // remove money from giver, add it to the receiver
-            character.stats.money = character.stats.money - amount;
-            receiver.stats.money = receiver.stats.money + amount;
-
-            // let them both know what happened
-            Game.eventToSocket(socket, 'success', `You gave ${amount} to ${receiver.name}`);
-            Game.eventToUser(receiver.user_id, 'info', `${character.name} just gave you ${amount}!`);
-
-            // update the character stats of the two players
-            Game.characterManager.updateClient(character.user_id, 'stats');
-            Game.characterManager.updateClient(receiver.user_id, 'stats');
         })
-        .catch(Game.logger.error);
+        .catch(() => {});
 }
 
 function cmdPunch(socket, command, params, Game) {
@@ -158,7 +158,7 @@ function cmdPunch(socket, command, params, Game) {
                             // send event to the bystanders
                             Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} his their fists. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
                         })
-                        .catch(Game.logger.error);
+                        .catch(() => {});
                 }
 
                 // update the target client's character inforamtion
@@ -171,7 +171,7 @@ function cmdPunch(socket, command, params, Game) {
                 Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} punch ${target.name}.`, [character.user_id, target.user_id]);
             });
         })
-        .catch(Game.logger.error);
+        .catch(() => {});
 }
 
 function cmdRelease(socket, command, params, Game) {
@@ -195,9 +195,9 @@ function cmdRelease(socket, command, params, Game) {
                     // get the target know they are no longer aimed at
                     Game.eventToUser(target.user_id, 'info', `${character.name} releases you from their aim.`);
                 })
-                .catch(Game.logger.error);
+                .catch(() => {});
         })
-        .catch(Game.logger.error)
+        .catch(() => {})
 }
 
 function cmdShoot(socket, command, params, Game) {
@@ -253,7 +253,7 @@ function cmdShoot(socket, command, params, Game) {
                             // send event to the bystanders
                             Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} with a ${weapon}. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
                         })
-                        .catch(Game.logger.error);
+                        .catch(() => {});
                 }
 
                 // update the target client's character inforamtion
@@ -266,7 +266,7 @@ function cmdShoot(socket, command, params, Game) {
                 Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} shoot ${target.name} with a ${weapon}.`, [character.user_id, target.user_id]);
             });
         })
-        .catch(Game.logger.error);
+        .catch(() => {});
 }
 
 function cmdStrike(socket, command, params, Game) {
@@ -317,7 +317,7 @@ function cmdStrike(socket, command, params, Game) {
                             // send event to the bystanders
                             Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} with a ${weapon}. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
                         })
-                        .catch(Game.logger.error);
+                        .catch(() => {});
                 }
 
                 // update the target client's character inforamtion
@@ -330,7 +330,7 @@ function cmdStrike(socket, command, params, Game) {
                 Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} strike ${target.name} with a ${weapon}.`, [character.user_id, target.user_id]);
             });
         })
-        .catch(Game.logger.error);
+        .catch(() => {});
 }
 
 module.exports = [

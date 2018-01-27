@@ -31,9 +31,9 @@ function cmdShop(socket, command, params, Game) {
                         payload: shop.toObject()
                     })
                 })
-                .catch(Game.logger.error);
+                .catch(() => {});
         })
-        .catch(Game.logger.error);
+        .catch(() => {});
 }
 
 module.exports = [

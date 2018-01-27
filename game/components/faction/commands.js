@@ -226,7 +226,7 @@ function cmdFactionSay(socket, command, params, Game) {
                 }
             });
         })
-        .catch(Game.logger.error)
+        .catch(() => {})
 }
 
 function cmdFactionKick(socket, command, params, Game) {

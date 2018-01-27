@@ -8,6 +8,8 @@ export default class NPC extends Character {
         this.npc_id = npcId;
         // generate a new unique ID for the NPCs
         this.id = uuid();
+        // Whether to ignore quantities on items, like ammo, so they dont run out of ammo etc.
+        this.ignoreQuantity = true;
         // keeps track of the timers for the NPC
         this.timers = [];
         // Anyone who takes aim at the NPC, for the duration of its life, will be 
@@ -23,6 +25,20 @@ export default class NPC extends Character {
         };
         // start the NPC logic
         this.initTimers();
+    }
+
+    /**
+     * Export a plain object of the needed NPC data, to be dispatched to the client.
+     * @return {Object} NPC data
+     */
+    exportToClient() {
+        return {
+            id: this.id,
+            npc_id: this.npc_id,
+            name: this.name,
+            type: this.type,
+            health: this.stats.health
+        }
     }
 
     /**
@@ -127,16 +143,61 @@ export default class NPC extends Character {
     }
 
     /**
-     * Export a plain object of the needed NPC data, to be dispatched to the client.
-     * @return {Object} NPC data
+     * Attck the current active target
+     * @return {Promise}
      */
-    exportToClient() {
-        return {
-            id: this.id,
-            npc_id: this.npc_id,
-            name: this.name,
-            type: this.type,
-            health: this.stats.health
-        }
+    attack() {
+        this.hasActiveTarget()
+            .then(() => {
+                console.log(`Attacking ${this.target.name}`);
+            })
+            .catch(() => {});
+    }
+
+    /**
+     * Whether the NPC has a target and is currently in combat
+     * @return {Boolean}
+     */
+    hasActiveTarget() {
+        return new Promise((resolve, reject) => {
+            let hasTarget = false;
+
+            // check if the NPC is already engaged in combat
+            if (this.target) {
+                if (this.target.location.map === this.location.map && this.target.location.x === this.location.x && this.target.location.y === this.location.y) {
+                    hasTarget = true;
+                }
+            }
+
+            if (!hasTarget) {
+                if (this.targetedBy.length) {
+                    this.setTarget(Math.round(Math.random() * (this.targetedBy.length - 1)));
+                    hasTarget = true;
+                }
+            }
+
+            if (hasTarget) {
+                resolve();
+            } else {
+                reject();
+            }
+        });
+    }
+
+    /**
+     * Adds the user id to the gridlock array
+     * @param  {Character Obj} character  the character objest of the character gridlocking the character.
+     */
+    gridLock(character) {
+        Character.prototype.gridLock.call(this, character);
+        // Make the NPC hostile towards the player, for the duration of its life.
+        this.hostiles.push(character);
+        // make the NPC immediately aim at the player, if they are not already engaged in combat with another
+        this.hasActiveTarget()
+            .then(() => {})
+            .catch(() => {
+                // set the attacker as the target, if there is no current target
+                this.setTarget(character);
+            })
     }
 }

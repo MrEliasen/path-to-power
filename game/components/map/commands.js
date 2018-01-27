@@ -141,9 +141,9 @@ function cmdFlee(socket, command, params, Game) {
                     // send the new grid details to the client
                     Game.mapManager.updateClient(character.user_id);
                 })
-                .catch(Game.logger.error)
+                .catch(() => {})
         })
-        .catch(Game.logger.error);
+        .catch(() => {});
 }
 
 module.exports = [

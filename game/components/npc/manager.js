@@ -238,7 +238,7 @@ export default class NPCManager {
         }
 
         // dispatch leave message to grid
-        this.Game.eventToRoom(NPC.getLocationId(), 'info', `${NPC.name} moves on to the ${directionOut}`);
+        this.Game.eventToRoom(NPC.getLocationId(), 'info', `${NPC.name} the ${NPC.type}, moves on to the ${directionOut}`);
 
         // remove player from the grid list of players
         this.Game.socketManager.dispatchToRoom(NPC.getLocationId(), {
@@ -256,7 +256,7 @@ export default class NPCManager {
         this.changeLocation(NPC, newLocation, oldLocation);
 
         // dispatch join message to new grid
-        this.Game.eventToRoom(NPC.getLocationId(), 'info', `${NPC.name} moves in from the ${directionIn}`);
+        this.Game.eventToRoom(NPC.getLocationId(), 'info', `${NPC.name} the ${NPC.type}, moves in from the ${directionIn}`);
 
         // add player from the grid list of players
         this.Game.socketManager.dispatchToRoom(NPC.getLocationId(), {

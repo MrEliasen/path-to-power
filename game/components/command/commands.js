@@ -31,7 +31,7 @@ function cmdGlobal(socket, command, params, Game) {
                 });
             });
         })
-        .catch(Game.logger.error)
+        .catch(() => {})
 }
 
 function cmdSay(socket, command, params, Game) {
@@ -49,7 +49,7 @@ function cmdSay(socket, command, params, Game) {
                 });
             });
         })
-        .catch(Game.logger.error)
+        .catch(() => {})
 }
 
 function cmdWhisper(socket, command, params, Game) {

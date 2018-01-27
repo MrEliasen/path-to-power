@@ -90,23 +90,20 @@ function cmdSkillSearch(socket, command, params, Game) {
             character.cooldowns.push(Game.cooldownManager.add(`skill_${skill.id}`, skill.cooldown, true));
 
             // get he list of characters at the grid
-            const playersAtGrid = Game.characterManager.getLocationList(character.location.map, character.location.x, character.location.y);
-
-            // find if player is in the same grid
             const userName = params[0].toLowerCase();
-            const targetCharacter = playersAtGrid.find((user) => user.name.toLowerCase().indexOf(userName) === 0);
 
-            // check if they are even in the area.
-            if (!targetCharacter) {
-                return Game.eventToSocket(socket, 'info', 'You search the area but without any luck.');
-            }
+            Game.commandManager.findAtLocation(userName, character.location, false, true)
+            .then((target) => {
+                // check if they are hiding
+                if (!target.hidden) {
+                    return Game.eventToSocket(socket, 'warning', 'This player is not hiding.')
+                }
 
-            // check if they are hiding
-            if (!targetCharacter.hidden) {
-                return Game.eventToSocket(socket, 'warning', 'This player is not hiding.')
-            }
-
-            skill.use(character, targetCharacter);
+                skill.use(character, target);
+            })
+            .catch((message) => {
+                Game.eventToSocket(socket, 'error', 'You search the area but without any luck.');
+            });
         })
         .catch(() => {
 
