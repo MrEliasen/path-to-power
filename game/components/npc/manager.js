@@ -1,6 +1,7 @@
 import NPC from './object';
 import NPCList from '../../data/npcs.json';
 import { NPC_JOINED_GRID, NPC_LEFT_GRID } from './types';
+import namesList from '../../data/names.json';
 
 export default class NPCManager {
     constructor(Game) {
@@ -75,6 +76,10 @@ export default class NPCManager {
 
         // add the map id to the location
         npcTemplate.location.map = map.id;
+
+        // randomise gender, and pick a name
+        npcTemplate.gender = Math.round(Math.random() * 1) ? "male" : "female";
+        npcTemplate.name = namesList[npcTemplate.gender][Math.round(Math.random() * (namesList[npcTemplate.gender].length - 1))];
 
         const newNPC = new NPC(this.Game, npcTemplate, npcData.id);
 

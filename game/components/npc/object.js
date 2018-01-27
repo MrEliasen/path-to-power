@@ -10,30 +10,74 @@ export default class NPC extends Character {
         this.id = uuid();
         // keeps track of the timers for the NPC
         this.timers = [];
+        // Anyone who takes aim at the NPC, for the duration of its life, will be 
+        // added to the list, and attacked on sight.
+        this.hostiles = [];
         // Set the default timers, overwrite with NPC specific timers (in seconds)
-        this.timerIntervals = Object.assign({
-            "move": 60,
-            "attack": 2,
-            "resupply": 1200
-        }, this.timerIntervals);
-
+        this.logic = {
+            ...this.logic, 
+            timers: Object.assign({
+                "move": [15,60],
+                "attack": 2
+            }, this.logic.timers)
+        };
         // start the NPC logic
         this.initTimers();
+    }
+
+    /**
+     * Generates a number between the min and max
+     * @param  {Number} min
+     * @param  {Number} max
+     * @return {Number}
+     */
+    getRandomTimerInterval(min, max) {
+        return Math.round(((Math.random() * (max - min)) + min) * 100) / 100;
     }
 
     /**
      * Starts the NPC logic timers
      */
     initTimers() {
-        Object.keys(this.timerIntervals).forEach((timerKey) => {
+        Object.keys(this.logic.timers).forEach((timerKey) => {
             const method = this[timerKey];
+            const timerValue = this.logic.timers[timerKey];
 
             if (!method) {
                 return this.Game.logger.error(`No NPC method found for timer ${timerKey}`);
             }
 
-            this.timers.push(setInterval(method.bind(this), this.timerIntervals[timerKey] * 1000));
+            // if the timer interval is an array, randomise each time, otherwise just create an Interval;
+            if (Array.isArray(timerValue)) {
+                const timer = {
+                    key: timerKey,
+                    type: "interval",
+                    range: [...timerValue],
+                    method: method.bind(this),
+                    ref: null
+                };
+                // add to the managed timer list
+                this.timers.push(timer);
+                // create the initial timer
+                this.updateTimer(timer.key);
+            } else {
+                this.timers.push({
+                    key: timerKey,
+                    type: "interval",
+                    ref: setInterval(method.bind(this), timerValue * 1000)
+                });
+            }
         });
+    }
+
+    updateTimer(timerKey) {
+        const timer = this.timers.find((obj) => obj.key === timerKey);
+        const nextAction = this.getRandomTimerInterval(...timer.range);
+
+        timer.ref = setTimeout(() => {
+            timer.method();
+            this.updateTimer(timerKey);
+        }, nextAction * 1000);
     }
 
     /**
@@ -91,6 +135,7 @@ export default class NPC extends Character {
             id: this.id,
             npc_id: this.npc_id,
             name: this.name,
+            type: this.type,
             health: this.stats.health
         }
     }
