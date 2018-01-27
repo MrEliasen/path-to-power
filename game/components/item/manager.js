@@ -207,7 +207,30 @@ export default class ItemManager {
         return this.templates[item_id];
     }
 
-    loadInventory(character) {
+    loadNPCInventory(NPC) {
+        return new Promise((resolve, reject) => {
+            // If the npc does not have any inventory, just ignore this
+            if (!NPC.inventory || !NPC.inventory.length) {
+                return resolve([]);
+            }
+
+            const inventory = NPC.inventory.map((item) => {
+                let newItem = this.add(item.item_id, item.modifiers, null);
+                newItem.equipped_slot = item.equipped_slot;
+
+                return newItem;
+            });
+
+            resolve(inventory);
+        })
+    }
+
+    /**
+     * Load Character inventory
+     * @param  {Character} character The player character
+     * @return {Promise}
+     */
+    loadCharacterInventory(character) {
         return new Promise((resolve, reject) => {
             ItemModel.find({ user_id: character.user_id}, {_id: 1, item_id: 1, modifiers: 1, equipped_slot: 1}, (err, items) => {
                 if (err) {

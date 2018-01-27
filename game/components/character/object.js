@@ -3,33 +3,26 @@ import Promise from 'bluebird';
 export default class Character {
     constructor(Game, character) {
         this.Game = Game;
-
         // the character objest of the characters who are currently aiming at this character
         this.targetedBy = [];
-
         // the character object of the current targed character
         this.target = null;
-
         // holds the faction object of the player
         this.faction = null;
-
         // holds all the skills for the character
         this.skills = null;
-
+        // Whether their skills and abilities should improve when used
+        this.train = true;
         // Whether to ignore quantities on items, like ammo, so they dont run out of ammo etc.
         this.ignoreQuantity = false
-
         // holds all the abilities for the character
         // This is set in the object assign, if not set it to blank
         this.abilities = [];
-
         // create the inventory and equipped objects
         this.inventory = [];
         this.equipped = {};
-
         // list of all active cooldowns for the character
         this.cooldowns = [];
-
         // if the character is new, they won't have stats, set the default here.
         this.stats = {
             health: 100,
@@ -165,7 +158,7 @@ export default class Character {
                 this.target.gridLock(this);
 
             })
-            .catch(this.Game.logger.error);
+            .catch(() => {});
     }
 
     /**

@@ -9,6 +9,7 @@ export default class SkillHide {
         this.name = 'Search';
         this.command = '/search';
         this.value = 1;
+        this.improve = true;
         this.cooldown = 5; // seconds
 
         Object.assign(this, {...modifiers});
@@ -60,13 +61,19 @@ export default class SkillHide {
         });
 
         // train the skill
-        this.train();
+        if (character.train) { 
+            this.train();
+        }
     }
 
     /**
      * Increase the skill by the training amount
      */
     train() {
+        if (!this.improve) {
+            return;
+        }
+
         // this is how much the skill should increment when used.
         // Round the new value to 5 decimal points
         this.value = this.value + Math.round(

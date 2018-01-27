@@ -41,7 +41,7 @@ export default class MapManager {
                             resolve(maplist.length);
                         }
                     })
-                    .catch(this.Game.logger.error)
+                    .catch(() => {})
             })
         })
     }
@@ -147,7 +147,7 @@ export default class MapManager {
                     y: parseInt(y, 10)
                 })
             })
-            .catch(this.Game.logger.error)
+            .catch(() => {})
         })
     }
 }

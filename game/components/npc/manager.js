@@ -89,29 +89,44 @@ export default class NPCManager {
         // load the character skills
         await this.Game.skillManager.load(newNPC);
 
-        // add the NPC to the managed list of npcs
-        this.npcs.push(newNPC);
+        
+        this.Game.itemManager.loadNPCInventory(newNPC)
+            .then((items) => {
+                if (items.length) {
+                    newNPC.setInventory(items);
 
-        // track the NPC location
-        this.changeLocation(newNPC, newNPC.location);
-
-        if (dispatchEvents) {
-            // dispatch join event to grid
-            this.Game.eventToRoom(newNPC.getLocationId(), 'info', `${newNPC.name} emerges from a nearby sidewalk.`);
-
-            // update the grid's player list
-            this.Game.socketManager.dispatchToRoom(newNPC.getLocationId(), {
-                type: NPC_JOINED_GRID,
-                payload: {
-                    name: newNPC.name,
-                    id: newNPC.id
+                    items.map((item, index) => {
+                        if (item.equipped_slot) {
+                            newNPC.equip(index);
+                        }
+                    });
                 }
-            });
-        }
 
-        this.Game.logger.info(`NPC generated. Type: "${newNPC.npc_id}"; Map "${newNPC.location.map}; Location "${newNPC.location.y}-${newNPC.location.x}"`);
+                // add the NPC to the managed list of npcs
+                this.npcs.push(newNPC);
 
-        return true;
+                // track the NPC location
+                this.changeLocation(newNPC, newNPC.location);
+
+                if (dispatchEvents) {
+                    // dispatch join event to grid
+                    this.Game.eventToRoom(newNPC.getLocationId(), 'info', `${newNPC.name} emerges from a nearby sidewalk.`);
+
+                    // update the grid's player list
+                    this.Game.socketManager.dispatchToRoom(newNPC.getLocationId(), {
+                        type: NPC_JOINED_GRID,
+                        payload: {
+                            name: newNPC.name,
+                            id: newNPC.id
+                        }
+                    });
+                }
+
+                this.Game.logger.info(`NPC generated. Type: "${newNPC.npc_id}"; Map "${newNPC.location.map}; Location "${newNPC.location.y}-${newNPC.location.x}"`);
+
+                return true;
+            })
+            .catch((err) => {});
     }
 
     /**

@@ -39,14 +39,8 @@ function cmdAim(socket, command, params, Game) {
                     // set the new target, releasing the old target's gridlock, and gridlocking the new target.
                     character.setTarget(target);
 
-                    // get the socket of the targeted character
-                    Game.socketManager.get(target.user_id)
-                        .then((targetSocket) => {
-                            // let the player know they are aimed at
-                            Game.eventToSocket(targetSocket, 'warning', `${character.name} has taken aim at you. The only way get out of this, is to kill ${character.name} or /flee <n|s|w|e>`);
-                        })
-                        .catch(() => {});
-
+                    // let the player know they are aimed at
+                    Game.eventToUser(target.user_id, 'warning', `${character.name} has taken aim at you. The only way get out of this, is to kill ${character.name} or /flee <n|s|w|e>`);
                     // let the character know they have a target
                     Game.eventToSocket(socket, 'info', `You take aim at ${target.name}. You can release your aim with /release`);
                     Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} take aim at ${target.name}.`, [target.user_id, character.user_id]);

@@ -1,9 +1,10 @@
 export default class AbilityAccuracy {
-    constructor(base, value) {
-        this.id     = 'acc';
-        this.name   = 'Accuracy';
-        this.base   = base;
-        this.value  = value || base;
+    constructor(base, value, improve = true) {
+        this.id       = 'acc';
+        this.name     = 'Accuracy';
+        this.base     = base;
+        this.improve  = improve;
+        this.value    = value || base;
     }
 
     /**
@@ -26,6 +27,10 @@ export default class AbilityAccuracy {
      * Increase the ability value by the training amount
      */
     train() {
+        if (!this.improve) {
+            return;
+        }
+
         // this is how much the ability should increment when "used" successfully.
         // By default, it will take 2194 hits to reach 60.0 accuracy.
         // Round the new value to 5 decimal points

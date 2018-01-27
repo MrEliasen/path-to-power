@@ -175,7 +175,7 @@ export default class SocketManager extends EventEmitter {
             .then((socket) => {
                 socket.join(roomId);
             })
-            .catch(this.Game.logger.error);
+            .catch(() => {});
     }
 
     /**
@@ -188,6 +188,6 @@ export default class SocketManager extends EventEmitter {
             .then((socket) => {
                 socket.leave(roomId);
             })
-            .catch(this.Game.logger.error);
+            .catch(() => {});
     }
 }

@@ -169,7 +169,7 @@ export default class Shop {
                     }
                 });
             })
-            .catch(this.Game.logger.error);
+            .catch(() => {});
     }
 
     addToInventory(itemObj, amount = null) {

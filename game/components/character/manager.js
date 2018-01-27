@@ -218,7 +218,7 @@ export default class CharacterManager {
             // join the grid room
             socket.join(character.getLocationId());
         })
-        .catch(this.Game.logger.error);
+        .catch(() => {});
     }
 
     /**
@@ -271,7 +271,7 @@ export default class CharacterManager {
 
             this.manage(newCharacter);
 
-            this.Game.itemManager.loadInventory(newCharacter)
+            this.Game.itemManager.loadCharacterInventory(newCharacter)
                 .then((items) => {
                     if (items) {
                         newCharacter.setInventory(items);

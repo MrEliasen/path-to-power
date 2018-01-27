@@ -98,6 +98,8 @@ export default class SkillManager {
             skills.forEach((skill) => {
                 let newSkill = this.new(skill);
 
+                newSkill.improve = character.train;
+
                 if (newSkill) {
                     character.skills.push(newSkill);
                 }

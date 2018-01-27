@@ -26,6 +26,9 @@ class Game {
         // setup the winston logger
         this.setupLogger();
 
+        // reference to the autosave timer, if enabled
+        this.autosaveTimer = null;
+
         // Manager placeholders
         this.socketManager = new socketManager(this, server);
         this.accountManager = new accountManager(this);
@@ -121,11 +124,11 @@ class Game {
             console.log(`${count} NPCS LOADED`);
         });
 
-        // Listen for connections
-        this.socketManager.listen();
-
         // setup autosave
         this.setupAutosave();
+
+        // Listen for connections
+        this.socketManager.listen();
     }
 
     /**
@@ -138,7 +141,7 @@ class Game {
         }
 
         // NOTE: if you want to add anything to the auto save, do it here
-        setInterval(() => {
+        this.autosaveTimer = setInterval(() => {
             this.characterManager.saveAll();
         }, this.config.game.autosave.interval);
     }

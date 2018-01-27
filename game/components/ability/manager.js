@@ -23,7 +23,7 @@ export default class AbilityManager {
             // clear the list and make an array, which will hold our abilities
             character.abilities = [];
             // set each of the abilities to the character
-            character.abilities.push(new AbilityAccuracy(20, abilities.acc));
+            character.abilities.push(new AbilityAccuracy(20, abilities.acc, character.train));
 
             resolve();
         });

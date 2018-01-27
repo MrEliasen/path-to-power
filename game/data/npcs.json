@@ -9,25 +9,27 @@
             "acc" : 45
         },
         "skills" : {},
-        "equipment" : {
-            "ranged": {
+        "inventory": [
+            {
+                "equipped_slot": "ranged",
                 "item_id": "pistol",
                 "modifiers": {}
             },
-            "melee": {
+            {
+                "equipped_slot": "melee",
                 "item_id": "police-baton",
                 "modifiers": {}
             },
-            "body": {
+            {
+                "equipped_slot": "armor",
                 "item_id": "kevlar",
                 "modifiers": {}
             },
-            "ammo": {
+            {
+                "equipped_slot": "ammo",
                 "item_id": "ammo",
                 "modifiers": {}
-            }
-        },
-        "inventory": [
+            },
             { 
                 "item_id": "ammo",
                 "modifiers": {}
