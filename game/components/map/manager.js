@@ -73,7 +73,7 @@ export default class MapManager {
                 payload: {
                     description: this.generateDescription(),
                     players: this.Game.characterManager.getLocationList(...location, character.user_id, true),
-                    npcs: [],
+                    npcs: this.Game.npcManager.getLocationList(...location, true),
                     items: this.Game.itemManager.getLocationList(...location, true),
                     structures: this.Game.structureManager.getGrid(...location, true)
                 }

@@ -1,0 +1,49 @@
+{
+    "police-officer" : {
+        "name" : "Police Officer",
+        "stats" : {
+            "health" : 300,
+            "money" : 200
+        },
+        "abilities" : {
+            "acc" : 45
+        },
+        "skills" : {},
+        "equipment" : {
+            "ranged": {
+                "item_id": "pistol",
+                "modifiers": {}
+            },
+            "melee": {
+                "item_id": "police-baton",
+                "modifiers": {}
+            },
+            "body": {
+                "item_id": "kevlar",
+                "modifiers": {}
+            },
+            "ammo": {
+                "item_id": "ammo",
+                "modifiers": {}
+            }
+        },
+        "inventory": [
+            { 
+                "item_id": "ammo",
+                "modifiers": {}
+            },
+            { 
+                "item_id": "ammo",
+                "modifiers": {}
+            },
+            { 
+                "item_id": "ammo",
+                "modifiers": {}
+            }
+        ],
+        "timerIntervals": {
+            "move": 5,
+            "attck": 2
+        }
+    }
+}

@@ -1,4 +1,6 @@
 import NPC from './object';
+import NPCList from '../../data/npcs.json';
+import { NPC_JOINED_GRID, NPC_LEFT_GRID } from './types';
 
 export default class NPCManager {
     constructor(Game) {
@@ -40,11 +42,41 @@ export default class NPCManager {
     }
 
     /**
+     * Takes a full, deep-copy, of a given object
+     * @param {Object} toCopy Object to copy
+     * @return {Object}
+     */
+    deepCopyObject(toCopy) {
+        return JSON.parse(JSON.stringify(toCopy));
+    }
+
+    /**
      * Adds a NPC class object to the managed list
      * @param {Object} npcData The needed NPC data to create a new npc
      */
-    async create(npcData) {
-        const newNPC = new NPC(npcData);
+    async create(npcData, map, dispatchEvents = true) {
+        // make sure the NPC exists
+        if (!NPCList[npcData.id]) {
+            return this.Game.logger.error(`No NPC with the ID ${npcData.id} exists.`);
+        }
+
+        // get the NPC template
+        const npcTemplate = this.deepCopyObject(NPCList[npcData.id]);
+
+        // generate location is one of not set
+        npcTemplate.location = npcData.location;
+
+        if (!npcTemplate.location) {
+            npcTemplate.location = {
+                x: Math.round(Math.random() * map.gridSize.x),
+                y: Math.round(Math.random() * map.gridSize.y)
+            }
+        }
+
+        // add the map id to the location
+        npcTemplate.location.map = map.id;
+
+        const newNPC = new NPC(this.Game, npcTemplate, npcData.id);
 
         // load the character abilities
         await this.Game.abilityManager.load(newNPC);
@@ -58,17 +90,21 @@ export default class NPCManager {
         // track the NPC location
         this.changeLocation(newNPC, newNPC.location);
 
-        // dispatch join event to grid
-        this.Game.eventToRoom(newNPC.getLocationId(), 'info', `${newNPC.name} emerges from a nearby sidewalk.`);
+        if (dispatchEvents) {
+            // dispatch join event to grid
+            this.Game.eventToRoom(newNPC.getLocationId(), 'info', `${newNPC.name} emerges from a nearby sidewalk.`);
 
-        // update the grid's player list
-        this.Game.socketManager.dispatchToRoom(newNPC.getLocationId(), {
-            type: NPC_JOINED_GRID,
-            payload: {
-                name: newNPC.name,
-                id: newNPC.id
-            }
-        });
+            // update the grid's player list
+            this.Game.socketManager.dispatchToRoom(newNPC.getLocationId(), {
+                type: NPC_JOINED_GRID,
+                payload: {
+                    name: newNPC.name,
+                    id: newNPC.id
+                }
+            });
+        }
+
+        this.Game.logger.info(`NPC generated. Type: "${newNPC.npc_id}"; Map "${newNPC.location.map}; Location "${newNPC.location.y}-${newNPC.location.x}"`);
 
         return true;
     }
@@ -113,10 +149,7 @@ export default class NPCManager {
         }
 
         return npcs.map((npc) => {
-            return {
-                id: npc.id,
-                name: npc.name
-            }
+            return npc.exportToClient()
         });
     }
 
@@ -130,7 +163,7 @@ export default class NPCManager {
 
         // if the old location does not exist, we dont need to remove the player from it
         if (this.locations[gridLocationId]) {
-            this.locations[gridLocationId] = npcsInGrid.filter((obj) => obj.id !== NPC.id);
+            this.locations[gridLocationId] = this.locations[gridLocationId].filter((obj) => obj.id !== NPC.id);
         }
     }
 
@@ -164,5 +197,68 @@ export default class NPCManager {
     changeLocation(NPC, newLocation = {}, oldLocation = {}) {
         this.removeFromGrid(oldLocation, NPC);
         this.addToGrid(newLocation, NPC);
+    }
+
+    /**
+     * Moves a NPC to the specific location, emitting related events on the way to and from
+     * @param  {NPC}    NPC         The NPC to move
+     * @param  {Object} newLocation {map, x, y}
+     * @param  {Object} moveAction  {grid, direction}
+     * @return {Promise}
+     */
+    move(NPC, newLocation, moveAction) {
+        let directionIn;
+        let directionOut;
+
+        // determin the direction names for the JOIN/LEAVE events
+        switch(moveAction.grid) {
+            case 'y':
+                if (moveAction.direction === 1) {
+                    directionOut = 'South';
+                    directionIn = 'North';
+                } else {
+                    directionOut = 'North';
+                    directionIn = 'South';
+                }
+                break;
+            case 'x':
+                if (moveAction.direction === 1) {
+                    directionOut = 'East';
+                    directionIn = 'West';
+                } else {
+                    directionOut = 'West';
+                    directionIn = 'East';
+                }
+                break;
+        }
+
+        // dispatch leave message to grid
+        this.Game.eventToRoom(NPC.getLocationId(), 'info', `${NPC.name} moves on to the ${directionOut}`);
+
+        // remove player from the grid list of players
+        this.Game.socketManager.dispatchToRoom(NPC.getLocationId(), {
+            type: NPC_LEFT_GRID,
+            payload: NPC.id
+        });
+
+        // save the old location
+        const oldLocation = {...NPC.location};
+
+        // update character location
+        NPC.updateLocation(newLocation.map, newLocation.x, newLocation.y);
+        
+        // change location on the map
+        this.changeLocation(NPC, newLocation, oldLocation);
+
+        // dispatch join message to new grid
+        this.Game.eventToRoom(NPC.getLocationId(), 'info', `${NPC.name} moves in from the ${directionIn}`);
+
+        // add player from the grid list of players
+        this.Game.socketManager.dispatchToRoom(NPC.getLocationId(), {
+            type: NPC_JOINED_GRID,
+            payload: NPC.exportToClient()
+        });
+
+        this.Game.logger.info(`NPC ${NPC.npc_id} (${NPC.id}) moved to ${NPC.location.map} ${NPC.location.y}-${NPC.location.x}`)   
     }
 }

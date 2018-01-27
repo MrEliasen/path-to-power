@@ -26,6 +26,20 @@
         }
     },
     {
+        "id": "kevlar",
+        "name": "Kevlar Vest",
+        "description": "Protectes the wearer from damage. Reducing damage taken by {damage_reduction}, soaking up to {durability} points of damage.",
+        "type": "armour",
+        "subtype": "body",
+        "stats": {
+            "equipable": true,
+            "price": 20,
+            "stackable": false,
+            "durability": 1000,
+            "damage_reduction": 2
+        }
+    },
+    {
         "id": "mushrooms",
         "name": "Mushrooms",
         "description": "Red kind, don't eat.",
@@ -56,6 +70,21 @@
         "id": "pocketknife",
         "name": "Pocket Knife",
         "description": "You are a real boy, with a pocket knife. Deals {damage_min}-{damage_max} damage on hit.",
+        "type": "weapon",
+        "subtype": "melee",
+        "stats": {
+            "equipable": true,
+            "price": 12,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 2,
+            "damage_max": 3
+        }
+    },
+    {
+        "id": "police-baton",
+        "name": "Police Baton",
+        "description": "Enforcing the law, one hit at the time. Deals {damage_min}-{damage_max} damage on hit.",
         "type": "weapon",
         "subtype": "melee",
         "stats": {

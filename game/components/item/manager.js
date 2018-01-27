@@ -4,6 +4,7 @@ import Promise from 'bluebird';
 import ItemModel from './model';
 import ItemList from '../../data/items.json';
 import Item from './object';
+import ItemCommands from './commands';
 
 export default class ItemManager {
     constructor(Game) {
@@ -24,10 +25,13 @@ export default class ItemManager {
         return new Promise((resolve, rejecte) => {
             ItemList.map((itemData) => {
                 this.templates[itemData.id] = new Item(this.getTemplate(itemData.id), itemData);
-            })
+            });
+
+            // register the commands
+            this.Game.commandManager.registerManager(ItemCommands);
 
             resolve(ItemList.length);
-        })
+        });
     }
 
     /**

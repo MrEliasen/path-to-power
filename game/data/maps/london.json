@@ -1,7 +1,7 @@
 {
     "id" : "london",
     "name": "London",
-    "grid_size": {
+    "gridSize": {
         "y": 30,
         "x": 30
     },
@@ -10,6 +10,16 @@
         {"id": "pawnshop", "x": 10, "y": 10},
         {"id": "mallshop", "x": 11, "y": 11},
         {"id": "hospital", "x": 15, "y": 15}
+    ],
+    "npcs": [
+        {
+            "id": "police-officer",
+            "amount": 1,
+            "location": {
+                "x": 10,
+                "y": 10
+            }
+        }
     ],
     "respawn": {
        "y": 0,
