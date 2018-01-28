@@ -72,7 +72,7 @@ export default class AccountManager {
             }
 
             // attempt to load the character from the database
-            this.Game.characterManager.load(socket.user.user_id, async (error, character) => {
+            this.Game.characterManager.load(socket.user, async (error, character) => {
                 if (error) {
                     return this.Game.socketManager.dispatchToSocket(socket, {
                         type: ACCOUNT_AUTHENTICATE_ERROR,
@@ -95,7 +95,7 @@ export default class AccountManager {
                 }
 
                 // create a new character
-                this.Game.characterManager.create(socket.user.user_id, socket.user.display_name, 'london', (error, newCharacter) => {
+                this.Game.characterManager.create(socket.user, 'london', (error, newCharacter) => {
                      if (error) {
                         return this.Game.socketManager.dispatchToSocket(socket, {
                             type: ACCOUNT_AUTHENTICATE_ERROR,

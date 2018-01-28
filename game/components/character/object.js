@@ -141,6 +141,7 @@ export default class Character {
             }),
             stats: this.stats,
             abilities: this.exportAbilities(true),
+            faction: this.faction ? this.faction.toObject(true) : null,
             skills: this.exportSkills(true),
             location: this.location
         }

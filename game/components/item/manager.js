@@ -71,7 +71,7 @@ export default class ItemManager {
      */
     drop(map_id, x, y, itemObject) {
         const gridId = `${map_id}_${y}_${x}`;
-        this.Game.logger.info('ItemManager::drop', {map_id, x, y, itemObject});
+        this.Game.logger.debug('ItemManager::drop', {map_id, x, y, itemObject});
 
         // Generate the item location, should it not exist.
         this.dropped_items[gridId] = this.dropped_items[gridId] || [];
@@ -159,7 +159,7 @@ export default class ItemManager {
      * @param {String} dbId       Database _id of the item, used for saving the item later.
      */
     add(itemId, modifiers = {}, dbId = null) {
-        this.Game.logger.info('ItemManager::add', {itemId})
+        this.Game.logger.debug('ItemManager::add', {itemId})
         const template = this.getTemplate(itemId);
 
         if (!template) {

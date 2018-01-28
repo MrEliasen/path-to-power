@@ -145,7 +145,12 @@ export default class CharacterManager {
                     payload: {
                         user_id: character.user_id,
                         name: character.name,
-                        faction: faction
+                        profile_image: character.profile_image,
+                        faction: character.faction ? {
+                            tag: character.faction.tag,
+                            name: character.faction.name,
+                            faction_id: character.faction.faction_id
+                        } : null
                     }
                 });
             });
@@ -253,12 +258,12 @@ export default class CharacterManager {
 
     /**
      * loads a character from the mongodb, based on user_id
-     * @param  {String}   user_id  The user ID
-     * @param  {Function} callback Callback function
-     * @return {Object}            Object with the character details.
+     * @param  {Object}   userData  The twitch user data
+     * @param  {Function} callback  Callback function
+     * @return {Object}             Object with the character details.
      */
-    load(user_id, callback) {
-        this.dbLoad(user_id, async (error, character) => {
+    load(userData, callback) {
+        this.dbLoad(userData.user_id, async (error, character) => {
             if (error) {
                 return callback(error);
             }
@@ -268,6 +273,7 @@ export default class CharacterManager {
             }
 
             const newCharacter = new Character(this.Game, character.toObject());
+            newCharacter.profile_image = userData.profile_image;
 
             this.manage(newCharacter);
 
@@ -297,9 +303,11 @@ export default class CharacterManager {
             online[character.user_id] = {
                 name: character.name,
                 user_id: character.user_id,
+                profile_image: character.profile_image,
                 faction: character.faction ? {
                     tag: character.faction.tag,
-                    name: character.faction.name
+                    name: character.faction.name,
+                    faction_id: character.faction.faction_id
                 } : null
             }
         })
@@ -328,21 +336,22 @@ export default class CharacterManager {
 
     /**
      * create a new character
-     * @param  {String}   user_id  User ID of the account
+     * @param  {Object}   userData The twitch user data
      * @param  {String}   name     Character Name
      * @param  {String}   city     Starting city ID
      * @param  {Function} callback Callback function
      * @return {Object}            Object with the character details
      */
-    create(user_id, name, city, callback) {
+    create(userData, city, callback) {
         this.dbCreate(user_id, name, city, (error, character) => {
             if (error) {
                 return callback(error)
             }
 
             const newCharacter = new Character(this.Game, character.toObject());
-            this.manage(newCharacter);
+            newCharacter.profile_image = userData.profile_image;
 
+            this.manage(newCharacter);
             callback(null, newCharacter);
         })
     }

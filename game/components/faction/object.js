@@ -185,20 +185,21 @@ export default class Faction {
 
     /**
      * Exports the faction to a plain object
+     * @param  {Bool}   ignoreMembers Whether to include members in the exported data or not.
      * @return {Object}
      */
-    toObject() {
+    toObject(ignoreMembers = false) {
         return {
             faction_id: this.faction_id,
             leader_id: this.leader_id,
             name: this.name,
             tag: this.tag,
-            members: this.onlineMembers.map((character) => {
+            members: !ignoreMembers ? this.onlineMembers.map((character) => {
                 return {
                     user_id: character.user_id,
                     name: character.name
                 }
-            })
+            }) : null
         }
     }
 }
