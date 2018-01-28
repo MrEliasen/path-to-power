@@ -150,6 +150,9 @@ export default class NPCManager {
                 }
             }
 
+            // set the default inventory
+            NPC.inventory = npcTemplate.inventory;
+
             // add the map id to the location
             NPC.location.map = gameMap.id;
 
