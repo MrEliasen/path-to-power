@@ -1,29 +1,25 @@
 {
-    "id" : "london",
-    "name": "London",
+    "id" : "berlin",
+    "name": "Berlin",
     "gridSize": {
-        "y": 30,
-        "x": 30
+        "y": 20,
+        "x": 20
     },
     "structures": [
         {"id": "hospital", "x": 5, "y": 5},
         {"id": "pawnshop", "x": 10, "y": 10},
         {"id": "mallshop", "x": 11, "y": 11},
         {"id": "hospital", "x": 15, "y": 15},
-        {"id": "london-airport", "x": 1, "y": 1}
+        {"id": "berlin-airport", "x": 1, "y": 1}
     ],
     "npcs": [
         {
             "id": "police-officer",
-            "amount": 1,
-            "location": {
-                "x": 10,
-                "y": 10
-            }
+            "amount": 1
         }
     ],
     "respawn": {
        "y": 5,
-       "x": 1 
+       "x": 5
     }
 }

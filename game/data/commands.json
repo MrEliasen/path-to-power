@@ -8,5 +8,8 @@
     },
     "/shop": {
         "description": "View the shop. Usage: /shop <building name>. If there is only one shop at a location, you can omit the building name."
+    },
+    "/travel": {
+        "description": "Travel to another city. Available destinations: {destinations}. Usage: /travel <destination name>"
     }
 }

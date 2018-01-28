@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import { GAME_COMMAND } from './types';
-import commandList from '../../data/commands.json';
+import * as commandList from '../../data/commands.json';
 import commandCommands from './commands';
 
 export default class CommandManager {
@@ -98,12 +98,24 @@ export default class CommandManager {
         })
     }
 
+    getTemplate(command) {
+        return new Promise((resolve, reject) => {
+            const cmd = commandList[command];
+            
+            if (!cmd) {
+                return reject(`Command ${command} was not found.`);
+            }
+
+            resolve(cmd);
+        });
+    }
+
     /**
      * returns a list of all available commands in game
      * @return {Object}
      */
     getList() {
-        return this.commandList;
+        return commandList;
     }
 
     /**

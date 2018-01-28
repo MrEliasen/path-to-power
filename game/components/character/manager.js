@@ -689,7 +689,7 @@ export default class CharacterManager {
                         // start the cooldown timer
                         newCooldown.start();
                     })
-                    .error(Game.logger.error);
+                    .catch(Game.logger.error);
                 })
                 .catch(() => {
                     this.Game.logger.debug(`Invalid move by character ${socket.user.user_id}`, newLocation);

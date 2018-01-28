@@ -17,6 +17,38 @@
             "shop-pawn"
         ]
     },
+    "london-airport": {
+        "name": "London Airport",
+        "colour": "#800080",
+        "commands": {
+            "/travel": {
+                "destinations": {
+                    "berlin": {
+                        "cost": 500,
+                        "x": 5,
+                        "y": 5
+                    }
+                }
+            }
+        },
+        "shops": []
+    },
+    "berlin-airport": {
+        "name": "Berlin Airport",
+        "colour": "#800080",
+        "commands": {
+            "/travel": {
+                "destinations": {
+                    "london": {
+                        "cost": 450,
+                        "x": 20,
+                        "y": 20
+                    }
+                }
+            }
+        },
+        "shops": []
+    },
     "mallshop": {
         "name": "Mall",
         "colour": "#d1400b",
