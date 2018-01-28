@@ -143,16 +143,16 @@ function cmdPunch(socket, command, params, Game) {
 
                 // if the target died
                 if (!attack.healthLeft) {
-                    return Game.characterManager.kill(target.user_id, character)
-                        .then((oldLocationId) => {
-                            // send event to the attacker
-                            Game.eventToSocket(socket, 'info', `You land the killing blow on ${target.name}. They fall to the ground, dropping everything they carried.`);
-                            // send event to the target
-                            Game.eventToUser(target.user_id, 'info', `${character.name} punches you, dealing ${attack.damageDealt} damage, killing you.`);
-                            // send event to the bystanders
-                            Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} his their fists. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
-                        })
-                        .catch(() => {});
+                    return target.kill(character)
+                            .then((oldLocationId) => {
+                                // send event to the attacker
+                                Game.eventToSocket(socket, 'info', `You land the killing blow on ${target.name}. They fall to the ground, dropping everything they carried.`);
+                                // send event to the target
+                                Game.eventToUser(target.user_id, 'info', `${character.name} punches you, dealing ${attack.damageDealt} damage, killing you.`);
+                                // send event to the bystanders
+                                Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} his their fists. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
+                            })
+                            .catch(() => {});
                 }
 
                 // update the target client's character inforamtion
@@ -238,7 +238,7 @@ function cmdShoot(socket, command, params, Game) {
 
                 // if the target died
                 if (!attack.healthLeft) {
-                    return Game.characterManager.kill(target.user_id, character)
+                    return target.kill(character)
                         .then((oldLocationId) => {
                             // send event to the attacker
                             Game.eventToSocket(socket, 'info', `You hit ${target.name} with your ${weapon}, killing them. They fall to the ground, dropping everything they carried.`);
@@ -302,7 +302,7 @@ function cmdStrike(socket, command, params, Game) {
 
                 // if the target died
                 if (!attack.healthLeft) {
-                    return Game.characterManager.kill(target.user_id, character)
+                    return target.kill(character)
                         .then((oldLocationId) => {
                             // send event to the attacker
                             Game.eventToSocket(socket, 'info', `You land the killing blow on ${target.name}, with your ${weapon}. They fall to the ground, dropping everything they carried.`);

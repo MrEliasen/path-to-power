@@ -86,6 +86,9 @@ export default class ItemManager {
                 this.dropped_items[gridId][itemIndex].addDurability(itemObject.stats.durability);
                 this.remove(itemObject);
             }
+        } else {
+            // reset their dropped status, in case its due to dying the items are dropped.
+            itemObject.equipped_slot = null;
         }
 
         // add item to the dropped items array, if the item was not stacked or if its
@@ -110,15 +113,27 @@ export default class ItemManager {
         return new Promise((resolve, reject) => {
             // get the list of items at the location
             const locationItems = this.getLocationList(map_id, x, y);
-            // find the item at the location, the user wants to pickup
-            const foundItemIndex = locationItems.findIndex((obj) => obj.name.toLowerCase().indexOf(itemName) !== -1);
+            let foundItemIndex = -1;
+            let foundItem;
 
-            // if not found, let them know
-            if (foundItemIndex === -1) {
-                return reject(); //Game.eventToSocket(socket, 'error', 'There are no items on the ground, matching that name.')
+            if (!locationItems.length) {
+                return reject();
             }
 
-            const foundItem = locationItems[foundItemIndex];
+            // find the item at the location, the user wants to pickup
+            if (itemName) {
+                foundItemIndex = locationItems.findIndex((obj) => obj.name.toLowerCase().indexOf(itemName) !== -1);
+
+                // if not found, let them know
+                if (foundItemIndex === -1) {
+                    return reject();
+                }
+
+                foundItem = locationItems[foundItemIndex];
+            } else {
+                foundItemIndex = 0;
+                foundItem = locationItems[foundItemIndex];
+            }
 
             // If the item is a non-stackable item, we remove it and return it.
             if (!foundItem.stats.stackable) {

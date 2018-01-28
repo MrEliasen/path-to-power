@@ -78,10 +78,6 @@ function cmdGiveItem(socket, command, params, Game) {
 }
 
 function cmdPickup(socket, command, params, Game) {
-    if (!params[0]) {
-        return;
-    } 
-
     // get the character
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
@@ -96,7 +92,7 @@ function cmdPickup(socket, command, params, Game) {
 
             // If the last parameter is not considered a number
             // assume its part of the item name, and set amount default 1
-            if (!parseInt(amount)) {
+            if (!parseInt(amount, 10)) {
                 itemName.push(amount);
                 amount = 1;
             }
@@ -138,7 +134,8 @@ module.exports = [
     },
     {
         commandKeys: [
-            '/pickup'
+            '/pickup',
+            '/get'
         ],
         method: cmdPickup
     },

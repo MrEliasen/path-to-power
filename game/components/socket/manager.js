@@ -2,6 +2,8 @@ import Promise from 'bluebird';
 import io from 'socket.io';
 import EventEmitter from 'events';
 
+import { ACCOUNT_AUTHENTICATE } from '../account/types';
+
 export default class SocketManager extends EventEmitter {
     constructor(Game, server) {
         super(Game, server);
@@ -115,6 +117,12 @@ export default class SocketManager extends EventEmitter {
         this.Game.logger.info('New action', {type: action.type});
         // Make sure actions have the right composition
         if (!action.payload || !action.type) {
+            return;
+        }
+
+        // if the client is not authenticating, but sending dispatches without
+        // being authenticated, ignore the request.
+        if (!socket.user && action.type !== ACCOUNT_AUTHENTICATE) {
             return;
         }
 

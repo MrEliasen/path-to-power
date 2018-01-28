@@ -212,6 +212,13 @@ export default class Character {
     }
 
     /**
+     * Kill the character
+     */
+    kill(killer) {
+        return this.Game.characterManager.kill(this.user_id, killer);
+    }
+
+    /**
      * Kills the character and updates the position to the map spawn position
      * @return {object} Plain object with the items, and cash dropped
      */

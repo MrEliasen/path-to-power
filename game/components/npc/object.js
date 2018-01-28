@@ -54,6 +54,30 @@ export default class NPC extends Character {
     }
 
     /**
+     * Kills and removes all timers
+     */
+    async clearTimers() {
+        this.timers.forEach((timer) => {
+            if (timer.ref) {
+                try {
+                    if (timer.type === 'timeout') {
+                        clearTimeout(timer.ref);
+                    } else {
+                        clearInterval(timer.ref);
+                    }
+                }
+                catch(err) {
+                    // supress errors caused by clearing a timer/interval
+                    // which is no longer active.
+                }
+            }
+        });
+
+        this.timers = [];
+        return;
+    }
+
+    /**
      * Starts the NPC logic timers
      */
     initTimers() {
@@ -69,7 +93,7 @@ export default class NPC extends Character {
             if (Array.isArray(timerValue)) {
                 const timer = {
                     key: timerKey,
-                    type: "interval",
+                    type: "timeout",
                     range: [...timerValue],
                     method: method.bind(this),
                     ref: null
@@ -88,6 +112,10 @@ export default class NPC extends Character {
         });
     }
 
+    /**
+     * Updates the specific timer, creating a new one with the same params, but randomised timer (if set)
+     * @param  {String} timerKey The action/skill/etc the timer governs
+     */
     updateTimer(timerKey) {
         const timer = this.timers.find((obj) => obj.key === timerKey);
         const nextAction = this.getRandomTimerInterval(...timer.range);
@@ -186,6 +214,9 @@ export default class NPC extends Character {
         .catch(() => {});
     }
 
+    /**
+     * Attacks the current target with their fists
+     */
     attackPunch() {
         // check if the attack will hit
         if (!this.attackHit()) {
@@ -218,6 +249,9 @@ export default class NPC extends Character {
         this.Game.eventToRoom(this.getLocationId(), 'info', `You see ${this.name} the ${this.type} punch ${this.target.name}.`, [this.target.user_id]);
     }
 
+    /**
+     * Attacks the current target with their ranged weapon
+     */
     attackShoot() {
         const weapon = this.equipped.ranged.name;
 
@@ -253,6 +287,9 @@ export default class NPC extends Character {
         this.Game.eventToRoom(character.getLocationId(), 'info', `You see ${this.name} the ${this.type} shoot ${this.target.name} with a ${weapon}.`, [this.target.user_id]);
     }
 
+    /**
+     * Attacks the current target with their melee weapon
+     */
     attackStrike() {
         const weapon = this.equipped.melee.name;
 
@@ -338,5 +375,38 @@ export default class NPC extends Character {
         this.hostiles.push(character.user_id);
         // make the NPC immediately aim at the player, if they are not already engaged in combat with another
         this.hasActiveTarget();
+    }
+
+    /**
+     * Kill the character
+     */
+    kill(killer) {
+        return this.Game.npcManager.kill(this, killer);
+    }
+
+    /**
+     * Kill the NPC, dropping their items and cash
+     * @return {Promise}
+     */
+    die() {
+        return new Promise((resolve, reject) => {
+            Character.prototype.die.call(this)
+                .then(async (loot) => {
+                    await this.clearTimers();
+
+                    // Initiates the NPC's respawn timer
+                    this.timers.push({
+                        key: 'respawn',
+                        ref: setTimeout(() => {
+                            this.Game.npcManager.reset(this);
+                        }, this.logic.respawn * 1000)
+                    });
+
+                    resolve(loot);
+                })
+                .catch(() => {
+                    reject();
+                });
+        });
     }
 }

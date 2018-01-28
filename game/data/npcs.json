@@ -2,7 +2,7 @@
     "police-officer" : {
         "type" : "Police Officer",
         "stats" : {
-            "health" : 300,
+            "health" : 1,
             "money" : 200
         },
         "abilities" : {
@@ -48,7 +48,7 @@
                 "move": [10, 30],
                 "attack": 2
             },
-            "respawn": 600,
+            "respawn": 10,
             "remainHostile": true
         }
     }
