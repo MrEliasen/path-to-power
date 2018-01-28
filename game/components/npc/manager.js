@@ -1,3 +1,4 @@
+import Promise from 'bluebird';
 import NPC from './object';
 import NPCList from '../../data/npcs.json';
 import { NPC_JOINED_GRID, NPC_LEFT_GRID } from './types';

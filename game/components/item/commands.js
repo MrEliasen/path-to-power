@@ -12,7 +12,7 @@ function cmdDrop(socket, command, params, Game) {
 
             // If the last parameter is not considered a number
             // assume its part of the item name, and set amount default 1
-            if (!parseInt(amount)) {
+            if (!parseInt(amount, 10)) {
                 item_name.push(amount);
                 amount = 1;
             }
@@ -58,7 +58,7 @@ function cmdGiveItem(socket, command, params, Game) {
     }
 
     const itemKey = params[0];
-    const amount = parseInt(params[1]) || 1;
+    const amount = parseInt(params[1], 10) || 1;
     const itemTemplate = Game.itemManager.getTemplate(itemKey);
 
     if (!itemTemplate) {

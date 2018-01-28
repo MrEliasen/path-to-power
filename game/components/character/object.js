@@ -47,6 +47,8 @@ export default class Character {
             this.location.x = spawn.x;
             this.location.y = spawn.y;
         }
+
+        this.gridLock = this.gridLock.bind(this);
     }
 
     /**

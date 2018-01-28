@@ -1,3 +1,4 @@
+import Promise from 'bluebird';
 import Character from '../character/object';
 import uuid from 'uuid/v4';
 
@@ -193,6 +194,97 @@ export default class NPC extends Character {
     }
 
     /**
+     * Whether the NPC has a target and is currently in combat
+     * @return {Boolean}
+     */
+    hasActiveTarget() {
+        return new Promise((resolve, reject) => {
+            let newTarget;
+
+            // check if the NPC has an active target
+            if (this.target) {
+                if (this.target.location.map === this.location.map && this.target.location.x === this.location.x && this.target.location.y === this.location.y) {
+                    return resolve();
+                } else {
+                    // clear the target, as its no longer in the same spot.
+                    this.target = null;
+                }
+            }
+
+            // if it has no target, check if we have any nearby who are hostile
+            if (!this.target) {
+                // check if its currently being aimed at, and prioritise those targets
+                if (this.targetedBy.length) {
+                    newTarget = this.targetedBy[Math.max(0, Math.round((Math.random() * this.targetedBy.length) - 1))];
+                    this.setTarget(newTarget.user_id);
+                    return resolve();
+                }
+
+                // if there are no one currently aiming at them, check for hostiles
+                if (this.hostiles.length) {
+                    const targets = this.hostiles.filter((obj) => {
+                        return obj.location.map === this.location.map && obj.location.x === this.location.x && obj.location.y === this.location.y
+                    });
+
+                    if (targets.length) {
+                        newTarget = targets[Math.max(0, Math.round((Math.random() * targets.length) - 1))]
+                        this.setTarget(newTarget.user_id);
+                        return resolve();
+                    }
+                }
+            }
+
+            this.target = null;
+            reject();
+        });
+    }
+
+    /**
+     * Adds the user id to the gridlock array
+     * @param  {Character Obj} character  the character objest of the character gridlocking the character.
+     */
+    gridLock(character) {
+        Character.prototype.gridLock.call(this, character);
+        // Make the NPC hostile towards the player, for the duration of its life.
+        this.hostiles.push(character);
+        // make the NPC immediately aim at the player, if they are not already engaged in combat with another
+        this.hasActiveTarget();
+    }
+
+    /**
+     * Kill the character
+     */
+    kill(killer) {
+        return this.Game.npcManager.kill(this, killer);
+    }
+
+    /**
+     * Kill the NPC, dropping their items and cash
+     * @return {Promise}
+     */
+    die() {
+        return new Promise((resolve, reject) => {
+            Character.prototype.die.call(this)
+                .then(async (loot) => {
+                    await this.clearTimers();
+
+                    // Initiates the NPC's respawn timer
+                    this.timers.push({
+                        key: 'respawn',
+                        ref: setTimeout(() => {
+                            this.Game.npcManager.reset(this);
+                        }, this.logic.respawn * 1000)
+                    });
+
+                    resolve(loot);
+                })
+                .catch(() => {
+                    reject();
+                });
+        });
+    }
+
+    /**
      * Attck the current active target
      * @return {Promise}
      */
@@ -323,90 +415,5 @@ export default class NPC extends Character {
         this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} strikes you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
         // send event to the bystanders
         this.Game.eventToRoom(this.getLocationId(), 'info', `You see ${this.name} the ${this.type} strike ${this.target.name} with a ${weapon}.`, [this.target.user_id]);
-    }
-
-    /**
-     * Whether the NPC has a target and is currently in combat
-     * @return {Boolean}
-     */
-    hasActiveTarget() {
-        return new Promise((resolve, reject) => {
-            let hasTarget = false;
-
-            // check if the NPC is already engaged in combat
-            if (this.target) {
-                if (this.target.location.map === this.location.map && this.target.location.x === this.location.x && this.target.location.y === this.location.y) {
-                    hasTarget = true;
-                }
-            }
-
-            if (!hasTarget) {
-                // check if its currently being aimed at, and prioritise those targets
-                if (this.targetedBy.length) {
-                    this.setTarget(this.targetedBy[Math.max(0, Math.round((Math.random() * this.targetedBy.length) - 1))].user_id);
-                    hasTarget = true;
-                // if there are no one currently aiming at them, check for hostiles
-                } else if (this.hostiles.length) {
-                    const targets = this.hostiles.filter((obj) => obj.location.map === this.location.map && obj.location.x === this.location.x && obj.location.y === this.location.y);
-
-                    if (targets.length) {
-                        this.setTarget(targets[Math.max(0, Math.round((Math.random() * targets.length) - 1))]);
-                        hasTarget = true;
-                    }
-                }
-            }
-
-            if (hasTarget) {
-                resolve();
-            } else {
-                this.target = null;
-                reject();
-            }
-        });
-    }
-
-    /**
-     * Adds the user id to the gridlock array
-     * @param  {Character Obj} character  the character objest of the character gridlocking the character.
-     */
-    gridLock(character) {
-        Character.prototype.gridLock.call(this, character);
-        // Make the NPC hostile towards the player, for the duration of its life.
-        this.hostiles.push(character.user_id);
-        // make the NPC immediately aim at the player, if they are not already engaged in combat with another
-        this.hasActiveTarget();
-    }
-
-    /**
-     * Kill the character
-     */
-    kill(killer) {
-        return this.Game.npcManager.kill(this, killer);
-    }
-
-    /**
-     * Kill the NPC, dropping their items and cash
-     * @return {Promise}
-     */
-    die() {
-        return new Promise((resolve, reject) => {
-            Character.prototype.die.call(this)
-                .then(async (loot) => {
-                    await this.clearTimers();
-
-                    // Initiates the NPC's respawn timer
-                    this.timers.push({
-                        key: 'respawn',
-                        ref: setTimeout(() => {
-                            this.Game.npcManager.reset(this);
-                        }, this.logic.respawn * 1000)
-                    });
-
-                    resolve(loot);
-                })
-                .catch(() => {
-                    reject();
-                });
-        });
     }
 }

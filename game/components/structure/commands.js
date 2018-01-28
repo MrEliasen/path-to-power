@@ -27,7 +27,7 @@ function cmdHeal(socket, command, params, Game) {
 
                             // if there are 2 params, the client is likely specifying the structure they want to use the command with
                             // meaning the 2nd param would be the amount, and not the first.
-                            let heal_ticks = parseInt(params[0]);
+                            let heal_ticks = parseInt(params[0], 10);
                             let heal_amount = heal_ticks * commandObj.modifiers.heal_amount;
 
                             // Check if the heal_amount is valid

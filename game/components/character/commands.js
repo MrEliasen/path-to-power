@@ -63,7 +63,7 @@ function cmdGive(socket, command, params, Game) {
     }
 
     const playerName = params[0];
-    const amount = parseInt(params[1]) || 0;
+    const amount = parseInt(params[1], 10) || 0;
 
     // make sure they are giving at least 1
     if (amount <= 0) {
