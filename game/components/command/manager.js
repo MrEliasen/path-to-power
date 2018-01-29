@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import { GAME_COMMAND } from './types';
-import * as commandList from '../../data/commands.json';
+import commandList from '../../data/commands.json';
 import commandCommands from './commands';
 
 export default class CommandManager {
@@ -64,10 +64,14 @@ export default class CommandManager {
             return;
         }
 
+        if (!action.payload) {
+            return;
+        }
+
         const payload = action.payload.toString().trim().split(' ');
 
         if (!payload[0]) {
-            return resolve();
+            return;
         }
 
         const command = payload.shift().toLowerCase();
@@ -115,7 +119,16 @@ export default class CommandManager {
      * @return {Object}
      */
     getList() {
-        return commandList;
+        const listOfCommands = {...commandList};
+        const managerCommands = [...Object.keys(this.commands)];
+
+        managerCommands.forEach((cmd) => {
+            if (!listOfCommands[cmd]) {
+                listOfCommands[cmd] = {description: ""};
+            }
+        });
+
+        return listOfCommands;
     }
 
     /**

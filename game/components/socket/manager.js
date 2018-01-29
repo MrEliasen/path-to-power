@@ -116,7 +116,7 @@ export default class SocketManager extends EventEmitter {
     onClientDispatch(socket, action) {
         this.Game.logger.info('New action', {type: action.type});
         // Make sure actions have the right composition
-        if (!action.payload || !action.type) {
+        if (!action.type) {
             return;
         }
 
