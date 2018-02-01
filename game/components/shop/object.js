@@ -141,7 +141,7 @@ export default class Shop {
 
                     // if the item has 0 durability, remove it
                     if (item.stats.durability <= 0) {
-                        this.Game.itemManager.remove(item);
+                        this.Game.itemManager.remove(character, item);
                     }
                 } else {
                     soldItem = character.inventory.splice(index, 1)[0];
@@ -153,8 +153,6 @@ export default class Shop {
                 // add item to shop inventory (if resell is enabled)
                 if (this.buy.resell) {
                     this.addToInventory(soldItem);
-                } else {
-                    this.Game.itemManager.remove(soldItem);
                 }
 
                 // update client character object
@@ -183,7 +181,6 @@ export default class Shop {
 
             if (inventoryItem) {
                 inventoryItem.shopQuantity = inventoryItem.shopQuantity + amount;
-                this.Game.itemManager.remove(itemObj);
             } else {
                 // set the amount of the item to the correct amount, before adding to the inventory
                 itemObj.shopQuantity = amount;
@@ -194,7 +191,7 @@ export default class Shop {
             inventoryItem = this.sell.list.find((obj) => obj.id === itemObj.id && obj.shopQuantity >= 999);
             // if once exists, delete the player item
             if (inventoryItem) {
-                return this.Game.itemManager.remove(itemObj);
+                return;
             }
 
             // check if we have other items with the same durability, then we can stack those.
@@ -203,7 +200,7 @@ export default class Shop {
             // stack the items if found
             if (inventoryItem) {
                 inventoryItem.shopQuantity = inventoryItem.shopQuantity + 1;
-                return this.Game.itemManager.remove(itemObj);
+                return;
             }
 
             // otherwise push the new item to the stack 
@@ -231,7 +228,8 @@ export default class Shop {
                 }
 
                 // check if the shop has the item
-                const item = this.sell.list[parseInt(index, 10)];
+                const itemIndex = parseInt(index, 10);
+                const item = this.sell.list[itemIndex];
                 if (!item) {
                     return this.Game.eventToUser(user_id, 'error', 'They do not appear to have that item anymore');
                 }
@@ -290,7 +288,7 @@ export default class Shop {
 
                 // remove the item from the shop, us quantity is 0
                 if (item.shopQuantity <= 0) {
-                    this.Game.itemManager.remove(item);
+                    this.sell.list.splice(itemIndex, 1);
                 }
             })
             .catch((err) => {

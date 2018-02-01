@@ -22,7 +22,7 @@ function cmdSkillSnoop(socket, command, params, Game) {
                         return Game.eventToUser(character.user_id, 'error', `You cannot snoop on anyone again so soon. You must wait another ${(ticksLeft / 10)} seconds.`);
                     }
                     // add the search cooldown to the character
-                    character.cooldowns.push(Game.cooldownManager.add(`skill_${skill.id}`, skill.cooldown, true));
+                    Game.cooldownManager.add(character, `skill_${skill.id}`, skill.cooldown, true);
 
                     const snoopInfo = skill.use(targetCharacter);
                     return Game.eventToSocket(socket, 'success', JSON.stringify(snoopInfo));
@@ -55,7 +55,7 @@ function cmdSkillHide(socket, command, params, Game) {
                 }
             } else {
                 // set the cooldown of the skill, when they come out of hiding
-                character.cooldowns.push(Game.cooldownManager.add(`skill_${skill.id}`, skill.cooldown, true));
+                Game.cooldownManager.add(character, `skill_${skill.id}`, skill.cooldown, true);
             }
 
             skill.use(character);
@@ -87,7 +87,7 @@ function cmdSkillSearch(socket, command, params, Game) {
                 return Game.eventToUser(character.user_id, 'error', `You cannot search again so soon. You must wait another ${(ticksLeft / 10)} seconds.`);
             }
             // add the search cooldown to the character
-            character.cooldowns.push(Game.cooldownManager.add(`skill_${skill.id}`, skill.cooldown, true));
+            Game.cooldownManager.add(character, `skill_${skill.id}`, skill.cooldown, true);
 
             // get he list of characters at the grid
             const userName = params[0].toLowerCase();

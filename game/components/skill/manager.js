@@ -7,8 +7,6 @@ import skillCommands from './commands';
 export default class SkillManager {
     constructor(Game) {
         this.Game = Game;
-        // The list of all skills currently managed (Players and NPCs)
-        this.skills = [];
     }
 
     /**

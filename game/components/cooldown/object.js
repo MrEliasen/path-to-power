@@ -31,6 +31,7 @@ export default class Cooldown {
             if (this.ticks <= 0) {
                 clearInterval(this.timer);
                 this.action = null;
+                this.timer = null;
                 this.remove = true;
             }
         }, 100);

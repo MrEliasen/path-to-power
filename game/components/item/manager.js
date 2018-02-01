@@ -11,8 +11,6 @@ export default class ItemManager {
         this.Game = Game;
         // list of all items in the game, for reference
         this.templates = {};
-        // list of items managed by the item manager
-        this.items = [];
         // dropped items, references items from the items list
         this.dropped_items = {};
     }
@@ -173,23 +171,25 @@ export default class ItemManager {
         const NewItem = new Item(null, {...itemData}, modifiers);
         // set the database ID
         NewItem._id = dbId;
-        // add building to the managed buildings array
-        this.items.push(NewItem);
 
         return NewItem;
     }
 
     /**
      * Removes an item from the game (and db)
-     * @param  {Item Obj} item item to remove
+     * @param  {Character} character item to remove
+     * @param  {Item Obj}  item      item to remove
      * @return {Promise}
      */
-    remove(item) {
+    remove(character, item) {
         const itemClone = {...item};
         item.destroy();
 
-        const newItemList = this.items.filter((managedItem) => !managedItem.remove);
-        this.items = newItemList;
+        character.inventory.forEach((obj, index) => {
+            if (obj.remove) {
+                character.inventory.splice(index, 1);
+            }
+        });
 
         // if the item is in the DB, delete it.
         if (itemClone._id) {

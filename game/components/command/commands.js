@@ -10,7 +10,7 @@ function checkChatCooldown (character, Game, callback) {
     }
 
     // add the search cooldown to the character
-    character.cooldowns.push(Game.cooldownManager.add('action_chat', 1, true));
+    Game.cooldownManager.add(character, 'action_chat', 1, true);
 
     // return the new cooldown 
     callback();

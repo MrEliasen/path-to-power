@@ -7,7 +7,7 @@ function checkAttackCooldown (character, Game, callback) {
     }
 
     // add the search cooldown to the character
-    character.cooldowns.push(Game.cooldownManager.add('action_attack', 2, true));
+    Game.cooldownManager.add(character, 'action_attack', 2, true);
 
     // return the new cooldown 
     callback();
@@ -33,8 +33,7 @@ function cmdAim(socket, command, params, Game) {
                     }
 
                     // add the search cooldown to the character
-                    const newCooldown = Game.cooldownManager.add('action_aim', 1);
-                    character.cooldowns.push(newCooldown);
+                    const newCooldown = Game.cooldownManager.add(character, 'action_aim', 1);
 
                     // set the new target, releasing the old target's gridlock, and gridlocking the new target.
                     character.setTarget(target);

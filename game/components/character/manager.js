@@ -242,6 +242,10 @@ export default class CharacterManager {
                         payload: character.user_id
                     });
 
+                    if (character.faction) {
+                        character.faction.unlinkCharacter(character);
+                    }
+
                     if (!reconnect) {
                         this.characters = this.characters.filter((obj) => obj.user_id !== user_id);
                     }
@@ -622,8 +626,7 @@ export default class CharacterManager {
             }
 
             // set the cooldown of the move action
-            const newCooldown = this.Game.cooldownManager.add(cooldownAction, 0.3);
-            character.cooldowns.push(newCooldown);
+            const newCooldown = this.Game.cooldownManager.add(character, cooldownAction, 0.3);
 
             // set the location we intend to move the character to
             newLocation[moveAction.grid] = newLocation[moveAction.grid] + moveAction.direction;

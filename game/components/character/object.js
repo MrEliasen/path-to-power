@@ -266,7 +266,7 @@ export default class Character {
 
             // remove ammo if durability is 0
             if (this.equipped.ammo.durability <= 0) {
-                this.Game.itemManager.remove(this.equipped.ammo);
+                this.Game.itemManager.remove(this, this.equipped.ammo);
             }
         }
 
@@ -514,7 +514,6 @@ export default class Character {
 
             if (inventoryItem) {
                 inventoryItem.addDurability(amount);
-                this.Game.itemManager.remove(itemObj);
             } else {
                 // set the amount of the item to the correct amount, before adding to the inventory
                 itemObj.setDurability(amount);
@@ -576,7 +575,7 @@ export default class Character {
         // if the armor durability is 0, remove the item as its broken.
         if (!durabilityLeft && durability) {
             armorRuined = true;
-            this.Game.itemManager.remove(this.equipped.armor);
+            this.Game.itemManager.remove(this, this.equipped.armor);
         }
 
         return {

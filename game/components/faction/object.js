@@ -61,6 +61,19 @@ export default class Faction {
     }
 
     /**
+     * Removes a character from list of online members, and removes faction reference (does not kick from the faction!)
+     * @param  {Character} character The character to unlink
+     */
+    unlinkCharacter(character) {
+        character.faction = null;
+        const index = this.onlineMembers.findIndex((obj) => obj.user_id === character.user_id);
+
+        if (index !== -1) {
+            this.onlineMembers.splice(index, 1);
+        }
+    }
+
+    /**
      * Adds a character to the faction
      * @param {Character Obj} character Character to add to the faction
      */
