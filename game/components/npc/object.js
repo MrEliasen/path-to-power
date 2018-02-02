@@ -393,27 +393,32 @@ export default class NPC extends Character {
             return this.Game.eventToRoom(this.getLocationId(), 'info', `You see ${this.name} the ${this.type} swing their ${weapon} at ${this.target.name}, but missing.`, [this.target.user_id]);
         }
 
-        // deal damage to the target
-        const damage = this.getWeaponDamage('melee');
-        const attack = this.target.dealDamage(damage, true);
+        this.getWeaponDamage('melee')
+            .then((damage) => {
+                // deal damage to the target
+                const attack = this.target.dealDamage(damage, true);
 
-        // if the target died
-        if (!attack.healthLeft) {
-            return this.Game.characterManager.kill(this.target.user_id, this)
-                .then((oldLocationId) => {
-                    // send event to the target
-                    this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} strikes you with their ${weapon}, dealing ${attack.damageDealt} damage, killing you.`);
-                    // send event to the bystanders
-                    this.Game.eventToRoom(oldLocationId, 'info', `You see ${this.name} the ${this.type} kill ${this.target.name} with a ${weapon}. ${this.target.name} fall to the ground, dropping everything they carried.`);
-                })
-                .catch(() => {});
-        }
+                // if the target died
+                if (!attack.healthLeft) {
+                    return this.Game.characterManager.kill(this.target.user_id, this)
+                        .then((oldLocationId) => {
+                            // send event to the target
+                            this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} strikes you with their ${weapon}, dealing ${attack.damageDealt} damage, killing you.`);
+                            // send event to the bystanders
+                            this.Game.eventToRoom(oldLocationId, 'info', `You see ${this.name} the ${this.type} kill ${this.target.name} with a ${weapon}. ${this.target.name} fall to the ground, dropping everything they carried.`);
+                        })
+                        .catch(() => {});
+                }
 
-        // update the target client's character inforamtion
-        this.Game.characterManager.updateClient(this.target.user_id, 'stats');
-        // send event to the target
-        this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} strikes you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
-        // send event to the bystanders
-        this.Game.eventToRoom(this.getLocationId(), 'info', `You see ${this.name} the ${this.type} strike ${this.target.name} with a ${weapon}.`, [this.target.user_id]);
+                // update the target client's character inforamtion
+                this.Game.characterManager.updateClient(this.target.user_id, 'stats');
+                // send event to the target
+                this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} strikes you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
+                // send event to the bystanders
+                this.Game.eventToRoom(this.getLocationId(), 'info', `You see ${this.name} the ${this.type} strike ${this.target.name} with a ${weapon}.`, [this.target.user_id]);
+            })
+            .catch(() => {
+
+            });
     }
 }

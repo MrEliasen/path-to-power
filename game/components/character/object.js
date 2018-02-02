@@ -20,7 +20,6 @@ export default class Character {
         this.abilities = [];
         // create the inventory and equipped objects
         this.inventory = [];
-        this.equipped = {};
         // list of all active cooldowns for the character
         this.cooldowns = [];
         // if the character is new, they won't have stats, set the default here.
@@ -136,9 +135,6 @@ export default class Character {
             inventory: this.inventory.map((item) => {
                 return item.toObject();
             }),
-            equipped: Object.keys(this.equipped).map((slot) => {
-                return this.equipped[slot].toObject();
-            }),
             stats: this.stats,
             abilities: this.exportAbilities(true),
             faction: this.faction ? this.faction.toObject(true) : null,
@@ -235,7 +231,6 @@ export default class Character {
                     const cash = this.stats.money;
 
                     // reset the character inventory, money, gridlock etc.
-                    this.equipped = {};
                     this.stats.money = 0;
                     this.targetedBy = [];
                     this.stats.health = this.stats.health_max;
@@ -254,23 +249,37 @@ export default class Character {
      * @return {Object}          the damage, -1 if the weapon cannot be fired.
      */
     fireRangedWeapon() {
-        const damage = this.getWeaponDamage('ranged');
+        return new Promise((resolve, reject) => {
+            this.getWeaponDamage('ranged')
+                .then((damage) => {
+                    if (!this.hasAmmo()) {
+                        return reject(0);
+                    }
 
-        if (!this.hasAmmo()) {
-            return 0;
-        }
+                    if (this.ignoreQuantity) {
+                        return resolve(damage);
+                    }
 
-        if (!this.ignoreQuantity) {
-            // reduce ammo durability
-            this.equipped.ammo.stats.durability = this.equipped.ammo.removeDurability(1);
+                    this.getEquipped('ammo')
+                        .then((item) => {
+                            // reduce ammo durability
+                            this.equipped.ammo.stats.durability = this.equipped.ammo.removeDurability(1);
 
-            // remove ammo if durability is 0
-            if (this.equipped.ammo.durability <= 0) {
-                this.Game.itemManager.remove(this, this.equipped.ammo);
-            }
-        }
+                            // remove ammo if durability is 0
+                            if (this.equipped.ammo.durability <= 0) {
+                                this.Game.itemManager.remove(this, this.equipped.ammo);
+                            }
 
-        return damage;
+                            resolve(damage);
+                        })
+                        .catch(() => {
+                            reject();
+                        })
+                })
+                .catch(() => {
+                    reject();
+                });
+        });
     }
 
     /**
@@ -293,56 +302,90 @@ export default class Character {
 
     /**
      * Gets the damage bonus of the equipped ammo
-     * @return {Number}
+     * @return {Promise}
      */
     getAmmoDamage() {
-        if (!this.hasAmmo()) {
-            return 0;
-        }
+        return new Promise((resolve) => {
+            if (!this.hasAmmo()) {
+                return resolve(0);
+            }
 
-        return this.equipped.ammo.stats.damage_bonus;
+            resolve(this.equipped.ammo.stats.damage_bonus);
+        });
     }
 
     /**
      * Generates the weapon damage, based on the type equipped.
      * @param  {String} slot     Any of the equipped weapon slots (melee|ranged)
      * @param  {Object} itemList List of all game items
-     * @return {Number}          Damage of the weapon
+     * @return {Promise}         Damage of the weapon
      */
     getWeaponDamage(slot) {
-        const equippedItem = this.equipped[slot];
-        let bonusDamage = 0;
+        return new Promise((resolve, reject) => {
+            this.getEquipped(slot)
+                .then((equippedItem) => {
 
-        if (!equippedItem) {
-            return 0;
-        }
+                    if (!equippedItem) {
+                        return reject();
+                    }
 
-        if (slot === 'ranged') {
-            bonusDamage = this.getAmmoDamage();
-        }
+                    this.getAmmoDamage
+                        .then((ammoDamage) => {
+                            let bonusDamage = 0;
 
-        return Math.floor(Math.random() * (equippedItem.stats.damage_max - equippedItem.stats.damage_min + 1)) + equippedItem.stats.damage_min + bonusDamage;
+                            if (slot === 'ranged') {
+                                bonusDamage = ammoDamage;
+                            }
+
+                            resolve(Math.floor(Math.random() * (equippedItem.stats.damage_max - equippedItem.stats.damage_min + 1)) + equippedItem.stats.damage_min + bonusDamage);
+                        })
+                        .catch(() => {
+                            reject();
+                        });
+                })
+                .catch(() => {
+                    reject();
+                });
+        });
+    }
+
+    /**
+     * Get the items which is equipped in the specified slot
+     * @param  {String} slot The equipment slot
+     * @return {Promise}
+     */
+    getEquipped(slot) {
+        return new Promise((resolve, reject) => {
+            const item = this.inventory.find((obj) => obj.equipped_slot === slot);
+
+            if (!item) {
+                return reject();
+            }
+
+            resolve(item);
+        });
     }
 
     /**
      * Unequips slotted item, and adds it to the inventory
      * @param  {String} slot  The equipped slot to unequip
-     * @return {Boolean}      True on success.
      */
     unEquip(slot) {
         if (!slot) {
             return false;
         }
 
-        this.equipped[slot].equipped_slot = null;
-        this.equipped[slot] = null;
-        return true;
+        this.getEquipped(slot)
+            .then((item) => {
+                item.equipped_slot = null;
+                this.Game.characterManager.updateClient(this.user_id);
+            })
+            .catch(() => {});
     }
 
     /**
      * Equips selected item from inventory, moving the other item (if any) to the inventory.
      * @param  {Number} inventoryIndex The inventory array index of the item to equip
-     * @return {Boolean}               True on success, false otherwise.
      */
     equip(inventoryIndex) {
         const item = this.inventory[inventoryIndex];
@@ -380,10 +423,20 @@ export default class Character {
 
         }
 
-        // equip the item
-        item.equipped_slot = slot;
-        this.equipped[slot] = item;
-        return true;
+        this.getEquipped(slot)
+            .then((equippedItem) => {
+                delete equippedItem.equipped_slot;
+
+                // equip the item
+                item.equipped_slot = slot;
+                this.Game.characterManager.updateClient(this.user_id);
+
+            })
+            .catch(() => {
+                // equip the item
+                item.equipped_slot = slot;
+                this.Game.characterManager.updateClient(this.user_id);
+            });
     }
 
     /**

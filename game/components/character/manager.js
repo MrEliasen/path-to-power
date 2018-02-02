@@ -53,13 +53,11 @@ export default class CharacterManager {
         switch (action.type) {
             case UNEQUIP_ITEM:
                 return this.get(socket.user.user_id).then((character) => {
-                    character.unEquip(action.payload.slot);
-                    this.updateClient(character.user_id);
+                    character.unEquip(action.payload);
                 });
             case EQUIP_ITEM:
                 return this.get(socket.user.user_id).then((character) => {
-                    character.equip(action.payload.index);
-                    this.updateClient(character.user_id);
+                    character.equip(action.payload);
                 });
             case MOVE_CHARACTER:
                 return this.move(socket, action.payload);
@@ -89,6 +87,8 @@ export default class CharacterManager {
      */
     getByName(characterName) {
         return new Promise((resolve, reject) =>{
+            characterName = characterName.toLowerCase();
+
             let character = this.characters.find((obj) => {
                 if (obj.name_lowercase === characterName || obj.name_lowercase.indexOf(characterName) === 0) {
                     return true;
@@ -180,12 +180,13 @@ export default class CharacterManager {
         const existingCharacter = this.characters.find((obj) => obj.user_id === character.user_id);
 
         if (wasLoggedIn && existingCharacter) {
-            await this.remove(character.user_id, true);
             // re-add targetedBy, if the player has any
             // NOTE: reapply any temporary effects here to avoid relogging to clear them
             existingCharacter.targetedBy.forEach((user) => {
                 character.gridLock(user);
             });
+
+            await this.remove(character.user_id);
         }
 
         // load the character abilities
@@ -230,7 +231,7 @@ export default class CharacterManager {
      * Remove a managed character from the list
      * @param  {String} user_id User ID
      */
-    remove(user_id, reconnect = false) {
+    remove(user_id) {
         return new Promise((resolve, reject) => {
             this.get(user_id)
                 .then((character) => {
@@ -246,10 +247,7 @@ export default class CharacterManager {
                         character.faction.unlinkCharacter(character);
                     }
 
-                    if (!reconnect) {
-                        this.characters = this.characters.filter((obj) => obj.user_id !== user_id);
-                    }
-
+                    this.characters = this.characters.filter((obj) => obj.user_id !== user_id);
                     this.dispatchRemoveFromPlayerList(user_id);
                     resolve();
                 })
@@ -302,9 +300,7 @@ export default class CharacterManager {
      * @return {Object} Object containing user_id => name objects
      */
     getOnline() {
-        const online = {};
-        this.characters.forEach((character) => {
-            online[character.user_id] = {
+        return this.characters.map((character) => ({
                 name: character.name,
                 user_id: character.user_id,
                 profile_image: character.profile_image,
@@ -313,10 +309,8 @@ export default class CharacterManager {
                     name: character.faction.name,
                     faction_id: character.faction.faction_id
                 } : null
-            }
-        })
-
-        return online;
+            })
+        );
     }
 
     /**

@@ -296,31 +296,36 @@ function cmdStrike(socket, command, params, Game) {
                 }
 
                 // deal damage to the target
-                const damage = character.getWeaponDamage('melee');
-                const attack = target.dealDamage(damage, true);
+                character.getWeaponDamage('melee')
+                    .then((damage) => {
+                        const attack = target.dealDamage(damage, true);
 
-                // if the target died
-                if (!attack.healthLeft) {
-                    return target.kill(character)
-                        .then((oldLocationId) => {
-                            // send event to the attacker
-                            Game.eventToSocket(socket, 'info', `You land the killing blow on ${target.name}, with your ${weapon}. They fall to the ground, dropping everything they carried.`);
-                            // send event to the target
-                            Game.eventToUser(target.user_id, 'info', `${character.name} strikes you with their ${weapon}, dealing ${attack.damageDealt} damage, killing you.`);
-                            // send event to the bystanders
-                            Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} with a ${weapon}. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
-                        })
-                        .catch(() => {});
-                }
+                        // if the target died
+                        if (!attack.healthLeft) {
+                            return target.kill(character)
+                                .then((oldLocationId) => {
+                                    // send event to the attacker
+                                    Game.eventToSocket(socket, 'info', `You land the killing blow on ${target.name}, with your ${weapon}. They fall to the ground, dropping everything they carried.`);
+                                    // send event to the target
+                                    Game.eventToUser(target.user_id, 'info', `${character.name} strikes you with their ${weapon}, dealing ${attack.damageDealt} damage, killing you.`);
+                                    // send event to the bystanders
+                                    Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} with a ${weapon}. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
+                                })
+                                .catch(() => {});
+                        }
 
-                // update the target client's character inforamtion
-                Game.characterManager.updateClient(target.user_id, 'stats');
-                // send event to the attacker
-                Game.eventToSocket(socket, 'info', `You strike ${target.name} with your ${weapon}, dealing ${attack.damageDealt} damage.`);
-                // send event to the target
-                Game.eventToUser(target.user_id, 'info', `${character.name} strikes you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
-                // send event to the bystanders
-                Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} strike ${target.name} with a ${weapon}.`, [character.user_id, target.user_id]);
+                        // update the target client's character inforamtion
+                        Game.characterManager.updateClient(target.user_id, 'stats');
+                        // send event to the attacker
+                        Game.eventToSocket(socket, 'info', `You strike ${target.name} with your ${weapon}, dealing ${attack.damageDealt} damage.`);
+                        // send event to the target
+                        Game.eventToUser(target.user_id, 'info', `${character.name} strikes you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
+                        // send event to the bystanders
+                        Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} strike ${target.name} with a ${weapon}.`, [character.user_id, target.user_id]);
+                    })
+                    .catch(() => {
+
+                    });
             });
         })
         .catch(() => {});
