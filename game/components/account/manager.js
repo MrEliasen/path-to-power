@@ -67,7 +67,7 @@ export default class AccountManager {
             const gameData = {
                 maps: this.Game.mapManager.getList(),
                 items: this.Game.itemManager.getTemplates(),
-                players: this.Game.characterManager.getOnline(),
+                players: [],
                 commands: this.Game.commandManager.getList()
             }
 
@@ -84,6 +84,9 @@ export default class AccountManager {
                 if (character) {
                     // Update the client
                     this.Game.mapManager.updateClient(character.user_id);
+
+                    // get the list of online players (after we loaded the character to make sure it is included)
+                    gameData.players = this.Game.characterManager.getOnline();
 
                     return this.Game.socketManager.dispatchToSocket(socket, {
                         type: ACCOUNT_AUTHENTICATE_SUCCESS,
@@ -103,7 +106,10 @@ export default class AccountManager {
                         });
                     }
 
-                    // Update the client f
+                    // get the list of online players (after we loaded the character to make sure it is included)
+                    gameData.players = this.Game.characterManager.getOnline();
+
+                    // Update the client
                     this.Game.mapManager.updateClient(character.user_id);
 
                     return this.Game.socketManager.dispatchToSocket(socket, {

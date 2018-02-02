@@ -77,12 +77,14 @@ export default class ItemManager {
         // stack items if possible
         let itemIndex = -1;
 
+        // remove any database ID's from the item, should there be any (since its not longer owned by a player)
+        itemObject._id = null;
+
         if (itemObject.stats.stackable) {
             itemIndex = this.dropped_items[gridId].findIndex((item) => item.id === itemObject.id);
 
             if (itemIndex !== -1) {
                 this.dropped_items[gridId][itemIndex].addDurability(itemObject.stats.durability);
-                this.remove(itemObject);
             }
         } else {
             // reset their dropped status, in case its due to dying the items are dropped.
@@ -306,8 +308,12 @@ export default class ItemManager {
     }
 
     cleanupDbInventory(character) {
-        const itemDbIds = character.inventory.map((obj) => {
-            return obj._id.toString();
+        const itemDbIds = [];
+
+        character.inventory.forEach((obj) => {
+            if (obj._id) {
+                return itemDbIds.push(obj._id.toString());
+            }
         });
 
         ItemModel.deleteMany({ user_id: character.user_id, _id: { $nin: itemDbIds }}, (err, deleted) => {

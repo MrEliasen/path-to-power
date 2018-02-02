@@ -77,6 +77,9 @@ export default class CharacterManager {
                 type: UPDATE_CHARACTER,
                 payload: property ? {[property]: characterData[property]} : characterData
             });
+        })
+        .catch(() => {
+
         });
     }
 
@@ -110,6 +113,10 @@ export default class CharacterManager {
      */
     get(user_id) {
         return new Promise((resolve, reject) => {
+            if (!user_id) {
+                return reject();
+            }
+
             const character = this.characters.find((obj) => obj.user_id === user_id);
 
             if (!character) {
@@ -445,10 +452,14 @@ export default class CharacterManager {
                 // Save the character information (stats/location/etc)
                 const saveCharacter = this.dbSave(character);
                 const saveInventory = this.Game.itemManager.saveInventory(character);
-                Promise.all([saveCharacter, saveInventory]).then((values) => {
-                    this.Game.logger.debug(`Saved ${user_id}`, values);
-                    resolve();
-                });
+                Promise.all([saveCharacter, saveInventory])
+                    .then((values) => {
+                        this.Game.logger.debug(`Saved ${user_id}`, values);
+                        resolve();
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
             });
         });
     }

@@ -220,7 +220,7 @@ function cmdFactionSay(socket, command, params, Game) {
             Game.socketManager.dispatchToRoom(character.faction.faction_id, {
                 type: CHAT_MESSAGE,
                 payload: {
-                    name: character.name,
+                    player: character.user_id,
                     message: params.join(' '),
                     type: 'faction'
                 }

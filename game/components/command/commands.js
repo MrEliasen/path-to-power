@@ -24,7 +24,7 @@ function cmdGlobal(socket, command, params, Game) {
                 Game.socketManager.dispatchToServer({
                     type: CHAT_MESSAGE,
                     payload: {
-                        name: character.name,
+                        player: character.user_id,
                         message: params.join(' '),
                         type: 'global'
                     }
@@ -42,7 +42,7 @@ function cmdSay(socket, command, params, Game) {
                 Game.socketManager.dispatchToRoom(`${character.location.map}_${character.location.y}_${character.location.x}`, {
                     type: NEW_EVENT,
                     payload: {
-                        name: character.name,
+                        player: character.user_id,
                         message: params.join(' '),
                         type: 'local'
                     }
@@ -69,7 +69,7 @@ function cmdWhisper(socket, command, params, Game) {
                         type: CHAT_MESSAGE,
                         payload: {
                             type: 'whisper-out',
-                            name: whisperTarget.name,
+                            player: whisperTarget.user_id,
                             message: params.join(' ')
                         }
                     });
@@ -78,7 +78,7 @@ function cmdWhisper(socket, command, params, Game) {
                         type: CHAT_MESSAGE,
                         payload: {
                             type: 'whisper-in',
-                            name: sender.name,
+                            player: sender.user_id,
                             message: params.join(' ')
                         }
                     });

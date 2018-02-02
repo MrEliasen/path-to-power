@@ -1,4 +1,4 @@
-import Promise from 'bluebird';
+ import Promise from 'bluebird';
 
 export default class Character {
     constructor(Game, character) {
@@ -495,15 +495,19 @@ export default class Character {
 
     /**
      * Remove the first occurance of a given item from the inventory, based on name.
-     * @param  {String} itemName    The name of the item (or first couple of letters) to search for
-     * @param  {Number} amount      The number of a given item to drop (stackable items only)
-     * @param  {Boolean} isFleeing  If the drop is caused by fleeing, random the amount dropped, if its a stackable item.
-     * @return {Object}             The item (with amount if stackable) which has been removed from the inventory.
+     * @param  {Mixed}   item      The name or inventory index of the item to drop
+     * @param  {Number}  amount    The number of a given item to drop (stackable items only)
+     * @param  {Boolean} isFleeing If the drop is caused by fleeing, random the amount dropped, if its a stackable item.
+     * @return {Object}            The item (with amount if stackable) which has been removed from the inventory.
      */
-    dropItem (itemName, amount = 1, isFleeing = false) {
+    dropItem (item, amount = 1, isFleeing = false) {
+        let itemIndex = parseInt(item, 10);
         amount = parseInt(amount, 10);
-        // get the first matching items from the inventory
-        let itemIndex = this.inventory.findIndex((item) => item.name.toLowerCase().indexOf(itemName) === 0);
+
+        if (isNaN(itemIndex)) {
+            // get the first matching items from the inventory
+            itemIndex = this.inventory.findIndex((obj) =>obj.name.toLowerCase().indexOf(item) === 0);
+        }
 
         // If no item was found
         if (itemIndex === -1) {

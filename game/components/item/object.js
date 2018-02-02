@@ -54,6 +54,7 @@ export default class Item {
         return {
             id: this.id,
             description: this.description,
+            fingerprint: this.fingerprint,
             name: this.name,
             type: this.type,
             subtype: this.subtype,
