@@ -52,6 +52,42 @@
         }
     },
     {
+        "id": "cocaine",
+        "name": "Cocaine",
+        "description": "Some description",
+        "type": "consumable",
+        "subtype": "drug",
+        "stats": {
+            "price": 20,
+            "stackable": true,
+            "durability": 1
+        }
+    },
+    {
+        "id": "weed",
+        "name": "Weed",
+        "description": "Some description",
+        "type": "consumable",
+        "subtype": "drug",
+        "stats": {
+            "price": 6,
+            "stackable": true,
+            "durability": 1
+        }
+    },
+    {
+        "id": "acid",
+        "name": "Acid",
+        "description": "Some description",
+        "type": "consumable",
+        "subtype": "drug",
+        "stats": {
+            "price": 12,
+            "stackable": true,
+            "durability": 1
+        }
+    },
+    {
         "id": "pistol",
         "name": "Pistol",
         "description": "Aim at target and squeeze trigger. Deals {damage_min}-{damage_max} damage on hit.",

@@ -17,7 +17,7 @@ import skillManager from './components/skill/manager';
 import cooldownManager from './components/cooldown/manager';
 import npcManager from './components/npc/manager';
 
-import { newEvent } from './actions';
+import { newEvent, addNews } from './actions';
 
 class Game {
     constructor(server, config) {
@@ -26,8 +26,8 @@ class Game {
         // setup the winston logger
         this.setupLogger();
 
-        // reference to the autosave timer, if enabled
-        this.autosaveTimer = null;
+        // Game timers
+        this.timers = [];
 
         // Manager placeholders
         this.socketManager = new socketManager(this, server);
@@ -125,25 +125,45 @@ class Game {
         });
 
         // setup autosave
-        this.setupAutosave();
+        this.setupGameTimers();
 
         // Listen for connections
         this.socketManager.listen();
     }
 
-    /**
-     * saves all character progress and items
-     * @return {Promise} The promise returned from the saveAll method
-     */
-    setupAutosave() {
-        if (!this.config.game.autosave.enabled) {
-            return;
+    onTimer(timerName) {
+        let callback = () => {};
+
+        switch(timerName) {
+            case 'autosave':
+                callback = () => {
+                    // NOTE: if you want to add anything to the auto save, do it here
+                    this.characterManager.saveAll();
+                };
+                break;
+            case 'newday':
+                callback = () => {
+                    // NOTE: if you want to add anything to the "new day" timer, do it here
+                    this.shopManager.resupplyAll();
+                    this.socketManager.dispatchToServer(addNews('The sun rises once again, and wave of new drugs flood the streets.'));
+                };
+                break;
         }
 
-        // NOTE: if you want to add anything to the auto save, do it here
-        this.autosaveTimer = setInterval(() => {
-            this.characterManager.saveAll();
-        }, this.config.game.autosave.interval);
+        this.logger.debug(`Running timer ${timerName}`);
+        callback();
+    }
+
+    /**
+     * Setup the game timers (like new day and autosave)
+     */
+    setupGameTimers() {
+        this.timers = this.config.game.timers.filter((timer) => timer.enabled).map((timer) => {
+            return {
+                name: timer.name,
+                timer: setInterval(this.onTimer.bind(this), timer.interval, timer.name)
+            }
+        });
     }
 
     /**

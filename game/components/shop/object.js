@@ -1,6 +1,7 @@
 import Promise from 'bluebird';
 import uuid from 'uuid/v4';
 import { SHOP_UPDATE } from './types';
+import { dice } from '../../helper';
 
 export default class Shop {
     constructor(Game, shopData) {
@@ -16,8 +17,12 @@ export default class Shop {
      * @return {Promise}
      */
     load() {
-        if (!this.sell.selling) {
+        if (!this.sell.enabled) {
             return;
+        }
+
+        if (!this.sell.list.length) {
+            return this.resupply();
         }
 
         this.sell.list = this.sell.list.map((item) => {
@@ -34,7 +39,7 @@ export default class Shop {
      * @return {Array}
      */
     getSellList(toObject = false) {
-        if (!this.sell.selling) {
+        if (!this.sell.enabled) {
             return [];
         }
 
@@ -57,7 +62,7 @@ export default class Shop {
      * @return {Array}
      */
     getBuyList(toObject = false) {
-        if (!this.buy.buying) {
+        if (!this.buy.enabled) {
             return [];
         }
 
@@ -101,7 +106,7 @@ export default class Shop {
                 const amount = 1;
 
                 // check if shop is buying anything
-                if (!this.buy.buying) {
+                if (!this.buy.enabled) {
                     return this.Game.eventToUser(user_id, 'error', 'They are not interested in buying anything.');
                 }
 
@@ -229,7 +234,7 @@ export default class Shop {
         this.Game.characterManager.get(user_id)
             .then((character) => {
                 // check if shop is selling anything
-                if (!this.sell.selling) {
+                if (!this.sell.enabled) {
                     return this.Game.eventToUser(user_id, 'error', 'They are not selling anything.');
                 }
 
@@ -300,5 +305,63 @@ export default class Shop {
             .catch((err) => {
                 this.Game.logger.error(err);
             });
+    }
+
+    /**
+     * Will restock the items sold in the shop, if enabled
+     */
+    resupply() {
+        // if there are no resupply settings, ignore the shop
+        if (!this.supply) {
+            return;
+        }
+
+        // remove items which are limited quantity
+        this.sell.list = this.sell.list.filter((item) => item.shopQuantity === -1);
+
+        // make a deep copy of the supply settings, as they might be altered.
+        const supply = {
+            ...this.supply,
+            numberOfItems: [
+                ...this.supply.numberOfItems
+            ],
+            items: [
+                ...this.supply.items
+            ]
+        };
+        // used for picking a random item from the list
+        let totalItems = supply.items.length;
+        // number of items to add to the shop
+        const itemsToAdd = dice(...supply.numberOfItems);
+
+        for (let i = itemsToAdd; i >= 0; i--) {
+            const index = dice(0, totalItems);
+            const supplyItem = supply.items[index];
+            const newItem = this.Game.itemManager.add(supplyItem.id);
+
+            // add a random quantity 
+            newItem.shopQuantity = dice(...supplyItem.quantity);
+
+            // push the item to the sell list
+            this.sell.list.push(newItem);
+
+            // if the resupply is only allow to add an item once, remove it from the array
+            if (supply.uniqueItems) {
+                supply.items.splice(index, 1);
+
+                // recalculate the total items, for our random item picking
+                totalItems = supply.items.length;
+            }
+        }
+
+        // If a location ID is set, dispatch an inventory update to the grid
+        // TODO: when a player opens a shop window, join a socket room for the shop, on move, leave the room.
+        /*this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
+            type: SHOP_UPDATE,
+            payload: {
+                shopId: this.id,
+                inventory: this.getSellList(true)
+            }
+        });*/
     }
 }

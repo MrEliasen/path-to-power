@@ -4,7 +4,7 @@
         "name": "Pawn Shop",
         "description": "They will buy and sell almost anything.",
         "sell": {
-            "selling": true,
+            "enabled": true,
             "sellPricePercent": 1.0,
             "list": [
                 { "id": "bodyarmor", "shopQuantity": -1 },
@@ -14,7 +14,7 @@
             ]
         },
         "buy": {
-            "buying": true,
+            "enabled": true,
             "resell": true,
             "buyPricePercent": 0.35,
             "list": [],
@@ -27,7 +27,7 @@
         "name": "Food Shop",
         "description": "You can buy and sell food and other consumables.",
         "sell": {
-            "selling": true,
+            "enabled": true,
             "sellPricePercent": 1.0,
             "list": [
                 { "id": "redapple", "shopQuantity": 10 },
@@ -35,7 +35,7 @@
             ]
         },
         "buy": {
-            "buying": true,
+            "enabled": true,
             "resell": true,
             "buyPricePercent": 0.35,
             "list": [
@@ -50,19 +50,27 @@
         "name": "Drug Dealer",
         "description": "",
         "sell": {
-            "selling": true,
+            "enabled": true,
             "sellPricePercent": 1.0,
-            "list": [
-                { "id": "mushrooms", "shopQuantity": 10 }
-            ]
+            "list": []
         },
         "buy": {
-            "buying": false,
+            "enabled": false,
             "resell": false,
             "buyPricePercent": 0.0,
             "list": [],
-            "ignoreType": [], 
-            "ignoreSubtype": [] 
+            "ignoreType": [],
+            "ignoreSubtype": []
+        },
+        "supply": {
+            "numberOfItems": [2,4],
+            "uniqueItems": false,
+            "items": [
+                {"id": "mushrooms", "quantity": [3,5] },
+                {"id": "cocaine", "quantity": [1,2] },
+                {"id": "weed", "quantity": [3,5] },
+                {"id": "acid", "quantity": [2,4] }
+            ]
         }
     },
     "druggie": {
@@ -70,12 +78,12 @@
         "name": "Druggie",
         "description": "",
         "sell": {
-            "selling": false,
+            "enabled": false,
             "sellPricePercent": 1.0,
             "list": []
         },
         "buy": {
-            "buying": true,
+            "enabled": true,
             "resell": false,
             "buyPricePercent": 1.35,
             "list": [],

@@ -1,4 +1,4 @@
-import { NEW_EVENT } from './types';
+import { NEW_EVENT, NEWS_UPDATE } from './types';
 
 export function newEvent(type, message, ignore =[]) {
     return {
@@ -8,5 +8,12 @@ export function newEvent(type, message, ignore =[]) {
             message,
             ignore
         }
+    }
+}
+
+export function addNews(message) {
+    return {
+        type: NEWS_UPDATE,
+        payload: message
     }
 }

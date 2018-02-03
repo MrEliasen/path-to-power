@@ -83,4 +83,14 @@ export default class ShopManager {
             resolve(newShop);
         });
     }
+
+    /**
+     * Resupply all the shops, if they need it
+     * @return {Void}
+     */
+    resupplyAll() {
+        this.shops.forEach((shop) => {
+            shop.resupply();
+        });
+    }
 }
