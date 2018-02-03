@@ -94,7 +94,7 @@ export default class Shop {
         }
     }
 
-    sellItem(user_id, index) {
+    sellItem(user_id, fingerprint) {
         // get the character of the player
         this.Game.characterManager.get(user_id)
             .then((character) => {
@@ -106,12 +106,15 @@ export default class Shop {
                 }
 
                 // get the item from the inventory
-                const item = character.inventory[index];
+                const index = character.inventory.findIndex((obj) => obj.fingerprint === fingerprint);
 
                 // check if the item exists
-                if (!item) {
+                if (index === -1) {
                     return this.Game.eventToUser(user_id, 'error', 'Invalid item.');
                 }
+
+                // get the Item Object from the inventory
+                const item = character.inventory[index];
 
                 // check if the shop is only interested in specific items, and if its on the list
                 if (this.buy.list.length && !this.buy.list.includes(item.id)) {
@@ -155,6 +158,9 @@ export default class Shop {
                     this.addToInventory(soldItem);
                 }
 
+                // let the player know they sold the item
+                this.Game.eventToUser(user_id, 'success', `You sold 1x ${soldItem.name} for ${(amount * pricePerUnit)}`);
+
                 // update client character object
                 this.Game.characterManager.updateClient(character.user_id);
 
@@ -188,7 +194,7 @@ export default class Shop {
             }
         } else {
             // check if the item is already sold as a unlimited quantity item.
-            inventoryItem = this.sell.list.find((obj) => obj.id === itemObj.id && obj.shopQuantity >= 999);
+            inventoryItem = this.sell.list.find((obj) => obj.id === itemObj.id && obj.shopQuantity === -1);
             // if once exists, delete the player item
             if (inventoryItem) {
                 return;
@@ -261,8 +267,8 @@ export default class Shop {
                 // remove money from player
                 character.stats.money = character.stats.money - price;
 
-                // remove item/quantity from shop, if its not an unlimited item (999)
-                if (item.shopQuantity < 999) {
+                // remove item/quantity from shop, if its not an unlimited item (-1)
+                if (item.shopQuantity !== -1) {
                     item.shopQuantity = item.shopQuantity - 1;
                 }
 
@@ -276,7 +282,7 @@ export default class Shop {
                 this.Game.eventToUser(character.user_id, 'success', `You have purchased 1x ${itemTemplate.name} for ${price}`);
 
                 // update the shop content for all in the grid (only if the item is limited quantity)
-                if (item.shopQuantity < 999) {
+                if (item.shopQuantity !== -1) {
                     this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
                         type: SHOP_UPDATE,
                         payload: {

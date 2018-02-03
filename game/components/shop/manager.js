@@ -45,7 +45,7 @@ export default class ShopManager {
 
             case SHOP_SELL:
                 this.get(action.payload.shop)
-                    .then((shop) => shop.sellItem(socket.user.user_id, action.payload.index, action.payload.item))
+                    .then((shop) => shop.sellItem(socket.user.user_id, action.payload.item))
                     .catch(() => {});
                 break;
         }

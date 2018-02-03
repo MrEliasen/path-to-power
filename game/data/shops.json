@@ -7,9 +7,10 @@
             "selling": true,
             "sellPricePercent": 1.0,
             "list": [
-                { "id": "bodyarmor", "shopQuantity": 999 },
-                { "id": "pocketknife", "shopQuantity": 999 },
-                { "id": "ammo", "shopQuantity": 999 }
+                { "id": "bodyarmor", "shopQuantity": -1 },
+                { "id": "pocketknife", "shopQuantity": -1 },
+                { "id": "ammo", "shopQuantity": -1 },
+                { "id": "redapple", "shopQuantity": 50 }
             ]
         },
         "buy": {
