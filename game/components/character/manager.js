@@ -762,7 +762,7 @@ export default class CharacterManager {
                         });
 
                         // give the cash to the killer
-                        killer.stats.money = killer.stats.money + droppedLoot.cash;
+                        killer.updateCash(droppedLoot.cash);
 
                         // Update the killers character stats
                         this.updateClient(killer.user_id);

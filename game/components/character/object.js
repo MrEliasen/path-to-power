@@ -643,4 +643,24 @@ export default class Character {
             armorRuined
         };
     }
+
+    /**
+     * Add/remove money from the characters cash
+     * @param  {Number} amount The amount to add/remove (negative number to remove)
+     * @return {Number}        The new cash total
+     */
+    updateCash(amount) {
+        this.stats.money = Math.max(0, Math.round((this.stats.money + amount) * 100) / 100);
+        return this.stats.money;
+    }
+
+    /**
+     * Add/remove money from the characters bank
+     * @param  {Number} amount The amount to add/remove (negative number to remove)
+     * @return {Number}        The new bank total
+     */
+    updateBank(amount) {
+        this.stats.bank = Math.max(0, Math.round((this.stats.bank + amount) * 100) / 100);
+        return this.stats.bank;
+    }
 }

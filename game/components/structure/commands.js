@@ -57,7 +57,7 @@ function cmdHeal(socket, command, params, Game) {
                             }
 
                             // remove money and add health
-                            character.stats.money = character.stats.money - price;
+                            character.updateCash(price * -1);
                             character.stats.health = character.stats.health + heal_amount;
 
                             // update the client
@@ -114,7 +114,7 @@ function cmdTravel(socket, command, params, Game) {
                             // remove aim from current target, if set
                             character.releaseTarget().then(() => {
                                 // remove money
-                                character.stats.money = character.stats.money - travel_details.cost;
+                                character.updateCash(travel_details.cost * -1);
 
                                 // leave the old grid room
                                 socket.leave(character.getLocationId());

@@ -2,7 +2,7 @@
     "police-officer" : {
         "type" : "Police Officer",
         "stats" : {
-            "health" : 1,
+            "health" : 500,
             "money" : 200
         },
         "abilities" : {
@@ -49,6 +49,70 @@
                 "attack": 2
             },
             "respawn": 10,
+            "remainHostile": true
+        }
+    },
+    "drug-dealer" : {
+        "type" : "Drug Dealer",
+        "stats" : {
+            "health" : 5000,
+            "money" : 0
+        },
+        "abilities" : {
+            "acc" : 65
+        },
+        "skills" : {},
+        "inventory": [
+            {
+                "equipped_slot": "ranged",
+                "item_id": "pistol",
+                "modifiers": {}
+            },
+            {
+                "equipped_slot": "armor",
+                "item_id": "kevlar",
+                "modifiers": {}
+            },
+            {
+                "equipped_slot": "ammo",
+                "item_id": "ammo",
+                "modifiers": {}
+            }
+        ],
+        "shop": "drug-dealer",
+        "logic": {
+            "timers": {
+                "move": [60, 120],
+                "attack": 2
+            },
+            "respawn": 600,
+            "remainHostile": true
+        }
+    },
+    "druggie" : {
+        "type" : "Druggie",
+        "stats" : {
+            "health" : 1000,
+            "money" : 0
+        },
+        "abilities" : {
+            "acc" : 55
+        },
+        "skills" : {},
+        "inventory": [
+            {
+                "equipped_slot": "melee",
+                "item_id": "police-baton",
+                "modifiers": {}
+            }
+        ],
+        "shop": "druggie",
+        "logic": {
+            "timers": {
+                "move": [60, 120],
+                "attack": 2
+            },
+            "respawn": 600,
             "remainHostile": true
         }
     }

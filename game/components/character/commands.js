@@ -93,8 +93,8 @@ function cmdGive(socket, command, params, Game) {
                 }
 
                 // remove money from giver, add it to the receiver
-                character.stats.money = character.stats.money - amount;
-                receiver.stats.money = receiver.stats.money + amount;
+                character.updateCash(amount * -1);
+                receiver.updateCash(amount);
 
                 // let them both know what happened
                 Game.eventToSocket(socket, 'success', `You gave ${amount} to ${receiver.name}`);

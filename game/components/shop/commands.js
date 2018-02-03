@@ -36,11 +36,51 @@ function cmdShop(socket, command, params, Game) {
         .catch(() => {});
 }
 
+function cmdBuy(socket, command, params, Game) {
+    const npcName = params.join(' ').toLowerCase();
+
+    // Fetch the character first
+    Game.characterManager.get(socket.user.user_id)
+        .then((character) => {
+            // get the NPC list at the character location
+            const NPCs = Game.npcManager.getLocationList(character.location.map, character.location.x, character.location.y);
+
+            if (!NPCs || !NPCs.length) {
+                return Game.eventToSocket(socket, 'error', 'There are no one around with that name.');
+            }
+
+            const NPC = NPCs.find((obj) => obj.name.toLowerCase().indexOf(npcName) === 0);
+
+            // if there are no NPC with that name, let them know
+            if (!NPC) {
+                return Game.eventToSocket(socket, 'error', 'There are no one around with that name.');
+            }
+
+            // check if the NPC has a "shop" assigned
+            if (!NPC.shop) {
+                return Game.eventToSocket(socket, 'error', `${NPC.name} is not selling or buying anything.`);
+            }
+
+            Game.socketManager.dispatchToSocket(socket, {
+                type: SHOP_LOAD,
+                payload: NPC.shop.toObject()
+            });
+        })
+        .catch(() => {});
+}
+
 module.exports = [
     {
         commandKeys: [
             '/shop'
         ],
         method: cmdShop
+    },
+    {
+        commandKeys: [
+            '/buy',
+            '/sell'
+        ],
+        method: cmdBuy
     }
 ];

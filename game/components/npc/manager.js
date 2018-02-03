@@ -91,6 +91,10 @@ export default class NPCManager {
         // load the character skills
         await this.Game.skillManager.load(newNPC);
 
+        // load shops is available
+        if (npcTemplate.shop) {
+            newNPC.shop = await this.Game.shopManager.add(npcTemplate.shop);
+        }
         
         this.Game.itemManager.loadNPCInventory(newNPC)
             .then((items) => {
@@ -386,7 +390,7 @@ export default class NPCManager {
                     });
 
                     // give the cash to the killer
-                    killer.stats.money = killer.stats.money + droppedLoot.cash;
+                    killer.updateCash(droppedLoot.cash);
 
                     // Update the killers character stats
                     this.Game.characterManager.updateClient(killer.user_id);

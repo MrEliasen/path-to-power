@@ -44,5 +44,48 @@
             "ignoreType": [], 
             "ignoreSubtype": [] 
         }
+    },
+    "drug-dealer": {
+        "id": "drug-dealer",
+        "name": "Drug Dealer",
+        "description": "",
+        "sell": {
+            "selling": true,
+            "sellPricePercent": 1.0,
+            "list": [
+                { "id": "mushrooms", "shopQuantity": 10 }
+            ]
+        },
+        "buy": {
+            "buying": false,
+            "resell": false,
+            "buyPricePercent": 0.0,
+            "list": [],
+            "ignoreType": [], 
+            "ignoreSubtype": [] 
+        }
+    },
+    "druggie": {
+        "id": "druggie",
+        "name": "Druggie",
+        "description": "",
+        "sell": {
+            "selling": false,
+            "sellPricePercent": 1.0,
+            "list": []
+        },
+        "buy": {
+            "buying": true,
+            "resell": false,
+            "buyPricePercent": 1.35,
+            "list": [],
+            "ignoreType": [
+                "armour",
+                "weapon"
+            ],
+            "ignoreSubtype": [
+                "food"
+            ]
+        }
     }
 }

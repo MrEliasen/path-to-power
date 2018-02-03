@@ -151,7 +151,7 @@ export default class Shop {
                 }
 
                 // add money to character
-                character.stats.money = (character.stats.money + (amount * pricePerUnit));
+                character.updateCash(amount * pricePerUnit);
 
                 // add item to shop inventory (if resell is enabled)
                 if (this.buy.resell) {
@@ -265,7 +265,7 @@ export default class Shop {
                 }
 
                 // remove money from player
-                character.stats.money = character.stats.money - price;
+                character.updateCash(price * -1);
 
                 // remove item/quantity from shop, if its not an unlimited item (-1)
                 if (item.shopQuantity !== -1) {
