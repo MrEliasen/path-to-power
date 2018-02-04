@@ -112,7 +112,7 @@ export default class AccountManager {
                     gameData.players = this.Game.characterManager.getOnline();
 
                     // Update the client
-                    this.Game.mapManager.updateClient(character.user_id);
+                    this.Game.mapManager.updateClient(newCharacter.user_id);
 
                     return this.Game.socketManager.dispatchToSocket(socket, {
                         type: ACCOUNT_AUTHENTICATE_SUCCESS,

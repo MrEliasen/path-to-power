@@ -10,7 +10,7 @@ export default class Character {
         // holds the faction object of the player
         this.faction = null;
         // holds all the skills for the character
-        this.skills = null;
+        this.skills = [];
         // Whether their skills and abilities should improve when used
         this.train = true;
         // Whether to ignore quantities on items, like ammo, so they dont run out of ammo etc.

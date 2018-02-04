@@ -346,7 +346,7 @@ export default class CharacterManager {
      * @return {Object}            Object with the character details
      */
     create(userData, city, callback) {
-        this.dbCreate(user_id, name, city, (error, character) => {
+        this.dbCreate(userData.user_id, userData.display_name, city, (error, character) => {
             if (error) {
                 return callback(error)
             }
