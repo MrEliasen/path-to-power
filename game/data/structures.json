@@ -2,7 +2,9 @@
     "hospital": {
         "name": "Hospital",
         "colour": "#1769ed",
-        "shops": [],
+        "shops": [
+            "pharmacy"
+        ],
         "commands": {
             "/heal": {
                 "cost": 1
@@ -14,11 +16,23 @@
         "colour": "#9e2f00",
         "commands": null,
         "shops": [
-            "shop-pawn"
+            "pawnshop"
         ]
     },
-    "london-airport": {
-        "name": "London Airport",
+    "bar": {
+        "name": "Bar",
+        "colour": "#9e2f00",
+        "commands": null,
+        "shops": []
+    },
+    "bank": {
+        "name": "National Bank",
+        "colour": "#9e2f00",
+        "commands": null,
+        "shops": []
+    },
+    "airport": {
+        "name": "International Airport",
         "colour": "#800080",
         "commands": {
             "/travel": {
@@ -32,30 +46,5 @@
             }
         },
         "shops": []
-    },
-    "berlin-airport": {
-        "name": "Berlin Airport",
-        "colour": "#800080",
-        "commands": {
-            "/travel": {
-                "destinations": {
-                    "london": {
-                        "cost": 450,
-                        "x": 20,
-                        "y": 20
-                    }
-                }
-            }
-        },
-        "shops": []
-    },
-    "mallshop": {
-        "name": "Mall",
-        "colour": "#d1400b",
-        "commands": null,
-        "shops": [
-            "shop-pawn",
-            "shop-food"
-        ]
     }
 }

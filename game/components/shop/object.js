@@ -27,6 +27,12 @@ export default class Shop {
 
         this.sell.list = this.sell.list.map((item) => {
             const newItem = this.Game.itemManager.add(item.id);
+
+            if (!newItem) {
+                this.Game.logger.info(`The item ${item.id} does not exists in shop ${this.id}`);
+                return null;
+            }
+
             newItem.shopQuantity = item.shopQuantity;
             newItem.expRequired = item.expRequired || 0;
 

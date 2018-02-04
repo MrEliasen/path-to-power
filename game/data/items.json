@@ -1,65 +1,153 @@
 [
     {
-        "id": "walther22",
-        "name": "Walther P22",
-        "description": ".22 caliber pistol. Deals {damage_min}-{damage_max} damage on hit.",
+        "id": "walther25",
+        "name": "Walther PPK",
+        "description": ".25 ACP. Deals {damage_min}-{damage_max} damage on hit.",
         "type": "weapon",
         "subtype": "ranged",
         "stats": {
             "equipable": true,
-            "price": 100,
+            "price": 1,
             "stackable": false,
             "durability": 100,
-            "damage_min": 3,
-            "damage_max": 5
+            "damage_min": 1,
+            "damage_max": 1
+        }
+    },
+    {
+        "id": "p290rs",
+        "name": "P290RS",
+        "description": ".380 ACP. Deals {damage_min}-{damage_max} damage on hit.",
+        "type": "weapon",
+        "subtype": "ranged",
+        "stats": {
+            "equipable": true,
+            "price": 1,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 1,
+            "damage_max": 1
         }
     },
     {
         "id": "glock17",
         "name": "Glock 17",
-        "description": "9mm caliber pistol. Deals {damage_min}-{damage_max} damage on hit.",
+        "description": "9mm. Deals {damage_min}-{damage_max} damage on hit.",
         "type": "weapon",
         "subtype": "ranged",
         "stats": {
             "equipable": true,
-            "price": 100,
+            "price": 1,
             "stackable": false,
-            "durability": 200,
-            "damage_min": 5,
-            "damage_max": 6
+            "durability": 100,
+            "damage_min": 1,
+            "damage_max": 1
         }
     },
     {
         "id": "m1911",
         "name": "M1911",
-        "description": ".45 caliber pistol. Deals {damage_min}-{damage_max} damage on hit.",
+        "description": ".45 ACP. Deals {damage_min}-{damage_max} damage on hit.",
         "type": "weapon",
         "subtype": "ranged",
         "stats": {
             "equipable": true,
-            "price": 100,
+            "price": 1,
             "stackable": false,
-            "durability": 300,
-            "damage_min": 8,
-            "damage_max": 9
+            "durability": 100,
+            "damage_min": 1,
+            "damage_max": 1
         }
     },
     {
-        "id": "deserteagle",
-        "name": "Desert Eagle",
-        "description": ".50 AE caliber pistol. Deals {damage_min}-{damage_max} damage on hit.",
+        "id": "85ss2fs",
+        "name": "85SS2FS",
+        "description": ".38 Special. Deals {damage_min}-{damage_max} damage on hit.",
         "type": "weapon",
         "subtype": "ranged",
         "stats": {
             "equipable": true,
-            "price": 100,
+            "price": 1,
             "stackable": false,
-            "durability": 400,
-            "damage_min": 12,
-            "damage_max": 15
+            "durability": 100,
+            "damage_min": 1,
+            "damage_max": 1
         }
     },
-
+    {
+        "id": "an94",
+        "name": "AN-94",
+        "description": "5.56x39. Deals {damage_min}-{damage_max} damage on hit.",
+        "type": "weapon",
+        "subtype": "ranged",
+        "stats": {
+            "equipable": true,
+            "price": 1,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 1,
+            "damage_max": 1
+        }
+    },
+    {
+        "id": "fnscar",
+        "name": "FN SCAR",
+        "description": "5.56x45. Deals {damage_min}-{damage_max} damage on hit.",
+        "type": "weapon",
+        "subtype": "ranged",
+        "stats": {
+            "equipable": true,
+            "price": 1,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 1,
+            "damage_max": 1
+        }
+    },
+    {
+        "id": "ak47",
+        "name": "AK-47",
+        "description": "7.62x39. Deals {damage_min}-{damage_max} damage on hit.",
+        "type": "weapon",
+        "subtype": "ranged",
+        "stats": {
+            "equipable": true,
+            "price": 1,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 1,
+            "damage_max": 1
+        }
+    },
+    {
+        "id": "hkg3",
+        "name": "HK G3",
+        "description": "7.62x51. Deals {damage_min}-{damage_max} damage on hit.",
+        "type": "weapon",
+        "subtype": "ranged",
+        "stats": {
+            "equipable": true,
+            "price": 1,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 1,
+            "damage_max": 1
+        }
+    },
+    {
+        "id": "leatherjacket",
+        "name": "Leather Jacket",
+        "description": "Protectes the wearer from ballistic damage. Reducing damage taken by {damage_reduction}, soaking up to {durability} total points of damage.",
+        "type": "armour",
+        "subtype": "body",
+        "stats": {
+            "equipable": true,
+            "price": 1,
+            "stackable": false,
+            "durability": 1,
+            "damage_reduction": 1
+        }
+    },
     {
         "id": "thickleathercoat",
         "name": "Thick Leather Coat",
@@ -68,38 +156,94 @@
         "subtype": "body",
         "stats": {
             "equipable": true,
-            "price": 100,
+            "price": 1,
             "stackable": false,
-            "durability": 1000,
+            "durability": 1,
             "damage_reduction": 1
         }
     },
     {
-        "id": "kevlar",
-        "name": "Kevlar",
+        "id": "m3armor",
+        "name": "M3 Bodyarmor",
         "description": "Protectes the wearer from ballistic damage. Reducing damage taken by {damage_reduction}, soaking up to {durability} total points of damage.",
         "type": "armour",
         "subtype": "body",
         "stats": {
             "equipable": true,
-            "price": 300,
+            "price": 1,
             "stackable": false,
-            "durability": 2000,
-            "damage_reduction": 3
+            "durability": 1,
+            "damage_reduction": 1
         }
     },
     {
-        "id": "miliarmor",
-        "name": "Military Armor",
+        "id": "kevlarvest",
+        "name": "Kevlar Vest",
         "description": "Protectes the wearer from ballistic damage. Reducing damage taken by {damage_reduction}, soaking up to {durability} total points of damage.",
         "type": "armour",
         "subtype": "body",
         "stats": {
             "equipable": true,
-            "price": 500,
+            "price": 1,
             "stackable": false,
-            "durability": 4000,
-            "damage_reduction": 6
+            "durability": 1,
+            "damage_reduction": 1
+        }
+    },
+    {
+        "id": "6b436a",
+        "name": "6B43 6A Armor",
+        "description": "Protectes the wearer from ballistic damage. Reducing damage taken by {damage_reduction}, soaking up to {durability} total points of damage.",
+        "type": "armour",
+        "subtype": "body",
+        "stats": {
+            "equipable": true,
+            "price": 1,
+            "stackable": false,
+            "durability": 1,
+            "damage_reduction": 1
+        }
+    },
+    {
+        "id": "ammobasic",
+        "name": "Basic Ammo",
+        "description": "Required for firing your ranged weapons. Adds an additional {damage_bonus} damage to your weapon.",
+        "type": "weapon",
+        "subtype": "ammo",
+        "stats": {
+            "equipable": true,
+            "price": 1,
+            "stackable": false,
+            "durability": 1,
+            "damage_bonus": 1
+        }
+    },
+    {
+        "id": "ammohp",
+        "name": "HP Ammo",
+        "description": "Hollow-point ammunition. Required for firing your ranged weapons. Adds an additional {damage_bonus} damage to your weapon.",
+        "type": "weapon",
+        "subtype": "ammo",
+        "stats": {
+            "equipable": true,
+            "price": 1,
+            "stackable": false,
+            "durability": 1,
+            "damage_bonus": 1
+        }
+    },
+    {
+        "id": "ammoap",
+        "name": "AP Ammo",
+        "description": "Armor-Piercing. Required for firing your ranged weapons. Adds an additional {damage_bonus} damage to your weapon.",
+        "type": "weapon",
+        "subtype": "ammo",
+        "stats": {
+            "equipable": true,
+            "price": 1,
+            "stackable": false,
+            "durability": 1,
+            "damage_bonus": 1
         }
     },
     {
@@ -110,130 +254,386 @@
         "subtype": "melee",
         "stats": {
             "equipable": true,
-            "price": 50,
+            "price": 1,
             "stackable": false,
             "durability": 100,
             "damage_min": 1,
-            "damage_max": 3
+            "damage_max": 1
         }
     },
     {
-        "id": "golfclub",
-        "name": "Golf Club",
+        "id": "switchblade",
+        "name": "Switchblade",
         "description": "Melee weapon. Deals {damage_min}-{damage_max} damage on hit, ignoring armor.",
         "type": "weapon",
         "subtype": "melee",
         "stats": {
             "equipable": true,
-            "price": 150,
+            "price": 1,
             "stackable": false,
             "durability": 100,
-            "damage_min": 3,
-            "damage_max": 4
+            "damage_min": 1,
+            "damage_max": 1
         }
     },
     {
-        "id": "metalbaseballbat",
-        "name": "Metal Baseball Bat",
+        "id": "axe",
+        "name": "Fire Axe",
         "description": "Melee weapon. Deals {damage_min}-{damage_max} damage on hit, ignoring armor.",
         "type": "weapon",
         "subtype": "melee",
         "stats": {
             "equipable": true,
-            "price": 350,
+            "price": 1,
             "stackable": false,
             "durability": 100,
-            "damage_min": 4,
-            "damage_max": 6
+            "damage_min": 1,
+            "damage_max": 1
         }
     },
     {
-        "id": "police-baton",
-        "name": "Police Baton",
-        "description": "Enforcing the law, one hit at the time. Deals {damage_min}-{damage_max} damage on hit.",
+        "id": "machete",
+        "name": "Machete",
+        "description": "Melee weapon. Deals {damage_min}-{damage_max} damage on hit, ignoring armor.",
         "type": "weapon",
         "subtype": "melee",
         "stats": {
             "equipable": true,
-            "price": 350,
+            "price": 1,
             "stackable": false,
             "durability": 100,
-            "damage_min": 4,
-            "damage_max": 5
+            "damage_min": 1,
+            "damage_max": 1
         }
     },
     {
-        "id": "ammo",
-        "name": "Basic Ammo",
-        "description": "Required for firing your ranged weapons. Adds an additional {damage_bonus} damage to your weapon.",
+        "id": "chainsaw",
+        "name": "Chainsaw",
+        "description": "Melee weapon. Deals {damage_min}-{damage_max} damage on hit, ignoring armor.",
         "type": "weapon",
-        "subtype": "ammo",
+        "subtype": "melee",
         "stats": {
             "equipable": true,
-            "price": 10,
+            "price": 1,
             "stackable": false,
-            "durability": 20,
-            "damage_bonus": 1
+            "durability": 100,
+            "damage_min": 1,
+            "damage_max": 1
         }
     },
     {
-        "id": "redapple",
-        "name": "Red Apple",
-        "description": "A shiny red apple. Does not contain poison.",
-        "type": "consumable",
-        "subtype": "food",
-        "stats": {
-            "price": 2,
-            "stackable": true,
-            "durability": 1
-        }
-    },
-    {
-        "id": "mushrooms",
-        "name": "Mushrooms",
-        "description": "Red kind, don't eat.",
+        "id": "ecstasy",
+        "name": "Ecstasy",
+        "description": "Ecstasy is a psychoactive drug used primarily as a recreational drug. The desired recreational effects include increased empathy, euphoria, and heightened sensations. - wikipedia.org",
         "type": "consumable",
         "subtype": "drug",
         "stats": {
-            "price": 2,
+            "price": 1,
+            "priceRange": [4, 3, 7],
             "stackable": true,
-            "durability": 1
+            "durability": 1,
+            "useEffect": "drugEcstasy"
+        }
+    },
+    {
+        "id": "hashish",
+        "name": "Hashish",
+        "description": "Hashish, or hash, is a drug made from cannabis. While herbal cannabis is referred to as marijuana, hashish is cannabis resin. - wikipedia.org",
+        "type": "consumable",
+        "subtype": "drug",
+        "stats": {
+            "price": 1,
+            "priceRange": [7, 6, 15],
+            "stackable": true,
+            "durability": 1,
+            "useEffect": "drugHashish"
+        }
+    },
+    {
+        "id": "marijuana",
+        "name": "Marijuana",
+        "description": "Cannabis, also known as marijuana among other names, is a psychoactive drug from the Cannabis plant intended for medical or recreational use. - wikipedia.org",
+        "type": "consumable",
+        "subtype": "drug",
+        "stats": {
+            "price": 1,
+            "priceRange": [12, 8, 24],
+            "stackable": true,
+            "durability": 1,
+            "useEffect": "drugMarijuana"
+        }
+    },
+    {
+        "id": "amphetamine",
+        "name": "Amphetamine",
+        "description": "Amphetamine is a potent central nervous system stimulant that is used in the treatment of attention deficit hyperactivity disorder, narcolepsy, and obesity. - wikipedia.org",
+        "type": "consumable",
+        "subtype": "drug",
+        "stats": {
+            "price": 1,
+            "priceRange": [22, 15, 44],
+            "stackable": true,
+            "durability": 1,
+            "useEffect": "drugAmphetamine"
+        }
+    },
+    {
+        "id": "methamphetamine",
+        "name": "Methamphetamine",
+        "description": "Methamphetamine is a strong central nervous system stimulant that is mainly used as a recreational drug and less commonly as a second-line treatment for attention deficit hyperactivity disorder and obesity. - wikipedia.org",
+        "type": "consumable",
+        "subtype": "drug",
+        "stats": {
+            "price": 1,
+            "priceRange": [25, 23, 28],
+            "stackable": true,
+            "durability": 1,
+            "useEffect": "drugMethamphetamine"
         }
     },
     {
         "id": "cocaine",
         "name": "Cocaine",
-        "description": "Some description",
+        "description": "Cocaine, also known as coke, is a strong stimulant mostly used as a recreational drug. - wikipedia.org",
         "type": "consumable",
         "subtype": "drug",
         "stats": {
-            "price": 20,
+            "price": 1,
+            "priceRange": [73, 59, 132],
             "stackable": true,
+            "durability": 1,
+            "useEffect": "drugCocaine"
+        }
+    },
+    {
+        "id": "crack",
+        "name": "Crack",
+        "description": "Crack cocaine, also known simply as crack, is a free base form of cocaine that can be smoked. Crack offers a short but intense high to smokers. The Manual of Adolescent Substance Abuse Treatment calls it the most addictive form of cocaine. - wikipedia.org",
+        "type": "consumable",
+        "subtype": "drug",
+        "stats": {
+            "price": 1,
+            "priceRange": [75, 58, 124],
+            "stackable": true,
+            "durability": 1,
+            "useEffect": "drugCrack"
+        }
+    },
+    {
+        "id": "heroinbrown",
+        "name": "Heroin (Brown)",
+        "description": "Brown heroin, is the result of the first stage of purification. Brown heroin is easier to produce than white heroin. - talkingdrugs.org",
+        "type": "consumable",
+        "subtype": "drug",
+        "stats": {
+            "price": 1,
+            "priceRange": [119, 96, 239],
+            "stackable": true,
+            "durability": 1,
+            "useEffect": "drugHeroinBrown"
+        }
+    },
+    {
+        "id": "heroinwhite",
+        "name": "Heroin (White)",
+        "description": "White heroin,is the most refined heroin on the market. - talkingdrugs.org",
+        "type": "consumable",
+        "subtype": "drug",
+        "stats": {
+            "price": 1,
+            "priceRange": [209, 96, 209],
+            "stackable": true,
+            "durability": 1,
+            "useEffect": "drugHeroinWhite"
+        }
+    },
+    {
+        "id": "medicalkit",
+        "name": "Medical Kit",
+        "description": "Will heal the user for {effect.healAmount} on use.",
+        "type": "consumable",
+        "subtype": "misc",
+        "stats": {
+            "price": 1,
+            "stackable": false,
+            "durability": 1,
+            "useEffect": "miscMedKit"
+        }
+    },
+    {
+        "id": "bandage",
+        "name": "Sterile Bandage",
+        "description": "Will heal the user for {effect.healAmount} on use.",
+        "type": "consumable",
+        "subtype": "misc",
+        "stats": {
+            "price": 1,
+            "stackable": false,
+            "durability": 1,
+            "useEffect": "miscMedKit"
+        }
+    },
+    {
+        "id": "adrenalin",
+        "name": "Adrenalin",
+        "description": "On use, will reduce all cooldowns by 50%, for {effect.duration}",
+        "type": "consumable",
+        "subtype": "misc",
+        "stats": {
+            "price": 1,
+            "stackable": false,
+            "durability": 1,
+            "useEffect": "miscAdrenalin"
+        }
+    },
+    {
+        "id": "cellphone",
+        "name": "Cell Phone",
+        "description": "Get the location of dealers in your area, costs {effect.cost} per use.",
+        "type": "consumable",
+        "subtype": "misc",
+        "stats": {
+            "price": 1,
+            "stackable": false,
+            "durability": 1,
+            "useEffect": "miscPhone"
+        }
+    },
+    {
+        "id": "pepperspray",
+        "name": "Pepper Spray",
+        "description": "On use, will flee in a random direction, without loosing reputation.",
+        "type": "consumable",
+        "subtype": "misc",
+        "stats": {
+            "price": 1,
+            "stackable": false,
+            "durability": 1,
+            "useEffect": "miscPepperSpray"
+        }
+    },
+    {
+        "id": "beacon",
+        "name": "Distress Beacon",
+        "description": "Signals all members of you are in trouble. They will all receive your current location.",
+        "type": "consumable",
+        "subtype": "misc",
+        "stats": {
+            "price": 1,
+            "stackable": false,
+            "durability": 1,
+            "useEffect": "miscPepperSpray"
+        }
+    },
+    {
+        "id": "laptop",
+        "name": "Laptop",
+        "description": "Allows you to transfer money from one bank account to another, without visiting the bank.",
+        "subtype": "misc",
+        "stats": {
+            "price": 1,
+            "stackable": false,
+            "durability": 1,
+            "useEffect": "miscPepperSpray"
+        }
+    },
+    {
+        "id": "cheapwatch",
+        "name": "Cheap Watch",
+        "description": "(Trash) A cheap knock-off watch.",
+        "type": "trash",
+        "subtype": "trash",
+        "stats": {
+            "price": 1,
+            "stackable": false,
             "durability": 1
         }
     },
     {
-        "id": "weed",
-        "name": "Weed",
-        "description": "Some description",
-        "type": "consumable",
-        "subtype": "drug",
+        "id": "winebottle",
+        "name": "Wine Bottle",
+        "description": "(Trash) A cheap wine bottle, unopened.",
+        "type": "trash",
+        "subtype": "trash",
         "stats": {
-            "price": 6,
-            "stackable": true,
+            "price": 1,
+            "stackable": false,
             "durability": 1
         }
     },
     {
-        "id": "acid",
-        "name": "Acid",
-        "description": "Some description",
-        "type": "consumable",
-        "subtype": "drug",
+        "id": "brokenbottle",
+        "name": "Broken Bottle",
+        "description": "Melee weapon. Deals {damage_min}-{damage_max} damage on hit, ignoring armor.",
+        "type": "weapon",
+        "subtype": "melee",
         "stats": {
-            "price": 12,
-            "stackable": true,
-            "durability": 1
+            "equipable": true,
+            "price": 1,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 1,
+            "damage_max": 1
+        }
+    },
+    {
+        "id": "police-baton",
+        "name": "Police Baton",
+        "description": "Melee weapon. Deals {damage_min}-{damage_max} damage on hit, ignoring armor.",
+        "type": "weapon",
+        "subtype": "melee",
+        "stats": {
+            "equipable": true,
+            "price": 1,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 1,
+            "damage_max": 1
+        }
+    },
+    {
+        "id": "briefcase",
+        "name": "Briefcase",
+        "description": "Melee weapon. Deals {damage_min}-{damage_max} damage on hit, ignoring armor.",
+        "type": "weapon",
+        "subtype": "melee",
+        "stats": {
+            "equipable": true,
+            "price": 1,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 1,
+            "damage_max": 1
+        }
+    },
+    {
+        "id": "brassknuckle",
+        "name": "Brass Knuckle",
+        "description": "Melee weapon. Deals {damage_min}-{damage_max} damage on hit, ignoring armor.",
+        "type": "weapon",
+        "subtype": "melee",
+        "stats": {
+            "equipable": true,
+            "price": 1,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 1,
+            "damage_max": 1
+        }
+    },
+    {
+        "id": "stapon",
+        "name": "Strap On",
+        "description": "Melee weapon. Deals {damage_min}-{damage_max} damage on hit, ignoring armor.",
+        "type": "weapon",
+        "subtype": "melee",
+        "stats": {
+            "equipable": true,
+            "price": 1,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 1,
+            "damage_max": 1
         }
     }
 ]

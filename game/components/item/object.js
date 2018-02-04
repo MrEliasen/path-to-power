@@ -2,7 +2,7 @@ import uuid from 'uuid/v4';
 /*{
     id: "",
     name: "",
-    type: "weapon|armour|consumable",
+    type: "weapon|armour|consumable|trash",
     subtype: "[melee|ranged|ammo]|[body]|[food|drug]",
     stats: {
         price: 123,
@@ -23,10 +23,11 @@ import uuid from 'uuid/v4';
         // Type: armour
         damage_reduction: 123,
 
+        // Subtype: drug
+        priceRange: [Mean, Min, Max]
+
         // Type: consumable
-        effects: [
-            {"effect-id": 123123}
-        ]
+        useEffect: "effectId/name"
     }
 }*/
 

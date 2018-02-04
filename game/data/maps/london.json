@@ -6,40 +6,52 @@
         "x": 30
     },
     "structures": [
-        {"id": "hospital", "x": 5, "y": 5},
-        {"id": "pawnshop", "x": 10, "y": 10},
-        {"id": "mallshop", "x": 11, "y": 11},
-        {"id": "hospital", "x": 15, "y": 15},
-        {"id": "london-airport", "x": 1, "y": 1}
+        {"id": "hospital", "x": 26, "y": 7},
+        {"id": "pawnshop", "x": 1, "y": 22},
+        {"id": "bar", "x": 28, "y": 4},
+        {"id": "bank", "x": 5, "y": 3},
+        {"id": "airport", "x": 30, "y": 29}
     ],
     "npcs": [
         {
             "id": "police-officer",
-            "amount": 1,
-            "location": {
-                "x": 10,
-                "y": 10
-            }
+            "amount": 2
+        },
+        {
+            "id": "bum",
+            "amount": 2
+        },
+        {
+            "id": "pedestrian",
+            "amount": 3
+        },
+        {
+            "id": "bouncer",
+            "amount": 1
+        },
+        {
+            "id": "hooker",
+            "amount": 2
+        },
+        {
+            "id": "loadshark",
+            "amount": 1
+        },
+        {
+            "id": "deaagent",
+            "amount": 1
         },
         {
             "id": "drug-dealer",
-            "amount": 1,
-            "location": {
-                "x": 10,
-                "y": 10
-            }
+            "amount": 2
         },
         {
             "id": "druggie",
-            "amount": 1,
-            "location": {
-                "x": 10,
-                "y": 10
-            }
+            "amount": 2
         }
     ],
     "respawn": {
-       "y": 5,
-       "x": 1 
+       "y": 7,
+       "x": 26 
     }
 }

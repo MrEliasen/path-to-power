@@ -2,11 +2,11 @@
     "police-officer" : {
         "type" : "Police Officer",
         "stats" : {
-            "health" : 500,
-            "money" : 200
+            "health" : 100,
+            "money" : 25
         },
         "abilities" : {
-            "acc" : 45
+            "acc" : 50
         },
         "skills" : {},
         "inventory": [
@@ -22,20 +22,16 @@
             },
             {
                 "equipped_slot": "armor",
-                "item_id": "kevlar",
+                "item_id": "kevlarvest",
                 "modifiers": {}
             },
             {
                 "equipped_slot": "ammo",
-                "item_id": "ammo",
+                "item_id": "ammobasic",
                 "modifiers": {}
             },
             { 
-                "item_id": "ammo",
-                "modifiers": {}
-            },
-            { 
-                "item_id": "ammo",
+                "item_id": "ammobasic",
                 "modifiers": {}
             }
         ],
@@ -44,39 +40,38 @@
                 "move": [10, 30],
                 "attack": 2
             },
-            "respawn": 10,
+            "respawn": 600,
             "remainHostile": true
         }
     },
     "drug-dealer" : {
         "type" : "Drug Dealer",
         "stats" : {
-            "health" : 5000,
+            "health" : 1000,
             "money" : 0
         },
         "abilities" : {
-            "acc" : 65
+            "acc" : 85
         },
         "skills" : {},
         "inventory": [
             {
                 "equipped_slot": "ranged",
-                "item_id": "deserteagle",
+                "item_id": "ak47",
                 "modifiers": {}
             },
             {
                 "equipped_slot": "armor",
-                "item_id": "kevlar",
+                "item_id": "kevlarvest",
                 "modifiers": {}
             },
             {
                 "equipped_slot": "ammo",
-                "item_id": "ammo",
+                "item_id": "ammohp",
                 "modifiers": {}
             },
             {
-                "equipped_slot": "ammo",
-                "item_id": "ammo",
+                "item_id": "ammohp",
                 "modifiers": {}
             }
         ],
@@ -86,14 +81,14 @@
                 "move": [60, 180],
                 "attack": 2
             },
-            "respawn": 600,
+            "respawn": 1800,
             "remainHostile": true
         }
     },
     "druggie" : {
         "type" : "Druggie",
         "stats" : {
-            "health" : 1000,
+            "health" : 500,
             "money" : 0
         },
         "abilities" : {
@@ -102,15 +97,233 @@
         "skills" : {},
         "inventory": [
             {
+                "equipped_slot": "armor",
+                "item_id": "thickleathercoat",
+                "modifiers": {}
+            },
+            {
                 "equipped_slot": "melee",
-                "item_id": "metalbaseballbat",
+                "item_id": "switchblade",
                 "modifiers": {}
             }
         ],
         "shop": "druggie",
         "logic": {
             "timers": {
-                "move": [60, 120],
+                "move": [60, 180],
+                "attack": 2
+            },
+            "respawn": 1800,
+            "remainHostile": true
+        }
+    },
+    "bum" : {
+        "type" : "Bum",
+        "stats" : {
+            "health" : 100,
+            "money" : 7
+        },
+        "abilities" : {
+            "acc" : 55
+        },
+        "skills" : {},
+        "inventory": [
+            {
+                "equipped_slot": "armor",
+                "item_id": "thickleathercoat",
+                "modifiers": {}
+            },
+            {
+                "equipped_slot": "melee",
+                "item_id": "brokenbottle",
+                "modifiers": {}
+            },
+            {
+                "item_id": "winebottle",
+                "modifiers": {
+                    "durability": 2
+                }
+            }
+        ],
+        "logic": {
+            "timers": {
+                "move": [100, 400],
+                "attack": 2
+            },
+            "respawn": 300,
+            "remainHostile": true
+        }
+    },
+    "pedestrian" : {
+        "type" : "Pedestrian",
+        "stats" : {
+            "health" : 60,
+            "money" : 36
+        },
+        "abilities" : {
+            "acc" : 12
+        },
+        "skills" : {},
+        "inventory": [
+            {
+                "equipped_slot": "melee",
+                "item_id": "briefcase",
+                "modifiers": {}
+            },
+            {
+                "item_id": "cheapwatch",
+                "modifiers": {}
+            }
+        ],
+        "logic": {
+            "timers": {
+                "move": [10, 60],
+                "attack": 2
+            },
+            "respawn": 60,
+            "remainHostile": true
+        }
+    },
+    "bouncer" : {
+        "type" : "Bouncer",
+        "stats" : {
+            "health" : 135,
+            "money" : 54
+        },
+        "abilities" : {
+            "acc" : 30
+        },
+        "skills" : {},
+        "inventory": [
+            {
+                "equipped_slot": "melee",
+                "item_id": "brassknuckle",
+                "modifiers": {}
+            },
+            {
+                "item_id": "cheapwatch",
+                "modifiers": {}
+            }
+        ],
+        "logic": {
+            "timers": {
+                "move": [45, 120],
+                "attack": 2
+            },
+            "respawn": 120,
+            "remainHostile": true
+        }
+    },
+    "hooker" : {
+        "type" : "Hooker",
+        "stats" : {
+            "health" : 100,
+            "money" : 130
+        },
+        "abilities" : {
+            "acc" : 20
+        },
+        "skills" : {},
+        "inventory": [
+            {
+                "equipped_slot": "melee",
+                "item_id": "stapon",
+                "modifiers": {}
+            },
+            {
+                "item_id": "cheapwatch",
+                "modifiers": {}
+            }
+        ],
+        "logic": {
+            "timers": {
+                "move": [200, 300],
+                "attack": 2
+            },
+            "respawn": 180,
+            "remainHostile": true
+        }
+    },
+    "loadshark" : {
+        "type" : "Load Shark",
+        "stats" : {
+            "health" : 250,
+            "money" : 430
+        },
+        "abilities" : {
+            "acc" : 40
+        },
+        "skills" : {},
+        "inventory": [
+            {
+                "equipped_slot": "ranged",
+                "item_id": "85ss2fs",
+                "modifiers": {}
+            },
+            {
+                "equipped_slot": "armor",
+                "item_id": "m3armor",
+                "modifiers": {}
+            },
+            {
+                "equipped_slot": "ammo",
+                "item_id": "ammobasic",
+                "modifiers": {}
+            },
+            {
+                "equipped_slot": "ammo",
+                "item_id": "ammobasic",
+                "modifiers": {}
+            },
+            {
+                "item_id": "cheapwatch",
+                "modifiers": {}
+            }
+        ],
+        "logic": {
+            "timers": {
+                "move": [50, 150],
+                "attack": 2
+            },
+            "respawn": 380,
+            "remainHostile": true
+        }
+    },
+    "deaagent" : {
+        "type" : "DEA Agent",
+        "stats" : {
+            "health" : 350,
+            "money" : 34
+        },
+        "abilities" : {
+            "acc" : 80
+        },
+        "skills" : {},
+        "inventory": [
+            {
+                "equipped_slot": "ranged",
+                "item_id": "m1911",
+                "modifiers": {}
+            },
+            {
+                "equipped_slot": "armor",
+                "item_id": "kevlarvest",
+                "modifiers": {}
+            },
+            {
+                "equipped_slot": "ammo",
+                "item_id": "ammohp",
+                "modifiers": {}
+            },
+            {
+                "equipped_slot": "ammo",
+                "item_id": "ammohp",
+                "modifiers": {}
+            }
+        ],
+        "logic": {
+            "timers": {
+                "move": [50, 150],
                 "attack": 2
             },
             "respawn": 600,

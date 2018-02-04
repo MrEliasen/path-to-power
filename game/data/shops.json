@@ -1,56 +1,76 @@
-{
-    "shop-pawn": {
-        "id": "shop-pawn",
-        "name": "Pawn Shop",
-        "description": "They will buy and sell almost anything.",
+[
+    {
+        "id": "pharmacy",
+        "name": "Pharmacy Shop",
+        "description": "They sell pharmaceutical products.",
         "sell": {
             "enabled": true,
             "sellPricePercent": 1.0,
             "list": [
-                { "expRequired": 301, "shopQuantity": -1, "id": "walther22"},
-                { "expRequired": 1201, "shopQuantity": -1, "id": "glock17"},
-                { "expRequired": 3301, "shopQuantity": -1, "id": "m1911"},
-                { "expRequired": 6601, "shopQuantity": -1, "id": "deserteagle"},
-                { "expRequired": 301, "shopQuantity": -1, "id": "thickleathercoat"},
-                { "expRequired": 1201, "shopQuantity": -1, "id": "kevlar"},
-                { "expRequired": 8701, "shopQuantity": -1, "id": "miliarmor"},
-                { "expRequired": 0, "shopQuantity": -1, "id": "woodenclub"},
-                { "expRequired": 301, "shopQuantity": -1, "id": "golfclub"},
-                { "expRequired": 2101, "shopQuantity": -1, "id": "metalbaseballbat"}
+                { "expRequired": 0, "shopQuantity": -1, "id": "bandage"},
+                { "expRequired": 44201, "shopQuantity": -1, "id": "medicalkit"},
+                { "expRequired": 11101, "shopQuantity": -1, "id": "adrenalin"}
             ]
         },
         "buy": {
-            "enabled": true,
+            "enabled": false,
             "resell": true,
             "buyPricePercent": 0.35,
             "list": [],
-            "ignoreType": ["consumable"], 
+            "ignoreType": [], 
             "ignoreSubtype": []
         }
     },
-    "shop-food": {
-        "id": "shop-food",
-        "name": "Food Shop",
-        "description": "You can buy and sell food and other consumables.",
+    {
+        "id": "pawnshop",
+        "name": "Pawn Shop",
+        "description": "They will buy and sell just about anything.",
         "sell": {
             "enabled": true,
             "sellPricePercent": 1.0,
             "list": [
-                { "id": "redapple", "shopQuantity": 10 }
+                { "expRequired": 301, "shopQuantity": -1, "id": "walther25"},
+                { "expRequired": 2101, "shopQuantity": -1, "id": "p290rs"},
+                { "expRequired": 6601, "shopQuantity": -1, "id": "glock17"},
+                { "expRequired": 13801, "shopQuantity": -1, "id": "m1911"},
+                { "expRequired": 23701, "shopQuantity": -1, "id": "85ss2fs"},
+                { "expRequired": 39901, "shopQuantity": -1, "id": "an94"},
+                { "expRequired": 52901, "shopQuantity": -1, "id": "fnscar"},
+                { "expRequired": 66701, "shopQuantity": -1, "id": "ak47"},
+                { "expRequired": 116101, "shopQuantity": -1, "id": "hkg3"},
+
+                { "expRequired": 1201, "shopQuantity": -1, "id": "leatherjacket"},
+                { "expRequired": 8701, "shopQuantity": -1, "id": "thickleathercoat"},
+                { "expRequired": 27601, "shopQuantity": -1, "id": "m3armor"},
+                { "expRequired": 57401, "shopQuantity": -1, "id": "kevlarvest"},
+                { "expRequired": 135901, "shopQuantity": -1, "id": "6b436a"},
+
+                { "expRequired": 301, "shopQuantity": -1, "id": "ammobasic"},
+                { "expRequired": 23701, "shopQuantity": -1, "id": "ammohp"},
+                { "expRequired": 116101, "shopQuantity": -1, "id": "ammoap"},
+
+                { "expRequired": 2101, "shopQuantity": -1, "id": "woodenclub"},
+                { "expRequired": 11101, "shopQuantity": -1, "id": "switchblade"},
+                { "expRequired": 27601, "shopQuantity": -1, "id": "axe"},
+                { "expRequired": 52901, "shopQuantity": -1, "id": "machete"},
+                { "expRequired": 76401, "shopQuantity": -1, "id": "chainsaw"},
+
+                { "expRequired": 3301, "shopQuantity": -1, "id": "cellphone"},
+                { "expRequired": 2101, "shopQuantity": -1, "id": "pepperspray"},
+                { "expRequired": 13801, "shopQuantity": -1, "id": "beacon"},
+                { "expRequired": 16801, "shopQuantity": -1, "id": "laptop"}
             ]
         },
         "buy": {
             "enabled": true,
             "resell": true,
-            "buyPricePercent": 0.35,
-            "list": [
-                "redapple"
-            ],
+            "buyPricePercent": 0.25,
+            "list": [],
             "ignoreType": [], 
-            "ignoreSubtype": [] 
+            "ignoreSubtype": ["drug"]
         }
     },
-    "drug-dealer": {
+    {
         "id": "drug-dealer",
         "name": "Drug Dealer",
         "description": "",
@@ -68,17 +88,22 @@
             "ignoreSubtype": []
         },
         "supply": {
-            "numberOfItems": [2,4],
+            "numberOfItems": [10,35],
             "uniqueItems": false,
             "items": [
-                {"id": "mushrooms", "quantity": [3,5] },
-                {"id": "cocaine", "quantity": [1,2] },
-                {"id": "weed", "quantity": [3,5] },
-                {"id": "acid", "quantity": [2,4] }
+                {"id": "ecstasy", "quantity": [1,10]},
+                {"id": "hashish", "quantity": [1,10]},
+                {"id": "marijuana", "quantity": [1,10]},
+                {"id": "amphetamine", "quantity": [1,10]},
+                {"id": "methamphetamine", "quantity": [1,10]},
+                {"id": "cocaine", "quantity": [1,10]},
+                {"id": "crack", "quantity": [1,10]},
+                {"id": "heroinbrown", "quantity": [1,10]},
+                {"id": "heroinwhite", "quantity": [1,10]}
             ]
         }
     },
-    "druggie": {
+    {
         "id": "druggie",
         "name": "Druggie",
         "description": "",
@@ -90,15 +115,20 @@
         "buy": {
             "enabled": true,
             "resell": false,
-            "buyPricePercent": 1.35,
-            "list": [],
-            "ignoreType": [
-                "armour",
-                "weapon"
+            "buyPricePercent": 1.45,
+            "list": [
+                "ecstasy",
+                "hashish",
+                "marijuana",
+                "amphetamine",
+                "methamphetamine",
+                "cocaine",
+                "crack",
+                "heroinbrown",
+                "heroinwhite"
             ],
-            "ignoreSubtype": [
-                "food"
-            ]
+            "ignoreType": [],
+            "ignoreSubtype": []
         }
     }
-}
+]

@@ -11,22 +11,32 @@
     "rfc2822": "ddd, D MMM YYYY H:mm:ss [GMT]",
     "server_port": 8086,
     "game": {
-        "maps": [],
+        "logout_timer": 5000,
         "spawn" : {
             "map": "",
-            "x": 0,
-            "y": 0
+            "x": 1,
+            "y": 1
         },
         "character": {
             "name_length_min": 2,
             "name_length_max": 25,
             "defaults": {
-                "health_max": 100
+                "health_max": 100,
+                "money": 0,
+                "bank": 200
             }
         },
-        "autosave": {
-            "enabled": true,
-            "interval": 5000
-        }
+        "timers": [
+            {
+                "name": "autosave",
+                "enabled": true,
+                "interval": 5000
+            },
+            {
+                "name": "newday",
+                "enabled": true,
+                "interval": 1800000
+            }
+        ]
     }
 }
