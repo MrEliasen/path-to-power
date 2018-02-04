@@ -1,0 +1,57 @@
+{
+    "id" : "moscow",
+    "name": "Moscow",
+    "gridSize": {
+        "y": 30,
+        "x": 30
+    },
+    "structures": [
+        {"id": "hospital", "x": 5, "y": 5},
+        {"id": "pawnshop", "x": 4, "y": 4},
+        {"id": "bar", "x": 8, "y": 30},
+        {"id": "bank", "x": 13, "y": 6},
+        {"id": "airport", "x": 14, "y": 21}
+    ],
+    "npcs": [
+        {
+            "id": "police-officer",
+            "amount": 2
+        },
+        {
+            "id": "bum",
+            "amount": 2
+        },
+        {
+            "id": "pedestrian",
+            "amount": 3
+        },
+        {
+            "id": "bouncer",
+            "amount": 1
+        },
+        {
+            "id": "hooker",
+            "amount": 2
+        },
+        {
+            "id": "loadshark",
+            "amount": 1
+        },
+        {
+            "id": "deaagent",
+            "amount": 1
+        },
+        {
+            "id": "drug-dealer",
+            "amount": 2
+        },
+        {
+            "id": "druggie",
+            "amount": 2
+        }
+    ],
+    "respawn": {
+       "y": 28,
+       "x": 13 
+    }
+}

@@ -41,7 +41,9 @@ export default class MapManager {
                             resolve(maplist.length);
                         }
                     })
-                    .catch(() => {})
+                    .catch((err) => {
+                        this.Game.logger.error('MAP LOAD ERROR', err);
+                    });
             })
         })
     }

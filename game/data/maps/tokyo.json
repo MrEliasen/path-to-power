@@ -1,0 +1,57 @@
+{
+    "id" : "tokyo",
+    "name": "Tokyo",
+    "gridSize": {
+        "y": 30,
+        "x": 30
+    },
+    "structures": [
+        {"id": "hospital", "x": 13, "y": 28},
+        {"id": "pawnshop", "x": 4, "y": 7},
+        {"id": "bar", "x": 5, "y": 29},
+        {"id": "bank", "x": 8, "y": 3},
+        {"id": "airport", "x": 11, "y": 16}
+    ],
+    "npcs": [
+        {
+            "id": "police-officer",
+            "amount": 2
+        },
+        {
+            "id": "bum",
+            "amount": 2
+        },
+        {
+            "id": "pedestrian",
+            "amount": 3
+        },
+        {
+            "id": "bouncer",
+            "amount": 1
+        },
+        {
+            "id": "hooker",
+            "amount": 2
+        },
+        {
+            "id": "loadshark",
+            "amount": 1
+        },
+        {
+            "id": "deaagent",
+            "amount": 1
+        },
+        {
+            "id": "drug-dealer",
+            "amount": 2
+        },
+        {
+            "id": "druggie",
+            "amount": 2
+        }
+    ],
+    "respawn": {
+       "y": 28,
+       "x": 13 
+    }
+}

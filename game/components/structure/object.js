@@ -15,8 +15,8 @@ export default class Structure {
                 return resolve();
             }
 
-            this.shops.forEach(async (shopId, index) => {
-                return this.shops[index] = await this.Game.shopManager.add(shopId);
+            this.shops = this.shops.map(async (shopId) => {
+                return await this.Game.shopManager.add(shopId);
             });
 
             resolve();

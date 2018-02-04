@@ -1,0 +1,57 @@
+{
+    "id" : "mexicocity",
+    "name": "Mexico City",
+    "gridSize": {
+        "y": 30,
+        "x": 30
+    },
+    "structures": [
+        {"id": "hospital", "x": 25, "y": 17},
+        {"id": "pawnshop", "x": 2, "y": 8},
+        {"id": "bar", "x": 7, "y": 12},
+        {"id": "bank", "x": 29, "y": 13},
+        {"id": "airport", "x": 25, "y": 7}
+    ],
+    "npcs": [
+        {
+            "id": "police-officer",
+            "amount": 2
+        },
+        {
+            "id": "bum",
+            "amount": 2
+        },
+        {
+            "id": "pedestrian",
+            "amount": 3
+        },
+        {
+            "id": "bouncer",
+            "amount": 1
+        },
+        {
+            "id": "hooker",
+            "amount": 2
+        },
+        {
+            "id": "loadshark",
+            "amount": 1
+        },
+        {
+            "id": "deaagent",
+            "amount": 1
+        },
+        {
+            "id": "drug-dealer",
+            "amount": 2
+        },
+        {
+            "id": "druggie",
+            "amount": 2
+        }
+    ],
+    "respawn": {
+       "y": 17,
+       "x": 25 
+    }
+}

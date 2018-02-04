@@ -7,7 +7,7 @@ export default class GameMap {
     }
 
     loadNpcs() {
-        return new Promise((resolve) => {
+        return new Promise(async (resolve, reject) => {
             const total = this.npcs.length;
             let loaded = 0;
 
@@ -20,6 +20,7 @@ export default class GameMap {
                 }
 
                 loaded++
+                this.Game.logger.info(`LOADED ${loaded}/${total} NPCs `, {name: this.name});
 
                 if (loaded >= total) {
                     resolve(loaded);
@@ -36,9 +37,12 @@ export default class GameMap {
             // Load all structures for map
             this.structures.forEach(async (structure) => {
                 await this.Game.structureManager.add(this.id, structure.x, structure.y, structure.id);
+
                 loaded++
+                this.Game.logger.info(`LOADED ${loaded}/${total} STRUCTURES `, {name: this.name});
 
                 if (loaded >= total) {
+                    this.Game.logger.info('LOADED ALL STRUCTURES', {name: this.name});
                     resolve(loaded);
                 }
             });
@@ -52,14 +56,21 @@ export default class GameMap {
     generate() {
         return new Promise((resolve) => {
             // Save the character information (stats/location/etc)
-            const npcsLoaded = this.loadNpcs();
-            const structureLoaded = this.loadStructures();
+            this.loadNpcs()
+                .then((npcs) => {
+                    this.Game.logger.info(`Generated ${npcs} NPCs in map "${this.id}"`);
 
-            Promise
-                .all([npcsLoaded, structureLoaded])
-                .then((values) => {
-                    this.Game.logger.info(`Generated ${values[0]} NPCs and ${values[1]} structures for map "${this.id}"`);
-                    resolve();
+                    this.loadStructures()
+                        .then((structures) => {
+                            this.Game.logger.info(`Generated ${structures} structures in map "${this.id}"`);
+                            resolve();
+                        })
+                        .catch((err) => {
+                            this.Game.logger.error(err);
+                        });
+                })
+                .catch((err) => {
+                    this.Game.logger.error(err);
                 });
         });
     }

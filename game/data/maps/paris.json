@@ -1,0 +1,57 @@
+{
+    "id" : "paris",
+    "name": "Paris",
+    "gridSize": {
+        "y": 30,
+        "x": 30
+    },
+    "structures": [
+        {"id": "hospital", "x": 13, "y": 25},
+        {"id": "pawnshop", "x": 28, "y": 17},
+        {"id": "bar", "x": 2, "y": 25},
+        {"id": "bank", "x": 29, "y": 8},
+        {"id": "airport", "x": 21, "y": 12}
+    ],
+    "npcs": [
+        {
+            "id": "police-officer",
+            "amount": 2
+        },
+        {
+            "id": "bum",
+            "amount": 2
+        },
+        {
+            "id": "pedestrian",
+            "amount": 3
+        },
+        {
+            "id": "bouncer",
+            "amount": 1
+        },
+        {
+            "id": "hooker",
+            "amount": 2
+        },
+        {
+            "id": "loadshark",
+            "amount": 1
+        },
+        {
+            "id": "deaagent",
+            "amount": 1
+        },
+        {
+            "id": "drug-dealer",
+            "amount": 2
+        },
+        {
+            "id": "druggie",
+            "amount": 2
+        }
+    ],
+    "respawn": {
+       "y": 25,
+       "x": 13 
+    }
+}

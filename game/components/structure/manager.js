@@ -30,7 +30,7 @@ export default class StructureManager {
      * @param {Number} x            
      * @param {Number} y            
      * @param {String} structure_id Structure ID
-     * @return {Structure Obj} The new structure object.
+     * @return {Promise}
      */
     async add(map_id, x, y, structure_id) {
         this.Game.logger.info('StructureManager::add', {map_id, structure_id, x, y});

@@ -1,0 +1,57 @@
+{
+    "id" : "newyork",
+    "name": "New York",
+    "gridSize": {
+        "y": 30,
+        "x": 30
+    },
+    "structures": [
+        {"id": "hospital", "x": 9, "y": 22},
+        {"id": "pawnshop", "x": 14, "y": 19},
+        {"id": "bar", "x": 11, "y": 23},
+        {"id": "bank", "x": 19, "y": 24},
+        {"id": "airport", "x": 29, "y": 0}
+    ],
+    "npcs": [
+        {
+            "id": "police-officer",
+            "amount": 2
+        },
+        {
+            "id": "bum",
+            "amount": 2
+        },
+        {
+            "id": "pedestrian",
+            "amount": 3
+        },
+        {
+            "id": "bouncer",
+            "amount": 1
+        },
+        {
+            "id": "hooker",
+            "amount": 2
+        },
+        {
+            "id": "loadshark",
+            "amount": 1
+        },
+        {
+            "id": "deaagent",
+            "amount": 1
+        },
+        {
+            "id": "drug-dealer",
+            "amount": 2
+        },
+        {
+            "id": "druggie",
+            "amount": 2
+        }
+    ],
+    "respawn": {
+       "y": 22,
+       "x": 9 
+    }
+}

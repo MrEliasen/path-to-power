@@ -89,39 +89,35 @@ class Game {
 
     async init() {
         await this.itemManager.init().then((count) => {
-            console.log(`${count} ITEMS LOADED`);
+            console.log(`ITEM MANAGER LOADED ${count} ITEMS TEMPLATES`);
         });
 
         await this.mapManager.init().then((count) => {
-            console.log(`${count} MAPS LOADED`);
+            console.log(`MAP MANAGER LOADED ${count} MAPS`);
         });
 
         await this.factionManager.init().then((count) => {
-            console.log(`${count} FACTIONS LOADED`);
+            console.log(`FACTION MANAGER LOADED ${count} FACTIONS`);
         });
 
         await this.shopManager.init().then(() => {
-            console.log(`SHOPS LOADED`);
+            console.log(`SHOP MANAGER LOADED`);
         });
 
         await this.structureManager.init().then(() => {
-            console.log(`STRUCTURES LOADED`);
+            console.log(`STRUCTURES MANAGER LOADED`);
         });
 
         await this.commandManager.init().then(() => {
-            console.log(`COMMANDS LOADED`);
+            console.log(`COMMAND MANAGER LOADED`);
         });
 
         await this.characterManager.init().then(() => {
-            console.log(`CHARACTERS LOADED`);
+            console.log(`CHARACTERS MANAGER LOADED`);
         });
 
         await this.skillManager.init().then(() => {
-            console.log(`SKILLS LOADED`);
-        });
-
-        await this.npcManager.init().then((count) => {
-            console.log(`${count} NPCS LOADED`);
+            console.log(`SKILL MANAGER LOADED`);
         });
 
         // setup autosave

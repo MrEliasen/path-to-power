@@ -21,13 +21,13 @@
     },
     "bar": {
         "name": "Bar",
-        "colour": "#9e2f00",
+        "colour": "#ff9933",
         "commands": null,
         "shops": []
     },
     "bank": {
         "name": "National Bank",
-        "colour": "#9e2f00",
+        "colour": "#009933",
         "commands": null,
         "shops": []
     },
@@ -37,10 +37,40 @@
         "commands": {
             "/travel": {
                 "destinations": {
-                    "berlin": {
+                    "tokyo": {
                         "cost": 500,
-                        "x": 5,
-                        "y": 5
+                        "x": 11,
+                        "y": 16
+                    },
+                    "paris": {
+                        "cost": 500,
+                        "x": 21,
+                        "y": 12
+                    },
+                    "newyork": {
+                        "cost": 500,
+                        "x": 29,
+                        "y": 0
+                    },
+                    "moscow": {
+                        "cost": 500,
+                        "x": 14,
+                        "y": 21
+                    },
+                    "mexicocity": {
+                        "cost": 500,
+                        "x": 25,
+                        "y": 7
+                    },
+                    "delhi": {
+                        "cost": 500,
+                        "x": 8,
+                        "y": 10
+                    },
+                    "london": {
+                        "cost": 500,
+                        "x": 30,
+                        "y": 29
                     }
                 }
             }

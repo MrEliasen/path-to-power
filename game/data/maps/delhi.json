@@ -1,0 +1,57 @@
+{
+    "id" : "delhi",
+    "name": "Delhi",
+    "gridSize": {
+        "y": 30,
+        "x": 30
+    },
+    "structures": [
+        {"id": "hospital", "x": 9, "y": 10},
+        {"id": "pawnshop", "x": 0, "y": 21},
+        {"id": "bar", "x": 28, "y": 23},
+        {"id": "bank", "x": 30, "y": 4},
+        {"id": "airport", "x": 8, "y": 10}
+    ],
+    "npcs": [
+        {
+            "id": "police-officer",
+            "amount": 2
+        },
+        {
+            "id": "bum",
+            "amount": 2
+        },
+        {
+            "id": "pedestrian",
+            "amount": 3
+        },
+        {
+            "id": "bouncer",
+            "amount": 1
+        },
+        {
+            "id": "hooker",
+            "amount": 2
+        },
+        {
+            "id": "loadshark",
+            "amount": 1
+        },
+        {
+            "id": "deaagent",
+            "amount": 1
+        },
+        {
+            "id": "drug-dealer",
+            "amount": 2
+        },
+        {
+            "id": "druggie",
+            "amount": 2
+        }
+    ],
+    "respawn": {
+       "y": 10,
+       "x": 9 
+    }
+}

@@ -17,17 +17,6 @@ export default class NPCManager {
     }
 
     /**
-     * Create and load all the NPCS into the maps
-     * @return {Promise}
-     */
-    init() {
-        return new Promise((resolve, reject) => {
-            // load in all the NPCS for the maps
-            resolve(0);
-        });
-    }
-
-    /**
      * gets the NPC with the specific id
      * @param  {String} npcId The NPC ID
      * @return {Promise}
@@ -96,7 +85,8 @@ export default class NPCManager {
             newNPC.shop = await this.Game.shopManager.add(npcTemplate.shop);
         }
         
-        this.Game.itemManager.loadNPCInventory(newNPC)
+        await new Promise((resolve) => {
+            this.Game.itemManager.loadNPCInventory(newNPC)
             .then((items) => {
                 if (items.length) {
                     newNPC.setInventory(items);
@@ -128,9 +118,15 @@ export default class NPCManager {
                     });
                 }
 
-                this.Game.logger.info(`NPC generated. Type: "${newNPC.npc_id}"; Map "${newNPC.location.map}; Location "${newNPC.location.y}-${newNPC.location.x}"`);
+                resolve();
+
+                //this.Game.logger.info(`NPC generated. Type: "${newNPC.npc_id}"; Map "${newNPC.location.map}; Location "${newNPC.location.y}-${newNPC.location.x}"`);
             })
-            .catch((err) => {});
+            .catch((err) => {
+                this.Game.logger.info(err);
+                resolve();
+            });
+        });
     }
 
     /**
