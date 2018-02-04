@@ -1,4 +1,4 @@
- import Promise from 'bluebird';
+import Promise from 'bluebird';
 
 export default class Character {
     constructor(Game, character) {
@@ -27,7 +27,8 @@ export default class Character {
             health: 100,
             health_max: 100,
             money: 0,
-            bank: 200
+            bank: 200,
+            exp: 0,
         }
 
         // assign all the character modifiers, and deep-copy the stats

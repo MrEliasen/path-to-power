@@ -12,7 +12,7 @@
         "inventory": [
             {
                 "equipped_slot": "ranged",
-                "item_id": "pistol",
+                "item_id": "glock17",
                 "modifiers": {}
             },
             {
@@ -27,10 +27,6 @@
             },
             {
                 "equipped_slot": "ammo",
-                "item_id": "ammo",
-                "modifiers": {}
-            },
-            { 
                 "item_id": "ammo",
                 "modifiers": {}
             },
@@ -65,7 +61,7 @@
         "inventory": [
             {
                 "equipped_slot": "ranged",
-                "item_id": "pistol",
+                "item_id": "deserteagle",
                 "modifiers": {}
             },
             {
@@ -77,12 +73,17 @@
                 "equipped_slot": "ammo",
                 "item_id": "ammo",
                 "modifiers": {}
+            },
+            {
+                "equipped_slot": "ammo",
+                "item_id": "ammo",
+                "modifiers": {}
             }
         ],
         "shop": "drug-dealer",
         "logic": {
             "timers": {
-                "move": [60, 120],
+                "move": [60, 180],
                 "attack": 2
             },
             "respawn": 600,
@@ -102,7 +103,7 @@
         "inventory": [
             {
                 "equipped_slot": "melee",
-                "item_id": "police-baton",
+                "item_id": "metalbaseballbat",
                 "modifiers": {}
             }
         ],

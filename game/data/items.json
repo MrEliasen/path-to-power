@@ -1,5 +1,182 @@
 [
     {
+        "id": "walther22",
+        "name": "Walther P22",
+        "description": ".22 caliber pistol. Deals {damage_min}-{damage_max} damage on hit.",
+        "type": "weapon",
+        "subtype": "ranged",
+        "stats": {
+            "equipable": true,
+            "price": 100,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 3,
+            "damage_max": 5
+        }
+    },
+    {
+        "id": "glock17",
+        "name": "Glock 17",
+        "description": "9mm caliber pistol. Deals {damage_min}-{damage_max} damage on hit.",
+        "type": "weapon",
+        "subtype": "ranged",
+        "stats": {
+            "equipable": true,
+            "price": 100,
+            "stackable": false,
+            "durability": 200,
+            "damage_min": 5,
+            "damage_max": 6
+        }
+    },
+    {
+        "id": "m1911",
+        "name": "M1911",
+        "description": ".45 caliber pistol. Deals {damage_min}-{damage_max} damage on hit.",
+        "type": "weapon",
+        "subtype": "ranged",
+        "stats": {
+            "equipable": true,
+            "price": 100,
+            "stackable": false,
+            "durability": 300,
+            "damage_min": 8,
+            "damage_max": 9
+        }
+    },
+    {
+        "id": "deserteagle",
+        "name": "Desert Eagle",
+        "description": ".50 AE caliber pistol. Deals {damage_min}-{damage_max} damage on hit.",
+        "type": "weapon",
+        "subtype": "ranged",
+        "stats": {
+            "equipable": true,
+            "price": 100,
+            "stackable": false,
+            "durability": 400,
+            "damage_min": 12,
+            "damage_max": 15
+        }
+    },
+
+    {
+        "id": "thickleathercoat",
+        "name": "Thick Leather Coat",
+        "description": "Protectes the wearer from ballistic damage. Reducing damage taken by {damage_reduction}, soaking up to {durability} total points of damage.",
+        "type": "armour",
+        "subtype": "body",
+        "stats": {
+            "equipable": true,
+            "price": 100,
+            "stackable": false,
+            "durability": 1000,
+            "damage_reduction": 1
+        }
+    },
+    {
+        "id": "kevlar",
+        "name": "Kevlar",
+        "description": "Protectes the wearer from ballistic damage. Reducing damage taken by {damage_reduction}, soaking up to {durability} total points of damage.",
+        "type": "armour",
+        "subtype": "body",
+        "stats": {
+            "equipable": true,
+            "price": 300,
+            "stackable": false,
+            "durability": 2000,
+            "damage_reduction": 3
+        }
+    },
+    {
+        "id": "miliarmor",
+        "name": "Military Armor",
+        "description": "Protectes the wearer from ballistic damage. Reducing damage taken by {damage_reduction}, soaking up to {durability} total points of damage.",
+        "type": "armour",
+        "subtype": "body",
+        "stats": {
+            "equipable": true,
+            "price": 500,
+            "stackable": false,
+            "durability": 4000,
+            "damage_reduction": 6
+        }
+    },
+    {
+        "id": "woodenclub",
+        "name": "Wooden Club",
+        "description": "Melee weapon. Deals {damage_min}-{damage_max} damage on hit, ignoring armor.",
+        "type": "weapon",
+        "subtype": "melee",
+        "stats": {
+            "equipable": true,
+            "price": 50,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 1,
+            "damage_max": 3
+        }
+    },
+    {
+        "id": "golfclub",
+        "name": "Golf Club",
+        "description": "Melee weapon. Deals {damage_min}-{damage_max} damage on hit, ignoring armor.",
+        "type": "weapon",
+        "subtype": "melee",
+        "stats": {
+            "equipable": true,
+            "price": 150,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 3,
+            "damage_max": 4
+        }
+    },
+    {
+        "id": "metalbaseballbat",
+        "name": "Metal Baseball Bat",
+        "description": "Melee weapon. Deals {damage_min}-{damage_max} damage on hit, ignoring armor.",
+        "type": "weapon",
+        "subtype": "melee",
+        "stats": {
+            "equipable": true,
+            "price": 350,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 4,
+            "damage_max": 6
+        }
+    },
+    {
+        "id": "police-baton",
+        "name": "Police Baton",
+        "description": "Enforcing the law, one hit at the time. Deals {damage_min}-{damage_max} damage on hit.",
+        "type": "weapon",
+        "subtype": "melee",
+        "stats": {
+            "equipable": true,
+            "price": 350,
+            "stackable": false,
+            "durability": 100,
+            "damage_min": 4,
+            "damage_max": 5
+        }
+    },
+    {
+        "id": "ammo",
+        "name": "Basic Ammo",
+        "description": "Required for firing your ranged weapons. Adds an additional {damage_bonus} damage to your weapon.",
+        "type": "weapon",
+        "subtype": "ammo",
+        "stats": {
+            "equipable": true,
+            "price": 10,
+            "stackable": false,
+            "durability": 20,
+            "damage_bonus": 1
+        }
+    },
+    {
         "id": "redapple",
         "name": "Red Apple",
         "description": "A shiny red apple. Does not contain poison.",
@@ -9,34 +186,6 @@
             "price": 2,
             "stackable": true,
             "durability": 1
-        }
-    },
-    {
-        "id": "bodyarmor",
-        "name": "Body Armor",
-        "description": "Protectes the wearer from damage. Reducing damage taken by {damage_reduction}, soaking up to {durability} points of damage.",
-        "type": "armour",
-        "subtype": "body",
-        "stats": {
-            "equipable": true,
-            "price": 20,
-            "stackable": false,
-            "durability": 1000,
-            "damage_reduction": 2
-        }
-    },
-    {
-        "id": "kevlar",
-        "name": "Kevlar Vest",
-        "description": "Protectes the wearer from damage. Reducing damage taken by {damage_reduction}, soaking up to {durability} points of damage.",
-        "type": "armour",
-        "subtype": "body",
-        "stats": {
-            "equipable": true,
-            "price": 20,
-            "stackable": false,
-            "durability": 1000,
-            "damage_reduction": 2
         }
     },
     {
@@ -85,95 +234,6 @@
             "price": 12,
             "stackable": true,
             "durability": 1
-        }
-    },
-    {
-        "id": "pistol",
-        "name": "Pistol",
-        "description": "Aim at target and squeeze trigger. Deals {damage_min}-{damage_max} damage on hit.",
-        "type": "weapon",
-        "subtype": "ranged",
-        "stats": {
-            "equipable": true,
-            "price": 35,
-            "stackable": false,
-            "durability": 50,
-            "damage_min": 6,
-            "damage_max": 8
-        }
-    },
-    {
-        "id": "pocketknife",
-        "name": "Pocket Knife",
-        "description": "You are a real boy, with a pocket knife. Deals {damage_min}-{damage_max} damage on hit.",
-        "type": "weapon",
-        "subtype": "melee",
-        "stats": {
-            "equipable": true,
-            "price": 12,
-            "stackable": false,
-            "durability": 100,
-            "damage_min": 2,
-            "damage_max": 3
-        }
-    },
-    {
-        "id": "police-baton",
-        "name": "Police Baton",
-        "description": "Enforcing the law, one hit at the time. Deals {damage_min}-{damage_max} damage on hit.",
-        "type": "weapon",
-        "subtype": "melee",
-        "stats": {
-            "equipable": true,
-            "price": 12,
-            "stackable": false,
-            "durability": 100,
-            "damage_min": 2,
-            "damage_max": 3
-        }
-    },
-    {
-        "id": "uzi",
-        "name": "Uzi",
-        "description": "Deals {damage_min}-{damage_max} damage on hit.",
-        "type": "weapon",
-        "subtype": "ranged",
-        "stats": {
-            "equipable": true,
-            "price": 35,
-            "stackable": false,
-            "durability": 50,
-            "damage_min": 6,
-            "damage_max": 8
-        }
-    },
-    {
-        "id": "sword",
-        "name": "Sword",
-        "description": "Go medevil, on somebody. Deals {damage_min}-{damage_max} damage on hit.",
-        "type": "weapon",
-        "subtype": "melee",
-        "stats": {
-            "equipable": true,
-            "price": 12,
-            "stackable": false,
-            "durability": 100,
-            "damage_min": 2,
-            "damage_max": 3
-        }
-    },
-    {
-        "id": "ammo",
-        "name": "Basic Ammo",
-        "description": "Required for firing your ranged weapons. Adds an additional {damage_bonus} damage to your weapon.",
-        "type": "weapon",
-        "subtype": "ammo",
-        "stats": {
-            "equipable": true,
-            "price": 10,
-            "stackable": false,
-            "durability": 20,
-            "damage_bonus": 1
         }
     }
 ]

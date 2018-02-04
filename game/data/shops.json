@@ -7,10 +7,16 @@
             "enabled": true,
             "sellPricePercent": 1.0,
             "list": [
-                { "id": "bodyarmor", "shopQuantity": -1 },
-                { "id": "pocketknife", "shopQuantity": -1 },
-                { "id": "ammo", "shopQuantity": -1 },
-                { "id": "redapple", "shopQuantity": 50 }
+                { "expRequired": 301, "shopQuantity": -1, "id": "walther22"},
+                { "expRequired": 1201, "shopQuantity": -1, "id": "glock17"},
+                { "expRequired": 3301, "shopQuantity": -1, "id": "m1911"},
+                { "expRequired": 6601, "shopQuantity": -1, "id": "deserteagle"},
+                { "expRequired": 301, "shopQuantity": -1, "id": "thickleathercoat"},
+                { "expRequired": 1201, "shopQuantity": -1, "id": "kevlar"},
+                { "expRequired": 8701, "shopQuantity": -1, "id": "miliarmor"},
+                { "expRequired": 0, "shopQuantity": -1, "id": "woodenclub"},
+                { "expRequired": 301, "shopQuantity": -1, "id": "golfclub"},
+                { "expRequired": 2101, "shopQuantity": -1, "id": "metalbaseballbat"}
             ]
         },
         "buy": {
@@ -30,8 +36,7 @@
             "enabled": true,
             "sellPricePercent": 1.0,
             "list": [
-                { "id": "redapple", "shopQuantity": 10 },
-                { "id": "mushrooms", "shopQuantity": 10 }
+                { "id": "redapple", "shopQuantity": 10 }
             ]
         },
         "buy": {

@@ -28,6 +28,7 @@ export default class Shop {
         this.sell.list = this.sell.list.map((item) => {
             const newItem = this.Game.itemManager.add(item.id);
             newItem.shopQuantity = item.shopQuantity;
+            newItem.expRequired = item.expRequired || 0;
 
             return newItem;
         });
@@ -51,7 +52,8 @@ export default class Shop {
             return {
                 id: item.id,
                 name: item.name,
-                quantity: item.shopQuantity
+                quantity: item.shopQuantity,
+                expRequired: item.expRequired
             }
         })
     }
@@ -250,6 +252,11 @@ export default class Shop {
                     return this.Game.eventToUser(user_id, 'error', 'The item you where after is no longer available.');
                 }
 
+                // make sure the player is heigh enough rank/exp
+                if (character.stats.exp < item.expRequired) {
+                    return this.Game.eventToUser(user_id, 'error', 'You do not have a heigh enough rank to purchase this item.');
+                }
+
                 const itemTemplate = this.Game.itemManager.getTemplate(item.id);
 
                 // Check the template exists
@@ -265,7 +272,7 @@ export default class Shop {
                 }
 
                 // check if the item is limited stock/has enough quantity
-                if (item.shopQuantity < 1) {
+                if (item.shopQuantity < 1 && item.shopQuantity !== -1) {
                     return this.Game.eventToUser(user_id, 'error', 'They do not appear to have that item anymore');
                 }
 

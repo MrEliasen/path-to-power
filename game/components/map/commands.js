@@ -1,5 +1,5 @@
 import { UPDATE_GROUND_ITEMS } from '../item/types';
-import { LEFT_GRID, JOINED_GRID } from '../character/types';
+import { LEFT_GRID } from '../character/types';
 
 function getDirectionName(move) {
     if (move.grid === 'x') {
@@ -124,13 +124,10 @@ function cmdFlee(socket, command, params, Game) {
                     // dispatch join message to new grid
                     Game.eventToRoom(character.getLocationId(), 'info', `${character.name} scrambles in from the ${getDirectionName(moveAction)}`, [character.user_id]);
                     // add player from the grid list of players
-                    Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                        type: JOINED_GRID,
-                        payload: {
-                            name: character.name,
-                            user_id: character.user_id
-                        }
-                    });
+                    Game.socketManager.dispatchToRoom(
+                        character.getLocationId(),
+                        Game.characterManager.joinedGrid(character)
+                    );
 
                     // update the socket room
                     socket.join(character.getLocationId());

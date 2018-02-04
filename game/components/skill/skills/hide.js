@@ -1,6 +1,5 @@
 import {
-    LEFT_GRID,
-    JOINED_GRID
+    LEFT_GRID
 } from '../../character/types';
 
 export default class SkillHide {
@@ -61,13 +60,10 @@ export default class SkillHide {
             this.Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} appear from one of the alleys`, [character.user_id]);
 
             // re-add the character to the grid player list
-            this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                type: JOINED_GRID,
-                payload: {
-                    name: character.name,
-                    user_id: character.user_id
-                }
-            });
+            this.Game.socketManager.dispatchToRoom(
+                character.getLocationId(),
+                this.Game.characterManager.joinedGrid(character)
+            );
         }
     }
 

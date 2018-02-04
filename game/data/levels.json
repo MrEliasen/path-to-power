@@ -1,0 +1,110 @@
+[
+    {
+       "exp": 0,
+       "name": "Wannabe"
+    },
+    {
+       "exp": 301,
+       "name": "Mugger"
+    },
+    {
+       "exp": 601,
+       "name": "Burglar"
+    },
+    {
+       "exp": 1201,
+       "name": "Robber"
+    },
+    {
+       "exp": 2101,
+       "name": "Thug"
+    },
+    {
+       "exp": 3301,
+       "name": "Hustler"
+    },
+    {
+       "exp": 4801,
+       "name": "Wankster"
+    },
+    {
+       "exp": 6601,
+       "name": "Gangster"
+    },
+    {
+       "exp": 8701,
+       "name": "Drug Pusher"
+    },
+    {
+       "exp": 11101,
+       "name": "Drug Runner"
+    },
+    {
+       "exp": 13801,
+       "name": "Drug Smuggler"
+    },
+    {
+       "exp": 16801,
+       "name": "Drug Dealer"
+    },
+    {
+       "exp": 20101,
+       "name": "Drug Creator"
+    },
+    {
+       "exp": 23701,
+       "name": "Gun Smuggler"
+    },
+    {
+       "exp": 27601,
+       "name": "Druglord"
+    },
+    {
+       "exp": 31601,
+       "name": "Supreme Druglord"
+    },
+    {
+       "exp": 39901,
+       "name": "Pimp"
+    },
+    {
+       "exp": 44201,
+       "name": "Mobster"
+    },
+    {
+       "exp": 48501,
+       "name": "Mafia Recruit"
+    },
+    {
+       "exp": 52901,
+       "name": "Mafia Informant"
+    },
+    {
+       "exp": 57401,
+       "name": "Known Criminal"
+    },
+    {
+       "exp": 62001,
+       "name": "Criminal Mastermind"
+    },
+    {
+       "exp": 66701,
+       "name": "Mobfather"
+    },
+    {
+       "exp": 71501,
+       "name": "Underboss"
+    },
+    {
+       "exp": 76401,
+       "name": "Don"
+    },
+    {
+       "exp": 116101,
+       "name": "Godfather"
+    },
+    {
+       "exp": 135901,
+       "name": "Worlds Most Wanted"
+    }
+]

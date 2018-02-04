@@ -3,6 +3,7 @@ import request from 'superagent';
 // account specific imports
 import { ACCOUNT_AUTHENTICATE, ACCOUNT_AUTHENTICATE_ERROR, ACCOUNT_AUTHENTICATE_SUCCESS } from './types';
 import AccountModel from './model';
+import Levels from '../../data/levels.json';
 
 export default class AccountManager {
     constructor(Game) {
@@ -68,7 +69,8 @@ export default class AccountManager {
                 maps: this.Game.mapManager.getList(),
                 items: this.Game.itemManager.getTemplates(),
                 players: [],
-                commands: this.Game.commandManager.getList()
+                commands: this.Game.commandManager.getList(),
+                levels: Levels
             }
 
             // attempt to load the character from the database

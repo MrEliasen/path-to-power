@@ -1,4 +1,4 @@
-import { LEFT_GRID, JOINED_GRID } from '../map/types';
+import { LEFT_GRID } from '../map/types';
 
 function cmdHeal(socket, command, params, Game) {
     // Fetch the character first
@@ -148,13 +148,10 @@ function cmdTravel(socket, command, params, Game) {
                                 Game.eventToRoom(character.getLocationId(), 'info', `${character.name} emerge from a plane which just landed`, [character.user_id]);
 
                                 // add player from the grid list of players
-                                Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                                    type: JOINED_GRID,
-                                    payload: {
-                                        name: character.name,
-                                        user_id: character.user_id
-                                    }
-                                });
+                                Game.socketManager.dispatchToRoom(
+                                    character.getLocationId(),
+                                    Game.characterManager.joinedGrid(character)
+                                );
 
                                 // update the socket room
                                 socket.join(character.getLocationId());

@@ -8,13 +8,14 @@ import {
     UNEQUIP_ITEM,
     UPDATE_CHARACTER,
     MOVE_CHARACTER,
-    LEFT_GRID,
-    JOINED_GRID
+    LEFT_GRID
 } from './types';
 import { UPDATE_GROUND_ITEMS } from '../item/types';
 import Character from './object';
 import CharacterModel from './model';
 import characterCommands from './commands';
+import { joinedGrid } from './actions';
+import Levels from '../../data/levels.json';
 
 export default class CharacterManager {
     constructor(Game) {
@@ -221,13 +222,10 @@ export default class CharacterManager {
             // dispatch join event to grid
             this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} emerges from a nearby building`, [character.user_id]);
             // update the grid's player list
-            this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                type: JOINED_GRID,
-                payload: {
-                    name: character.name,
-                    user_id: character.user_id
-                }
-            });
+            this.Game.socketManager.dispatchToRoom(
+                character.getLocationId(),
+                this.Game.characterManager.joinedGrid(character)
+            );
             // join the grid room
             socket.join(character.getLocationId());
         })
@@ -538,11 +536,27 @@ export default class CharacterManager {
         return players
             .filter((obj) => obj.user_id !== ignore && !obj.hidden)
             .map((character) => {
-                return {
-                    user_id: character.user_id,
-                    name: character.name
-                }
+                return this.joinedGrid(character, false)
             });
+    }
+
+    /**
+     * Get the action object for a character, joining a grid
+     * @param  {Character} character    The character to get the object of
+     * @param  {Bool}      createAction Whether to return an action from the action creator or not.
+     * @return {Object}                 Redux action object
+     */
+    joinedGrid(character, action = true) {
+        const details = {
+            name: character.name,
+            user_id: character.user_id
+        };
+
+        if (!action) {
+            return details;
+        }
+
+        return joinedGrid(details);
     }
 
     /**
@@ -563,6 +577,20 @@ export default class CharacterManager {
                 playersInGrid.splice(index, 1);
             }
         }
+    }
+
+    getRank(exp) {
+        const levelCount = Levels.length - 1;
+        let rank;
+
+        for (var i = 0; i < levelCount; i++) {
+            if (Levels[i].exp > exp) {
+                rank = Levels[i - 1].name;
+                break;
+            }
+        }
+
+        return rank;
     }
 
     /**
@@ -686,13 +714,10 @@ export default class CharacterManager {
                         // dispatch join message to new grid
                         this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} strolls in from the ${directionIn}`, [character.user_id]);
                         // add player from the grid list of players
-                        this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                            type: JOINED_GRID,
-                            payload: {
-                                name: character.name,
-                                user_id: character.user_id
-                            }
-                        });
+                        this.Game.socketManager.dispatchToRoom(
+                            character.getLocationId(),
+                            this.Game.characterManager.joinedGrid(character)
+                        );
 
                         // update the socket room
                         socket.join(character.getLocationId());
@@ -777,13 +802,10 @@ export default class CharacterManager {
                         })
 
                         // add player from the grid list of players
-                        this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                            type: JOINED_GRID,
-                            payload: {
-                                name: character.name,
-                                user_id: character.user_id
-                            }
-                        });
+                        this.Game.socketManager.dispatchToRoom(
+                            character.getLocationId(),
+                            this.Game.characterManager.joinedGrid(character)
+                        );
 
                         // update the socket room
                         this.Game.socketManager.userJoinRoom(character.user_id, character.getLocationId());
