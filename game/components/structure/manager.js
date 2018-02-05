@@ -33,7 +33,7 @@ export default class StructureManager {
      * @return {Promise}
      */
     async add(map_id, x, y, structure_id) {
-        this.Game.logger.info('StructureManager::add', {map_id, structure_id, x, y});
+        //this.Game.logger.debug('StructureManager::add', {map_id, structure_id, x, y});
 
         const structureData = structureList[structure_id];
         const newStructure = new Structure(this.Game, structureData, {map: map_id, x, y});

@@ -64,11 +64,17 @@ function cmdHeal(socket, command, params, Game) {
                             Game.characterManager.updateClient(character.user_id, 'stats');
                             Game.eventToSocket(socket, 'success', `You healed ${heal_amount}, costing you ${price}`);
                         })
-                        .catch(Game.logger.debug)
+                        .catch((err) => {
+                            Game.logger.debug(err);
+                        });
                 })
-                .catch(Game.logger.debug)
+                .catch((err) => {
+                    Game.logger.debug(err);
+                });
         })
-        .catch(Game.logger.debug)
+        .catch((err) => {
+            Game.logger.debug(err);
+        });
 }
 
 function cmdTravel(socket, command, params, Game) {

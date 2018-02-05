@@ -51,7 +51,6 @@ export default class CommandManager {
 
         // register the command and the method it should execute
         this.commands[commandName] = commandMethod;
-        this.Game.logger.debug(`Registered command ${commandName} to method ${commandMethod.name}`)
     }
 
     /**

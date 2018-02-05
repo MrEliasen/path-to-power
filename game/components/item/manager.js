@@ -22,7 +22,7 @@ export default class ItemManager {
     init() {
         return new Promise((resolve, rejecte) => {
             ItemList.map((itemData) => {
-                this.templates[itemData.id] = new Item(this.getTemplate(itemData.id), itemData);
+                this.templates[itemData.id] = new Item(null, itemData);
             });
 
             // register the commands
@@ -159,7 +159,7 @@ export default class ItemManager {
      * @param {String} dbId       Database _id of the item, used for saving the item later.
      */
     add(itemId, modifiers = {}, dbId = null) {
-        this.Game.logger.debug('ItemManager::add', {itemId})
+        //this.Game.logger.debug('ItemManager::add', {itemId})
         const template = this.getTemplate(itemId);
 
         if (!template) {
@@ -170,7 +170,7 @@ export default class ItemManager {
         // nested objects are still copied as reference, so we have to make a "sub-copy" of the stats.
         itemData.stats = {...template.stats};
 
-        const NewItem = new Item(null, {...itemData}, modifiers);
+        const NewItem = new Item(this.Game, itemData, modifiers);
         // set the database ID
         NewItem._id = dbId;
 

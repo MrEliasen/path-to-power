@@ -700,4 +700,14 @@ export default class Character {
         this.stats.exp = Math.max(0, Math.round(this.stats.exp + amount));
         return this.stats.exp;
     }
+
+    /**
+     * Add/remove health from the character
+     * @param  {Number} amount The amount to add/remove (negative number to remove)
+     * @return {Number}        The new health total
+     */
+    updateHealth(amount) {
+        this.stats.health = Math.max(0, Math.round(this.stats.health + amount));
+        return this.stats.health;
+    }
 }

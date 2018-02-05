@@ -32,11 +32,11 @@ import uuid from 'uuid/v4';
 }*/
 
 export default class Item {
-    constructor(template = null, itemData, modifiers = {}) {
+    constructor(Game, itemData, modifiers = {}) {
         Object.assign(this, itemData);
         Object.assign(this.stats, modifiers);
+        this.Game = Game;
 
-        this.template = template;
         this.fingerprint = uuid();
     }
 
@@ -60,7 +60,8 @@ export default class Item {
             type: this.type,
             subtype: this.subtype,
             stats: {...this.stats},
-            equipped_slot: this.equipped_slot
+            equipped_slot: this.equipped_slot,
+            hasUseEffect: (this.stats.useEffect ? true : false)
         }
     }
 
@@ -73,13 +74,6 @@ export default class Item {
         const modifiers = {
             durability: parseInt(this.stats.durability, 10)
         };
-        /*const template = this.template;
-
-        Object.keys(template.stats).map((stat_key) => {
-            if (template.stats[stat_key] !== this.stats[stat_key]) {
-                modifiers[stat_key] = this.stats[stat_key];
-            }
-        })*/
 
         return modifiers;
     }
@@ -113,5 +107,33 @@ export default class Item {
      */
     removeDurability(amount) {
         this.stats.durability = parseInt(this.stats.durability, 10) - parseInt(amount,10);
+    }
+
+    /**
+     * Use the item, if the item allows
+     */
+   use(character) {
+        // check if the item has an effect, if not, its not useable
+        if (!this.stats.useEffect) {
+            return;
+        }
+
+        // apply the item use effect
+        this.Game.effectManager.apply(character, this.stats.useEffect.id, this.stats.useEffect.modifiers || {})
+            .then((effect) => {
+                // reduce the durability of the item
+                this.removeDurability(1);
+
+                // if the item has no more uses, remove it.
+                if (this.stats.durability <= 0) {
+                    this.Game.itemManager.remove(character, this);
+                }
+
+                // update the users inventory on the client side.
+                this.Game.characterManager.updateClient(character.user_id, 'inventory');
+            })
+            .catch((err) => {
+                return;
+            });
     }
 }

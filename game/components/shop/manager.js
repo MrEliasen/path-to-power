@@ -69,7 +69,7 @@ export default class ShopManager {
      */
     add(shopId) {
         return new Promise((resolve, reject) => {
-            this.Game.logger.info('ShopManager::add', {shopId})
+            //this.Game.logger.info('ShopManager::add', {shopId})
 
             const ShopData = ShopList.find((obj) => obj.id === shopId);
             const newShop = new Shop(this.Game, ShopData);

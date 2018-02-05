@@ -16,6 +16,7 @@ import abilityManager from './components/ability/manager';
 import skillManager from './components/skill/manager';
 import cooldownManager from './components/cooldown/manager';
 import npcManager from './components/npc/manager';
+import effectManager from './components/effect/manager';
 
 import { newEvent, addNews } from './actions';
 
@@ -43,6 +44,7 @@ class Game {
         this.skillManager = new skillManager(this);
         this.cooldownManager = new cooldownManager(this);
         this.npcManager = new npcManager(this);
+        this.effectManager = new effectManager(this);
 
         // load game data
         this.init();
@@ -52,18 +54,13 @@ class Game {
      * Creates our logger we will be using throughout
      */
     setupLogger() {
-        /*this.logger = winston.createLogger({
+        this.logger = winston.createLogger({
             level: (process.env.NODE_ENV !== 'production' ? 'info' : 'warning'),
             format: winston.format.json(),
             transports: [
                 new winston.transports.File({
                     filename: 'error.log',
                     level: 'error',
-                    timestamp: true
-                }),
-                new winston.transports.File({
-                    filename: 'combined.log',
-                    level: 'warning',
                     timestamp: true
                 }),
                 new winston.transports.File({
@@ -84,22 +81,7 @@ class Game {
             Promise.longStackTraces();
         }
 
-        this.logger.info('Logger initiated.');*/
-
-        this.logger = {
-            info: (...args) => {
-                console.log(args);
-            },
-            error: (...args) => {
-                console.log(args);
-            },
-            warning: (...args) => {
-                console.log(args);
-            },
-            debug: () => {
-
-            }
-        }
+        this.logger.info('Logger initiated.');
     }
 
     async init() {

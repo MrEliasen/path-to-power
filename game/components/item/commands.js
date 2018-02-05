@@ -178,10 +178,43 @@ function cmdPickup(socket, command, params, Game) {
                     Game.eventToSocket(socket, 'error', 'There are no items on the ground, matching that name.');
                 })
         })
-        .catch(Game.logger.debug)
+        .catch((err) => {
+            Game.logger.debug(err);
+        });
+}
+
+function cmdUseItem(socket, command, params, Game) {
+    // get the character
+    Game.characterManager.get(socket.user.user_id)
+        .then((character) => {
+            const index = parseInt(params[0], 10);
+
+            // Validate the index is a number
+            if (isNaN(index) || index < 0) {
+                return;
+            }
+
+            const item = character.inventory[index];
+
+            // make sure the item exists
+            if (!item) {
+                return;
+            }
+
+            item.use(character);
+        })
+        .catch(() => {
+
+        });
 }
 
 module.exports = [
+    {
+        commandKeys: [
+            '/usebyindex'
+        ],
+        method: cmdUseItem
+    },
     {
         commandKeys: [
             '/drop'

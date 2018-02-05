@@ -332,7 +332,13 @@
             "priceRange": [4, 3, 7],
             "stackable": true,
             "durability": 1,
-            "useEffect": "drugEcstasy"
+            "useEffect": {
+                "id": "drug",
+                "modifiers": {
+                    "exp": 5,
+                    "health": -5
+                }
+            }
         }
     },
     {
@@ -346,7 +352,13 @@
             "priceRange": [7, 6, 15],
             "stackable": true,
             "durability": 1,
-            "useEffect": "drugHashish"
+            "useEffect": {
+                "id": "drug",
+                "modifiers": {
+                    "exp": 5,
+                    "health": -5
+                }
+            }
         }
     },
     {
@@ -360,7 +372,13 @@
             "priceRange": [12, 8, 24],
             "stackable": true,
             "durability": 1,
-            "useEffect": "drugMarijuana"
+            "useEffect": {
+                "id": "drug",
+                "modifiers": {
+                    "exp": 5,
+                    "health": -5
+                }
+            }
         }
     },
     {
@@ -374,7 +392,13 @@
             "priceRange": [22, 15, 44],
             "stackable": true,
             "durability": 1,
-            "useEffect": "drugAmphetamine"
+            "useEffect": {
+                "id": "drug",
+                "modifiers": {
+                    "exp": 5,
+                    "health": -5
+                }
+            }
         }
     },
     {
@@ -388,7 +412,13 @@
             "priceRange": [25, 23, 28],
             "stackable": true,
             "durability": 1,
-            "useEffect": "drugMethamphetamine"
+            "useEffect": {
+                "id": "drug",
+                "modifiers": {
+                    "exp": 5,
+                    "health": -5
+                }
+            }
         }
     },
     {
@@ -402,7 +432,13 @@
             "priceRange": [73, 59, 132],
             "stackable": true,
             "durability": 1,
-            "useEffect": "drugCocaine"
+            "useEffect": {
+                "id": "drug",
+                "modifiers": {
+                    "exp": 5,
+                    "health": -5
+                }
+            }
         }
     },
     {
@@ -416,7 +452,13 @@
             "priceRange": [75, 58, 124],
             "stackable": true,
             "durability": 1,
-            "useEffect": "drugCrack"
+            "useEffect": {
+                "id": "drug",
+                "modifiers": {
+                    "exp": 5,
+                    "health": -5
+                }
+            }
         }
     },
     {
@@ -430,7 +472,13 @@
             "priceRange": [119, 96, 239],
             "stackable": true,
             "durability": 1,
-            "useEffect": "drugHeroinBrown"
+            "useEffect": {
+                "id": "drug",
+                "modifiers": {
+                    "exp": 5,
+                    "health": -5
+                }
+            }
         }
     },
     {
@@ -444,7 +492,13 @@
             "priceRange": [209, 96, 209],
             "stackable": true,
             "durability": 1,
-            "useEffect": "drugHeroinWhite"
+            "useEffect": {
+                "id": "drug",
+                "modifiers": {
+                    "exp": 5,
+                    "health": -5
+                }
+            }
         }
     },
     {
@@ -457,7 +511,9 @@
             "price": 1,
             "stackable": false,
             "durability": 1,
-            "useEffect": "miscMedKit"
+            "useEffect": {
+                "id": "miscItemHeal"
+            }
         }
     },
     {
@@ -470,7 +526,9 @@
             "price": 1,
             "stackable": false,
             "durability": 1,
-            "useEffect": "miscMedKit"
+            "useEffect": {
+                "id": "miscItemHeal"
+            }
         }
     },
     {
@@ -483,7 +541,9 @@
             "price": 1,
             "stackable": false,
             "durability": 1,
-            "useEffect": "miscAdrenalin"
+            "useEffect": {
+                "id": "miscAdrenalin"
+            }
         }
     },
     {
@@ -496,7 +556,9 @@
             "price": 1,
             "stackable": false,
             "durability": 1,
-            "useEffect": "miscPhone"
+            "useEffect": {
+                "id": "miscPhone"
+            }
         }
     },
     {
@@ -509,7 +571,9 @@
             "price": 1,
             "stackable": false,
             "durability": 1,
-            "useEffect": "miscPepperSpray"
+            "useEffect": {
+                "id": "miscPepperSpray"
+            }
         }
     },
     {
@@ -522,7 +586,9 @@
             "price": 1,
             "stackable": false,
             "durability": 1,
-            "useEffect": "miscPepperSpray"
+            "useEffect": {
+                "id": "miscBeacon"
+            }
         }
     },
     {
@@ -533,8 +599,7 @@
         "stats": {
             "price": 1,
             "stackable": false,
-            "durability": 1,
-            "useEffect": "miscPepperSpray"
+            "durability": 1
         }
     },
     {
