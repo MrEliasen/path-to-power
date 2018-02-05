@@ -112,15 +112,20 @@ export default class Item {
     /**
      * Use the item, if the item allows
      */
-   use(character) {
+    use(character) {
         // check if the item has an effect, if not, its not useable
         if (!this.stats.useEffect) {
             return;
         }
 
         // apply the item use effect
-        this.Game.effectManager.apply(character, this.stats.useEffect.id, this.stats.useEffect.modifiers || {})
+        this.Game.effectManager.apply(character, this.stats.useEffect.id, this.stats.useEffect.modifiers, this)
             .then((effect) => {
+                // check if the use effect, reduces item durability
+                if (this.stats.useEffect.ignoreDurability) {
+                    return;
+                }
+
                 // reduce the durability of the item
                 this.removeDurability(1);
 

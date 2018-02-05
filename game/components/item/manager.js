@@ -69,7 +69,7 @@ export default class ItemManager {
      */
     drop(map_id, x, y, itemObject) {
         const gridId = `${map_id}_${y}_${x}`;
-        this.Game.logger.debug('ItemManager::drop', {map_id, x, y, itemObject});
+        this.Game.logger.debug('ItemManager::drop', {map_id, x, y, id: itemObject.id});
 
         // Generate the item location, should it not exist.
         this.dropped_items[gridId] = this.dropped_items[gridId] || [];

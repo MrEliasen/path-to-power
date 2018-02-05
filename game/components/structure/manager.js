@@ -98,7 +98,7 @@ export default class StructureManager {
                 if (buildings.length) {
                     buildings.forEach((building) => {
                         shops = shops.concat(building.shops);
-                    })
+                    });
                 }
             }
 
@@ -108,7 +108,7 @@ export default class StructureManager {
             }
 
             resolve(shops);
-        })
+        });
     }
 
     /**

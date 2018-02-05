@@ -14,7 +14,7 @@ export default class EffectManager {
      * @param  {Object}    effectModifiers  Additional modifiers to overwrite the defaults
      * @return {Mixed}                      Anything returned from the effect
      */
-    apply(character, effectId, effectModifiers = null) {
+    apply(character, effectId, effectModifiers = {}, item = null) {
         return new Promise((resolve, reject) => {
             const effect = Effects[effectId];
 
@@ -23,7 +23,7 @@ export default class EffectManager {
                 return reject();
             }
 
-            const effectOutput = effect(character, effectModifiers, this.Game);
+            const effectOutput = effect(character, effectModifiers || {}, item, this.Game);
 
             // if the effect does not return a promise, just return the output as is
             if (typeof effectOutput.then !== 'function') {

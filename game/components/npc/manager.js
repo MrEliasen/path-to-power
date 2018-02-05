@@ -228,13 +228,20 @@ export default class NPCManager {
     /**
      * Get the list of NPCs at a given location
      * @param  {String}  map        Map Id
-     * @param  {Number}  x
-     * @param  {Number}  y
+     * @param  {Number}  x          Leave out x and y to get the map list.
+     * @param  {Number}  y          Leave out x and y to get the map list.
      * @param  {Boolean} toClient   Whether to return the references or list of NPC ID and names (to be sent to client)
      * @return {Array}              Array of NPCs
      */
-    getLocationList(map, x, y, toClient = false) {
-        let npcs = this.locations[`${map}_${y}_${x}`] || [];
+    getLocationList(map, x = null, y = null, toClient = false) {
+        let npcs = [];
+
+        // if we need to get NPCs from a specific grid within a map
+        if (x && y) {
+            npcs = this.npcs.filter((obj) => obj.location.map === map && obj.location.x === x && obj.location.y === y);
+        } else {
+            npcs = this.npcs.filter((obj) => obj.location.map === map);
+        }
 
         if (!toClient) {
             return npcs;
@@ -251,11 +258,11 @@ export default class NPCManager {
      * @param  {NPC}    NPC        The NPC to remove
      */
     removeFromGrid(position, NPC) {
-        const gridLocationId = `${position.map}_${position.y}_${position.x}`;
+        const gridId = `${position.y}_${position.x}`;
 
         // if the old location does not exist, we dont need to remove the player from it
-        if (this.locations[gridLocationId]) {
-            this.locations[gridLocationId] = this.locations[gridLocationId].filter((obj) => obj.id !== NPC.id);
+        if (this.locations[position.map] && this.locations[position.map][gridId]) {
+            this.locations[position.map][gridId] = this.locations[position.map][gridId].filter((obj) => obj.id !== NPC.id);
         }
     }
 
@@ -265,19 +272,19 @@ export default class NPCManager {
      * @param {NPC}    NPC        The NPC to add to the grid
      */
     addToGrid(position, NPC) {
-        const location_key = `${position.map}_${position.y}_${position.x}`;
+        const gridId = `${position.y}_${position.x}`;
 
         // if the location array is not set yet, make it
-        if (!this.locations[location_key]) {
-            this.locations[location_key] = [];
+        if (!this.locations[position.map][gridId]) {
+            this.locations[position.map][gridId] = [];
         }
 
         // if they are already on the list, ignore.
-        if (this.locations[location_key].findIndex((obj) => obj.id === NPC.id) !== -1) {
+        if (this.locations[position.map][gridId].findIndex((obj) => obj.id === NPC.id) !== -1) {
             return;
         }
 
-        this.locations[location_key].push(NPC);
+        this.locations[position.map][gridId].push(NPC);
     }
 
     /**
@@ -287,8 +294,8 @@ export default class NPCManager {
      * @param  {Object} newLocation {map, x ,y}
      */
     changeLocation(NPC, newLocation = {}, oldLocation = {}) {
-        this.removeFromGrid(oldLocation, NPC);
-        this.addToGrid(newLocation, NPC);
+        //this.removeFromGrid(oldLocation, NPC);
+        //this.addToGrid(newLocation, NPC);
     }
 
     /**

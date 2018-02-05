@@ -512,7 +512,10 @@
             "stackable": false,
             "durability": 1,
             "useEffect": {
-                "id": "miscItemHeal"
+                "id": "miscItemHeal",
+                "modifiers": {
+                    "health": 15
+                }
             }
         }
     },
@@ -527,7 +530,10 @@
             "stackable": false,
             "durability": 1,
             "useEffect": {
-                "id": "miscItemHeal"
+                "id": "miscItemHeal",
+                "modifiers": {
+                    "health": 15
+                }
             }
         }
     },
@@ -549,7 +555,7 @@
     {
         "id": "cellphone",
         "name": "Cell Phone",
-        "description": "Get the location of dealers in your area, costs {effect.cost} per use.",
+        "description": "Get the location of dealers and druggies, based on your reputation, in your area. Costs {effect.cost} per use.",
         "type": "consumable",
         "subtype": "misc",
         "stats": {
@@ -557,7 +563,11 @@
             "stackable": false,
             "durability": 1,
             "useEffect": {
-                "id": "miscPhone"
+                "id": "miscPhone",
+                "modifiers": {
+                    "cost": 10,
+                    "ignoreDurability": true
+                }
             }
         }
     },
@@ -703,7 +713,7 @@
     },
     {
         "id": "trout",
-        "name": "Trot",
+        "name": "Trout",
         "description": "Melee weapon. Deals {damage_min}-{damage_max} damage on hit, ignoring armor.",
         "type": "weapon",
         "subtype": "melee",

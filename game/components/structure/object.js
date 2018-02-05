@@ -15,11 +15,21 @@ export default class Structure {
                 return resolve();
             }
 
-            this.shops = this.shops.map(async (shopId) => {
-                return await this.Game.shopManager.add(shopId);
-            });
+            const total = this.shops.length;
+            let loaded = 0;
+            const shopsList = [...this.shops];
+            this.shops = [];
 
-            resolve();
+            shopsList.forEach(async (shopId) => {
+                const shop = await this.Game.shopManager.add(shopId);
+                this.shops.push(shop);
+
+                loaded++
+
+                if (loaded >= total) {
+                    resolve(loaded);
+                }
+            });
         });
     }
 }
