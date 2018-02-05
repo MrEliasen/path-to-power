@@ -276,6 +276,8 @@ export default class NPC extends Character {
                         }, this.logic.respawn * 1000)
                     });
 
+                    loot.exp = this.stats.expReward;
+
                     resolve(loot);
                 })
                 .catch(() => {
@@ -290,13 +292,18 @@ export default class NPC extends Character {
      */
     attack() {
         this.hasActiveTarget().then(() => {
+            const ammo = this.getEquippedSync('ammo');
+            let weapon = this.getEquippedSync('ranged');
+
             // if they have a ranged weapon equipped and ammo, used it
-            if (this.equipped.ranged && this.equipped.ammo) {
+            if (weapon && ammo) {
                 return this.attackShoot();
             }
 
+            weapon = this.getEquippedSync('melee');
+
             // if they have a melee weapon equipped, used it
-            if (this.equipped.melee) {
+            if (weapon) {
                 return this.attackStrike();
             }
 
@@ -345,7 +352,7 @@ export default class NPC extends Character {
      * Attacks the current target with their ranged weapon
      */
     attackShoot() {
-        const weapon = this.equipped.ranged.name;
+        const weapon = this.getEquippedSync('ranged').name;
 
         // check if the attack will hit
         if (!this.attackHit()) {
@@ -383,7 +390,7 @@ export default class NPC extends Character {
      * Attacks the current target with their melee weapon
      */
     attackStrike() {
-        const weapon = this.equipped.melee.name;
+        const weapon = this.getEquippedSync('melee').name;
 
         // check if the attack will hit
         if (!this.attackHit()) {

@@ -208,7 +208,7 @@ function cmdShoot(socket, command, params, Game) {
             }
 
             // check if they have a melee weapon equipped
-            if (!character.equipped.ranged) {
+            if (!character.getEquippedSync('ranged')) {
                 return Game.eventToSocket(socket, 'error', 'You do not have a ranged weapon equipped.');
             }
 
@@ -219,7 +219,7 @@ function cmdShoot(socket, command, params, Game) {
 
             // check if there is a cooldown
             checkAttackCooldown(character, Game, () => {
-                const weapon = character.equipped.ranged.name;
+                const weapon = character.getEquippedSync('ranged').name;
 
                 // check if the attack will hit
                 if (!character.attackHit()) {
@@ -277,13 +277,13 @@ function cmdStrike(socket, command, params, Game) {
             }
 
             // check if they have a melee weapon equipped
-            if (!character.equipped.melee) {
+            if (!character.getEquippedSync('melee')) {
                 return Game.eventToSocket(socket, 'error', 'You do not have a melee weapon equipped.');
             }
 
             // check if there is a cooldown
             checkAttackCooldown(character, Game, () => {
-                const weapon = character.equipped.melee.name;
+                const weapon = character.getEquippedSync('melee').name;
 
                 // check if the attack will hit
                 if (!character.attackHit()) {

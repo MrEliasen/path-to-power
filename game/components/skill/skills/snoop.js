@@ -42,7 +42,7 @@ export default class SkillSnoop {
         if (this.value >= 2) {
             Object.assign(details, {
                 equipped: {
-                    ...targetCharacter.equipped
+                    ...(targetCharacter.getEquippedSync() || {})
                 },
                 rank: Game.characterManager.getRank(targetCharacter.stats.exp)
             })

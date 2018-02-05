@@ -264,11 +264,11 @@ export default class Character {
                     this.getEquipped('ammo')
                         .then((item) => {
                             // reduce ammo durability
-                            this.equipped.ammo.stats.durability = this.equipped.ammo.removeDurability(1);
+                            item.stats.durability = item.removeDurability(1);
 
                             // remove ammo if durability is 0
-                            if (this.equipped.ammo.durability <= 0) {
-                                this.Game.itemManager.remove(this, this.equipped.ammo);
+                            if (item.durability <= 0) {
+                                this.Game.itemManager.remove(this, item);
                             }
 
                             resolve(damage);
@@ -288,7 +288,7 @@ export default class Character {
      * @return {Boolean}
      */
     hasAmmo() {
-        const equippedAmmo = this.equipped['ammo'];
+        const equippedAmmo = this.getEquippedSync('ammo');
 
         if (!equippedAmmo) {
             return false;
@@ -311,7 +311,13 @@ export default class Character {
                 return resolve(0);
             }
 
-            resolve(this.equipped.ammo.stats.damage_bonus);
+            this.getEquipped('ammo')
+                .then((item) => {
+                    resolve(item.stats.damage_bonus);
+                })
+                .catch(() => {
+                    reject();
+                });
         });
     }
 
@@ -330,7 +336,7 @@ export default class Character {
                         return reject();
                     }
 
-                    this.getAmmoDamage
+                    this.getAmmoDamage()
                         .then((ammoDamage) => {
                             let bonusDamage = 0;
 
@@ -355,9 +361,14 @@ export default class Character {
      * @param  {String} slot The equipment slot
      * @return {Promise}
      */
-    getEquipped(slot) {
+    getEquipped(slot = null) {
         return new Promise((resolve, reject) => {
-            const item = this.inventory.find((obj) => obj.equipped_slot === slot);
+            // if no slot if specified, return all equipped items
+            if (!slot) {
+                return resolve(this.getEquippedSync());
+            }
+
+            const item = this.getEquippedSync(slot);
 
             if (!item) {
                 return reject();
@@ -365,6 +376,20 @@ export default class Character {
 
             resolve(item);
         });
+    }
+
+    /**
+     * Get the items which is equipped in the specified slot
+     * @param  {String}  slot The equipment slot
+     * @return {Mixed}        Item if found, null otherwise;
+     */
+    getEquippedSync(slot) {
+        // if no slot if specified, return all equipped items
+        if (!slot) {
+            return this.inventory.filter((obj) => obj.equipped_slot);
+        }
+
+        return this.inventory.find((obj) => obj.equipped_slot === slot);
     }
 
     /**
@@ -465,7 +490,7 @@ export default class Character {
 
         // if the item (after accounting for the amount to drop), is 0, remove it
         selectedItem.durability = selectedItem.durability - amount;
-
+ 
         if (selectedItem.durability <= 0) {
             this.inventory.splice(inventoryIndex, 1);
         }
@@ -607,10 +632,11 @@ export default class Character {
         let durability = 0;
         let health = this.stats.health;
         let armorRuined = false;
+        const armorItem = this.getEquippedSync('armor');
 
-        if (!ignoreArmor && this.equipped.armor) {
-            durability = this.equipped.armor.durability;
-            armor = this.equipped.armor.stats.damage_reduction;
+        if (!ignoreArmor && armorItem) {
+            durability = armorItem.durability;
+            armor = armorItem.stats.damage_reduction;
         }
 
         // Either you block the damage dealt if it's lower than your armor/durability combo
@@ -624,8 +650,8 @@ export default class Character {
         let durabilityLeft   = Math.max(0, durability - damage);
 
         // update the durability of the equipped armor
-        if (!ignoreArmor && this.equipped.armor) {
-            this.equipped.armor.durability = durabilityLeft;
+        if (!ignoreArmor && armorItem) {
+            armorItem.durability = durabilityLeft;
         }
 
         this.stats.health = healthLeft;
@@ -633,7 +659,7 @@ export default class Character {
         // if the armor durability is 0, remove the item as its broken.
         if (!durabilityLeft && durability) {
             armorRuined = true;
-            this.Game.itemManager.remove(this, this.equipped.armor);
+            this.Game.itemManager.remove(this, armor);
         }
 
         return {
@@ -663,5 +689,15 @@ export default class Character {
     updateBank(amount) {
         this.stats.bank = Math.max(0, Math.round((this.stats.bank + amount) * 100) / 100);
         return this.stats.bank;
+    }
+
+    /**
+     * Add/remove exp from the character
+     * @param  {Number} amount The amount to add/remove (negative number to remove)
+     * @return {Number}        The new exp total
+     */
+    updateExp(amount) {
+        this.stats.exp = Math.max(0, Math.round(this.stats.exp + amount));
+        return this.stats.exp;
     }
 }

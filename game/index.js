@@ -52,7 +52,7 @@ class Game {
      * Creates our logger we will be using throughout
      */
     setupLogger() {
-        this.logger = winston.createLogger({
+        /*this.logger = winston.createLogger({
             level: (process.env.NODE_ENV !== 'production' ? 'info' : 'warning'),
             format: winston.format.json(),
             transports: [
@@ -84,7 +84,22 @@ class Game {
             Promise.longStackTraces();
         }
 
-        this.logger.info('Logger initiated.');
+        this.logger.info('Logger initiated.');*/
+
+        this.logger = {
+            info: (...args) => {
+                console.log(args);
+            },
+            error: (...args) => {
+                console.log(args);
+            },
+            warning: (...args) => {
+                console.log(args);
+            },
+            debug: () => {
+
+            }
+        }
     }
 
     async init() {

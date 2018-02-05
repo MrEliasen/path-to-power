@@ -3,7 +3,8 @@
         "type" : "Police Officer",
         "stats" : {
             "health" : 100,
-            "money" : 25
+            "money" : 25,
+            "expReward": 1
         },
         "abilities" : {
             "acc" : 50
@@ -48,7 +49,8 @@
         "type" : "Drug Dealer",
         "stats" : {
             "health" : 1000,
-            "money" : 0
+            "money" : 0,
+            "expReward": 1
         },
         "abilities" : {
             "acc" : 85
@@ -89,7 +91,8 @@
         "type" : "Druggie",
         "stats" : {
             "health" : 500,
-            "money" : 0
+            "money" : 0,
+            "expReward": 1
         },
         "abilities" : {
             "acc" : 55
@@ -121,7 +124,8 @@
         "type" : "Bum",
         "stats" : {
             "health" : 100,
-            "money" : 7
+            "money" : 7,
+            "expReward": 1
         },
         "abilities" : {
             "acc" : 55
@@ -158,7 +162,8 @@
         "type" : "Pedestrian",
         "stats" : {
             "health" : 60,
-            "money" : 36
+            "money" : 36,
+            "expReward": 1
         },
         "abilities" : {
             "acc" : 12
@@ -188,7 +193,8 @@
         "type" : "Bouncer",
         "stats" : {
             "health" : 135,
-            "money" : 54
+            "money" : 54,
+            "expReward": 1
         },
         "abilities" : {
             "acc" : 30
@@ -218,7 +224,8 @@
         "type" : "Hooker",
         "stats" : {
             "health" : 100,
-            "money" : 130
+            "money" : 130,
+            "expReward": 1
         },
         "abilities" : {
             "acc" : 20
@@ -248,7 +255,8 @@
         "type" : "Load Shark",
         "stats" : {
             "health" : 250,
-            "money" : 430
+            "money" : 430,
+            "expReward": 1
         },
         "abilities" : {
             "acc" : 40
@@ -293,7 +301,8 @@
         "type" : "DEA Agent",
         "stats" : {
             "health" : 350,
-            "money" : 34
+            "money" : 34,
+            "expReward": 1
         },
         "abilities" : {
             "acc" : 80

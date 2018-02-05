@@ -387,6 +387,7 @@ export default class NPCManager {
 
                     // give the cash to the killer
                     killer.updateCash(droppedLoot.cash);
+                    killer.updateExp(droppedLoot.exp);
 
                     // Update the killers character stats
                     this.Game.characterManager.updateClient(killer.user_id);
