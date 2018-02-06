@@ -107,8 +107,12 @@ export default class MapManager {
      */
     getList() {
         const list = {};
-        Object.keys(this.maps).map((mapId) => {
-            list[mapId] = this.maps[mapId].name;
+        Object.keys(this.maps).forEach((mapId) => {
+            // NOTE: if you want to change what map information the client get, change it here
+            list[mapId] = {
+                name: this.maps[mapId].name,
+                buildings: this.Game.structureManager.getMapData(mapId)
+            };
         })
 
         return list;

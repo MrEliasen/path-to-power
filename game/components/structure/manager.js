@@ -39,13 +39,14 @@ export default class StructureManager {
         const newStructure = new Structure(this.Game, structureData, {map: map_id, x, y});
 
         // Generate the structure location, should it not exist.
-        this.structures[`${map_id}_${y}_${x}`] = this.structures[`${map_id}_${y}_${x}`] || [];
+        this.structures[map_id] = this.structures[map_id] || {};
+        this.structures[map_id][`${y}_${x}`] = this.structures[map_id][`${y}_${x}`] || [];
 
         // load any shops which are set for this structure
         await newStructure.loadShops();
 
         // add structure to the managed structures array
-        this.structures[`${map_id}_${y}_${x}`].push(newStructure);
+        this.structures[map_id][`${y}_${x}`].push(newStructure);
 
         // return the new structure object
         return newStructure;
@@ -120,7 +121,8 @@ export default class StructureManager {
      * @return {Array}        list of buildings
      */
     getGrid(map_id, x, y, forClient = false) {
-        const structures = this.structures[`${map_id}_${y}_${x}`] || [];
+        let structures = this.structures[map_id] || {};
+        structures = structures[`${y}_${x}`] || [];
 
         if (!forClient) {
             return structures;
@@ -141,5 +143,31 @@ export default class StructureManager {
                 }),
             }
         })
+    }
+
+    /**
+     * Get the list of structures in a given map, and their location
+     * @param  {String} mapId The map ID
+     * @return {Array}
+     */
+    getMapData(mapId) {
+        const structureList = this.structures[mapId] || {};
+        const structureData = [];
+
+        // Loop the grids with structures
+        Object.keys(structureList).forEach((gridId) => {
+            // look the buildings within a grid
+            structureList[gridId].forEach((obj) => {
+                structureData.push({
+                    name: obj.name,
+                    location: {
+                        x: obj.location.x,
+                        y: obj.location.y
+                    }
+                })
+            });
+        });
+
+        return structureData;
     }
 }
