@@ -124,6 +124,12 @@ function cmdGiveItem(socket, command, params, Game) {
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
             const item = Game.itemManager.add(itemTemplate.id);
+
+            // make sure the character has room
+            if (!character.hasRoomForItem(item, amount)) {
+                return Game.eventToSocket(socket, 'error', `You do not have enough inventory space for ${amount}x of that item.`);
+            }
+
             character.giveItem(item, amount);
             Game.eventToSocket(socket, 'info',  `You received ${amount}x ${item.name}`);
             Game.characterManager.updateClient(socket.user.user_id, 'inventory');
@@ -158,6 +164,11 @@ function cmdPickup(socket, command, params, Game) {
             // get the item from the ground
             Game.itemManager.pickup(...location, itemName, amount)
                 .then((itemObject) => {
+                    // make sure the character has room
+                    if (!character.hasRoomForItem(itemObject)) {
+                        return this.Game.eventToUser(user_id, 'error', 'You do not have enough inventory space to pickup that item.');
+                    }
+
                     // add to user inventory
                     character.giveItem(itemObject);
                     // update the character details, client side

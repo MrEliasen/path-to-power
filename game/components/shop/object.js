@@ -282,6 +282,13 @@ export default class Shop {
                     return this.Game.eventToUser(user_id, 'error', 'They do not appear to have that item anymore');
                 }
 
+                const itemToAdd = this.Game.itemManager.add(item.id);
+
+                // make sure the character has room
+                if (!character.hasRoomForItem(itemToAdd)) {
+                    return this.Game.eventToUser(user_id, 'error', 'You do not have enough inventory space for that item.');
+                }
+
                 // remove money from player
                 character.updateCash(price * -1);
 
@@ -291,7 +298,7 @@ export default class Shop {
                 }
 
                 // give item to player
-                character.giveItem(this.Game.itemManager.add(item.id), 1);
+                character.giveItem(itemToAdd, 1);
 
                 // update the client player object
                 this.Game.characterManager.updateClient(character.user_id);

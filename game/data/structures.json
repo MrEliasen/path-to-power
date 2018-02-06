@@ -28,7 +28,10 @@
     "bank": {
         "name": "National Bank",
         "colour": "#009933",
-        "commands": null,
+        "commands": {
+            "/deposit": {},
+            "/withdraw": {}
+        },
         "shops": []
     },
     "airport": {

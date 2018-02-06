@@ -188,7 +188,82 @@ function cmdTravel(socket, command, params, Game) {
         });
 }
 
+function cmdWithdraw(socket, command, params, Game) {
+    // Fetch the character first
+    Game.characterManager.get(socket.user.user_id)
+        .then((character) => {
+            let amount = parseInt(params[0], 10);
+
+            // make sure the amount is valid
+            if (isNaN(amount)) {
+                return Game.eventToSocket(socket, 'error', 'You must specify a valid amount to withdraw.');
+            }
+
+            // make sure the amount is a positive number
+            if (amount < 0) {
+                return Game.eventToSocket(socket, 'error', 'You must specify a positive amount to withdraw.');
+            }
+
+            // make sure they have that much money in the bank
+            if (character.stats.bank < amount) {
+                return Game.eventToSocket(socket, 'error', `You do not have that much in your account. You have ${character.stats.bank}.`);
+            }
+
+            character.updateBank(amount * -1);
+            character.updateCash(amount);
+
+            // update the client's character object
+            Game.characterManager.updateClient(character.user_id, 'stats');
+            Game.eventToSocket(socket, 'success', `You withdrew ${amount} from your bank account. You have ${character.stats.bank} left in your account.`);
+        })
+        .catch(() => {});
+}
+
+function cmdDeposit(socket, command, params, Game) {
+    // Fetch the character first
+    Game.characterManager.get(socket.user.user_id)
+        .then((character) => {
+            let amount = parseInt(params[0], 10);
+
+            // make sure the amount is valid
+            if (isNaN(amount)) {
+                return Game.eventToSocket(socket, 'error', 'You must specify a valid amount to deposit.');
+            }
+
+            // make sure the amount is a positive number
+            if (amount < 0) {
+                return Game.eventToSocket(socket, 'error', 'You must specify a positive amount to deposit.');
+            }
+
+            // make sure they have that much money in the bank
+            if (character.stats.cash < amount) {
+                return Game.eventToSocket(socket, 'error', `You do not have that much cash on you. You currently have ${character.stats.money} cash on you.`);
+            }
+
+            character.updateCash(amount * -1);
+            character.updateBank(amount);
+
+            // update the client's character object
+            Game.characterManager.updateClient(character.user_id, 'stats');
+
+            Game.eventToSocket(socket, 'success', `You deposit ${amount} into your bank account. Your account is now at ${character.stats.bank}.`);
+        })
+        .catch(() => {});
+}
+
 module.exports = [
+    {
+        commandKeys: [
+            '/withdraw'
+        ],
+        method: cmdWithdraw
+    },
+    {
+        commandKeys: [
+            '/deposit'
+        ],
+        method: cmdDeposit
+    },
     {
         commandKeys: [
             '/heal'

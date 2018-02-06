@@ -29,6 +29,7 @@ export default class Character {
             money: 0,
             bank: 200,
             exp: 0,
+            inventorySize: 30,
         }
 
         // assign all the character modifiers, and deep-copy the stats
@@ -707,7 +708,51 @@ export default class Character {
      * @return {Number}        The new health total
      */
     updateHealth(amount) {
-        this.stats.health = Math.max(0, Math.round(this.stats.health + amount));
+        let newHealth = Math.max(0, Math.round(this.stats.health + amount));
+
+        // don't allow them to heal above their max
+        if (newHealth > this.stats.health_max) {
+            newHealth = this.stats.health_max;
+        }
+
+        this.stats.health = newHealth;
         return this.stats.health;
+    }
+
+    /**
+     * Get the amount of space the character has left in its inventory
+     * @return {Number}
+     */
+    inventorySpaceLeft() {
+        return this.stats.inventorySize - this.inventory.length;
+    }
+
+    /**
+     * Checks if the character has room to receive a given item
+     * @param  {Item}    item   The item object
+     * @param  {Number}  amount The amount of an item to add.
+     * @return {Boolean}        True if they have room, false otherwise.
+     */
+    hasRoomForItem(itemObj, amount = null) {
+        // check if item is stackable, and if so, see if we have that item in the inventory already
+        if (itemObj.stats.stackable) {
+            amount = amount || itemObj.stats.durability;
+
+            const inventoryItem = this.inventory.find((obj) => obj.id === itemObj.id);
+
+            if (!inventoryItem) {
+                if (this.inventorySpaceLeft() <= 0) {
+                    return false;
+                }
+            }
+        } else {
+            amount = amount || 1;
+
+            if (this.inventorySpaceLeft() - amount < 0) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
