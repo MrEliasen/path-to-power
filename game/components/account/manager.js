@@ -1,7 +1,13 @@
 import request from 'superagent';
 
 // account specific imports
-import { ACCOUNT_AUTHENTICATE, ACCOUNT_AUTHENTICATE_ERROR, ACCOUNT_AUTHENTICATE_SUCCESS } from './types';
+import {
+    ACCOUNT_AUTHENTICATE,
+    ACCOUNT_AUTHENTICATE_ERROR,
+    ACCOUNT_AUTHENTICATE_SUCCESS,
+    ACCOUNT_AUTHENTICATE_NEW,
+    CREATE_CHARACTER
+} from './types';
 import AccountModel from './model';
 import Levels from '../../data/levels.json';
 
@@ -26,6 +32,8 @@ export default class AccountManager {
         switch (action.type) {
             case ACCOUNT_AUTHENTICATE:
                 return this.authenticate(socket, action);
+            case CREATE_CHARACTER:
+                return this.signUp(socket, action);
         }
     }
 
@@ -65,13 +73,7 @@ export default class AccountManager {
             this.Game.socketManager.add(socket);
 
             // game data we will send to the client, with the autentication success
-            const gameData = {
-                maps: this.Game.mapManager.getList(),
-                items: this.Game.itemManager.getTemplates(),
-                players: [],
-                commands: this.Game.commandManager.getList(),
-                levels: Levels
-            }
+            const gameData = this.getGameData();
 
             // attempt to load the character from the database
             this.Game.characterManager.load(socket.user, async (error, character) => {
@@ -82,29 +84,86 @@ export default class AccountManager {
                     });
                 }
 
-                // If they already have a character, send them the character and authenticate
-                if (character) {
-                    // Update the client
-                    this.Game.mapManager.updateClient(character.user_id);
-
-                    // get the list of online players (after we loaded the character to make sure it is included)
-                    gameData.players = this.Game.characterManager.getOnline();
-
+                // If they do not have a character yet, send them to the character creation screen
+                if (!character) {
                     return this.Game.socketManager.dispatchToSocket(socket, {
-                        type: ACCOUNT_AUTHENTICATE_SUCCESS,
+                        type: ACCOUNT_AUTHENTICATE_NEW,
                         payload: {
-                            character: character.exportToClient(),
-                            gameData
+                            routeTo: '/character',
+                            gameData: {
+                                maps: gameData.maps
+                            }
                         }
-                    })
+                    });
                 }
 
+                // Update the client
+                this.Game.mapManager.updateClient(character.user_id);
+
+                // get the list of online players (after we loaded the character to make sure it is included)
+                gameData.players = this.Game.characterManager.getOnline();
+
+                return this.Game.socketManager.dispatchToSocket(socket, {
+                    type: ACCOUNT_AUTHENTICATE_SUCCESS,
+                    payload: {
+                        character: character.exportToClient(),
+                        gameData
+                    }
+                })
+            })
+        })
+    }
+
+    getGameData() {
+        // game data we will send to the client, with the autentication success
+        return {
+            maps: this.Game.mapManager.getList(),
+            items: this.Game.itemManager.getTemplates(),
+            players: [],
+            commands: this.Game.commandManager.getList(),
+            levels: Levels
+        };
+    }
+
+    /**
+     * handles character creation requests from clients
+     * @param  {Socket.IO Object} socket The socket the request from made from
+     * @param  {Object}           action Redux action object
+     */
+    signUp(socket, action) {
+        if (!action.payload.location) {
+            return this.Game.socketManager.dispatchToSocket(socket, {
+                type: ACCOUNT_AUTHENTICATE_ERROR,
+                payload: {
+                    message: 'You must select a start location.'
+                }
+            });
+        }
+
+        // make sure the client is authenticated
+        if (!socket.user || !socket.user.user_id) {
+            return this.Game.socketManager.dispatchToSocket(socket, {
+                type: ACCOUNT_AUTHENTICATE_ERROR,
+                payload: {
+                    routeTo: '/'
+                }
+            });
+        }
+
+        // make sure we have all the details we need to create the character
+        // check we have the starting location
+        this.Game.mapManager.get(action.payload.location)
+            .then((gameMap) => {
+                const gameData = this.getGameData();
+
                 // create a new character
-                this.Game.characterManager.create(socket.user, 'london', (error, newCharacter) => {
+                this.Game.characterManager.create(socket.user, gameMap.id, (error, newCharacter) => {
                      if (error) {
                         return this.Game.socketManager.dispatchToSocket(socket, {
                             type: ACCOUNT_AUTHENTICATE_ERROR,
-                            payload: error
+                            payload: {
+                                'message': 'Something went wrong while creating your character! Sorry, please try again in a moment.'
+                            }
                         });
                     }
 
@@ -123,7 +182,14 @@ export default class AccountManager {
                     })
                 });
             })
-        })
+            .catch(() => {
+                return this.Game.socketManager.dispatchToSocket(socket, {
+                    type: ACCOUNT_AUTHENTICATE_ERROR,
+                    payload: {
+                        message: 'Invalid start location.'
+                    }
+                });
+            });
     }
 
     /**

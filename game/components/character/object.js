@@ -619,7 +619,8 @@ export default class Character {
     }
 
     attackHit() {
-        return this.abilities.find((obj) => obj.id = 'acc').use();
+        const acc =  this.abilities.find((obj) => obj.id = 'acc');
+        return acc.use();
     }
 
     /**

@@ -114,7 +114,8 @@ module.exports = [
     {
         commandKeys: [
             '/snoop',
-            '/snooping'
+            '/snooping',
+            '/snoopdog'
         ],
         method: cmdSkillSnoop
     },

@@ -237,7 +237,7 @@ export default class NPCManager {
         let npcs = [];
 
         // if we need to get NPCs from a specific grid within a map
-        if (x && y) {
+        if (x !== null && y !== null) {
             npcs = this.npcs.filter((obj) => obj.location.map === map && obj.location.x === x && obj.location.y === y);
         } else {
             npcs = this.npcs.filter((obj) => obj.location.map === map);
@@ -347,7 +347,7 @@ export default class NPCManager {
         NPC.updateLocation(newLocation.map, newLocation.x, newLocation.y);
         
         // change location on the map
-        this.changeLocation(NPC, newLocation, oldLocation);
+        //this.changeLocation(NPC, newLocation, oldLocation);
 
         // dispatch join message to new grid
         this.Game.eventToRoom(NPC.getLocationId(), 'info', `${NPC.name} the ${NPC.type}, moves in from the ${directionIn}`);
@@ -385,7 +385,7 @@ export default class NPCManager {
                     });
 
                     // Hide the NPC
-                    this.removeFromGrid(NPC.location, NPC);
+                    //this.removeFromGrid(NPC.location, NPC);
                     
                     // drop all items on the ground
                     droppedLoot.items.forEach((item) => {

@@ -121,7 +121,7 @@ export default class CharacterManager {
             const character = this.characters.find((obj) => obj.user_id === user_id);
 
             if (!character) {
-                return reject(`Character ${user_id} was not found.`);
+                return reject(`Character ${user_id} was not found. It was likely never loaded.`);
             }
 
             resolve(character);
@@ -346,7 +346,7 @@ export default class CharacterManager {
      * @return {Object}            Object with the character details
      */
     create(userData, city, callback) {
-        this.dbCreate(userData.user_id, userData.display_name, city, (error, character) => {
+        this.dbCreate(userData.user_id, userData.display_name, city, async (error, character) => {
             if (error) {
                 return callback(error)
             }
@@ -354,7 +354,7 @@ export default class CharacterManager {
             const newCharacter = new Character(this.Game, character.toObject());
             newCharacter.profile_image = userData.profile_image;
 
-            this.manage(newCharacter);
+            await this.manage(newCharacter);
             callback(null, newCharacter);
         })
     }

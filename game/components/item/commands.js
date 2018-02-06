@@ -244,11 +244,11 @@ module.exports = [
             '/get'
         ],
         method: cmdPickup
-    },
+    },/*
     {
         commandKeys: [
             '/giveitem'
         ],
         method: cmdGiveItem
-    },
+    },*/
 ];
