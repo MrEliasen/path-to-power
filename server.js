@@ -2,6 +2,7 @@
 import child_process from 'child_process';
 import fs from 'fs';
 import http from 'http';
+import readline from 'readline-sync';
 
 //3rd party
 import express from 'express';
@@ -23,6 +24,16 @@ if (!fs.existsSync('./game/data')) {
 if (!config) {
     fs.copyFileSync('./config.new.json', './config.json');
     config = require('./config');
+
+    // get the twitch client id
+    config.twitch.clientId = readline.question('First time setup. Enter your Twitch.tv Application Client ID (this can always be changed in the config.json later): ');
+    // make sure a value was supplied
+    if (!config.twitch.clientId || config.twitch.clientId === '') {
+        throw 'You must provide a Twitch Application ID for the server to work.';
+    }
+
+    // create a new config.json file
+    fs.writeFile('config.json', JSON.stringify(config, null, 4), 'utf8');
 }
 
 /************************************

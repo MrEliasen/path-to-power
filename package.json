@@ -1,17 +1,17 @@
 {
-    "name": "road-to-legend-server",
+    "name": "path-to-power-server",
     "version": "0.1.0",
-    "description": "The server for a simple MUD inspired, browser-based multiplayer game.",
+    "description": "The server for a simple MUD inspired browser-based multiplayer game.",
     "scripts": {
-        "start": "nodemon -L server.js --inspect --exec babel-node --presets env"
+        "start": "nodemon -L server.js --inspect --exec babel-node --presets env,stage-0"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/MrEliasen/road-to-legend-server.git"
+        "url": "git+https://github.com/MrEliasen/path-to-power-server.git"
     },
     "author": "SirMrE (@markeliasen)",
     "bugs": {
-        "url": "https://github.com/MrEliasen/road-to-legend-server/issues"
+        "url": "https://github.com/MrEliasen/path-to-power-server/issues"
     },
     "nodemonConfig": {
         "ignore": [
@@ -19,7 +19,7 @@
             "npm-debug.log"
         ]
     },
-    "homepage": "https://www.sirmre.com/apps/road-to-legend",
+    "homepage": "https://www.pathtopower.online",
     "dependencies": {
         "bluebird": "^3.5.1",
         "escape-string-regexp": "^1.0.5",
@@ -27,6 +27,7 @@
         "express": "^4.16.2",
         "moment": "^2.20.1",
         "mongoose": "^4.13.7",
+        "readline-sync": "^1.4.7",
         "socket.io": "^2.0.4",
         "superagent": "^3.8.2",
         "uuid": "^3.1.0",

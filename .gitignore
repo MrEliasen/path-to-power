@@ -40,12 +40,11 @@ jspm_packages
 # Optional REPL history
 .node_repl_history
 
-# Do not include live config files
-config.js
-config.json
-
 # Yarn
 *yarn.lock
 package-lock.json
 
+# Live Game files
+config.json
+game/data
 Superseded
