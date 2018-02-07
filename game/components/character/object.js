@@ -231,14 +231,22 @@ export default class Character {
                      // drop all items and cash
                     const items = this.inventory.splice(0, this.inventory.length);
                     const cash = this.stats.money;
+                    const targetedBy = this.targetedBy;
 
                     // reset the character inventory, money, gridlock etc.
                     this.stats.money = 0;
                     this.targetedBy = [];
                     this.stats.health = this.stats.health_max;
 
+                    const expLost = 0;
+                    // if its a player, reduce their exp
+                    if (this.user_id) {
+                        this.stats.exp * 0.035;
+                        this.updateExp(expLost * -1);
+                    }
+
                     // return what is dropped by the character
-                    resolve({ items, cash })
+                    resolve({ items, cash, exp: expLost, targetedBy})
                 })
                 .catch((err) => {
                     reject(err)

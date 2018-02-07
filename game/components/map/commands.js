@@ -96,11 +96,18 @@ function cmdFlee(socket, command, params, Game) {
                     // reset the gridlock
                     character.targetedBy = [];
 
+                    const expLoss = character.stats.exp * 0.01;
+                    character.updateExp(expLoss * -1)
+
                     // leave the old grid room
                     socket.leave(character.getLocationId());
 
+                    // Let the player know it succeeded
+                    Game.eventToRoom(character.getLocationId(), 'info', `You fled the area, dropping some items as you ran away. Fleeing also cost you ${expLoss} reputation.`)
+
                     // dispatch leave message to grid
                     Game.eventToRoom(character.getLocationId(), 'info', `${character.name} fled the area, dropping some items as they ran away.`)
+
                     // remove player from the grid list of players
                     Game.socketManager.dispatchToRoom(character.getLocationId(), {
                         type: LEFT_GRID,

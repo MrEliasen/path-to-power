@@ -786,6 +786,19 @@ export default class CharacterManager {
                             this.Game.itemManager.drop(oldLocation.map, oldLocation.x, oldLocation.y, item);
                         });
 
+                        // TODO: Test if this works! Need more players to test.
+                        const cashReward = Math.floor(droppedLoot.cash / targetedBy.length);
+                        const expReward  = Math.floor(droppedLoot.exp / targetedBy.length);
+                        targetedBy.forEach((char) => {
+                            // make sure its a player
+                            if (char.user_id) {
+                                // give them an equal amount of cash and exp, from the dropped loot
+                                char.updateCash(cashReward);
+                                char.updateExp(expReward);
+                                this.updateClient(char.user_id);
+                            }
+                        });
+
                         // give the cash to the killer
                         killer.updateCash(droppedLoot.cash);
 
