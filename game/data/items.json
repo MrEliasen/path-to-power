@@ -7,11 +7,11 @@
         "subtype": "ranged",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 2045,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 4,
+            "damage_max": 8
         }
     },
     {
@@ -22,11 +22,11 @@
         "subtype": "ranged",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 8187,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 5,
+            "damage_max": 10
         }
     },
     {
@@ -37,11 +37,11 @@
         "subtype": "ranged",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 18570,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 6,
+            "damage_max": 12
         }
     },
     {
@@ -52,11 +52,11 @@
         "subtype": "ranged",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 32757,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 7,
+            "damage_max": 14
         }
     },
     {
@@ -67,11 +67,11 @@
         "subtype": "ranged",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 51330,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 8,
+            "damage_max": 16
         }
     },
     {
@@ -82,11 +82,11 @@
         "subtype": "ranged",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 101198,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 9,
+            "damage_max": 18
         }
     },
     {
@@ -97,11 +97,11 @@
         "subtype": "ranged",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 131037,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 10,
+            "damage_max": 20
         }
     },
     {
@@ -112,11 +112,11 @@
         "subtype": "ranged",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 167301,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 11,
+            "damage_max": 22
         }
     },
     {
@@ -127,11 +127,11 @@
         "subtype": "ranged",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 205330,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 12,
+            "damage_max": 24
         }
     },
     {
@@ -142,9 +142,9 @@
         "subtype": "body",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 356,
             "stackable": false,
-            "durability": 1,
+            "durability": 1000,
             "damage_reduction": 1
         }
     },
@@ -156,10 +156,10 @@
         "subtype": "body",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 8981,
             "stackable": false,
-            "durability": 1,
-            "damage_reduction": 1
+            "durability": 1000,
+            "damage_reduction": 2
         }
     },
     {
@@ -170,10 +170,10 @@
         "subtype": "body",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 35931,
             "stackable": false,
-            "durability": 1,
-            "damage_reduction": 1
+            "durability": 1000,
+            "damage_reduction": 4
         }
     },
     {
@@ -184,10 +184,10 @@
         "subtype": "body",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 80827,
             "stackable": false,
-            "durability": 1,
-            "damage_reduction": 1
+            "durability": 1000,
+            "damage_reduction": 6
         }
     },
     {
@@ -198,10 +198,10 @@
         "subtype": "body",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 143731,
             "stackable": false,
-            "durability": 1,
-            "damage_reduction": 1
+            "durability": 1000,
+            "damage_reduction": 9
         }
     },
     {
@@ -212,9 +212,9 @@
         "subtype": "ammo",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 409,
             "stackable": false,
-            "durability": 1,
+            "durability": 10,
             "damage_bonus": 1
         }
     },
@@ -226,10 +226,10 @@
         "subtype": "ammo",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 6551,
             "stackable": false,
-            "durability": 1,
-            "damage_bonus": 1
+            "durability": 10,
+            "damage_bonus": 2
         }
     },
     {
@@ -240,10 +240,10 @@
         "subtype": "ammo",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 26207,
             "stackable": false,
-            "durability": 1,
-            "damage_bonus": 1
+            "durability": 10,
+            "damage_bonus": 4
         }
     },
     {
@@ -254,11 +254,11 @@
         "subtype": "melee",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 7425,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 3,
+            "damage_max": 3
         }
     },
     {
@@ -269,11 +269,11 @@
         "subtype": "melee",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 40476,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 6,
+            "damage_max": 6
         }
     },
     {
@@ -284,11 +284,11 @@
         "subtype": "melee",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 99397,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 9,
+            "damage_max": 9
         }
     },
     {
@@ -299,11 +299,11 @@
         "subtype": "melee",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 184748,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 12,
+            "damage_max": 12
         }
     },
     {
@@ -314,11 +314,11 @@
         "subtype": "melee",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 298054,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 15,
+            "damage_max": 15
         }
     },
     {
@@ -330,13 +330,13 @@
         "stats": {
             "price": 1,
             "priceRange": [4, 3, 7],
-            "stackable": true,
+            "stackable": false,
             "durability": 1,
             "useEffect": {
                 "id": "drug",
                 "modifiers": {
-                    "exp": 5,
-                    "health": -5
+                    "exp": 1,
+                    "health": -1
                 }
             }
         }
@@ -350,13 +350,13 @@
         "stats": {
             "price": 1,
             "priceRange": [7, 6, 15],
-            "stackable": true,
+            "stackable": false,
             "durability": 1,
             "useEffect": {
                 "id": "drug",
                 "modifiers": {
-                    "exp": 5,
-                    "health": -5
+                    "exp": 2,
+                    "health": -2
                 }
             }
         }
@@ -370,13 +370,13 @@
         "stats": {
             "price": 1,
             "priceRange": [12, 8, 24],
-            "stackable": true,
+            "stackable": false,
             "durability": 1,
             "useEffect": {
                 "id": "drug",
                 "modifiers": {
-                    "exp": 5,
-                    "health": -5
+                    "exp": 3,
+                    "health": -1
                 }
             }
         }
@@ -390,12 +390,12 @@
         "stats": {
             "price": 1,
             "priceRange": [22, 15, 44],
-            "stackable": true,
+            "stackable": false,
             "durability": 1,
             "useEffect": {
                 "id": "drug",
                 "modifiers": {
-                    "exp": 5,
+                    "exp": 4,
                     "health": -5
                 }
             }
@@ -410,13 +410,13 @@
         "stats": {
             "price": 1,
             "priceRange": [25, 23, 28],
-            "stackable": true,
+            "stackable": false,
             "durability": 1,
             "useEffect": {
                 "id": "drug",
                 "modifiers": {
-                    "exp": 5,
-                    "health": -5
+                    "exp": 3,
+                    "health": -6
                 }
             }
         }
@@ -430,13 +430,13 @@
         "stats": {
             "price": 1,
             "priceRange": [73, 59, 132],
-            "stackable": true,
+            "stackable": false,
             "durability": 1,
             "useEffect": {
                 "id": "drug",
                 "modifiers": {
-                    "exp": 5,
-                    "health": -5
+                    "exp": 9,
+                    "health": -10
                 }
             }
         }
@@ -450,13 +450,13 @@
         "stats": {
             "price": 1,
             "priceRange": [75, 58, 124],
-            "stackable": true,
+            "stackable": false,
             "durability": 1,
             "useEffect": {
                 "id": "drug",
                 "modifiers": {
-                    "exp": 5,
-                    "health": -5
+                    "exp": 9,
+                    "health": -15
                 }
             }
         }
@@ -470,13 +470,13 @@
         "stats": {
             "price": 1,
             "priceRange": [119, 96, 239],
-            "stackable": true,
+            "stackable": false,
             "durability": 1,
             "useEffect": {
                 "id": "drug",
                 "modifiers": {
-                    "exp": 5,
-                    "health": -5
+                    "exp": 15,
+                    "health": -30
                 }
             }
         }
@@ -490,13 +490,13 @@
         "stats": {
             "price": 1,
             "priceRange": [209, 96, 209],
-            "stackable": true,
+            "stackable": false,
             "durability": 1,
             "useEffect": {
                 "id": "drug",
                 "modifiers": {
-                    "exp": 5,
-                    "health": -5
+                    "exp": 13,
+                    "health": -14
                 }
             }
         }
@@ -508,9 +508,9 @@
         "type": "consumable",
         "subtype": "misc",
         "stats": {
-            "price": 1,
+            "price": 60334,
             "stackable": false,
-            "durability": 1,
+            "durability": 5,
             "useEffect": {
                 "id": "miscItemHeal",
                 "modifiers": {
@@ -526,7 +526,7 @@
         "type": "consumable",
         "subtype": "misc",
         "stats": {
-            "price": 1,
+            "price": 3849,
             "stackable": false,
             "durability": 1,
             "useEffect": {
@@ -559,7 +559,7 @@
         "type": "consumable",
         "subtype": "misc",
         "stats": {
-            "price": 1,
+            "price": 1000,
             "stackable": false,
             "durability": 1,
             "useEffect": {
@@ -619,7 +619,7 @@
         "type": "trash",
         "subtype": "trash",
         "stats": {
-            "price": 1,
+            "price": 45,
             "stackable": false,
             "durability": 1
         }
@@ -631,7 +631,7 @@
         "type": "trash",
         "subtype": "trash",
         "stats": {
-            "price": 1,
+            "price": 25,
             "stackable": false,
             "durability": 1
         }
@@ -644,11 +644,11 @@
         "subtype": "melee",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 8,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 2,
+            "damage_max": 3
         }
     },
     {
@@ -659,11 +659,11 @@
         "subtype": "melee",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 18173,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 7,
+            "damage_max": 7
         }
     },
     {
@@ -674,11 +674,11 @@
         "subtype": "melee",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 345,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 2,
+            "damage_max": 3
         }
     },
     {
@@ -689,11 +689,11 @@
         "subtype": "melee",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 2758,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
+            "damage_min": 2,
+            "damage_max": 4
         }
     },
     {
@@ -704,26 +704,11 @@
         "subtype": "melee",
         "stats": {
             "equipable": true,
-            "price": 1,
+            "price": 1984,
             "stackable": false,
             "durability": 100,
-            "damage_min": 1,
-            "damage_max": 1
-        }
-    },
-    {
-        "id": "trout",
-        "name": "Trout",
-        "description": "Melee weapon. Deals {damage_min}-{damage_max} damage on hit, ignoring armor.",
-        "type": "weapon",
-        "subtype": "melee",
-        "stats": {
-            "equipable": true,
-            "price": 1,
-            "stackable": false,
-            "durability": 100,
-            "damage_min": 50,
-            "damage_max": 55
+            "damage_min": 3,
+            "damage_max": 3
         }
     }
 ]

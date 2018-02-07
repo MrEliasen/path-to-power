@@ -37,15 +37,15 @@ function miscPhone(character, modifiers = {}, item, Game) {
 
     // get the list of NPCS for the map
     let npclist = Game.npcManager.getLocationList(character.location.map);
-    const npcTypes = ['Druggie'];
+    const npcTypes = ['Drug Dealer'];
     let messageArray = [
         `You use your ${item.name} to call some contacts. Your current reputation allowed you to get the following information:`,
         "----------------"
     ]
 
-    // if they have over a certain amount of EXP, show drug dealers location as well.
-    if (character.stats.exp > 16801) {
-        npcTypes.push('Drug Dealer');
+    // if they have over a certain amount of EXP, show druggies location as well.
+    if (character.stats.exp > 22563) {
+        npcTypes.push('Druggie');
         // overwrite the initial message
         messageArray[0] = `You use your ${item.name} to call some contacts.`;
 

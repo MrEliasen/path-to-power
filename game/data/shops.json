@@ -7,9 +7,8 @@
             "enabled": true,
             "sellPricePercent": 1.0,
             "list": [
-                { "expRequired": 0, "shopQuantity": -1, "id": "bandage"},
-                { "expRequired": 44201, "shopQuantity": -1, "id": "medicalkit"},
-                { "expRequired": 11101, "shopQuantity": -1, "id": "adrenalin"}
+                { "expRequired": 5640, "shopQuantity": -1, "id": "bandage"},
+                { "expRequired": 44201, "shopQuantity": -1, "id": "medicalkit"}
             ]
         },
         "buy": {
@@ -29,36 +28,33 @@
             "enabled": true,
             "sellPricePercent": 1.0,
             "list": [
-                { "expRequired": 301, "shopQuantity": -1, "id": "walther25"},
-                { "expRequired": 2101, "shopQuantity": -1, "id": "p290rs"},
-                { "expRequired": 6601, "shopQuantity": -1, "id": "glock17"},
-                { "expRequired": 13801, "shopQuantity": -1, "id": "m1911"},
-                { "expRequired": 23701, "shopQuantity": -1, "id": "85ss2fs"},
-                { "expRequired": 39901, "shopQuantity": -1, "id": "an94"},
-                { "expRequired": 52901, "shopQuantity": -1, "id": "fnscar"},
-                { "expRequired": 66701, "shopQuantity": -1, "id": "ak47"},
-                { "expRequired": 116101, "shopQuantity": -1, "id": "hkg3"},
+                { "expRequired": 224, "shopQuantity": -1, "id": "cellphone"},
 
-                { "expRequired": 1201, "shopQuantity": -1, "id": "leatherjacket"},
-                { "expRequired": 8701, "shopQuantity": -1, "id": "thickleathercoat"},
-                { "expRequired": 27601, "shopQuantity": -1, "id": "m3armor"},
-                { "expRequired": 57401, "shopQuantity": -1, "id": "kevlarvest"},
-                { "expRequired": 135901, "shopQuantity": -1, "id": "6b436a"},
+                { "expRequired": 899, "shopQuantity": -1, "id": "walther25"},
+                { "expRequired": 3599, "shopQuantity": -1, "id": "p290rs"},
+                { "expRequired": 8163, "shopQuantity": -1, "id": "glock17"},
+                { "expRequired": 14399, "shopQuantity": -1, "id": "m1911"},
+                { "expRequired": 22563, "shopQuantity": -1, "id": "85ss2fs"},
+                { "expRequired": 44483, "shopQuantity": -1, "id": "an94"},
+                { "expRequired": 57599, "shopQuantity": -1, "id": "fnscar"},
+                { "expRequired": 73539, "shopQuantity": -1, "id": "ak47"},
+                { "expRequired": 90255, "shopQuantity": -1, "id": "hkg3"},
 
-                { "expRequired": 301, "shopQuantity": -1, "id": "ammobasic"},
-                { "expRequired": 23701, "shopQuantity": -1, "id": "ammohp"},
-                { "expRequired": 116101, "shopQuantity": -1, "id": "ammoap"},
+                { "expRequired": 224, "shopQuantity": -1, "id": "leatherjacket"},
+                { "expRequired": 5640, "shopQuantity": -1, "id": "thickleathercoat"},
+                { "expRequired": 22563, "shopQuantity": -1, "id": "m3armor"},
+                { "expRequired": 50755, "shopQuantity": -1, "id": "kevlarvest"},
+                { "expRequired": 90255, "shopQuantity": -1, "id": "6b436a"},
 
-                { "expRequired": 2101, "shopQuantity": -1, "id": "woodenclub"},
-                { "expRequired": 11101, "shopQuantity": -1, "id": "switchblade"},
-                { "expRequired": 27601, "shopQuantity": -1, "id": "axe"},
-                { "expRequired": 52901, "shopQuantity": -1, "id": "machete"},
-                { "expRequired": 76401, "shopQuantity": -1, "id": "chainsaw"},
+                { "expRequired": 899, "shopQuantity": -1, "id": "ammobasic"},
+                { "expRequired": 14399, "shopQuantity": -1, "id": "ammohp"},
+                { "expRequired": 57599, "shopQuantity": -1, "id": "ammoap"},
 
-                { "expRequired": 3301, "shopQuantity": -1, "id": "cellphone"},
-                { "expRequired": 2101, "shopQuantity": -1, "id": "pepperspray"},
-                { "expRequired": 13801, "shopQuantity": -1, "id": "beacon"},
-                { "expRequired": 16801, "shopQuantity": -1, "id": "laptop"}
+                { "expRequired": 2040, "shopQuantity": -1, "id": "woodenclub"},
+                { "expRequired": 11120, "shopQuantity": -1, "id": "switchblade"},
+                { "expRequired": 27307, "shopQuantity": -1, "id": "axe"},
+                { "expRequired": 50755, "shopQuantity": -1, "id": "machete"},
+                { "expRequired": 81883, "shopQuantity": -1, "id": "chainsaw"}
             ]
         },
         "buy": {
@@ -88,18 +84,18 @@
             "ignoreSubtype": []
         },
         "supply": {
-            "numberOfItems": [10,35],
+            "numberOfItems": [25,45],
             "uniqueItems": false,
             "items": [
-                {"id": "ecstasy", "quantity": [1,10]},
-                {"id": "hashish", "quantity": [1,10]},
-                {"id": "marijuana", "quantity": [1,10]},
-                {"id": "amphetamine", "quantity": [1,10]},
-                {"id": "methamphetamine", "quantity": [1,10]},
-                {"id": "cocaine", "quantity": [1,10]},
-                {"id": "crack", "quantity": [1,10]},
-                {"id": "heroinbrown", "quantity": [1,10]},
-                {"id": "heroinwhite", "quantity": [1,10]}
+                {"id": "ecstasy", "quantity": [1,1]},
+                {"id": "hashish", "quantity": [1,1]},
+                {"id": "marijuana", "quantity": [1,1]},
+                {"id": "amphetamine", "quantity": [1,1]},
+                {"id": "methamphetamine", "quantity": [1,1]},
+                {"id": "cocaine", "quantity": [1,1]},
+                {"id": "crack", "quantity": [1,1]},
+                {"id": "heroinbrown", "quantity": [1,1]},
+                {"id": "heroinwhite", "quantity": [1,1]}
             ]
         }
     },

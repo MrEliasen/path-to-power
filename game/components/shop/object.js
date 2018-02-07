@@ -166,6 +166,12 @@ export default class Shop {
                 // add money to character
                 character.updateCash(amount * pricePerUnit);
 
+                // if they sold drugs, give them exp
+                if (soldItem.subtype === 'drug') {
+                    // NOTE: EXP is given here, for dealing drugs.
+                    character.updateExp(2);
+                }
+
                 // add item to shop inventory (if resell is enabled)
                 if (this.buy.resell) {
                     this.addToInventory(soldItem);

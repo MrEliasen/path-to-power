@@ -1,110 +1,86 @@
 [
     {
        "exp": 0,
+       "name": "Nobody"
+    },
+    {
+       "exp": 224,
        "name": "Wannabe"
     },
     {
-       "exp": 301,
+       "exp": 899,
        "name": "Mugger"
     },
     {
-       "exp": 601,
+       "exp": 2040,
        "name": "Burglar"
     },
     {
-       "exp": 1201,
+       "exp": 3599,
        "name": "Robber"
     },
     {
-       "exp": 2101,
+       "exp": 5640,
        "name": "Thug"
     },
     {
-       "exp": 3301,
+       "exp": 8163,
        "name": "Hustler"
     },
     {
-       "exp": 4801,
+       "exp": 11120,
        "name": "Wankster"
     },
     {
-       "exp": 6601,
+       "exp": 14399,
        "name": "Gangster"
     },
     {
-       "exp": 8701,
-       "name": "Drug Pusher"
-    },
-    {
-       "exp": 11101,
-       "name": "Drug Runner"
-    },
-    {
-       "exp": 13801,
-       "name": "Drug Smuggler"
-    },
-    {
-       "exp": 16801,
-       "name": "Drug Dealer"
-    },
-    {
-       "exp": 20101,
-       "name": "Drug Creator"
-    },
-    {
-       "exp": 23701,
-       "name": "Gun Smuggler"
-    },
-    {
-       "exp": 27601,
-       "name": "Druglord"
-    },
-    {
-       "exp": 31601,
-       "name": "Supreme Druglord"
-    },
-    {
-       "exp": 39901,
+       "exp": 18384,
        "name": "Pimp"
     },
     {
-       "exp": 44201,
-       "name": "Mobster"
+       "exp": 22563,
+       "name": "Drug Pusher"
     },
     {
-       "exp": 48501,
+       "exp": 27307,
+       "name": "Drug Runner"
+    },
+    {
+       "exp": 32655,
+       "name": "Drug Smuggler"
+    },
+    {
+       "exp": 38296,
+       "name": "Drug Dealer"
+    },
+    {
+       "exp": 44483,
+       "name": "Mafia Associates"
+    },
+    {
+       "exp": 50755,
        "name": "Mafia Recruit"
     },
     {
-       "exp": 52901,
-       "name": "Mafia Informant"
+       "exp": 57599,
+       "name": "Soldier"
     },
     {
-       "exp": 57401,
-       "name": "Known Criminal"
+       "exp": 65024,
+       "name": "Caporegime"
     },
     {
-       "exp": 62001,
-       "name": "Criminal Mastermind"
-    },
-    {
-       "exp": 66701,
-       "name": "Mobfather"
-    },
-    {
-       "exp": 71501,
+       "exp": 73539,
        "name": "Underboss"
     },
     {
-       "exp": 76401,
-       "name": "Don"
-    },
-    {
-       "exp": 116101,
+       "exp": 81883,
        "name": "Godfather"
     },
     {
-       "exp": 135901,
+       "exp": 90255,
        "name": "Worlds Most Wanted"
     }
 ]

@@ -2,9 +2,9 @@
     "police-officer" : {
         "type" : "Police Officer",
         "stats" : {
-            "health" : 100,
-            "money" : 25,
-            "expReward": 1
+            "health" : 250,
+            "money" : 15330,
+            "expReward": 175
         },
         "abilities" : {
             "acc" : 50
@@ -48,12 +48,12 @@
     "drug-dealer" : {
         "type" : "Drug Dealer",
         "stats" : {
-            "health" : 1000,
-            "money" : 0,
-            "expReward": 1
+            "health" : 750,
+            "money" : 55330,
+            "expReward": -1250
         },
         "abilities" : {
-            "acc" : 85
+            "acc" : 70
         },
         "skills" : {},
         "inventory": [
@@ -90,12 +90,12 @@
     "druggie" : {
         "type" : "Druggie",
         "stats" : {
-            "health" : 500,
-            "money" : 0,
-            "expReward": 1
+            "health" : 200,
+            "money" : 1347,
+            "expReward": -650
         },
         "abilities" : {
-            "acc" : 55
+            "acc" : 45
         },
         "skills" : {},
         "inventory": [
@@ -123,20 +123,15 @@
     "bum" : {
         "type" : "Bum",
         "stats" : {
-            "health" : 100,
-            "money" : 7,
-            "expReward": 1
+            "health" : 75,
+            "money" : 45,
+            "expReward": 35
         },
         "abilities" : {
-            "acc" : 55
+            "acc" : 20
         },
         "skills" : {},
         "inventory": [
-            {
-                "equipped_slot": "armor",
-                "item_id": "thickleathercoat",
-                "modifiers": {}
-            },
             {
                 "equipped_slot": "melee",
                 "item_id": "brokenbottle",
@@ -152,7 +147,7 @@
         "logic": {
             "timers": {
                 "move": [100, 400],
-                "attack": 2
+                "attack": 2.5
             },
             "respawn": 300,
             "remainHostile": true
@@ -161,12 +156,12 @@
     "pedestrian" : {
         "type" : "Pedestrian",
         "stats" : {
-            "health" : 60,
-            "money" : 36,
-            "expReward": 1
+            "health" : 50,
+            "money" : 143,
+            "expReward": 23
         },
         "abilities" : {
-            "acc" : 12
+            "acc" : 15
         },
         "skills" : {},
         "inventory": [
@@ -193,11 +188,11 @@
         "type" : "Bouncer",
         "stats" : {
             "health" : 135,
-            "money" : 54,
-            "expReward": 1
+            "money" : 342,
+            "expReward": 65
         },
         "abilities" : {
-            "acc" : 30
+            "acc" : 33
         },
         "skills" : {},
         "inventory": [
@@ -224,11 +219,11 @@
         "type" : "Hooker",
         "stats" : {
             "health" : 100,
-            "money" : 130,
-            "expReward": 1
+            "money" : 412,
+            "expReward": 50
         },
         "abilities" : {
-            "acc" : 20
+            "acc" : 28
         },
         "skills" : {},
         "inventory": [
@@ -254,12 +249,12 @@
     "loadshark" : {
         "type" : "Load Shark",
         "stats" : {
-            "health" : 250,
-            "money" : 430,
-            "expReward": 1
+            "health" : 200,
+            "money" : 4300,
+            "expReward": 85
         },
         "abilities" : {
-            "acc" : 40
+            "acc" : 38
         },
         "skills" : {},
         "inventory": [
@@ -291,7 +286,7 @@
         "logic": {
             "timers": {
                 "move": [50, 150],
-                "attack": 2
+                "attack": 2.2
             },
             "respawn": 380,
             "remainHostile": true
@@ -300,12 +295,12 @@
     "deaagent" : {
         "type" : "DEA Agent",
         "stats" : {
-            "health" : 350,
-            "money" : 34,
-            "expReward": 1
+            "health" : 375,
+            "money" : 7535,
+            "expReward": 285
         },
         "abilities" : {
-            "acc" : 80
+            "acc" : 65
         },
         "skills" : {},
         "inventory": [

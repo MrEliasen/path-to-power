@@ -41,37 +41,37 @@
             "/travel": {
                 "destinations": {
                     "tokyo": {
-                        "cost": 500,
+                        "cost": 350,
                         "x": 11,
                         "y": 16
                     },
                     "paris": {
-                        "cost": 500,
+                        "cost": 350,
                         "x": 21,
                         "y": 12
                     },
                     "newyork": {
-                        "cost": 500,
+                        "cost": 350,
                         "x": 29,
                         "y": 0
                     },
                     "moscow": {
-                        "cost": 500,
+                        "cost": 350,
                         "x": 14,
                         "y": 21
                     },
                     "mexicocity": {
-                        "cost": 500,
+                        "cost": 350,
                         "x": 25,
                         "y": 7
                     },
                     "delhi": {
-                        "cost": 500,
+                        "cost": 350,
                         "x": 8,
                         "y": 10
                     },
                     "london": {
-                        "cost": 500,
+                        "cost": 350,
                         "x": 30,
                         "y": 29
                     }
