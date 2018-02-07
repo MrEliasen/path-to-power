@@ -9,6 +9,7 @@ import readline from 'readline-sync';
 import child_process from 'child_process';
 
 // 3rd party
+import https from 'https';
 import express from 'express';
 import mongoose from 'mongoose';
 
@@ -44,8 +45,20 @@ if (!fs.existsSync(`${__dirname}/../config.json`)) {
  *          INITIALISATION          *
  ************************************/
 // Create our Express server
-const app = express();
 const Game = require('./game').Game;
+let app;
+
+if (config.server.certificate.key) {
+    app = https.createServer({
+        key: fs.readFileSync(config.server.certificate.key, 'utf8'),
+        cert: fs.readFileSync(config.server.certificate.cert, 'utf8'),
+        ca: [
+            fs.readFileSync(config.server.certificate.ca, 'utf8')
+        ]
+    }, express());
+} else {
+    app = express();
+}
 
 // Connect to the MongoDB
 mongoose.Promise = global.Promise;

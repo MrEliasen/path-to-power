@@ -4,7 +4,14 @@
     "twitch": {
         "clientId": ""
     },
-    "server_port": 8086,
+    "server_port": {
+        "port": 8086,
+        "certificate": {
+            "cert": "",
+            "key": "",
+            "ca": "",
+        }
+    },
     "game": {
         "logout_timer": 5000,
         "spawn" : {
