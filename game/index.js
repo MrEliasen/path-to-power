@@ -1,3 +1,7 @@
+// Required for compiling
+require("babel-core/register");
+require("babel-polyfill");
+
 // native modules
 import fs from 'fs';
 import http from 'http';
