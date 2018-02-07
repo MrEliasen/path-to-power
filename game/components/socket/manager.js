@@ -179,11 +179,15 @@ export default class SocketManager extends EventEmitter {
      * @param  {String} roomId  Room ID to join
      */
     userJoinRoom(user_id, roomId) {
-        this.get(user_id)
+        const action = this.get(user_id);
+
+        action
             .then((socket) => {
                 socket.join(roomId);
             })
             .catch(() => {});
+
+        return action;
     }
 
     /**
@@ -192,10 +196,14 @@ export default class SocketManager extends EventEmitter {
      * @param  {String} roomId  Room ID to leaves
      */
     userLeaveRoom(user_id, roomId) {
-        this.get(user_id)
+        const action = this.get(user_id);
+
+        action
             .then((socket) => {
                 socket.leave(roomId);
             })
             .catch(() => {});
+
+        return action;
     }
 }

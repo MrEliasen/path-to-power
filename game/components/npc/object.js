@@ -374,7 +374,7 @@ export default class NPC extends Character {
 
                 // if the target died
                 if (!attack.healthLeft) {
-                    return this.Game.characterManager.kill(this.target.user_id, character)
+                    return this.Game.characterManager.kill(this.target.user_id, this)
                         .then((oldLocationId) => {
                             // send event to the target
                             this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} hits you with their ${weapon}, dealing ${attack.damageDealt} damage, killing you.`);

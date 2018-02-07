@@ -11,3 +11,12 @@ export function dice(min = 0, max) {
         )) + Math.min(min, max)
     );
 }
+
+/**
+ * Takes a full, deep-copy, of a given object
+ * @param {Object} toCopy Object to copy
+ * @return {Object}
+ */
+export function deepCopyObject(toCopy) {
+    return JSON.parse(JSON.stringify(toCopy));
+}

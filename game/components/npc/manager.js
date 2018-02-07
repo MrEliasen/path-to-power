@@ -1,9 +1,10 @@
 import Promise from 'bluebird';
 import NPC from './object';
 import NPCList from '../../data/npcs.json';
-import { NPC_JOINED_GRID, NPC_LEFT_GRID } from './types';
+import { NPC_JOINED_GRID, NPC_LEFT_GRID, UPDATE_GRID_NPCS } from './types';
 import { UPDATE_GROUND_ITEMS } from '../item/types';
 import namesList from '../../data/names.json';
+import {deepCopyObject} from '../../helper';
 
 export default class NPCManager {
     constructor(Game) {
@@ -34,15 +35,6 @@ export default class NPCManager {
     }
 
     /**
-     * Takes a full, deep-copy, of a given object
-     * @param {Object} toCopy Object to copy
-     * @return {Object}
-     */
-    deepCopyObject(toCopy) {
-        return JSON.parse(JSON.stringify(toCopy));
-    }
-
-    /**
      * Adds a NPC class object to the managed list
      * @param {Object} npcData The needed NPC data to create a new npc
      */
@@ -53,7 +45,7 @@ export default class NPCManager {
         }
 
         // get the NPC template
-        const npcTemplate = this.deepCopyObject(NPCList[npcData.id]);
+        const npcTemplate = deepCopyObject(NPCList[npcData.id]);
 
         // generate location is one of not set
         npcTemplate.location = npcData.location;
@@ -136,7 +128,7 @@ export default class NPCManager {
     reset(NPC) {
         this.Game.mapManager.get(NPC.location.map).then((gameMap) => {
             // get the NPC template
-            const npcTemplate = this.deepCopyObject(NPCList[NPC.npc_id]);
+            const npcTemplate = deepCopyObject(NPCList[NPC.npc_id]);
 
             // generate location is one of not set
             NPC.location = npcTemplate.location;
@@ -296,6 +288,18 @@ export default class NPCManager {
     changeLocation(NPC, newLocation = {}, oldLocation = {}) {
         //this.removeFromGrid(oldLocation, NPC);
         //this.addToGrid(newLocation, NPC);
+    }
+
+    /**
+     * Updates the client map location information
+     * @param  {String} locationId  Grid Location Id to update
+     */
+    updateGrid(location, locationId) {
+        // dispatch to client
+        this.Game.socketManager.dispatchToRoom(locationId, {
+            type: UPDATE_GRID_NPCS,
+            payload: this.getLocationList(location.map, location.x, location.y, true)
+        });
     }
 
     /**

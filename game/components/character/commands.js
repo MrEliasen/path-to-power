@@ -154,12 +154,19 @@ function cmdPunch(socket, command, params, Game) {
                             .catch(() => {});
                 }
 
-                // update the target client's character inforamtion
-                Game.characterManager.updateClient(target.user_id, 'stats');
+                // if the target is an NPC, update their health for all clients in the grid
+                if (!target.user_id) {
+                    Game.npcManager.updateGrid(character.location, character.getLocationId());
+                } else {
+                    // otherwise
+                    // update the target client's character inforamtion
+                    Game.characterManager.updateClient(target.user_id, 'stats');
+                    // send event to the target
+                    Game.eventToUser(target.user_id, 'info', `${character.name} punch you, dealing ${attack.damageDealt} damage.`);
+                }
+
                 // send event to the attacker
                 Game.eventToSocket(socket, 'info', `You punch ${target.name}, dealing ${attack.damageDealt} damage.`);
-                // send event to the target
-                Game.eventToUser(target.user_id, 'info', `${character.name} punch you, dealing ${attack.damageDealt} damage.`);
                 // send event to the bystanders
                 Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} punch ${target.name}.`, [character.user_id, target.user_id]);
             });
@@ -249,12 +256,18 @@ function cmdShoot(socket, command, params, Game) {
                         .catch(() => {});
                 }
 
-                // update the target client's character inforamtion
-                Game.characterManager.updateClient(target.user_id, 'stats');
+                // if the target is an NPC, update their health on the client side
+                if (!target.user_id) {
+                    Game.npcManager.updateGrid(character.location, character.getLocationId());
+                } else {
+                    // update the target client's character inforamtion
+                    Game.characterManager.updateClient(target.user_id, 'stats');
+                    // send event to the target
+                    Game.eventToUser(target.user_id, 'info', `${character.name} shoots you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
+                }
+
                 // send event to the attacker
                 Game.eventToSocket(socket, 'info', `You shoot ${target.name} with your ${weapon}, dealing ${attack.damageDealt} damage.`);
-                // send event to the target
-                Game.eventToUser(target.user_id, 'info', `${character.name} shoots you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
                 // send event to the bystanders
                 Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} shoot ${target.name} with a ${weapon}.`, [character.user_id, target.user_id]);
             });
@@ -314,12 +327,18 @@ function cmdStrike(socket, command, params, Game) {
                                 .catch(() => {});
                         }
 
-                        // update the target client's character inforamtion
-                        Game.characterManager.updateClient(target.user_id, 'stats');
+                        // if the target is an NPC, update their health on the client side
+                        if (!target.user_id) {
+                            Game.npcManager.updateGrid(character.location, character.getLocationId());
+                        } else {
+                            // update the target client's character inforamtion
+                            Game.characterManager.updateClient(target.user_id, 'stats');
+                            // send event to the target
+                            Game.eventToUser(target.user_id, 'info', `${character.name} strikes you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
+                        }
+
                         // send event to the attacker
                         Game.eventToSocket(socket, 'info', `You strike ${target.name} with your ${weapon}, dealing ${attack.damageDealt} damage.`);
-                        // send event to the target
-                        Game.eventToUser(target.user_id, 'info', `${character.name} strikes you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
                         // send event to the bystanders
                         Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} strike ${target.name} with a ${weapon}.`, [character.user_id, target.user_id]);
                     })

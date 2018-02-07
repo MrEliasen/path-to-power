@@ -756,7 +756,7 @@ export default class CharacterManager {
                 // get the map so we know where to respawn the player
                 this.Game.mapManager.get(character.location.map).then((gameMap) => {
                     // kill the character
-                    character.die().then((droppedLoot) => {
+                    character.die().then(async (droppedLoot) => {
                         // save the old location before it is overwritten by the die() method on the character
                         const oldLocationId = character.getLocationId();
                         // save the old location
@@ -768,7 +768,7 @@ export default class CharacterManager {
                         };
 
                         // leave the old grid room
-                        this.Game.socketManager.userLeaveRoom(character.user_id, character.getLocationId());
+                        await this.Game.socketManager.userLeaveRoom(character.user_id, character.getLocationId());
 
                         // remove player from the grid list of players
                         this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
@@ -788,9 +788,9 @@ export default class CharacterManager {
                         });
 
                         // TODO: Test if this works! Need more players to test.
-                        const cashReward = Math.floor(droppedLoot.cash / targetedBy.length);
-                        const expReward  = Math.floor(droppedLoot.exp / targetedBy.length);
-                        targetedBy.forEach((char) => {
+                        const cashReward = Math.floor(droppedLoot.cash / droppedLoot.targetedBy.length);
+                        const expReward  = Math.floor(droppedLoot.exp / droppedLoot.targetedBy.length);
+                        droppedLoot.targetedBy.forEach((char) => {
                             // make sure its a player
                             if (char.user_id) {
                                 // give them an equal amount of cash and exp, from the dropped loot
@@ -800,14 +800,10 @@ export default class CharacterManager {
                             }
                         });
 
-                        // give the cash to the killer
-                        killer.updateCash(droppedLoot.cash);
-
-                        // Update the killers character stats
-                        this.updateClient(killer.user_id);
-
-                        // Let the killer know how much money they received
-                        this.Game.eventToUser(killer.user_id, 'info', `You find ${droppedLoot.cash} money on ${character.name} body.`);
+                        // Let the killer know how much money they received, if its not an NPC
+                        if (killer.user_id) {
+                            this.Game.eventToUser(killer.user_id, 'info', `You find ${droppedLoot.cash} money on ${character.name} body.`);
+                        }
 
                         // update the client's ground look at the location
                         this.Game.socketManager.dispatchToRoom(oldLocationId, {
@@ -822,7 +818,7 @@ export default class CharacterManager {
                         );
 
                         // update the socket room
-                        this.Game.socketManager.userJoinRoom(character.user_id, character.getLocationId());
+                        await this.Game.socketManager.userJoinRoom(character.user_id, character.getLocationId());
 
                         // update client/socket character and location information
                         this.updateClient(character.user_id);
