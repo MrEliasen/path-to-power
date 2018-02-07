@@ -1,6 +1,5 @@
 // Load required packages
 var mongoose = require('mongoose'),
-    config = require('../../../config.json'),
     moment = require('moment');
 
 // Define our product schema
@@ -27,11 +26,11 @@ var ItemSchema = new mongoose.Schema({
 ItemSchema.pre('save', function (callback) {
     if (!this.date_added) {
         // set the date for when it was created
-        this.date_added = moment().format(config.rfc2822);
+        this.date_added = moment().format('ddd, D MMM YYYY H:mm:ss [GMT]');
     }
 
     // set the date for when it was updated
-    this.date_updated = moment().format(config.rfc2822);
+    this.date_updated = moment().format('ddd, D MMM YYYY H:mm:ss [GMT]');
     
     callback();
 });

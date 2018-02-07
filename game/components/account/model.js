@@ -1,8 +1,7 @@
 // Load required packages
 var mongoose = require('mongoose'),
     moment = require('moment'),
-    uuid = require('uuid/v4'),
-    config = require('../../../config.json');
+    uuid = require('uuid/v4');
 
 // Define our product schema
 var AccountSchema = new mongoose.Schema({
@@ -25,7 +24,7 @@ var AccountSchema = new mongoose.Schema({
 AccountSchema.pre('save', function (callback) {
     if (!this.date_added) {
         // set the date for when it was created
-        this.date_added = moment().format(config.rfc2822);
+        this.date_added = moment().format('ddd, D MMM YYYY H:mm:ss [GMT]');
     }
 
     if (!this.session_token) {
@@ -34,7 +33,7 @@ AccountSchema.pre('save', function (callback) {
     }
 
     // set the date for when it was updated
-    this.date_updated = moment().format(config.rfc2822);
+    this.date_updated = moment().format('ddd, D MMM YYYY H:mm:ss [GMT]');
     callback();
 });
 

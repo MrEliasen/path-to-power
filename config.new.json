@@ -4,7 +4,6 @@
     "twitch": {
         "clientId": ""
     },
-    "rfc2822": "ddd, D MMM YYYY H:mm:ss [GMT]",
     "server_port": 8086,
     "game": {
         "logout_timer": 5000,

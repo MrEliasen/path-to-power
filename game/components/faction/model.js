@@ -1,6 +1,5 @@
 // Load required packages
 var mongoose = require('mongoose'),
-    config = require('../../../config.json'),
     moment = require('moment');
 
 // Define our product schema
@@ -31,11 +30,11 @@ var FactionSchema = new mongoose.Schema({
 FactionSchema.pre('save', function (callback) {
     if (!this.date_added) {
         // set the date for when it was created
-        this.date_added = moment().format(config.rfc2822);
+        this.date_added = moment().format('ddd, D MMM YYYY H:mm:ss [GMT]');
     }
 
     // set the date for when it was updated
-    this.date_updated = moment().format(config.rfc2822);
+    this.date_updated = moment().format('ddd, D MMM YYYY H:mm:ss [GMT]');
     // create a lower-case version of the name and tag, to make it easier to find.
     this.name_lowercase = this.name.toLowerCase();
     this.tag_lowercase = this.tag.toLowerCase();
