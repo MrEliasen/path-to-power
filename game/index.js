@@ -205,4 +205,4 @@ class Game {
     }
 }
 
-export default Game;
+exports.Game = Game;

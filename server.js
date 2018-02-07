@@ -41,13 +41,14 @@ if (!fs.existsSync('./config.json')) {
  ************************************/
 // Create our Express server
 const app = express();
+const Game = require('./game').Game;
 
 // Connect to the MongoDB
 mongoose.Promise = global.Promise;
-mongoose.connect(config.mongo_db, {useMongoClient: true}).then(
+mongoose.connect(config.mongo_db).then(
     () => {
         const webServer = http.createServer(app);
-        const GameServer = require('./game')(webServer, config);
+        const GameServer = new Game(webServer, config);
 
         // On shutdown signal, gracefully close all connections and clear the memory store.
         process.on('SIGTERM', function() {
