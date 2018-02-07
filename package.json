@@ -3,8 +3,8 @@
     "version": "0.1.0",
     "description": "The server for a simple MUD inspired browser-based multiplayer game.",
     "scripts": {
-        "start": "nodemon -L server.js --inspect --exec babel-node --presets env,stage-0",
-        "build": "babel server.js -d dist",
+        "start": "nodemon -L ./game --inspect --exec babel-node --presets env,stage-0",
+        "build": "babel game --out-dir dist --source-maps inline --copy-files",
         "serve": "node dist/index.js"
     },
     "repository": {
