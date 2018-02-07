@@ -103,13 +103,17 @@ export default class AccountManager {
                 // get the list of online players (after we loaded the character to make sure it is included)
                 gameData.players = this.Game.characterManager.getOnline();
 
-                this.Game.eventToSocket(socket, 'multiline', [
-                    '††††† Path To Power Online †††††',
-                    '--------------------------------',
-                    'Welcome! If you would like to know how to play the game, click the menu in the top-right.',
-                    'If you want to see a list of all commands, type /commandlist',
-                    'Enjoy!'
-                ]);
+                // send the welcome after 2 seconds
+                // TODO: Recode this!
+                setTimeout(() => {
+                    this.Game.eventToSocket(socket, 'multiline', [
+                        '††††† Path To Power Online †††††',
+                        '- - - - - - - - - - - - - - - - - - - - - - - - - -',
+                        'Welcome! If you would like to know how to play the game, click the menu in the top-right.',
+                        'You move on the arrow keys, and if you want to see a list of all commands, type /commandlist',
+                        'Enjoy!'
+                    ]);
+                }, 1000);
 
                 return this.Game.socketManager.dispatchToSocket(socket, {
                     type: ACCOUNT_AUTHENTICATE_SUCCESS,
