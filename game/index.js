@@ -5,11 +5,11 @@ require("babel-polyfill");
 // native modules
 import fs from 'fs';
 import http from 'http';
+import https from 'https';
 import readline from 'readline-sync';
 import child_process from 'child_process';
 
 // 3rd party
-import https from 'https';
 import express from 'express';
 import mongoose from 'mongoose';
 
@@ -46,25 +46,28 @@ if (!fs.existsSync(`${__dirname}/../config.json`)) {
  ************************************/
 // Create our Express server
 const Game = require('./game').Game;
-let app;
-
-if (config.server.certificate.key) {
-    app = https.createServer({
-        key: fs.readFileSync(config.server.certificate.key, 'utf8'),
-        cert: fs.readFileSync(config.server.certificate.cert, 'utf8'),
-        ca: [
-            fs.readFileSync(config.server.certificate.ca, 'utf8')
-        ]
-    }, express());
-} else {
-    app = express();
-}
+const app = express();
 
 // Connect to the MongoDB
 mongoose.Promise = global.Promise;
 mongoose.connect(config.mongo_db).then(
     () => {
-        const webServer = http.createServer(app);
+        let webServer;
+
+        // if an SSL cert is defined, start a HTTPS server
+        if (config.server.certificate.key) {
+            webServer = https.createServer({
+                key: fs.readFileSync(config.server.certificate.key, 'utf8'),
+                cert: fs.readFileSync(config.server.certificate.cert, 'utf8'),
+                ca: [
+                    fs.readFileSync(config.server.certificate.ca, 'utf8')
+                ]
+            }, app);
+        }else {
+            // otherwise an HTTP server
+            webServer = http.createServer(app);
+        }
+
         const GameServer = new Game(webServer, config);
 
         // On shutdown signal, gracefully close all connections and clear the memory store.
