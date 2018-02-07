@@ -381,7 +381,8 @@ export default class CharacterManager {
             name: character_name,
             location: {
                 map: city
-            }
+            },
+            stats: {...this.Game.config.game.defaultStats}
         });
 
         newCharacter.save(function(err) {

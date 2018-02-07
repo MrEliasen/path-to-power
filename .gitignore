@@ -4,6 +4,8 @@ logs
 npm-debug.log*
 .DS_STORE
 error.log
+debug.log
+combined.log
 
 # Runtime data
 pids
