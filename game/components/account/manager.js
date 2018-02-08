@@ -103,6 +103,14 @@ export default class AccountManager {
                 // get the list of online players (after we loaded the character to make sure it is included)
                 gameData.players = this.Game.characterManager.getOnline();
 
+                this.Game.socketManager.dispatchToSocket(socket, {
+                    type: ACCOUNT_AUTHENTICATE_SUCCESS,
+                    payload: {
+                        character: character.exportToClient(),
+                        gameData
+                    }
+                });
+
                 // send the welcome after 2 seconds
                 // TODO: Recode this!
                 setTimeout(() => {
@@ -114,14 +122,6 @@ export default class AccountManager {
                         'Enjoy!'
                     ]);
                 }, 1000);
-
-                return this.Game.socketManager.dispatchToSocket(socket, {
-                    type: ACCOUNT_AUTHENTICATE_SUCCESS,
-                    payload: {
-                        character: character.exportToClient(),
-                        gameData
-                    }
-                })
             })
         })
     }
