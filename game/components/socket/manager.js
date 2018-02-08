@@ -11,6 +11,8 @@ export default class SocketManager extends EventEmitter {
         this.Game = Game;
         // holds the active socket clients, for logged in users
         this.clients = {};
+        // webserver
+        this.server = server;
         // setup the socket server
         this.io = io(server);
         // disconnect timers (for DC events)
@@ -41,7 +43,7 @@ export default class SocketManager extends EventEmitter {
         this.io.on('connection', this.onConnection.bind(this));
 
         // listen for connections
-        this.io.listen(this.Game.config.server.port);
+        this.server.listen(this.Game.config.server.port);
     }
 
     /**

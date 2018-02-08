@@ -4,12 +4,12 @@
     "twitch": {
         "clientId": ""
     },
-    "server_port": {
+    "server": {
         "port": 8086,
         "certificate": {
             "cert": "",
             "key": "",
-            "ca": "",
+            "ca": ""
         }
     },
     "game": {

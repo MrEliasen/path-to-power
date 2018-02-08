@@ -63,7 +63,7 @@ mongoose.connect(config.mongo_db).then(
                     fs.readFileSync(config.server.certificate.ca, 'utf8')
                 ]
             }, app);
-        }else {
+        } else {
             // otherwise an HTTP server
             webServer = http.createServer(app);
         }
