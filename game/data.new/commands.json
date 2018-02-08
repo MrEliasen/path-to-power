@@ -96,6 +96,9 @@
     "/aim": {
       "description": "Take aim at another player/npc, locking them in the current location. Usage: /aim <target name>"
     },
+    "/target": {
+      "description": "Take aim at another player/npc, locking them in the current location. Usage: /target <target name>"
+    },
     "/give": {
       "description": "Give cash to another player. Usage: /give <player name> <amount>"
     },

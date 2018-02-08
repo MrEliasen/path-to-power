@@ -353,7 +353,8 @@ function cmdStrike(socket, command, params, Game) {
 module.exports = [
     {
         commandKeys: [
-            '/aim'
+            '/aim',
+            '/target'
         ],
         method: cmdAim
     },
