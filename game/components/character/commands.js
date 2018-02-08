@@ -1,13 +1,13 @@
 function checkAttackCooldown (character, Game, callback) {
     // check if the character has an existing cooldown for this action, if they are trying to hide
-    const ticksLeft = Game.cooldownManager.ticksLeft(character, 'action_attack');
+    const ticksLeft = Game.cooldownManager.ticksLeft(character, 'attack');
 
     if (ticksLeft) {
         return Game.eventToUser(character.user_id, 'error', `You cannot attack so fast. You must wait another ${(ticksLeft / 10)} seconds.`);
     }
 
     // add the search cooldown to the character
-    Game.cooldownManager.add(character, 'action_attack', 2, true);
+    Game.cooldownManager.add(character, 'attack', null, true);
 
     // return the new cooldown 
     callback();
@@ -33,7 +33,7 @@ function cmdAim(socket, command, params, Game) {
                     }
 
                     // add the search cooldown to the character
-                    const newCooldown = Game.cooldownManager.add(character, 'action_aim', 1);
+                    const newCooldown = Game.cooldownManager.add(character, 'aim');
 
                     // set the new target, releasing the old target's gridlock, and gridlocking the new target.
                     character.setTarget(target);

@@ -35,6 +35,17 @@
                 "enabled": true,
                 "interval": 1800000
             }
-        ]
+        ],
+        "playerCooldowns":  {
+            "move": 0.3,
+            "skills": 2.0,
+            "attack": 2.0,
+            "aim": 1.0,
+            "chat": 1.0,
+            "faction_invite": 3.0,
+            "skill_snoop": 10.0,
+            "skill_hide": 30.0,
+            "skill_search": 5.0
+        }
     }
 }

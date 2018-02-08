@@ -6,7 +6,6 @@ export default class SkillSnoop {
         this.command = '/snoop';
         this.value = 1;
         this.improve = true;
-        this.cooldown = 20;
 
         Object.assign(this, {...modifiers});
     }

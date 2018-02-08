@@ -10,7 +10,6 @@ export default class SkillHide {
         this.command = '/hide';
         this.value = 1;
         this.improve = true;
-        this.cooldown = 5; // seconds
 
         Object.assign(this, {...modifiers});
     }

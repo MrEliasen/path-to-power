@@ -3,7 +3,6 @@ import Cooldown from './object';
 export default class CooldownManager {
     constructor(Game) {
         this.Game = Game;
-    
         this.cleanup = this.cleanup.bind(this);
     }
 
@@ -14,7 +13,20 @@ export default class CooldownManager {
      * @param {character}  character The character object to add the cooldown to.
      * @param {Boolean} autostart Will being the timer when created, instead of manually.
      */
-    add(character, action, duraction, autostart = false) {
+    add(character, action, duraction = null, autostart = false) {
+        if (!duraction) {
+            // if no duration is specified, load the default from the config (if its not an NPC)
+            if (this.Game.config.game.playerCooldowns[action]) {
+                duraction = this.Game.config.game.playerCooldowns[action];
+            }
+
+            // if no duration is set after the above, just stop it here as the 
+            // cooldown is poinless without a duration
+            if (!duraction) {
+                return;
+            }
+        }
+
         // create the new cooldown
         const newCooldown = new Cooldown(action, duraction, autostart);
         // add it to the characters cooldown list cooldowns

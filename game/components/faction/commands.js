@@ -136,7 +136,7 @@ function cmdFactionInvite(socket, command, params, Game) {
                     }
 
                     // add the search cooldown to the character
-                    Game.cooldownManager.add(character, 'action_faction_invite', 3, true);
+                    Game.cooldownManager.add(character, 'faction_invite', null, true);
 
                     // Create the invite
                     character.faction.inviteMember(targetCharacter);
@@ -215,7 +215,7 @@ function cmdFactionSay(socket, command, params, Game) {
             }
 
             // add the search cooldown to the character
-            Game.cooldownManager.add(character, 'action_chat', 1, true);
+            Game.cooldownManager.add(character, 'chat', null, true);
 
             Game.socketManager.dispatchToRoom(character.faction.faction_id, {
                 type: CHAT_MESSAGE,

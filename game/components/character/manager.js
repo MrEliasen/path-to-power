@@ -658,7 +658,7 @@ export default class CharacterManager {
             }
 
             // set the cooldown of the move action
-            const newCooldown = this.Game.cooldownManager.add(character, cooldownAction, 2.0);
+            const newCooldown = this.Game.cooldownManager.add(character, cooldownAction);
 
             // set the location we intend to move the character to
             newLocation[moveAction.grid] = newLocation[moveAction.grid] + moveAction.direction;

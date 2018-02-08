@@ -3,14 +3,14 @@ import { NEW_EVENT } from '../../types';
 
 function checkChatCooldown (character, Game, callback) {
     // check if the character has an existing cooldown for this action, if they are trying to hide
-    const ticksLeft = Game.cooldownManager.ticksLeft(character, 'action_chat');
+    const ticksLeft = Game.cooldownManager.ticksLeft(character, 'chat');
 
     if (ticksLeft) {
         return Game.eventToUser(character.user_id, 'error', `You must wait another ${(ticksLeft / 10)} seconds before you can send another message.`);
     }
 
     // add the search cooldown to the character
-    Game.cooldownManager.add(character, 'action_chat', 1, true);
+    Game.cooldownManager.add(character, 'chat', null, true);
 
     // return the new cooldown 
     callback();
