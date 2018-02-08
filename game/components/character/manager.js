@@ -121,7 +121,7 @@ export default class CharacterManager {
             const character = this.characters.find((obj) => obj.user_id === user_id);
 
             if (!character) {
-                console.trace();
+                this.Game.logger.error(console.trace());
                 return reject(`Character ${user_id} was not found. It was likely never loaded.`);
             }
 
