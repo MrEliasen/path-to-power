@@ -62,26 +62,29 @@ export default class MapManager {
      */
     updateClient(user_id) {
         // Get the character object
-        this.Game.characterManager.get(user_id).then((character) => {
-            const location = [
-                character.location.map,
-                character.location.x,
-                character.location.y
-            ]
+        this.Game.characterManager.get(user_id)
+            .then((character) => {
+                const location = [
+                    character.location.map,
+                    character.location.x,
+                    character.location.y
+                ]
 
-            // dispatch to client
-            this.Game.socketManager.dispatchToUser(user_id, {
-                type: JOIN_GRID,
-                payload: {
-                    description: this.generateDescription(),
-                    players: this.Game.characterManager.getLocationList(...location, character.user_id, true),
-                    npcs: this.Game.npcManager.getLocationList(...location, true),
-                    items: this.Game.itemManager.getLocationList(...location, true),
-                    structures: this.Game.structureManager.getGrid(...location, true)
-                }
+                // dispatch to client
+                this.Game.socketManager.dispatchToUser(user_id, {
+                    type: JOIN_GRID,
+                    payload: {
+                        description: this.generateDescription(),
+                        players: this.Game.characterManager.getLocationList(...location, character.user_id, true),
+                        npcs: this.Game.npcManager.getLocationList(...location, true),
+                        items: this.Game.itemManager.getLocationList(...location, true),
+                        structures: this.Game.structureManager.getGrid(...location, true)
+                    }
+                });
+            })
+            .catch((err) => {
+                this.Game.logger.error(err);
             });
-        })
-        .catch();
     }
 
     /**
