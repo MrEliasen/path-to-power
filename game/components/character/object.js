@@ -31,6 +31,8 @@ export default class Character {
             exp: 0,
             inventorySize: 30,
         }
+        // keeps track of all timers
+        this.timers = [];
 
         // assign all the character modifiers, and deep-copy the stats
         Object.assign(this, {
@@ -49,7 +51,17 @@ export default class Character {
             this.location.y = spawn.y;
         }
 
+        this.initTimers();
+
         this.gridLock = this.gridLock.bind(this);
+    }
+
+    initTimers() {
+        // run the "garbage collection" every N seconds
+        this.timers.push({
+            name: "cooldownGc",
+            timer: setInterval(this.Game.cooldownManager.cleanup, 1000, this)
+        });
     }
 
     /**

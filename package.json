@@ -5,7 +5,7 @@
     "scripts": {
         "start": "nodemon -L ./game --inspect --exec babel-node --presets env,stage-0",
         "build": "babel game --out-dir dist --source-maps inline --copy-files",
-        "serve": "node dist/index.js"
+        "serve": "NODE_ENV=production node dist/index.js"
     },
     "repository": {
         "type": "git",

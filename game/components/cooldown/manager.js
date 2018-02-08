@@ -3,9 +3,8 @@ import Cooldown from './object';
 export default class CooldownManager {
     constructor(Game) {
         this.Game = Game;
-
-        // run the "garbage collection" every N seconds
-        this.gc = setInterval(this.cleanup.bind(this), 10000);
+    
+        this.cleanup = this.cleanup.bind(this);
     }
 
     /**
@@ -25,11 +24,11 @@ export default class CooldownManager {
     }
 
     ticksLeft(character, action) {
-        const cooldown = character.cooldowns.find((cd) => cd.action === action);
+        const cooldown = character.cooldowns.find((cd) => cd.action === action && cd.ticks > 0);
 
         // if there are no timer set, return 0 to aviod locking character from certain actions
         // TODO: Reinitiate timers on server reboot (if any)
-        if (!cooldown || cooldown.remove) {
+        if (!cooldown) {
             return 0;
         }
 
@@ -41,12 +40,10 @@ export default class CooldownManager {
     }
 
     /**
-     * Removes expired cooldowns
+     * Removes expired cooldowns from characters
+     * @param  {Character} character The character object
      */
-    cleanup() {
-        this.Game.characterManager.characters.forEach((character) => {
-            character.cooldowns = character.cooldowns.filter((obj) => !obj.remove);
-        });
-        //this.Game.logger.info(`Cooldown GC removed ${total - this.cooldowns.length} expired cooldowns.`);
+    cleanup(character) {
+        character.cooldowns = character.cooldowns.filter((obj) => obj.remove);
     }
 }
