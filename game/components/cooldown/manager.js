@@ -25,12 +25,11 @@ export default class CooldownManager {
     }
 
     ticksLeft(character, action) {
-        const cooldownAction = 'move';
         const cooldown = character.cooldowns.find((cd) => cd.action === action);
 
         // if there are no timer set, return 0 to aviod locking character from certain actions
         // TODO: Reinitiate timers on server reboot (if any)
-        if (!cooldown || !cooldown.timer) {
+        if (!cooldown || cooldown.remove) {
             return 0;
         }
 
