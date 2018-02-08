@@ -28,7 +28,7 @@ export default class Cooldown {
         this.timer = setInterval(() => {
             this.ticks--;
 
-            if (this.ticks <= 0) {
+            if (this.ticks === 0) {
                 clearInterval(this.timer);
                 this.action = null;
                 this.timer = null;

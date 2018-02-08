@@ -22,8 +22,6 @@ export default class CharacterManager {
         this.Game = Game;
         // keeps track of all current in-game characters
         this.characters = [];
-        // keeps track of character locations on the maps
-        this.locations = {}
         // log manager progress
         this.Game.logger.debug('CharacterManager::constructor Loaded');
         // listen for dispatches from the socket manager
@@ -528,7 +526,7 @@ export default class CharacterManager {
      * @return {Array}     Array of players
      */
     getLocationList(map, x, y, ignore = null, toClient = false) {
-        let players = this.locations[`${map}_${y}_${x}`] || [];
+        let players = this.characters.filter((obj) => obj.location.map == map && obj.location.y == y && obj.location.x == x);
 
         if (!toClient) {
             return players;
@@ -622,8 +620,8 @@ export default class CharacterManager {
      * @param  {Object} newLocation {map, x ,y}
      */
     changeLocation(character, newLocation = {}, oldLocation = {}) {
-        this.removeFromGrid(oldLocation, character);
-        this.addToGrid(newLocation, character);
+        //this.removeFromGrid(oldLocation, character);
+        //this.addToGrid(newLocation, character);
     }
 
     /**
