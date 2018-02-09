@@ -17,8 +17,6 @@ provide feedback.
 If you plan to contribute with new features or alterations to existing features
 or data, remember to also add/update the necessary documentation.
 
-Remember to use the 
-
 ## Code of Conduct
 
 In the interest of fostering an open and welcoming environment, we as
