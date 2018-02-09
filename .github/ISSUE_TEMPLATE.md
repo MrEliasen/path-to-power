@@ -22,13 +22,8 @@
 ## Environment Information
 
 Operating System: 
-
 NodeJS version: 
-
-If using Yarn, version: 
-
-PTP Server Version: 
-
+Which version of the PTP server is your project based on:
 
 ## Steps to Reproduce
 
@@ -41,7 +36,6 @@ PTP Server Version:
 1.
 2.
 3.
-...
 
 ## Expected Behavior
 
