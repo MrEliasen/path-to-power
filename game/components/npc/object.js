@@ -281,7 +281,7 @@ export default class NPC extends Character {
                         }, this.logic.respawn * 1000)
                     });
 
-                    loot.exp = this.stats.expReward;
+                    loot.exp = this.stats.exp;
 
                     resolve(loot);
                 })

@@ -789,10 +789,11 @@ export default class CharacterManager {
                         const cashReward = Math.floor(droppedLoot.cash / droppedLoot.targetedBy.length);
                         const expReward  = Math.floor(droppedLoot.exp / droppedLoot.targetedBy.length);
                         droppedLoot.targetedBy.forEach((char) => {
+                            // give them an equal amount of cash and exp, from the dropped loot
+                            char.updateCash(cashReward);
+
                             // make sure its a player
                             if (char.user_id) {
-                                // give them an equal amount of cash and exp, from the dropped loot
-                                char.updateCash(cashReward);
                                 char.updateExp(expReward);
                                 this.updateClient(char.user_id);
                             }

@@ -14,11 +14,6 @@
     },
     "game": {
         "logout_timer": 5000,
-        "spawn" : {
-            "map": "",
-            "x": 1,
-            "y": 1
-        },
         "defaultStats": {
             "health_max": 100,
             "money": 300,
@@ -38,7 +33,6 @@
         ],
         "playerCooldowns":  {
             "move": 0.3,
-            "skills": 2.0,
             "attack": 2.0,
             "aim": 1.0,
             "chat": 1.0,

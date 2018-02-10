@@ -4,7 +4,7 @@
         "stats" : {
             "health" : 250,
             "money" : 15330,
-            "expReward": 175
+            "exp": 175
         },
         "abilities" : {
             "acc" : 50
@@ -50,7 +50,7 @@
         "stats" : {
             "health" : 750,
             "money" : 55330,
-            "expReward": -1250
+            "exp": -1250
         },
         "abilities" : {
             "acc" : 70
@@ -92,7 +92,7 @@
         "stats" : {
             "health" : 200,
             "money" : 1347,
-            "expReward": -650
+            "exp": -650
         },
         "abilities" : {
             "acc" : 45
@@ -125,7 +125,7 @@
         "stats" : {
             "health" : 75,
             "money" : 45,
-            "expReward": 35
+            "exp": 35
         },
         "abilities" : {
             "acc" : 20
@@ -158,7 +158,7 @@
         "stats" : {
             "health" : 50,
             "money" : 143,
-            "expReward": 23
+            "exp": 23
         },
         "abilities" : {
             "acc" : 15
@@ -189,7 +189,7 @@
         "stats" : {
             "health" : 135,
             "money" : 342,
-            "expReward": 65
+            "exp": 65
         },
         "abilities" : {
             "acc" : 33
@@ -220,7 +220,7 @@
         "stats" : {
             "health" : 100,
             "money" : 412,
-            "expReward": 50
+            "exp": 50
         },
         "abilities" : {
             "acc" : 28
@@ -251,7 +251,7 @@
         "stats" : {
             "health" : 200,
             "money" : 4300,
-            "expReward": 85
+            "exp": 85
         },
         "abilities" : {
             "acc" : 38
@@ -297,7 +297,7 @@
         "stats" : {
             "health" : 375,
             "money" : 7535,
-            "expReward": 285
+            "exp": 285
         },
         "abilities" : {
             "acc" : 65
