@@ -1,4 +1,6 @@
 import uuid from 'uuid/v4';
+import {dice} from '../../helper';
+
 /*{
     id: "",
     name: "",
@@ -38,6 +40,8 @@ export default class Item {
         this.Game = Game;
 
         this.fingerprint = uuid();
+
+        this.shufflePrice = this.shufflePrice.bind(this);
     }
 
     /**
@@ -140,5 +144,18 @@ export default class Item {
             .catch((err) => {
                 return;
             });
+    }
+
+    /**
+     * Will update the price of a given item, if a price range is available
+     * @return {Number} The new price
+     */
+    shufflePrice() {
+        if (!this.stats.priceRange || this.stats.priceRange.length !== 3) {
+            return this.stats.price;
+        }
+
+        this.stats.price = dice(this.stats.priceRange[1], this.stats.priceRange[2]);
+        return this.stats.price;
     }
 }

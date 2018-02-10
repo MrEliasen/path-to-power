@@ -137,8 +137,13 @@ class Game {
             case 'newday':
                 callback = () => {
                     // NOTE: if you want to add anything to the "new day" timer, do it here
-                    this.shopManager.resupplyAll();
-                    this.socketManager.dispatchToServer(addNews('The sun rises once again, and wave of new drugs flood the streets.'));
+                    this.shopManager.resupplyAll()
+                        .then(() => {
+                            this.socketManager.dispatchToServer(addNews('The sun rises once again, and wave of new drugs flood the streets.'));
+                        })
+                        .catch(() => {
+
+                        });
                 };
                 break;
         }

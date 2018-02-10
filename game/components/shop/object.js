@@ -55,11 +55,14 @@ export default class Shop {
         }
 
         return this.sell.list.map((item) => {
+            const itemTemplate = this.Game.itemManager.getTemplate(item.id);
+
             return {
                 id: item.id,
                 name: item.name,
                 quantity: item.shopQuantity,
-                expRequired: item.expRequired
+                expRequired: item.expRequired,
+                price: itemTemplate.stats.price
             }
         })
     }
@@ -146,9 +149,11 @@ export default class Shop {
                     }
                 }
 
+                const itemTemplate = this.Game.itemManager.getTemplate(item.id);
+
                 // will hold the item, which was sold
                 let soldItem;
-                let pricePerUnit = item.stats.price * this.buy.buyPricePercent;
+                let pricePerUnit = itemTemplate.stats.price * this.buy.buyPricePercent;
 
                 // remove item from inventory/reduce amount
                 if (item.stats.stackable) {
@@ -276,7 +281,7 @@ export default class Shop {
                     return this.Game.eventToUser(user_id, 'error', 'Invalid item. The item might no longer be available.');
                 }
 
-                const price = (item.stats.price * this.sell.sellPricePercent);
+                const price = (itemTemplate.stats.price * this.sell.sellPricePercent);
 
                 // check if the character has enough money
                 if (character.stats.money < price) {
@@ -371,7 +376,7 @@ export default class Shop {
             // push the item to the sell list
             this.sell.list.push(newItem);
 
-            // if the resupply is only allow to add an item once, remove it from the array
+            // if the resupply is only allowed to add an item once, remove it from the array
             if (supply.uniqueItems) {
                 supply.items.splice(index, 1);
 

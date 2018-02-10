@@ -89,8 +89,22 @@ export default class ShopManager {
      * @return {Void}
      */
     resupplyAll() {
-        this.shops.forEach((shop) => {
-            shop.resupply();
+        return new Promise((resolve, reject) => {
+            // update the pricing on items, with the priceRange array defined.
+            // We update the templates as they will be used for the sell and buy prices
+            this.Game.itemManager.updatePrices()
+                .then(() => {
+                    // resupply all the shops
+                    this.shops.forEach((shop) => {
+                        shop.resupply();
+                    });
+
+                    resolve();
+                })
+                .catch((err) =>{
+                    this.Game.logger.error(err);
+                    reject();
+                });
         });
     }
 }

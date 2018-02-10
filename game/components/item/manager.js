@@ -28,7 +28,15 @@ export default class ItemManager {
             // register the commands
             this.Game.commandManager.registerManager(ItemCommands);
 
-            resolve(ItemList.length);
+            // set the initial item prices.
+            this.updatePrices()
+                .then(() =>{
+                    resolve(ItemList.length);
+                })
+                .catch((err) => {
+                    this.Game.logger.error(err);
+                    //process.exit();
+                });
         });
     }
 
@@ -410,5 +418,22 @@ export default class ItemManager {
                 resolve(item);
             })
         })
+    }
+
+    /**
+     * Updates the prices for items.
+     * @return {Promise}
+     */
+    updatePrices() {
+        return new Promise((resolve, reject) => {
+            // loop the templates, and set the new prices for any applicable items
+            // update the pricing on items, with the priceRange array defined.
+            // We update the templates as they will be used for the sell and buy prices
+            Object.keys(this.templates).forEach((itemId) => {
+                this.templates[itemId].shufflePrice();
+            });
+
+            resolve();
+        });
     }
 }
