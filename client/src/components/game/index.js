@@ -117,7 +117,7 @@ class Game extends React.Component {
 
         if (command.toLowerCase() === '/clear') {
             this.props.clearEvents();
-        } if (command.toLowerCase() === '/commandlist') {
+        } if (['/commandlist', '/commands'].includes(command.toLowerCase())) {
             this.props.newEvent({
                 type: 'multiline',
                 message: [
@@ -179,7 +179,7 @@ class Game extends React.Component {
                         floatingLabelFocusStyle={{color: '#2196F3'}}
                         inputStyle={{color: '#fff'}}
 
-                        dataSource={Object.keys(this.props.game.commands)}
+                        dataSource={Object.keys(this.props.game.commands).concat(['/commandlist', '/commands'])}
                         anchorOrigin={{vertical: 'top', horizontal: 'left'}}
                         targetOrigin={{vertical: 'bottom', horizontal: 'left'}}
                         listStyle={{
