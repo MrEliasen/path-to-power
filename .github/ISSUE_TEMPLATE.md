@@ -4,8 +4,6 @@
 
 ## Is this a bug report?
 
-(write your answer here)
-
 <!--
   If you answered "Yes":
     For bug reports, it is REQUIRED to fill the rest of this template.
@@ -13,7 +11,6 @@
   If you answered "No":
     You can safely delete this template and write your own ticket.
 -->
-
 
 ## Environment Information
 
@@ -29,10 +26,6 @@ Browser (+version):
   Be specific! If the bug cannot be reproduced, your issue may be closed.
 -->
 
-1.
-2.
-3.
-
 ## Expected Behavior
 
 <!--
@@ -40,8 +33,6 @@ Browser (+version):
   It’s fine if you’re not sure your understanding is correct.
   Just write down what you thought would happen.
 -->
-
-(Write what you expected it would behave.)
 
 ## Actual Behavior
 
@@ -51,8 +42,6 @@ Browser (+version):
   Describe this section in detail, and attach screenshots if possible.
   Don't just say "it doesn't work", as it would be like saying "it hurts" to a doctor.
 -->
-
-(Write what happened. Add screenshots please!)
 
 ## Possible Solution
 

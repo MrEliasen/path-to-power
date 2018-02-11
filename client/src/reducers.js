@@ -5,7 +5,7 @@ import AuthReducer from './components/auth/reducer';
 import CharacterReducer from './components/character/reducer';
 import GameReducer from './components/game/reducer';
 import EventsReducer from './components/events/reducer';
-import PlayerMapReducer from './components/playermap/reducer';
+import LocationReducer from './components/location/reducer';
 import ShopReducer from './components/shop/reducer';
 
 // refactored reducers
@@ -21,7 +21,7 @@ const rootReducer = combineReducers({
     game: GameReducer,
     character: CharacterReducer,
     events: EventsReducer,
-    map: PlayerMapReducer,
+    location: LocationReducer,
     shop: ShopReducer,
     router: routerReducer,
 });

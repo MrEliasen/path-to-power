@@ -139,7 +139,7 @@ class PlayerMap extends React.Component {
 function mapStateToProps(state) {
     return {
         maps: {...state.game.maps},
-        location: {...state.map},
+        location: {...state.location},
         itemlist: {...state.game.items},
         character: state.character ? {...state.character} : null,
     };

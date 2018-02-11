@@ -85,10 +85,6 @@ class Events extends React.Component {
                 return <p className="alert-danger">{event.message}</p>;
             case 'system':
                 return <p className="alert-warning">{event.message}</p>;
-            case 'local':
-                return <p>
-                    {event.name || '<Unknown>'} says: "{event.message}"
-                </p>;
             case 'multiline':
                 return event.message.map((msg, subIndex) =>
                     <p key={subIndex}>{msg}</p>
@@ -121,7 +117,6 @@ function mapStateToProps(state) {
     return {
         events: [...state.events],
         commandlist: {...state.game.commands},
-        players: [...state.game.players],
     };
 }
 

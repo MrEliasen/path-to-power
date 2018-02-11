@@ -4,7 +4,7 @@ import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
 import Events from '../events';
-import PlayerMap from '../playermap';
+import Location from '../location';
 import Shop from '../shop';
 
 import {clearEvents, newEvent} from '../events/actions';
@@ -15,6 +15,7 @@ import {moveCharacter} from '../character/actions';
 import InventoryMenu from '../inventory-menu';
 import PlayersMenu from '../players-menu';
 import StatsMenu from '../stats-menu';
+import Chat from '../chat';
 
 // UI
 import Paper from 'material-ui/Paper';
@@ -138,60 +139,11 @@ class Game extends React.Component {
         }, 250);
     }
 
-    renderChatMessage(message, index) {
-        let actionPrefix = '';
-        let actionSuffix = '';
-        let sender = {
-            user_id: message.user_id,
-            name: message.name,
-        };
-
-        console.log(message);
-
-        switch (message.type) {
-            case 'global':
-                actionSuffix = ' yells';
-                break;
-
-            case 'whisper-in':
-                actionSuffix = ' tells you';
-                break;
-
-            case 'whisper-out':
-                actionPrefix = 'You tell ';
-                break;
-
-            case 'local':
-                actionSuffix = ' says';
-                break;
-
-            case 'faction':
-                actionPrefix = '[Faction] ';
-                break;
-        }
-
-        // if there is no sender, assume its from the Game itself
-        if (!sender.user_id) {
-            actionPrefix = '';
-            actionSuffix = '';
-            sender = {
-                name: 'SYSTEM',
-            };
-        }
-
-        return <li
-            key={index}
-            className={`--${message.type}`}
-        >
-            {actionPrefix}<strong>{sender.name}</strong>{actionSuffix}: "{message.message}"
-        </li>;
-    }
-
     render() {
         return (
             <div className="c-game">
                 <Paper zDepth={1} rounded={true} className="c-game__location e-padding">
-                    <PlayerMap />
+                    <Location />
                 </Paper>
                 <div className="c-game__communication">
                     <Paper zDepth={1} rounded={true} className="c-game__news e-padding">
@@ -201,12 +153,7 @@ class Game extends React.Component {
                         }
                     </Paper>
                     <Paper zDepth={1} rounded={true} className="c-game__chat e-padding">
-                        <ul className="c-chat">
-                            {
-                                this.props.game.chat &&
-                                this.props.game.chat.map((message, index) => this.renderChatMessage(message, index))
-                            }
-                        </ul>
+                        <Chat />
                     </Paper>
                 </div>
                 <Events />
@@ -266,7 +213,6 @@ function mapActionsToProps(dispatch) {
 function mapStateToProps(state) {
     return {
         game: {...state.game},
-        map: {...state.map},
         character: state.character ? {...state.character} : null,
     };
 }

@@ -1,5 +1,4 @@
 import {CHAT_MESSAGE} from './types';
-import {NEW_EVENT} from '../../types';
 
 function checkChatCooldown(character, Game, callback) {
     // check if the character has an existing cooldown for this action, if they are trying to hide
@@ -55,7 +54,7 @@ function cmdSay(socket, command, params, Game) {
             // check for cooldowns
             checkChatCooldown(character, Game, () => {
                 Game.socketManager.dispatchToRoom(`${character.location.map}_${character.location.y}_${character.location.x}`, {
-                    type: NEW_EVENT,
+                    type: CHAT_MESSAGE,
                     payload: {
                         user_id: character.user_id,
                         name: character.name,
