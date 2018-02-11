@@ -214,6 +214,7 @@ function mapStateToProps(state) {
     return {
         game: {...state.game},
         character: state.character ? {...state.character} : null,
+        socket: state.app.socket,
     };
 }
 

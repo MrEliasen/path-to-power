@@ -1,6 +1,7 @@
 import {combineReducers} from 'redux';
 import {routerReducer} from 'react-router-redux';
 
+import AppReducer from './components/app/reducer';
 import AuthReducer from './components/auth/reducer';
 import CharacterReducer from './components/character/reducer';
 import GameReducer from './components/game/reducer';
@@ -14,6 +15,7 @@ import PlayersReducer from './components/players-menu/reducer';
 import StatsReducer from './components/stats-menu/reducer';
 
 const rootReducer = combineReducers({
+    app: AppReducer,
     inventorymenu: InventoryReducer,
     playersmenu: PlayersReducer,
     statsmenu: StatsReducer,

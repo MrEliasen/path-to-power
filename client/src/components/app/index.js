@@ -1,4 +1,5 @@
 import React from 'react';
+import {bindActionCreators} from 'redux';
 import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {Route} from 'react-router-dom';
@@ -25,18 +26,17 @@ import config from '../../config';
 
 // actions
 import {authLogin} from '../auth/actions';
+import {setConnectionStatus, setSocket, dispatchServerAction} from './actions';
 
 class App extends React.Component {
     constructor(props) {
         super(props);
-
-        this.state = {
-            connected: false,
-        };
     }
 
     componentWillUnmount() {
-        this.socket.close();
+        if (this.socket) {
+            this.socket.close();
+        }
     }
 
     componentDidMount() {
@@ -53,17 +53,26 @@ class App extends React.Component {
 
         this.socket
             .on('connect', this.onConnect.bind(this))
+            .on('reconnect', this.onConnect.bind(this))
+            .on('connect_timeout', this.onTimeout.bind(this))
+            .on('disconnect', this.onTimeout.bind(this))
             .on('reconnect', this.onReconnect.bind(this))
             .on('dispatch', this.onDispatch.bind(this));
+
+        this.props.setSocket(this.socket);
     }
 
     onConnect() {
-        this.setState({connected: true});
+        this.props.setConnectionStatus(true);
+    }
+
+    onTimeout() {
+        this.props.setConnectionStatus(false);
     }
 
     onReconnect() {
         // re-authenticate
-        if (Twitch.getToken()) {
+        if (Twitch.getToken() && this.socket) {
             this.socket.emit('dispatch', authLogin({
                 twitch_token: Twitch.getToken(),
             }));
@@ -79,7 +88,7 @@ class App extends React.Component {
         }
 
         // dispatch the action to redux store.
-        this.props.dispatch(data);
+        this.props.dispatchServerAction(data);
 
         // if the request is a route change, do so here (temp. fix until we implement redux-router)
         if (data.payload.routeTo) {
@@ -90,21 +99,14 @@ class App extends React.Component {
     render() {
         return (
             <React.Fragment>
-                <Header socket={this.socket} />
+                <Header />
                 <div className="c-main">
-                    {
-                        !this.state.connected &&
-                        <div>Connecting...</div>
-                    }
-                    {
-                        this.state.connected &&
-                        <React.Fragment>
-                            <Route exact path="/" component={Home} />
-                            <Route path="/auth" render={() => <Auth socket={this.socket}/>} />
-                            <Route path="/game" render={() => <Game socket={this.socket}/>} />
-                            <Route path="/character" render={() => <Character socket={this.socket}/>} />
-                        </React.Fragment>
-                    }
+                    <React.Fragment>
+                        <Route exact path="/" component={Home} />
+                        <Route path="/auth" component={Auth} />
+                        <Route path="/game" component={Game} />
+                        <Route path="/character" component={Character} />
+                    </React.Fragment>
                 </div>
                 {
                     this.props.character &&
@@ -115,10 +117,18 @@ class App extends React.Component {
     }
 }
 
+function bindActionsToProps(dispatch) {
+    return bindActionCreators({
+        setConnectionStatus,
+        setSocket,
+        dispatchServerAction,
+    }, dispatch);
+}
+
 function mapStateToProps(state) {
     return {
         character: state.character ? {...state.character} : null,
     };
 }
 
-export default withRouter(connect(mapStateToProps)(App));
+export default withRouter(connect(mapStateToProps, bindActionsToProps)(App));

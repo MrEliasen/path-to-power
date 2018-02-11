@@ -1,15 +1,19 @@
-import {NOTIFICATION_CLEAR, NOTIFICATION_SET} from './types';
+import {CONNECTION_STATUS, CONNECTION_SOCKET} from './types';
 
-export function clearNotification() {
+export function setConnectionStatus(connected) {
     return {
-        type: NOTIFICATION_CLEAR,
-        payload: {},
+        type: CONNECTION_STATUS,
+        payload: connected,
     };
 }
 
-export function setNotification(payload) {
+export function setSocket(socket) {
     return {
-        type: NOTIFICATION_SET,
-        payload: payload,
+        type: CONNECTION_SOCKET,
+        payload: socket,
     };
+}
+
+export function dispatchServerAction(action) {
+    return action;
 }

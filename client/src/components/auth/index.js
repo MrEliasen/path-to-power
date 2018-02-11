@@ -19,10 +19,18 @@ class Auth extends React.Component {
         if (nextProps.characterLoaded) {
             return this.props.history.push('/game');
         }
+
+        if (!this.props.isConnected && nextProps.isConnected) {
+            this.authenticate(nextProps.socket);
+        }
     }
 
-    componentDidMount() {
-        Twitch.events.addListener('auth.login', this.sendLogin.bind(this));
+    authenticate(socket) {
+        Twitch.events.addListener('auth.login', () => {
+            socket.emit('dispatch', authLogin({
+                twitch_token: Twitch.getToken(),
+            }));
+        });
 
         Twitch.init({
             clientId: config.twitch.clientId,
@@ -41,12 +49,6 @@ class Auth extends React.Component {
                 });
             }
         });
-    }
-
-    sendLogin() {
-        this.props.socket.emit('dispatch', authLogin({
-            twitch_token: Twitch.getToken(),
-        }));
     }
 
     showStatus() {
@@ -78,6 +80,8 @@ function mapStateToProps(state) {
     return {
         characterLoaded: state.character ? true : false,
         authError: {...state.auth},
+        isConnected: state.app.connected,
+        socket: state.app.socket,
     };
 }
 

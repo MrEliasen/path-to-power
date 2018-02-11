@@ -1,32 +1,22 @@
-import {ACCOUNT_LOGOUT} from '../auth/types';
-import {NOTIFICATION_CLEAR, CLIENT_NOTIFICATION} from './types';
+import {CONNECTION_STATUS, CONNECTION_SOCKET} from './types';
 
 const defaultState = {
-    notification: null,
+    connected: false,
+    socket: null,
 };
 
 export default function(state = defaultState, action) {
     switch (action.type) {
-        case NOTIFICATION_CLEAR:
+        case CONNECTION_STATUS:
             return {
                 ...state,
-                notification: null,
+                connected: action.payload,
             };
-
-        case CLIENT_NOTIFICATION:
+        case CONNECTION_SOCKET:
             return {
                 ...state,
-                notification: {
-                    message: action.payload.message,
-                    class: `alert-${(
-                        action.payload.type === 'error' ?
-                        'danger' : action.payload.type
-                    )}`,
-                },
+                socket: action.payload,
             };
-
-        case ACCOUNT_LOGOUT:
-            return defaultState;
     }
 
     return state;

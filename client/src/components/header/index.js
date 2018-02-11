@@ -32,32 +32,38 @@ class Header extends React.Component {
         });
     }
 
-    render() {
-        let authUrl = `https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=${config.twitch.clientId}&redirect_uri=${config.twitch.callbackUrl}&scope=${config.twitch.scope.join(',')}`;
+    renderContent() {
+        if (!this.props.isConnected) {
+            return <span>Connecting..</span>;
+        }
 
+        if (!this.props.character) {
+            return <FlatButton
+                href={`https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=${config.twitch.clientId}&redirect_uri=${config.twitch.callbackUrl}&scope=${config.twitch.scope.join(',')}`}
+                icon={<img src={loginImage} />}
+            />;
+        }
+
+        return <IconMenu
+            iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
+            anchorOrigin={{horizontal: 'right', vertical: 'top'}}
+            targetOrigin={{horizontal: 'right', vertical: 'top'}}
+        >
+            <MenuItem href="https://github.com/MrEliasen/path-to-power/wiki" primaryText="How To Play" target="_blank"/>
+            <MenuItem href="https://github.com/MrEliasen/path-to-power/issues" primaryText="Issues/Feedback" target="_blank"/>
+            <Divider />
+            <MenuItem onClick={this.logout.bind(this)} primaryText="Log Out" />
+        </IconMenu>;
+    }
+
+    render() {
         return (
             <Toolbar>
                 <ToolbarGroup>
                     <ToolbarTitle text="Path To Power" />
                 </ToolbarGroup>
                 <ToolbarGroup>
-                    {
-                        !this.props.character &&
-                        <FlatButton href={authUrl} icon={<img src={loginImage} />}/>
-                    }
-                    {
-                        this.props.character &&
-                        <IconMenu
-                            iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
-                            anchorOrigin={{horizontal: 'right', vertical: 'top'}}
-                            targetOrigin={{horizontal: 'right', vertical: 'top'}}
-                        >
-                            <MenuItem href="https://github.com/MrEliasen/path-to-power/wiki" primaryText="How To Play" target="_blank"/>
-                            <MenuItem href="https://github.com/MrEliasen/path-to-power/issues" primaryText="Issues/Feedback" target="_blank"/>
-                            <Divider />
-                            <MenuItem onClick={this.logout.bind(this)} primaryText="Log Out" />
-                        </IconMenu>
-                    }
+                    {this.renderContent()}
                 </ToolbarGroup>
             </Toolbar>
         );
@@ -68,6 +74,8 @@ function mapStateToProps(state) {
     return {
         gamedata: {...state.game},
         character: state.character ? {...state.character} : null,
+        isConnected: state.app.connected,
+        socket: state.app.socket,
     };
 }
 
