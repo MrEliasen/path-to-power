@@ -88,6 +88,7 @@ class InventoryMenu extends React.Component {
         };
 
         const hasEquippedItems = this.props.inventory.filter((obj) => obj.equipped_slot).length ? true : false;
+        const hasInventoryItems = this.props.inventory.filter((obj) => !obj.equipped_slot).length ? true : false;
 
         return (
             <React.Fragment>
@@ -151,6 +152,16 @@ class InventoryMenu extends React.Component {
                                     secondaryText={(item.stats.stackable ? `${item.stats.durability}` : '')}
                                 />;
                             })
+                        }
+                        {
+                            !hasInventoryItems &&
+                            <ListItem
+                                primaryText="Inventory is empty"
+                                secondaryText="You can buy items from the Pawn Shop, take them from NPCs and more."
+                                secondaryTextLines={2}
+                                disabled={true}
+                                style={{backgroundColor: 'none', fontSize: '14px', paddingTop: '0px'}}
+                            />
                         }
                     </div>
                 </Drawer>
