@@ -179,11 +179,9 @@ class Game {
             '░▒ ░       ▒   ▒▒ ░   ░     ▒ ░▒░ ░       ░      ░ ▒ ▒░    ░▒ ░       ░ ▒ ▒░   ▒ ░ ░   ░ ░  ░  ░▒ ░ ▒░',
             '░░         ░   ▒    ░       ░  ░░ ░     ░      ░ ░ ░ ▒     ░░       ░ ░ ░ ▒    ░   ░     ░     ░░   ░ ',
             '               ░  ░         ░  ░  ░                ░ ░                  ░ ░      ░       ░  ░   ░     ',
-            '------------------------------------------------------------------------------------------------------',
             'OPEN SOURCE: https://github.com/MrEliasen/path-to-power',
-            'A game by SirMrE | Coded live on Twitch.tv | ',
-            '------------------------------------------------------------------------------------------------------',
             'HOW TO PLAY: Click the menu in the top-right.',
+            'A game by SirMrE. Coded live on Twitch.tv. Big thank you to all my viewers!',
         ]);
     }
 

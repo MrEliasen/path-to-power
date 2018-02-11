@@ -1,7 +1,7 @@
 import Promise from 'bluebird';
 import uuid from 'uuid/v4';
-import { SHOP_UPDATE } from './types';
-import { dice } from '../../helper';
+import {SHOP_UPDATE} from '../../../shared/types';
+import {dice} from '../../helper';
 
 export default class Shop {
     constructor(Game, shopData) {
@@ -62,9 +62,9 @@ export default class Shop {
                 name: item.name,
                 quantity: item.shopQuantity,
                 expRequired: item.expRequired,
-                price: itemTemplate.stats.price
-            }
-        })
+                price: itemTemplate.stats.price,
+            };
+        });
     }
 
     /**
@@ -85,9 +85,9 @@ export default class Shop {
             return {
                 id: item.id,
                 name: item.name,
-                quantity: item.shopQuantity
-            }
-        })
+                quantity: item.shopQuantity,
+            };
+        });
     }
 
     /**
@@ -101,13 +101,13 @@ export default class Shop {
             name: this.name,
             sell: {
                 ...this.sell,
-                list: this.getSellList(true)
+                list: this.getSellList(true),
             },
             buy: {
                 ...this.buy,
-                list: this.getBuyList(true)
-            }
-        }
+                list: this.getBuyList(true),
+            },
+        };
     }
 
     sellItem(user_id, fingerprint) {
@@ -193,8 +193,8 @@ export default class Shop {
                     type: SHOP_UPDATE,
                     payload: {
                         shopId: this.id,
-                        inventory: this.getSellList(true)
-                    }
+                        inventory: this.getSellList(true),
+                    },
                 });
             })
             .catch(() => {});
@@ -214,7 +214,7 @@ export default class Shop {
             } else {
                 // set the amount of the item to the correct amount, before adding to the inventory
                 itemObj.shopQuantity = amount;
-                this.sell.list.push(itemObj)
+                this.sell.list.push(itemObj);
             }
         } else {
             // check if the item is already sold as a unlimited quantity item.
@@ -233,7 +233,7 @@ export default class Shop {
                 return;
             }
 
-            // otherwise push the new item to the stack 
+            // otherwise push the new item to the stack
             // set quantity to 1, since its a new item
             itemObj.shopQuantity = amount || 1;
             // otherwise, add it to the list
@@ -246,7 +246,6 @@ export default class Shop {
      * @param  {String} user_id User ID oh buyer
      * @param  {Number} index   The array index of the item they want to buy, on the shop selling list
      * @param  {String} itemId  The item ID to confirm the item is the one they where after
-     * @return {Promise}
      */
     buyItem(user_id, index, itemId) {
         // get the character of the player
@@ -323,8 +322,8 @@ export default class Shop {
                         type: SHOP_UPDATE,
                         payload: {
                             shopId: this.id,
-                            inventory: this.getSellList(true)
-                        }
+                            inventory: this.getSellList(true),
+                        },
                     });
                 }
 
@@ -354,11 +353,11 @@ export default class Shop {
         const supply = {
             ...this.supply,
             numberOfItems: [
-                ...this.supply.numberOfItems
+                ...this.supply.numberOfItems,
             ],
             items: [
-                ...this.supply.items
-            ]
+                ...this.supply.items,
+            ],
         };
         // used for picking a random item from the list
         let totalItems = supply.items.length;
@@ -370,7 +369,7 @@ export default class Shop {
             const supplyItem = supply.items[index];
             const newItem = this.Game.itemManager.add(supplyItem.id);
 
-            // add a random quantity 
+            // add a random quantity
             newItem.shopQuantity = dice(...supplyItem.quantity);
 
             // push the item to the sell list
@@ -403,12 +402,12 @@ export default class Shop {
      * @return {Promise}
      */
     getItemPrice(itemId, priceType) {
-        return new Promise((resolve, rejct) => {
+        return new Promise((resolve, reject) => {
             priceType = priceType.toString().toLowerCase();
 
             this.Game.itemManager.getItemPrice(itemId)
                 .then((itemPrice) => {
-                    if (!['sell','buy'].includes(priceType)) {
+                    if (!['sell', 'buy'].includes(priceType)) {
                         return reject();
                     }
 

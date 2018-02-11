@@ -1,15 +1,15 @@
 import escapeStringRegex from 'escape-string-regexp';
-import { CHAT_MESSAGE } from '../command/types';
+import {CHAT_MESSAGE} from '../command/types';
 
 // TODO: Create a config for the variables
 const name = {
     max_length: 25,
-    min_length: 3
-}
+    min_length: 3,
+};
 const tag = {
     max_length: 3,
-    min_length: 1
-}
+    min_length: 1,
+};
 
 function cmdFactionCreate(socket, command, params, Game) {
     // check we got 2 parameters
@@ -62,7 +62,7 @@ function cmdFactionCreate(socket, command, params, Game) {
             if (factions.filter((obj) => obj.tag_lowercase === factionTag.toLowerCase()).length) {
                 return Game.eventToSocket(socket, 'error', 'The faction tag is already taken.');
             }
-        })
+        });
 }
 
 function cmdFactionDisband(socket, command, params, Game) {
@@ -147,7 +147,7 @@ function cmdFactionInvite(socket, command, params, Game) {
                     Game.eventToUser(targetCharacter.user_id, 'info', `You have been invited to join the faction ${character.faction.name}. To join type: /factionjoin ${character.faction.name}`);
                 })
                 .catch(() => {
-                    Game.eventToSocket(socket, 'error', 'There are no players online by that name')
+                    Game.eventToSocket(socket, 'error', 'There are no players online by that name');
                 });
         })
         .catch(()=>{
@@ -169,7 +169,7 @@ function cmdFactionAcceptInvite(socket, command, params, Game) {
                 .then((faction) => {
                     // make sure there is an outstanding invite for the character
                     if (!faction.isInvited(character)) {
-                        return Game.eventToSocket(socket, 'error', 'There is no invite pending from that faction.')
+                        return Game.eventToSocket(socket, 'error', 'There is no invite pending from that faction.');
                     }
 
                     faction.addMember(character).
@@ -180,15 +180,15 @@ function cmdFactionAcceptInvite(socket, command, params, Game) {
                                 payload: {
                                     name: null,
                                     message: `${character.name} has joined ${character.faction.name}!`,
-                                    type: 'faction'
-                                }
+                                    type: 'faction',
+                                },
                             });
                             // update their presence on the online player list
                             Game.characterManager.dispatchUpdatePlayerList(character.user_id);
                         })
                         .catch(() => {
 
-                        })
+                        });
                 })
                 .catch(()=>{
                     Game.eventToSocket(socket, 'error', 'No invite for that faction was found. Make sure you spelled the faction name correct.');
@@ -207,6 +207,13 @@ function cmdFactionSay(socket, command, params, Game) {
                 return Game.eventToSocket(socket, 'error', 'You are not a member of a faction.');
             }
 
+            const message = params.join(' ');
+
+            // check if the message is empty
+            if (!message.length) {
+                return;
+            }
+
             // check if the character has an existing cooldown for this action, if they are trying to hide
             const ticksLeft = Game.cooldownManager.ticksLeft(character, 'action_chat');
 
@@ -220,13 +227,14 @@ function cmdFactionSay(socket, command, params, Game) {
             Game.socketManager.dispatchToRoom(character.faction.faction_id, {
                 type: CHAT_MESSAGE,
                 payload: {
-                    player: character.user_id,
-                    message: params.join(' '),
-                    type: 'faction'
-                }
+                    user_id: character.user_id,
+                    name: character.name,
+                    message: message,
+                    type: 'faction',
+                },
             });
         })
-        .catch(() => {})
+        .catch(() => {});
 }
 
 function cmdFactionKick(socket, command, params, Game) {
@@ -258,8 +266,8 @@ function cmdFactionKick(socket, command, params, Game) {
                                 payload: {
                                     name: null,
                                     message: `You have been kicked/removed from ${character.faction.name}!`,
-                                    type: 'faction'
-                                }
+                                    type: 'faction',
+                                },
                             });
 
                             // update their presence on the online player list
@@ -287,8 +295,8 @@ function cmdFactionKick(socket, command, params, Game) {
                                 payload: {
                                     name: null,
                                     message: `${dbCharacter.name} was removed from ${character.faction.name}!`,
-                                    type: 'faction'
-                                }
+                                    type: 'faction',
+                                },
                             });
                         })
                         .catch(() => {
@@ -301,7 +309,7 @@ function cmdFactionKick(socket, command, params, Game) {
                     }
 
                     Game.eventToSocket(socket, 'error', 'No player found by that name.');
-                })
+                });
         })
         .catch(()=>{
             Game.eventToSocket(socket, 'error', 'Something went wrong.');
@@ -344,13 +352,13 @@ function cmdFactionMakeLeader(socket, command, params, Game) {
                                 payload: {
                                     name: null,
                                     message: `${targetCharacter.name} has been promoted to the new leader of ${character.faction.name}!`,
-                                    type: 'faction'
-                                }
+                                    type: 'faction',
+                                },
                             });
                         })
                         .catch((err) => {
                             Game.eventToSocket(socket, 'error', err);
-                        })
+                        });
                 })
                 .catch(() => {
                     Game.eventToSocket(socket, 'error', 'No character with that name is online.');

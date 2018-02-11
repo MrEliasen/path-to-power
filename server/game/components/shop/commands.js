@@ -1,4 +1,4 @@
-import { SHOP_LOAD } from './types';
+import {SHOP_LOAD} from '../../../shared/types';
 
 function cmdShop(socket, command, params, Game) {
     const shopName = params.join(' ').toLowerCase();
@@ -28,8 +28,8 @@ function cmdShop(socket, command, params, Game) {
 
                     Game.socketManager.dispatchToSocket(socket, {
                         type: SHOP_LOAD,
-                        payload: shop.toObject()
-                    })
+                        payload: shop.toObject(),
+                    });
                 })
                 .catch((err) => {
                     Game.logger.error(err);
@@ -67,7 +67,7 @@ function cmdBuy(socket, command, params, Game) {
 
             Game.socketManager.dispatchToSocket(socket, {
                 type: SHOP_LOAD,
-                payload: NPC.shop.toObject()
+                payload: NPC.shop.toObject(),
             });
         })
         .catch(() => {});
@@ -76,15 +76,15 @@ function cmdBuy(socket, command, params, Game) {
 module.exports = [
     {
         commandKeys: [
-            '/shop'
+            '/shop',
         ],
-        method: cmdShop
+        method: cmdShop,
     },
     {
         commandKeys: [
             '/buy',
-            '/sell'
+            '/sell',
         ],
-        method: cmdBuy
-    }
+        method: cmdBuy,
+    },
 ];

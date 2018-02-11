@@ -1,16 +1,15 @@
 import Promise from 'bluebird';
 
 // manager specific imports
+import shopCommands from './commands';
 import ShopList from '../../data/shops.json';
 import Shop from './object';
 import {
     SHOP_BUY,
     SHOP_SELL,
     SHOP_ITEM_PRICE,
-    SHOP_GET_SELL_PRICE,
-    SHOP_GET_BUY_PRICE
-} from './types';
-import shopCommands from './commands';
+    SHOP_GET_PRICE,
+} from '../../../shared/types';
 
 export default class ShopManager {
     constructor(Game) {
@@ -58,14 +57,14 @@ export default class ShopManager {
             case SHOP_GET_PRICE:
                 this.get(action.payload.shop)
                     .then((shop) => {
-                        shop.getItemPrice(action.payload.item.id, action.payload.priceType)
+                        shop.getItemPrice(action.payload.itemId, action.payload.priceType)
                             .then((price) => {
-                                this.Game.dispatchToSocket(socket, {
+                                this.Game.socketManager.dispatchToSocket(socket, {
                                     type: SHOP_ITEM_PRICE,
                                     payload: {
-                                        itemId: action.payload.item.id,
-                                        price
-                                    }
+                                        itemId: action.payload.itemId,
+                                        price,
+                                    },
                                 });
                             })
                             .catch(() => {

@@ -43,6 +43,7 @@
         "babel-preset-env": "^1.6.1",
         "babel-preset-stage-0": "^6.24.1",
         "eslint": "^4.15.0",
-        "eslint-config-google": "^0.9.1"
+        "eslint-config-google": "^0.9.1",
+        "nodemon": "^1.14.12"
     }
 }

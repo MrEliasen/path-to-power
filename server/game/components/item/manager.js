@@ -444,13 +444,13 @@ export default class ItemManager {
      */
     getItemPrice(itemId) {
         return new Promise((resolve, reject) => {
-            this.getTemplate(itemId)
-                .then((itemTemplate) => {
-                    resolve(itemTemplate.stats.price);
-                })
-                .catch(() => {
-                    reject();
-                });  
-        })
+            const template = this.getTemplate(itemId);
+
+            if (!template) {
+                return reject();
+            }
+
+            resolve(template.stats.price);
+        });
     }
 }
