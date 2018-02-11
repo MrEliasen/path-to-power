@@ -3,7 +3,13 @@ import Promise from 'bluebird';
 // manager specific imports
 import ShopList from '../../data/shops.json';
 import Shop from './object';
-import { SHOP_BUY, SHOP_SELL } from './types';
+import {
+    SHOP_BUY,
+    SHOP_SELL,
+    SHOP_ITEM_PRICE,
+    SHOP_GET_SELL_PRICE,
+    SHOP_GET_BUY_PRICE
+} from './types';
 import shopCommands from './commands';
 
 export default class ShopManager {
@@ -46,6 +52,26 @@ export default class ShopManager {
             case SHOP_SELL:
                 this.get(action.payload.shop)
                     .then((shop) => shop.sellItem(socket.user.user_id, action.payload.item))
+                    .catch(() => {});
+                break;
+
+            case SHOP_GET_PRICE:
+                this.get(action.payload.shop)
+                    .then((shop) => {
+                        shop.getItemPrice(action.payload.item.id, action.payload.priceType)
+                            .then((price) => {
+                                this.Game.dispatchToSocket(socket, {
+                                    type: SHOP_ITEM_PRICE,
+                                    payload: {
+                                        itemId: action.payload.item.id,
+                                        price
+                                    }
+                                });
+                            })
+                            .catch(() => {
+
+                            });
+                    })
                     .catch(() => {});
                 break;
         }

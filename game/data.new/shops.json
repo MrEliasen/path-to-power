@@ -5,7 +5,7 @@
         "description": "They sell pharmaceutical products.",
         "sell": {
             "enabled": true,
-            "sellPricePercent": 1.0,
+            "priceMultiplier": 1.0,
             "list": [
                 { "expRequired": 5640, "shopQuantity": -1, "id": "bandage"},
                 { "expRequired": 44201, "shopQuantity": -1, "id": "medicalkit"}
@@ -14,7 +14,7 @@
         "buy": {
             "enabled": false,
             "resell": true,
-            "buyPricePercent": 0.35,
+            "priceMultiplier": 0.35,
             "list": [],
             "ignoreType": [], 
             "ignoreSubtype": []
@@ -26,7 +26,7 @@
         "description": "They will buy and sell just about anything.",
         "sell": {
             "enabled": true,
-            "sellPricePercent": 1.0,
+            "priceMultiplier": 1.0,
             "list": [
                 { "expRequired": 224, "shopQuantity": -1, "id": "cellphone"},
 
@@ -60,7 +60,7 @@
         "buy": {
             "enabled": true,
             "resell": true,
-            "buyPricePercent": 0.25,
+            "priceMultiplier": 0.25,
             "list": [],
             "ignoreType": [], 
             "ignoreSubtype": ["drug"]
@@ -72,13 +72,13 @@
         "description": "",
         "sell": {
             "enabled": true,
-            "sellPricePercent": 1.0,
+            "priceMultiplier": 1.0,
             "list": []
         },
         "buy": {
             "enabled": false,
             "resell": false,
-            "buyPricePercent": 0.0,
+            "priceMultiplier": 0.0,
             "list": [],
             "ignoreType": [],
             "ignoreSubtype": []
@@ -105,13 +105,13 @@
         "description": "",
         "sell": {
             "enabled": false,
-            "sellPricePercent": 1.0,
+            "priceMultiplier": 1.0,
             "list": []
         },
         "buy": {
             "enabled": true,
             "resell": false,
-            "buyPricePercent": 1.45,
+            "priceMultiplier": 1.45,
             "list": [
                 "ecstasy",
                 "hashish",

@@ -436,4 +436,21 @@ export default class ItemManager {
             resolve();
         });
     }
+
+    /**
+     * Will get the price of the item
+     * @param  {String} itemId The item ID to get the price of
+     * @return {Promise}
+     */
+    getItemPrice(itemId) {
+        return new Promise((resolve, reject) => {
+            this.getTemplate(itemId)
+                .then((itemTemplate) => {
+                    resolve(itemTemplate.stats.price);
+                })
+                .catch(() => {
+                    reject();
+                });  
+        })
+    }
 }

@@ -6,6 +6,8 @@ It uses (at the time of writing) Twitch.tv as authentication method, but other/m
 
 ## Installation
 
+Please note: As there is no "official" stable release yet, breaking changes are likely to be introduced at every commit, without warning.
+
 1. Create a new project on [Twitch.tv](https://dev.twitch.tv).
 2. Clone the repository
 3. Run `npm install` or `yarn` to install dependencies

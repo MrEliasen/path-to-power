@@ -114,13 +114,7 @@ export default class AccountManager {
                 // send the welcome after 2 seconds
                 // TODO: Recode this!
                 setTimeout(() => {
-                    this.Game.eventToSocket(socket, 'multiline', [
-                        '††††† Path To Power Online †††††',
-                        '- - - - - - - - - - - - - - - - - - - - - - - - - -',
-                        'Welcome! If you would like to know how to play the game, click the menu in the top-right.',
-                        'You move on the arrow keys, and if you want to see a list of all commands, type /commandlist',
-                        'Enjoy!'
-                    ]);
+                    this.Game.sendMotdToSocket(socket);
                 }, 1000);
             })
         })

@@ -153,7 +153,7 @@ export default class Shop {
 
                 // will hold the item, which was sold
                 let soldItem;
-                let pricePerUnit = itemTemplate.stats.price * this.buy.buyPricePercent;
+                let pricePerUnit = itemTemplate.stats.price * this.buy.priceMultiplier;
 
                 // remove item from inventory/reduce amount
                 if (item.stats.stackable) {
@@ -281,7 +281,7 @@ export default class Shop {
                     return this.Game.eventToUser(user_id, 'error', 'Invalid item. The item might no longer be available.');
                 }
 
-                const price = (itemTemplate.stats.price * this.sell.sellPricePercent);
+                const price = (itemTemplate.stats.price * this.sell.priceMultiplier);
 
                 // check if the character has enough money
                 if (character.stats.money < price) {
@@ -394,5 +394,29 @@ export default class Shop {
                 inventory: this.getSellList(true)
             }
         });*/
+    }
+
+    /**
+     * Retrives the calculated price for a given item.
+     * @param  {String} itemId     Item ID to calculate the price for
+     * @param  {String} priceType  buy or sell, defines which price multiplier we will be using
+     * @return {Promise}
+     */
+    getItemPrice(itemId, priceType) {
+        return new Promise((resolve, rejct) => {
+            priceType = priceType.toString().toLowerCase();
+
+            this.Game.itemManager.getItemPrice(itemId)
+                .then((itemPrice) => {
+                    if (!['sell','buy'].includes(priceType)) {
+                        return reject();
+                    }
+
+                    resolve(itemPrice * this[priceType].priceMultiplier);
+                })
+                .catch(() => {
+                    reject();
+                });
+        });
     }
 }
