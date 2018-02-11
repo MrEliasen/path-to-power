@@ -121,6 +121,7 @@ module.exports = [
         commandKeys: [
             '/global',
             '/g',
+            '/yell',
         ],
         method: cmdGlobal,
     },
