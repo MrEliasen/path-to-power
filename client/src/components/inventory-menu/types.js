@@ -1,0 +1,3 @@
+export const INVENTORY_MENU_TOGGLE = 'INVENTORY_MENU_TOGGLE';
+export const EQUIP_ITEM = 'EQUIP_ITEM';
+export const UNEQUIP_ITEM = 'UNEQUIP_ITEM';

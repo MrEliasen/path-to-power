@@ -1,0 +1,10 @@
+.c-chat {
+    margin: 0px;
+    padding: 0px;
+    list-style: none;
+
+    li {
+        margin-top: 5px;
+        @include mudfont;
+    }
+}

@@ -14,16 +14,12 @@
     You can safely delete this template and write your own ticket.
 -->
 
-## Have you modified any of the code, or just the data/config files?
-
-(write your answer here)
-
 
 ## Environment Information
 
 Operating System: 
 NodeJS version: 
-Which version of the PTP server is your project based on:
+Browser (+version): 
 
 ## Steps to Reproduce
 

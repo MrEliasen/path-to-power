@@ -1,0 +1,86 @@
+.c-game {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    align-content: flex-start;
+
+    height: 100%;
+    padding: 10px 15px;
+
+    .c-game__location,
+    .c-game__communication {
+        height: 48%;
+    }
+
+    .c-game__location {
+        @include mudfont;
+
+        width: calc(60% - 10px);
+        margin-right: 10px;
+
+        .c-game__event-divider {
+            width: 100%;
+            display: black;
+            height: 1px;
+            border-bottom: 1px dashed #000;
+            margin: 4px 0px 6px;
+        }
+
+        p {
+            @include mudfont;
+            margin: 0px;
+        }
+
+        .infoheader {
+            margin: 8px 0px 2px;
+            display: block;
+        }
+    }
+    .c-game__communication {
+        width: 40%;
+
+        display: flex;
+        flex-direction: column;
+
+        .c-game__news {
+            height: 65px;
+
+            h3 {
+                @include mudfont;
+
+                margin: 0px;
+                padding: 0px;
+                font-size: 16px;
+                text-align: center;
+            }
+        }
+
+        .c-game__chat {
+            margin-top: 10px;
+            height: calc(100% - 75px);
+        }
+    }
+
+    .c-game__events {
+        width: 100%;
+        margin-top: 10px;
+        height: calc(52% - 30px - 72px);
+
+        div.event-sparator {
+            width: 100%;
+            margin: 11px 0px;
+            height: 1px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        p {
+            @include mudfont;
+            margin: 0px 0px;
+        }
+    }
+
+    .c-game_command {
+        width: 100%;
+    }
+}

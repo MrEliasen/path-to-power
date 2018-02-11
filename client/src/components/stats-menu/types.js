@@ -1,0 +1,1 @@
+export const STATS_MENU_TOGGLE = 'STATS_MENU_TOGGLE';
