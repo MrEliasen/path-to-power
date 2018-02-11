@@ -141,7 +141,12 @@ class Game extends React.Component {
     renderChatMessage(message, index) {
         let actionPrefix = '';
         let actionSuffix = '';
-        let sender = this.props.game.players.find((obj) => obj.user_id === message.player);
+        let sender = {
+            user_id: message.user_id,
+            name: message.name,
+        };
+
+        console.log(message);
 
         switch (message.type) {
             case 'global':
@@ -166,7 +171,7 @@ class Game extends React.Component {
         }
 
         // if there is no sender, assume its from the Game itself
-        if (!sender) {
+        if (!sender.user_id) {
             actionPrefix = '';
             actionSuffix = '';
             sender = {
@@ -182,26 +187,6 @@ class Game extends React.Component {
         </li>;
     }
 
-    dice(min = 0, max) {
-        return Math.floor(
-            (Math.random() * (
-                Math.max(min, max) - Math.min(min, max)
-            )) + Math.min(min, max)
-        );
-    }
-
-    getRandomColour() {
-        let colour = [];
-
-        colour.push(this.dice(0, 359));
-        colour.push('100%');
-        colour.push('45%');
-
-        return {
-            color: `hsl(${colour.join(',')})`,
-        };
-    }
-
     render() {
         return (
             <div className="c-game">
@@ -212,7 +197,7 @@ class Game extends React.Component {
                     <Paper zDepth={1} rounded={true} className="c-game__news e-padding">
                         {
                             this.props.game.news &&
-                            <h3 style={this.getRandomColour()}>{this.props.game.news}</h3>
+                            <h3 style={this.props.game.news.colour}>{this.props.game.news.message}</h3>
                         }
                     </Paper>
                     <Paper zDepth={1} rounded={true} className="c-game__chat e-padding">

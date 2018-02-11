@@ -86,12 +86,8 @@ class Events extends React.Component {
             case 'system':
                 return <p className="alert-warning">{event.message}</p>;
             case 'local':
-                const player = this.props.players.find((obj) => {
-                    return obj.user_id === event.player;
-                }) || {};
-
                 return <p>
-                    {player.name || '<Unknown>'} says: "{event.message}"
+                    {event.name || '<Unknown>'} says: "{event.message}"
                 </p>;
             case 'multiline':
                 return event.message.map((msg, subIndex) =>

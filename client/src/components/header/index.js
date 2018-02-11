@@ -52,9 +52,8 @@ class Header extends React.Component {
                             anchorOrigin={{horizontal: 'right', vertical: 'top'}}
                             targetOrigin={{horizontal: 'right', vertical: 'top'}}
                         >
-                            <MenuItem href="" primaryText="How To Play" />
-                            <MenuItem href="https://github.com/MrEliasen/path-to-power-server/wiki" primaryText="Game Wiki" />
-                            <MenuItem href="https://github.com/MrEliasen/path-to-power-server/issues" primaryText="Issues/Feedback" />
+                            <MenuItem href="https://github.com/MrEliasen/path-to-power/wiki" primaryText="How To Play" target="_blank"/>
+                            <MenuItem href="https://github.com/MrEliasen/path-to-power/issues" primaryText="Issues/Feedback" target="_blank"/>
                             <Divider />
                             <MenuItem onClick={this.logout.bind(this)} primaryText="Log Out" />
                         </IconMenu>

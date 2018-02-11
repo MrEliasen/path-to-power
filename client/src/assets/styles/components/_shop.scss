@@ -13,6 +13,7 @@
     overflow-y: auto;
 
     &.__item-list {
+        @include mudfont;
         width: 275px;
 
         .--selected {
@@ -21,6 +22,8 @@
     }
 
     &.__item-details {
+        @include mudfont;
+
         width: calc(100% - 300px);
         padding: 10px 15px;
         height: 355px;

@@ -1,5 +1,9 @@
 @mixin mudfont {
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    white-space: pre-wrap;
+    word-wrap: break-word;
     font-family: "Lucida Console", Monaco, monospace !important;
-    white-space: pre;
     font-size: 14px;
 }

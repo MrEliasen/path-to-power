@@ -31,7 +31,6 @@ class Shop extends React.Component {
         this.state = {
             tab: 'buy',
             selected: null,
-            fetchingDetails: false,
         };
 
         this.select = this.select.bind(this);
@@ -63,6 +62,12 @@ class Shop extends React.Component {
                 listName,
             },
         });
+
+        this.props.sendAction(getItemDetails(
+            item.id,
+            this.props.shop.fingerprint,
+            (listName === 'inventory' ? 'buy' : 'sell'),
+        ));
     }
 
     isSelected(id, listName) {
@@ -97,7 +102,7 @@ class Shop extends React.Component {
             return <p>Select and item to see more details.</p>;
         }
 
-        if (this.state.fetchingDetails) {
+        if (!this.props.shop.details || this.props.shop.details.itemId !== this.state.selected.item.id) {
             return <CircularProgress size={80} thickness={5} />;
         }
 
@@ -106,11 +111,7 @@ class Shop extends React.Component {
 
         return <React.Fragment>
             <strong>Name:</strong> {itemTemplate.name}<br/>
-            <strong>{this.state.selected.list === 'inventory' ? 'Sell ' : ''}Price:</strong> {
-                this.state.selected.list === 'inventory' ?
-                Math.floor(this.state.selected.item.price * this.props.shop.buy.buyPricePercent) :
-                Math.floor(this.state.selected.item.price * this.props.shop.sell.sellPricePercent)
-            }
+            <strong>{this.state.selected.list === 'inventory' ? 'Sell ' : ''}Price:</strong> {this.props.shop.details.price}
             <br/>
             <strong>Stackable:</strong> {(itemTemplate.stats.stackable ? 'Yes' : 'No')}<br/>
             <strong>Description:</strong> {this.generateDescription(itemTemplate.description, Object.assign({...itemTemplate.stats}, selectedItemModifiers))}

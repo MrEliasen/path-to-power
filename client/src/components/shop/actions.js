@@ -1,4 +1,5 @@
-import {SHOP_SELL, SHOP_BUY, SHOP_CLOSE} from './types';
+import {SHOP_SELL, SHOP_BUY, SHOP_GET_PRICE} from '../../../../server/shared/types';
+import {SHOP_CLOSE} from './types';
 
 export function shopBuy(itemId, index, shopFingerprint) {
     return {
@@ -23,9 +24,9 @@ export function shopSell(itemFingerprint, shopFingerprint) {
 
 export function getItemDetails(itemId, shopFingerprint, priceType) {
     return {
-        type: SHOP_ITEM_PRICE,
+        type: SHOP_GET_PRICE,
         payload: {
-            item: itemId,
+            itemId: itemId,
             shop: shopFingerprint,
             priceType: priceType,
         },

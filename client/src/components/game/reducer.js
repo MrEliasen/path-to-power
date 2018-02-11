@@ -1,14 +1,6 @@
-import {
-    ADD_ONLINE_PLAYER,
-    REMOVE_ONLINE_PLAYER,
-    CHAT_MESSAGE,
-    NEWS_UPDATE,
-} from './types';
-import {
-    ACCOUNT_LOGOUT,
-    ACCOUNT_AUTHENTICATE_SUCCESS,
-    ACCOUNT_AUTHENTICATE_NEW,
-} from '../auth/types';
+import {ADD_ONLINE_PLAYER, REMOVE_ONLINE_PLAYER, CHAT_MESSAGE, NEWS_UPDATE} from './types';
+import {ACCOUNT_LOGOUT, ACCOUNT_AUTHENTICATE_SUCCESS, ACCOUNT_AUTHENTICATE_NEW} from '../auth/types';
+import {getRandomColour} from '../../helper';
 
 const defaultState = {
     players: [],
@@ -19,7 +11,6 @@ const defaultState = {
     commands: {},
     levels: [],
 };
-
 export default function(state = defaultState, action) {
     let players;
 
@@ -27,7 +18,10 @@ export default function(state = defaultState, action) {
         case NEWS_UPDATE:
             return {
                 ...state,
-                news: action.payload,
+                news: {
+                    message: action.payload,
+                    colour: getRandomColour(),
+                },
             };
 
         case ACCOUNT_AUTHENTICATE_SUCCESS:
