@@ -229,6 +229,16 @@ class Game {
         this.logger.debug('Server Event', {type, message, ignore});
         this.socketManager.dispatchToServer(newEvent(type, message, ignore));
     }
+
+    /**
+     * Will run when the server receives a SIGTERM signal/is told to shut down.
+     * @param {function} callback Will execute when done.
+     */
+    async shutdown(callback) {
+        this.Game.logger.info('Received shutdown signal, Running shutdown procedure');
+        await this.characterManager.saveAll();
+        callback();
+    }
 }
 
 exports.Game = Game;

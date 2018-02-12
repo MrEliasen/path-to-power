@@ -70,12 +70,11 @@ mongoose.connect(config.mongo_db).then(
 
         const GameServer = new Game(webServer, config);
 
-        // On shutdown signal, gracefully close all connections and clear the memory store.
+        // On shutdown signal, gracefully shutdown the game server.
         process.on('SIGTERM', function() {
-            // To be added later!
-            // GameServer.shutdown(() => {
-            //     process.exit();
-            // });
+            GameServer.shutdown(() => {
+                process.exit();
+            });
         });
     },
     (err) => {

@@ -417,6 +417,7 @@ export default class CharacterManager {
                     .then(() => {
                         saves++;
 
+                        console.log('saved', character.name);
                         if (saves === total) {
                             resolve();
                         }
