@@ -18,7 +18,7 @@ function checkChatCooldown(character, Game, callback) {
 function cmdGlobal(socket, command, params, Game) {
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
-            const message = params.join(' ');
+            const message = params.join(' ').trim();
 
             // check if the message is empty
             if (!message.length) {
@@ -44,7 +44,7 @@ function cmdGlobal(socket, command, params, Game) {
 function cmdSay(socket, command, params, Game) {
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
-            const message = params.join(' ');
+            const message = params.join(' ').trim();
 
             // check if the message is empty
             if (!message.length) {
@@ -72,8 +72,13 @@ function cmdWhisper(socket, command, params, Game) {
         return Game.eventToSocket(socket, 'error', 'Invalid whisper. Syntax: /w <username> <message>');
     }
 
-    const message = params.join(' ');
+    const target = params.shift();
+    // if no name is given, let the user know.
+    if (!target) {
+        return Game.eventToSocket(socket, 'error', 'Invalid whisper target. Syntax: /w <username> <message> (make sure you do not have additional spaces between /w and <username>');
+    }
 
+    const message = params.join(' ').trim();
     // check if the message is empty
     if (!message.length) {
         return;
@@ -83,8 +88,6 @@ function cmdWhisper(socket, command, params, Game) {
         .then((sender) => {
             // check for cooldowns
             checkChatCooldown(sender, Game, () => {
-                const target = params.shift();
-
                 Game.characterManager.getByName(target).then((whisperTarget) => {
                     // send message to the socket
                     Game.socketManager.dispatchToSocket(socket, {
