@@ -15,8 +15,12 @@
 ## Environment Information
 
 Operating System: 
-NodeJS version: 
-Browser (+version): 
+Browser/Version: 
+Browser Plugins: 
+
+## Character Details (if applicable)
+
+Name: 
 
 ## Steps to Reproduce
 
