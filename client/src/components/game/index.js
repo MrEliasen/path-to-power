@@ -168,6 +168,9 @@ class Game extends React.Component {
                         searchText={this.state.command}
                         onUpdateInput={(command) => {
                             this.setState({command: command});
+                            setTimeout(() => {
+                                document.querySelector('.c-game_command input').focus();
+                            }, 100);
                         }}
                         onKeyPress={(e) => {
                             if (e.key && e.key == 'Enter') {
@@ -182,7 +185,7 @@ class Game extends React.Component {
                         floatingLabelFocusStyle={{color: '#2196F3'}}
                         inputStyle={{color: '#fff'}}
                         filter={(searchText, key) => searchText.length > 1 && key.indexOf(searchText) !== -1}
-                        dataSource={Object.keys(this.props.game.commands).concat(['/commandlist', '/commands'])}
+                        dataSource={Object.keys(this.props.game.commands).concat(['/commandlist', '/commands', '/clear'])}
                         anchorOrigin={{vertical: 'top', horizontal: 'left'}}
                         targetOrigin={{vertical: 'bottom', horizontal: 'left'}}
                         listStyle={{
