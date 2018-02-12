@@ -7,6 +7,9 @@
         "build": "babel game --out-dir dist --source-maps inline --copy-files",
         "serve": "NODE_ENV=production node dist/index.js"
     },
+    "engines": {
+        "node" : ">=8.9.4"
+    },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/MrEliasen/path-to-power-server.git"

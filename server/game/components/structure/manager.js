@@ -105,7 +105,7 @@ export default class StructureManager {
 
             // if we didn't find any matching buildings..
             if (!shops.length) {
-                return reject(`No buildings at ${map_id}/${y}/${x}, matching command ${command}`);
+                return reject();
             }
 
             resolve(shops);

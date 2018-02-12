@@ -20,6 +20,8 @@ function cmdShop(socket, command, params, Game) {
                     // overwrite if they specified a shop, and its name didn't match their criteria
                     if (params.length >= 1) {
                         shop = shops.find((obj) => obj.name.toLowerCase().indexOf(shopName) === 0);
+                    } else {
+                        shop = shops[0];
                     }
 
                     if (!shop) {
@@ -31,8 +33,9 @@ function cmdShop(socket, command, params, Game) {
                         payload: shop.toObject(),
                     });
                 })
-                .catch((err) => {
-                    Game.logger.error(err);
+                .catch(() => {
+                    // if no shops are found at the location
+                    return Game.eventToSocket(socket, 'error', 'There are no shops in the area.');
                 });
         })
         .catch((err) => {
