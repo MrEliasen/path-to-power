@@ -190,6 +190,7 @@ class Game extends React.Component {
                         }}
                         menuStyle={{
                             maxHeight: '150px',
+                            overflowY: 'auto',
                         }}
                         menuProps={{
                             id: 'c-autocomplete__menu',
