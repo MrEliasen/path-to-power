@@ -1,26 +1,19 @@
 <!--
-  PLEASE DON'T DELETE THIS TEMPLATE UNTIL YOU HAVE READ THE FIRST SECTION.
--->
+  ARE YOU REPORTING A BUG?
 
-## Is this a bug report?
+  If the answered "Yes":
+    It is REQUIRED to fill the rest of this template.
 
-<!--
-  If you answered "Yes":
-    For bug reports, it is REQUIRED to fill the rest of this template.
-
-  If you answered "No":
+  If the answered "No":
     You can safely delete this template and write your own ticket.
 -->
 
-## Environment Information
+## Debug Information
 
-Operating System: 
-Browser/Version: 
-Browser Plugins: 
-
-## Character Details (if applicable)
-
-Name: 
+**In-Game Name**: (if applicable)
+**Operating System**: 
+**Browser/Version**: 
+**Browser Plugins**: 
 
 ## Steps to Reproduce
 
