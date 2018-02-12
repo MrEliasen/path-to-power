@@ -21,6 +21,20 @@ import Divider from 'material-ui/Divider';
 class Header extends React.Component {
     constructor(props) {
         super(props);
+
+        this.state = {
+            issueUrl: 'https://github.com/MrEliasen/path-to-power/issues/new',
+        };
+    }
+
+    componentWillMount() {
+        this.generateIssueLink();
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.character && !this.props.character) {
+            this.generateIssueLink();
+        }
     }
 
     logout() {
@@ -50,10 +64,34 @@ class Header extends React.Component {
             targetOrigin={{horizontal: 'right', vertical: 'top'}}
         >
             <MenuItem href="https://github.com/MrEliasen/path-to-power/wiki" primaryText="How To Play" target="_blank"/>
-            <MenuItem href="https://github.com/MrEliasen/path-to-power/issues" primaryText="Issues/Feedback" target="_blank"/>
+            <MenuItem href={this.state.issueUrl} target="_blank" primaryText="Report A Bug" />
             <Divider />
             <MenuItem onClick={this.logout.bind(this)} primaryText="Log Out" />
         </IconMenu>;
+    }
+
+    generateIssueLink() {
+        fetch('https://raw.githubusercontent.com/MrEliasen/path-to-power/master/.github/ISSUE_TEMPLATE.md')
+            .then((response) => response.text())
+            .then((text) => {
+                // replace static information
+                text = text.replace('**Operating System**:', `**Operating System**: ${window.navigator.platform}`);
+                text = text.replace('**Browser/Version**:', `**Browser/Version**: ${window.navigator.userAgent}`);
+
+                if (this.props.character) {
+                    text = text.replace('**In-Game Name**: (if applicable)', `**In-Game Name**: ${this.props.character.name}`);
+                }
+
+                // get browser plugins
+                const plugins = Array.from(window.navigator.plugins).map((obj) => `* ${obj.name}`);
+                text = text.replace('**Browser Plugins**: ', "**Browser Plugins**: \n\n" + plugins.join("\n"));
+
+                this.setState({
+                    issueUrl: `https://github.com/MrEliasen/path-to-power/issues/new?body=${encodeURIComponent(text)}`,
+                });
+            })
+            .catch((err) => {
+            });
     }
 
     render() {
