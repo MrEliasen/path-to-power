@@ -1,9 +1,12 @@
 import {CONNECTION_STATUS, CONNECTION_SOCKET} from './types';
 
-export function setConnectionStatus(connected) {
+export function setConnectionStatus(connected, connectedEvent) {
     return {
         type: CONNECTION_STATUS,
-        payload: connected,
+        payload: {
+            connected,
+            connectedEvent,
+        },
     };
 }
 

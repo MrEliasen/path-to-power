@@ -41,8 +41,9 @@ class Header extends React.Component {
         Twitch.logout((error) => {
             localStorage.removeItem('account');
             this.props.authLogout();
-            this.props.socket.close();
             this.props.history.push('/');
+            //this.props.socket.close();
+            this.props.socket.emit('logout');
         });
     }
 
@@ -92,7 +93,7 @@ class Header extends React.Component {
 
     render() {
         return (
-            <Toolbar>
+            <Toolbar className="c-header">
                 <ToolbarGroup>
                     <ToolbarTitle text="Path To Power" />
                 </ToolbarGroup>

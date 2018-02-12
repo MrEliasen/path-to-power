@@ -63,11 +63,11 @@ class App extends React.Component {
     }
 
     onConnect() {
-        this.props.setConnectionStatus(true);
+        this.props.setConnectionStatus(true, 'Connected');
     }
 
     onTimeout() {
-        this.props.setConnectionStatus(false);
+        this.props.setConnectionStatus(false, 'Connection Timed Out - Reconnecting');
     }
 
     onReconnect() {

@@ -19,6 +19,8 @@ import Chat from '../chat';
 
 // UI
 import Paper from 'material-ui/Paper';
+import Dialog from 'material-ui/Dialog';
+import LinearProgress from 'material-ui/LinearProgress';
 import AutoComplete from 'material-ui/AutoComplete';
 
 class Game extends React.Component {
@@ -198,6 +200,15 @@ class Game extends React.Component {
                 <PlayersMenu sendCommand={this.sendCommand} setCommand={this.setCommand} />
                 <StatsMenu />
                 <Shop sendAction={this.sendAction} />
+
+                <Dialog
+                    title={this.props.connection.lastEvent}
+                    open={!this.props.connection.isConnected}
+                    modal={true}
+                    titleStyle={{textAlign: 'center'}}
+                >
+                    <LinearProgress mode="indeterminate" />
+                </Dialog>
             </div>
         );
     }
@@ -215,6 +226,10 @@ function mapStateToProps(state) {
         game: {...state.game},
         character: state.character ? {...state.character} : null,
         socket: state.app.socket,
+        connection: {
+            isConnected: state.app.connected,
+            lastEvent: state.app.connectedEvent,
+        },
     };
 }
 

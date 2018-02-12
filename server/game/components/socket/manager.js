@@ -47,6 +47,23 @@ export default class SocketManager extends EventEmitter {
     }
 
     /**
+     * Handles new connections
+     * @param  {Socket.IO Socket} socket
+     */
+    onConnection(socket) {
+        socket.on('dispatch', (action) => {
+            this.onClientDispatch(socket, action);
+        });
+        socket.on('logout', (action) => {
+            this.onDisconnect({...socket.user});
+            socket.user = null;
+        });
+        socket.on('disconnect', () => {
+            this.onDisconnect(socket.user);
+        });
+    }
+
+    /**
      * Add a socket to track in the list
      * @param {Socket.Io object} socket The socket object to track
      */
@@ -78,36 +95,21 @@ export default class SocketManager extends EventEmitter {
     }
 
     /**
-     * Handles new connections
-     * @param  {Socket.IO Socket} socket
-     */
-    onConnection(socket) {
-        socket.on('dispatch', (action) => {
-            this.onClientDispatch(socket, action)
-        });
-        socket.on('disconnect', () => {
-            this.onDisconnect(socket);
-        });
-    }
-
-    /**
      * Handles socket disconnections
      * @param  {Socket.IO Socket} socket
      */
-    onDisconnect(socket, forced = false) {
-        this.Game.logger.info('Socket disconnected', socket.user);
-
+    onDisconnect(user = null, forced = false) {
         // if the user is logged in, set a timer for when we remove them from the game.
-        if (socket.user) {
-            const user = {...socket.user};
+        if (user) {
+            this.Game.logger.info('Socket disconnected', user);
 
             if (forced) {
                 return this.emit('disconnect', user);
             }
 
-            this.timers[socket.user.user_id] = setTimeout(() =>{
-                this.emit('disconnect', user)
-            }, this.Game.config.game.logout_timer)
+            this.timers[user.user_id] = setTimeout(() =>{
+                this.emit('disconnect', user);
+            }, this.Game.config.game.logout_timer);
         }
     }
 
