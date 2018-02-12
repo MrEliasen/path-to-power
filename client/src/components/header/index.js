@@ -82,10 +82,6 @@ class Header extends React.Component {
                     text = text.replace('**In-Game Name**: (if applicable)', `**In-Game Name**: ${this.props.character.name}`);
                 }
 
-                // get browser plugins
-                const plugins = Array.from(window.navigator.plugins).map((obj) => `* ${obj.name}`);
-                text = text.replace('**Browser Plugins**: ', "**Browser Plugins**: \n\n" + plugins.join("\n"));
-
                 this.setState({
                     issueUrl: `https://github.com/MrEliasen/path-to-power/issues/new?body=${encodeURIComponent(text)}`,
                 });

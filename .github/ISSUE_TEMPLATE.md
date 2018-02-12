@@ -13,7 +13,6 @@
 **In-Game Name**: (if applicable)
 **Operating System**: 
 **Browser/Version**: 
-**Browser Plugins**: 
 
 ## Steps to Reproduce
 
