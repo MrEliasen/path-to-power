@@ -1,4 +1,4 @@
-import { LEFT_GRID } from '../map/types';
+import {LEFT_GRID} from '../map/types';
 
 function cmdHeal(socket, command, params, Game) {
     // Fetch the character first
@@ -251,6 +251,77 @@ function cmdDeposit(socket, command, params, Game) {
         .catch(() => {});
 }
 
+function cmdDrink(socket, command, params, Game) {
+    // Fetch the character first
+    Game.characterManager.get(socket.user.user_id)
+        .then((character) => {
+            // load the commands details modifiers
+            Game.commandManager.getTemplate(command)
+                .then((commandObj) => {
+                    // get the structures list at the character location
+                    Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
+                        .then((structures) => {
+                            // if we get multiple structures, but only one parameter, the client didnt specify
+                            // the structure to use the command with.
+                            if (structures.length > 1 && params.length <= 1) {
+                                return Game.eventToSocket(socket, 'error', 'Invalid structure. There are multiple structures with that command use: /drink <amount> <structure-name>');
+                            }
+
+                            // set the first structure by default
+                            let structure = structures[0];
+
+                            // overwrite if they specified a structure, and its name didn't match their criteria
+                            if (params.length > 1 && structure.name.toLowerCase().indexOf(structures[1].toLowerCase()) !== 0) {
+                                structure = structures.find((structureItem) => structureItem.name.toLowerCase().indexOf(params[1].toLowerCase()) === 0);
+                            }
+
+                            //overwrite the command modifiers with the structure specific once.
+                            Object.assign(commandObj.modifiers, structure.commands[command]);
+
+                            // if there are 2 params, the client is likely specifying the structure they want to use the command with
+                            // meaning the 2nd param would be the amount, and not the first.
+                            const drinks = parseInt(params[0], 10);
+                            const exp = drinks * commandObj.modifiers.expReward;
+                            const health = drinks * commandObj.modifiers.healthDamage;
+                            const price = drinks * commandObj.modifiers.cost;
+
+                            // Check if the heal_amount is valid
+                            if (!drinks || drinks < 1) {
+                                return Game.eventToSocket(socket, 'error', 'Invalid drink amount. Syntax: /drink <amount>');
+                            }
+
+                            // Check if full health
+                            if (character.stats.health <= health) {
+                                return Game.eventToSocket(socket, 'warning', 'You shouldn\'t drink that much, you will die!');
+                            }
+
+                            // Check if they have the money
+                            if (commandObj.modifiers.cost && price > character.stats.money) {
+                                return Game.eventToSocket(socket, 'error', 'You do not have enough money to drink that amount.');
+                            }
+
+                            // remove money and add health
+                            character.updateCash(price * -1);
+                            character.updateHealth(health * -1);
+                            character.updateExp(exp);
+
+                            // update the client
+                            Game.characterManager.updateClient(character.user_id, 'stats');
+                            Game.eventToSocket(socket, 'success', `You drink ${drinks} drinks, costing you ${price} and ${health} health. (+${exp} rep)`);
+                        })
+                        .catch((err) => {
+                            Game.logger.debug(err);
+                        });
+                })
+                .catch((err) => {
+                    Game.logger.debug(err);
+                });
+        })
+        .catch((err) => {
+            Game.logger.debug(err);
+        });
+}
+
 module.exports = [
     {
         commandKeys: [
@@ -275,5 +346,11 @@ module.exports = [
             '/travel'
         ],
         method: cmdTravel
+    },
+    {
+        commandKeys: [
+            '/drink'
+        ],
+        method: cmdDrink
     }
 ];
