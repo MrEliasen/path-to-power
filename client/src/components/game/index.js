@@ -138,6 +138,7 @@ class Game extends React.Component {
         this.setState({command});
         setTimeout(() => {
             document.querySelector('.c-game_command input').focus();
+            document.querySelector('.c-game_command input').setSelectionRange(command.length, command.length);
         }, 250);
     }
 
@@ -180,7 +181,7 @@ class Game extends React.Component {
                         floatingLabelStyle={{color: '#FF9800'}}
                         floatingLabelFocusStyle={{color: '#2196F3'}}
                         inputStyle={{color: '#fff'}}
-
+                        filter={(searchText, key) => searchText.length > 1 && key.indexOf(searchText) !== -1}
                         dataSource={Object.keys(this.props.game.commands).concat(['/commandlist', '/commands'])}
                         anchorOrigin={{vertical: 'top', horizontal: 'left'}}
                         targetOrigin={{vertical: 'bottom', horizontal: 'left'}}
