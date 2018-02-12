@@ -119,7 +119,7 @@ class Game extends React.Component {
 
         if (command.toLowerCase() === '/clear') {
             this.props.clearEvents();
-        } if (['/commandlist', '/commands'].includes(command.toLowerCase())) {
+        } else if (['/commandlist', '/commands'].includes(command.toLowerCase())) {
             this.props.newEvent({
                 type: 'multiline',
                 message: [
