@@ -126,9 +126,9 @@ export default class CommandManager {
     /**
      * Find a specific target at the given location, by name
      * @param  {String} findName      The name, or part of, to search for
+     * @param  {Object} location      A character/npc location object
      * @param  {Bool}   ignoreHiding  Whether to include hidden players or not
      * @param  {Bool}   ignoreNPCs    Whether to include NPCs or not
-     * @param  {Object} location      A character/npc location object
      * @return {Promise}
      */
     findAtLocation(findName, location, ignoreHiding = true, ignoreNPCs = false) {
