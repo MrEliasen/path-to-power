@@ -241,7 +241,7 @@ module.exports = [
         aliases: [
             '/get',
         ],
-        description: 'Pickup an item from the ground. Usage: /pickup <item name>',
+        description: 'Pickup an item from the ground. If the name is omitted, the first item will be picked up. Usage: /pickup <item name>',
         method: cmdPickup,
     },
     {

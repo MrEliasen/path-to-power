@@ -29,6 +29,10 @@ export default class CommandManager {
         });
     }
 
+    /**
+     * Registers a manager's associated commands
+     * @param  {array} commandsList Array of commands from the managers commmands.js
+     */
     registerManager(commandsList) {
         commandsList.forEach((obj) => {
             // register the main command
@@ -65,7 +69,7 @@ export default class CommandManager {
     /**
      * checks for dispatches, and reacts only if the type is listend to
      * @param  {Socket.IO Socket} socket Client who dispatched the action
-     * @param  {Object} action The redux action
+     * @param  {Object}           action The redux action
      */
     onDispatch(socket, action) {
         if (action.type !== GAME_COMMAND) {

@@ -11,10 +11,10 @@
   "rules": {
     "quotes": [2, "single"],
     "strict": [2, "never"],
-    "require-jsdoc": "off",
     "max-len": "off",
     "spaced-comment": "off",
     "camelcase": "off"
+    "valid-jsdoc": ["error", { "requireReturn": false }]
   },
   "plugins": []
 }
