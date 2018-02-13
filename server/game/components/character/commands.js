@@ -13,7 +13,7 @@ function checkAttackCooldown (character, Game, callback) {
     callback();
 }
 
-function cmdAim(socket, command, params, Game) {
+function cmdAim(socket, command, params, cmdObject, Game) {
     if (!params[0]) {
         return;
     }
@@ -56,7 +56,7 @@ function cmdAim(socket, command, params, Game) {
         });
 }
 
-function cmdGive(socket, command, params, Game) {
+function cmdGive(socket, command, params, cmdObject, Game) {
     if (params.length !== 2) {
         return Game.eventToSocket(socket, 'error', `Your must specify player and amount to give. Syntax: /give <player> <amount>`);
     }
@@ -111,7 +111,7 @@ function cmdGive(socket, command, params, Game) {
         .catch(() => {});
 }
 
-function cmdPunch(socket, command, params, Game) {
+function cmdPunch(socket, command, params, cmdObject, Game) {
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
             const target = character.target;
@@ -174,7 +174,7 @@ function cmdPunch(socket, command, params, Game) {
         .catch(() => {});
 }
 
-function cmdRelease(socket, command, params, Game) {
+function cmdRelease(socket, command, params, cmdObject, Game) {
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
             // if they do not have a target, simply ignore the command
@@ -200,7 +200,7 @@ function cmdRelease(socket, command, params, Game) {
         .catch(() => {})
 }
 
-function cmdShoot(socket, command, params, Game) {
+function cmdShoot(socket, command, params, cmdObject, Game) {
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
             const target = character.target;
@@ -275,7 +275,7 @@ function cmdShoot(socket, command, params, Game) {
         .catch(() => {});
 }
 
-function cmdStrike(socket, command, params, Game) {
+function cmdStrike(socket, command, params, cmdObject, Game) {
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
             const target = character.target;
@@ -352,40 +352,41 @@ function cmdStrike(socket, command, params, Game) {
 
 module.exports = [
     {
-        commandKeys: [
-            '/aim',
-            '/target'
+        command: '/aim',
+        aliases: [
+            '/target',
         ],
-        method: cmdAim
+        description: 'Take aim at another player/npc, locking them in the current location. Usage: /aim <target name>',
+        method: cmdAim,
     },
     {
-        commandKeys: [
-            '/give'
-        ],
-        method: cmdGive
+        command: '/give',
+        aliases: [],
+        description: 'Give cash to another player. Usage: /give <player name> <amount>',
+        method: cmdGive,
     },
     {
-        commandKeys: [
-            '/punch'
-        ],
-        method: cmdPunch
+        command: '/punch',
+        aliases: [],
+        description: 'Attcks a target (/aim) with your fists. Usage: /punch',
+        method: cmdPunch,
     },
     {
-        commandKeys: [
-            '/release'
-        ],
-        method: cmdRelease
+        command: '/release',
+        aliases: [],
+        description: 'Releases your /aim from a target. Usage: /release',
+        method: cmdRelease,
     },
     {
-        commandKeys: [
-            '/shoot'
-        ],
-        method: cmdShoot
+        command: '/shoot',
+        aliases: [],
+        description: 'Attcks a target (/aim) with your equipped ranged weapon. Usage: /shoot',
+        method: cmdShoot,
     },
     {
-        commandKeys: [
-            '/strike'
-        ],
-        method: cmdStrike
+        command: '/strike',
+        aliases: [],
+        description: 'Attcks a target (/aim) with your equipped melee weapon. Usage: /strike',
+        method: cmdStrike,
     },
 ];

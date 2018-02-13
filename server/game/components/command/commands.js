@@ -15,16 +15,16 @@ function checkChatCooldown(character, Game, callback) {
     callback();
 }
 
-function cmdGlobal(socket, command, params, Game) {
+function cmdGlobal(socket, command, params, cmdObject, Game) {
+    const message = params.join(' ').trim();
+
+    // check if the message is empty
+    if (!message.length) {
+        return Game.eventToSocket(socket, 'error', 'You must specify a message to send. Syntax: /g <message>');
+    }
+
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
-            const message = params.join(' ').trim();
-
-            // check if the message is empty
-            if (!message.length) {
-                return;
-            }
-
             // check for cooldowns
             checkChatCooldown(character, Game, () => {
                 Game.socketManager.dispatchToServer({
@@ -41,16 +41,16 @@ function cmdGlobal(socket, command, params, Game) {
         .catch(() => {});
 }
 
-function cmdSay(socket, command, params, Game) {
+function cmdSay(socket, command, params, cmdObject, Game) {
+    const message = params.join(' ').trim();
+
+    // check if the message is empty
+    if (!message.length) {
+        return Game.eventToSocket(socket, 'error', 'You must specify a message to send. Syntax: /s <message>');
+    }
+
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
-            const message = params.join(' ').trim();
-
-            // check if the message is empty
-            if (!message.length) {
-                return;
-            }
-
             // check for cooldowns
             checkChatCooldown(character, Game, () => {
                 Game.socketManager.dispatchToRoom(`${character.location.map}_${character.location.y}_${character.location.x}`, {
@@ -67,7 +67,7 @@ function cmdSay(socket, command, params, Game) {
         .catch(() => {});
 }
 
-function cmdWhisper(socket, command, params, Game) {
+function cmdWhisper(socket, command, params, cmdObject, Game) {
     if (params.length < 2) {
         return Game.eventToSocket(socket, 'error', 'Invalid whisper. Syntax: /w <username> <message>');
     }
@@ -120,27 +120,30 @@ function cmdWhisper(socket, command, params, Game) {
 
 module.exports = [
     {
-        commandKeys: [
-            '/global',
+        command: '/global',
+        aliases: [
             '/g',
             '/yell',
         ],
+        description: 'Speak in global chat. Usage: /global <message>',
         method: cmdGlobal,
     },
     {
-        commandKeys: [
-            '/say',
+        command: '/say',
+        aliases: [
             '/s',
         ],
+        description: 'Speak in local chat. Only people in same spot can see it. Usage: /say <message>',
         method: cmdSay,
     },
     {
-        commandKeys: [
-            '/whisper',
+        command: '/whisper',
+        aliases: [
             '/w',
             '/tell',
             '/pm',
         ],
+        description: 'Send a private message to another player. Usage: /whisper <player name> <message>',
         method: cmdWhisper,
     },
 ];

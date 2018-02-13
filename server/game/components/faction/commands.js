@@ -11,7 +11,7 @@ const tag = {
     min_length: 1,
 };
 
-function cmdFactionCreate(socket, command, params, Game) {
+function cmdFactionCreate(socket, command, params, cmdObject, Game) {
     // check we got 2 parameters
     if (params.length != 2) {
         return Game.eventToSocket(socket, 'error', 'You must specify both a name and tag eg: /factioncreate MyfactionName Tag');
@@ -65,7 +65,7 @@ function cmdFactionCreate(socket, command, params, Game) {
         });
 }
 
-function cmdFactionDisband(socket, command, params, Game) {
+function cmdFactionDisband(socket, command, params, cmdObject, Game) {
     // check we got 1 parameter
     if (params.length != 1) {
         return Game.eventToSocket(socket, 'error', 'To try avoid accidental faction disbands, you must specify your faction name (case sensitive) as the first argument eg: /factiondisband MyfactionName');
@@ -102,7 +102,7 @@ function cmdFactionDisband(socket, command, params, Game) {
         });
 }
 
-function cmdFactionInvite(socket, command, params, Game) {
+function cmdFactionInvite(socket, command, params, cmdObject, Game) {
     // check we got 1 parameter
     if (params.length != 1) {
         return Game.eventToSocket(socket, 'error', 'You must specify a player name eg: /factioninvite PlayerName');
@@ -155,7 +155,7 @@ function cmdFactionInvite(socket, command, params, Game) {
         });
 }
 
-function cmdFactionAcceptInvite(socket, command, params, Game) {
+function cmdFactionAcceptInvite(socket, command, params, cmdObject, Game) {
     // check we got 1 parameter
     if (params.length != 1) {
         return Game.eventToSocket(socket, 'error', 'You must specify the faction you want to join eg: /factionjoin FactionName');
@@ -199,19 +199,19 @@ function cmdFactionAcceptInvite(socket, command, params, Game) {
         });
 }
 
-function cmdFactionSay(socket, command, params, Game) {
+function cmdFactionSay(socket, command, params, cmdObject, Game) {
+    const message = params.join(' ').trim();
+
+    // check if the message is empty
+    if (!message.length) {
+        return Game.eventToSocket(socket, 'error', 'You must specify a message to send. Syntax: /f <message>');
+    }
+
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
             // make sure they are in a faction
             if (!character.faction) {
                 return Game.eventToSocket(socket, 'error', 'You are not a member of a faction.');
-            }
-
-            const message = params.join(' ');
-
-            // check if the message is empty
-            if (!message.length) {
-                return;
             }
 
             // check if the character has an existing cooldown for this action, if they are trying to hide
@@ -237,7 +237,7 @@ function cmdFactionSay(socket, command, params, Game) {
         .catch(() => {});
 }
 
-function cmdFactionKick(socket, command, params, Game) {
+function cmdFactionKick(socket, command, params, cmdObject, Game) {
     // check we got 1 parameter
     if (params.length != 1) {
         return Game.eventToSocket(socket, 'error', 'You must specify a player name eg: /factionkick PlayerName');
@@ -316,7 +316,7 @@ function cmdFactionKick(socket, command, params, Game) {
         });
 }
 
-function cmdFactionMakeLeader(socket, command, params, Game) {
+function cmdFactionMakeLeader(socket, command, params, cmdObject, Game) {
     // check we got 1 parameter
     if (params.length != 1) {
         return Game.eventToSocket(socket, 'error', 'You must specify the name of the faction member you want to promote to leader eg: /factionpromote MemberName');
@@ -371,46 +371,47 @@ function cmdFactionMakeLeader(socket, command, params, Game) {
 
 module.exports = [
     {
-        commandKeys: [
-            '/factioncreate',
-        ],
+        command: '/factioncreate',
+        aliases: [],
+        description: 'Create a new faction. Name and Tag is case sensitive. Usage: /factioncreate <Name> <Tag>',
         method: cmdFactionCreate,
     },
     {
-        commandKeys: [
-            '/factiondisband',
-        ],
+        command: '/factiondisband',
+        aliases: [],
+        description: 'Disband your faction permanently and immediately. Usage: /factiondisband',
         method: cmdFactionDisband,
     },
     {
-        commandKeys: [
-            '/factioninvite',
-        ],
+        command: '/factioninvite',
+        aliases: [],
+        description: 'Send an invite to another player, to join your faction. Usage: /factioninvite <player name>',
         method: cmdFactionInvite,
     },
     {
-        commandKeys: [
-            '/factionjoin',
-        ],
+        command: '/factionjoin',
+        aliases: [],
+        description: 'If you where invited to join a faction, you can join it with: /factionjoin <faction name>',
         method: cmdFactionAcceptInvite,
     },
     {
-        commandKeys: [
-            '/faction',
+        command: '/faction',
+        aliases: [
             '/f',
         ],
+        description: 'Speak in the faction-only chat. Will only be visible to members of the same faction. Usage: /faction <message>',
         method: cmdFactionSay,
     },
     {
-        commandKeys: [
-            '/factionkick',
-        ],
+        command: '/factionkick',
+        aliases: [],
+        description: 'Kick a member from your faction. Usage: /factionkick <player name>',
         method: cmdFactionKick,
     },
     {
-        commandKeys: [
-            '/factionpromote',
-        ],
+        command: '/factionpromote',
+        aliases: [],
+        description: 'Promote a member in your faction, to faction leader. Usage: /factionpromote <player name>',
         method: cmdFactionMakeLeader,
     },
 ];

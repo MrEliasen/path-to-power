@@ -1,6 +1,6 @@
 import {SHOP_LOAD} from '../../../shared/types';
 
-function cmdShop(socket, command, params, Game) {
+function cmdShop(socket, command, params, cmdObject, Game) {
     const shopName = params.join(' ').toLowerCase();
 
     // Fetch the character first
@@ -43,7 +43,7 @@ function cmdShop(socket, command, params, Game) {
         });
 }
 
-function cmdBuy(socket, command, params, Game) {
+function cmdBuy(socket, command, params, cmdObject, Game) {
     const npcName = params.join(' ').toLowerCase();
 
     // Fetch the character first
@@ -78,16 +78,18 @@ function cmdBuy(socket, command, params, Game) {
 
 module.exports = [
     {
-        commandKeys: [
-            '/shop',
-        ],
+        command: '/shop',
+        aliases: [],
+        description: 'View the shop. Usage: /shop <building name>. If there is only one shop at a location, you can omit the building name.',
         method: cmdShop,
     },
     {
-        commandKeys: [
-            '/buy',
+        command: '/trade',
+        aliases: [
             '/sell',
+            '/buy',
         ],
+        description: 'Opens a NPC\'s shop, if one exists. Usage: /trade <npc name>',
         method: cmdBuy,
     },
 ];

@@ -1,6 +1,6 @@
 import {UPDATE_GROUND_ITEMS} from './types';
 
-function cmdDrop(socket, command, params, Game) {
+function cmdDrop(socket, command, params, cmdObject, Game) {
     if (!params[0]) {
         return;
     }
@@ -52,7 +52,7 @@ function cmdDrop(socket, command, params, Game) {
         });
 }
 
-function cmdDropByIndex(socket, command, params, Game) {
+function cmdDropByIndex(socket, command, params, cmdObject, Game) {
     if (!params[0]) {
         return;
     }
@@ -108,7 +108,7 @@ function cmdDropByIndex(socket, command, params, Game) {
         });
 }
 
-function cmdGiveItem(socket, command, params, Game) {
+function cmdGiveItem(socket, command, params, cmdObject, Game) {
     if (!params[0]) {
         return;
     }
@@ -139,7 +139,7 @@ function cmdGiveItem(socket, command, params, Game) {
         });
 }
 
-function cmdPickup(socket, command, params, Game) {
+function cmdPickup(socket, command, params, cmdObject, Game) {
     // get the character
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
@@ -192,7 +192,7 @@ function cmdPickup(socket, command, params, Game) {
         });
 }
 
-function cmdUseItem(socket, command, params, Game) {
+function cmdUseItem(socket, command, params, cmdObject, Game) {
     // get the character
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
@@ -219,34 +219,35 @@ function cmdUseItem(socket, command, params, Game) {
 
 module.exports = [
     {
-        commandKeys: [
-            '/usebyindex',
-        ],
+        command: '/usebyindex',
+        aliases: [],
+        description: 'use an inventory item, based on the item\'s inventory index. Usage: /usebyindex <index>',
         method: cmdUseItem,
     },
     {
-        commandKeys: [
-            '/drop',
-        ],
+        command: '/drop',
+        aliases: [],
+        description: 'Drop an item on the ground. Usage: /drop <item name>',
         method: cmdDrop,
     },
     {
-        commandKeys: [
-            '/dropbyindex',
-        ],
+        command: '/dropbyindex',
+        aliases: [],
+        description: 'Drop an item, based on the item\'s inventory index, on the ground. Usage: /dropbyindex <index>',
         method: cmdDropByIndex,
     },
     {
-        commandKeys: [
-            '/pickup',
+        command: '/pickup',
+        aliases: [
             '/get',
         ],
+        description: 'Pickup an item from the ground. Usage: /pickup <item name>',
         method: cmdPickup,
     },
     {
-        commandKeys: [
-            '/giveitem',
-        ],
+        command: '/giveitem',
+        aliases: [],
+        description: 'Gives an item to the player. Usage: /giveitem <itemId>',
         method: cmdGiveItem,
     },
 ];

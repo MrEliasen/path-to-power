@@ -1,4 +1,4 @@
-function cmdSkillSnoop(socket, command, params, Game) {
+function cmdSkillSnoop(socket, command, params, cmdObject, Game) {
     // get the character who is using the skill
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
@@ -36,7 +36,7 @@ function cmdSkillSnoop(socket, command, params, Game) {
         });
 }
 
-function cmdSkillHide(socket, command, params, Game) {
+function cmdSkillHide(socket, command, params, cmdObject, Game) {
     // get the character who is using the skill
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
@@ -65,7 +65,7 @@ function cmdSkillHide(socket, command, params, Game) {
         });
 }
 
-function cmdSkillSearch(socket, command, params, Game) {
+function cmdSkillSearch(socket, command, params, cmdObject, Game) {
     // get the character who is using the skill
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
@@ -112,25 +112,28 @@ function cmdSkillSearch(socket, command, params, Game) {
 
 module.exports = [
     {
-        commandKeys: [
-            '/snoop',
+        command: '/snoop',
+        aliases: [
             '/snooping',
-            '/snoopdog'
+            '/snoopdog',
         ],
-        method: cmdSkillSnoop
+        description: 'Attempts to gather information about a target player. Usage: /snoop <player name>',
+        method: cmdSkillSnoop,
     },
     {
-        commandKeys: [
-            '/hide',
-            '/unhide'
+        command: '/hide',
+        aliases: [
+            '/unhide',
         ],
-        method: cmdSkillHide
+        description: 'Hide (or re-appear if already hidden) in the given location, removing you from the player list. Usage: /hide',
+        method: cmdSkillHide,
     },
     {
-        commandKeys: [
-            '/search',
-            '/find'
+        command: '/search',
+        aliases: [
+            '/find',
         ],
-        method: cmdSkillSearch
-    }
+        description: 'Search for a hidden player, at your current location. Usage: /search <player name>',
+        method: cmdSkillSearch,
+    },
 ];

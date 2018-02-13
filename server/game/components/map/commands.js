@@ -9,7 +9,7 @@ function getDirectionName(move) {
     return move.direction === 1 ? 'West' : 'East';
 }
 
-function cmdFlee(socket, command, params, Game) {
+function cmdFlee(socket, command, params, cmdObject, Game) {
     let direction = params.join('').trim();
     let moveAction = {grid: '', direction: 0};
 
@@ -152,9 +152,9 @@ function cmdFlee(socket, command, params, Game) {
 
 module.exports = [
     {
-        commandKeys: [
-            '/flee'
-        ],
-        method: cmdFlee
-    }
+        command: '/flee',
+        aliases: [],
+        description: 'Flee from a grid, if you are aimed at. You will loose items and reputation when doing so. Usage: /flee <n|s|w|e>(optional)',
+        method: cmdFlee,
+    },
 ];
