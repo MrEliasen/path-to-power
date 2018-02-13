@@ -78,7 +78,9 @@ class Events extends React.Component {
     }
 
     generateCommandList() {
-        return Object.keys(this.props.commandlist).map((command) => {
+        const commands = Object.keys(this.props.commandlist);
+
+        return commands.sort().map((command) => {
             let commandObj = this.props.commandlist[command];
 
             return <p key={command}>
