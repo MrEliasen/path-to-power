@@ -163,7 +163,7 @@ export default class SocketManager extends EventEmitter {
      */
     dispatchToRoom(roomId, action) {
         if (!roomId) {
-            console.log('Missing roomId from dispatchToRoom?:', roomId, ' for action:', action);
+            return this.Game.logger.error('Missing roomId from dispatchToRoom?:', roomId, ' for action:', action);
         }
 
         this.io.sockets.in(roomId).emit('dispatch', action);

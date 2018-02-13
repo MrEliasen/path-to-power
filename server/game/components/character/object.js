@@ -204,7 +204,6 @@ export default class Character {
      * @param  {Character Obj} character  the character objest of the character gridlocking the character.
      */
     gridLock(character) {
-        console.log('GRIDLOCKING', character.name, ' => ', this.name);
         if (this.targetedBy.findIndex((obj) => obj.user_id === character.user_id) === -1) {
             this.targetedBy.push(character);
         }
