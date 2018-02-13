@@ -77,6 +77,22 @@ class Events extends React.Component {
         </div>;
     }
 
+    generateCommandList() {
+        return Object.keys(this.props.commandlist).map((command) => {
+            let commandObj = this.props.commandlist[command];
+
+            return <p key={command}>
+                <strong>{command}</strong>:&nbsp;
+                {commandObj.description}&nbsp;
+                {
+                    commandObj.aliases &&
+                    commandObj.aliases.length > 0 &&
+                    <strong>(aliases: {commandObj.aliases.join(', ')})</strong>
+                }
+            </p>;
+        });
+    }
+
     renderEvent(event, index) {
         switch (event.type) {
             case 'structure-info':
@@ -85,6 +101,8 @@ class Events extends React.Component {
                 return <p className="alert-danger">{event.message}</p>;
             case 'system':
                 return <p className="alert-warning">{event.message}</p>;
+            case 'commandlist':
+                return this.generateCommandList();
             case 'multiline':
                 return event.message.map((msg, subIndex) =>
                     <p key={subIndex}>{msg}</p>

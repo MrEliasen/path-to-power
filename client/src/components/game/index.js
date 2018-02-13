@@ -121,11 +121,8 @@ class Game extends React.Component {
             this.props.clearEvents();
         } else if (['/commandlist', '/commands'].includes(command.toLowerCase())) {
             this.props.newEvent({
-                type: 'multiline',
-                message: [
-                    'Available Commands:',
-                    '-------------------',
-                ].concat(Object.keys(this.props.game.commands).map((cmd) => `${cmd}: ${this.props.game.commands[cmd].description}`)),
+                type: 'commandlist',
+                message: '',
             });
         } else {
             this.props.socket.emit('dispatch', newCommand(command));
