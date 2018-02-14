@@ -67,55 +67,33 @@ function cmdSay(socket, command, params, cmdObject, Game) {
         .catch(() => {});
 }
 
-function cmdWhisper(socket, command, params, cmdObject, Game) {
-    if (params.length < 2) {
-        return Game.eventToSocket(socket, 'error', 'Invalid whisper. Syntax: /w <username> <message>');
-    }
+function cmdWhisper(socket, player, command, params, cmdObject, Game) {
+    // check for cooldowns
+    checkChatCooldown(player, Game, () => {
+        const whisperTarget = params[0];
+        const message = params[1];
 
-    const target = params.shift();
-    // if no name is given, let the user know.
-    if (!target) {
-        return Game.eventToSocket(socket, 'error', 'Invalid whisper target. Syntax: /w <username> <message> (make sure you do not have additional spaces between /w and <username>');
-    }
-
-    const message = params.join(' ').trim();
-    // check if the message is empty
-    if (!message.length) {
-        return;
-    }
-
-    Game.characterManager.get(socket.user.user_id)
-        .then((sender) => {
-            // check for cooldowns
-            checkChatCooldown(sender, Game, () => {
-                Game.characterManager.getByName(target).then((whisperTarget) => {
-                    // send message to the socket
-                    Game.socketManager.dispatchToSocket(socket, {
-                        type: CHAT_MESSAGE,
-                        payload: {
-                            type: 'whisper-out',
-                            user_id: whisperTarget.user_id,
-                            name: whisperTarget.name,
-                            message: message,
-                        },
-                    });
-                    // send message to the target user
-                    Game.socketManager.dispatchToUser(whisperTarget.user_id, {
-                        type: CHAT_MESSAGE,
-                        payload: {
-                            type: 'whisper-in',
-                            user_id: sender.user_id,
-                            name: sender.name,
-                            message: message,
-                        },
-                    });
-                })
-                .catch(() => {
-                    Game.eventToSocket(socket, 'error', 'Invalid whisper target.');
-                });
-            });
-        })
-        .catch();
+        // send message to the socket
+        Game.socketManager.dispatchToSocket(socket, {
+            type: CHAT_MESSAGE,
+            payload: {
+                type: 'whisper-out',
+                user_id: whisperTarget.user_id,
+                name: whisperTarget.name,
+                message: message,
+            },
+        });
+        // send message to the target user
+        Game.socketManager.dispatchToUser(whisperTarget.user_id, {
+            type: CHAT_MESSAGE,
+            payload: {
+                type: 'whisper-in',
+                user_id: player.user_id,
+                name: player.name,
+                message: message,
+            },
+        });
+    });
 }
 
 module.exports = [
@@ -125,7 +103,14 @@ module.exports = [
             '/g',
             '/yell',
         ],
-        description: 'Speak in global chat. Usage: /global <message>',
+        params: [
+            {
+                name: 'Message',
+                desc: 'The message you wish to send to the player.',
+                rules: 'required|minlen:1|maxlen:500',
+            },
+        ],
+        description: 'Speak in global chat.',
         method: cmdGlobal,
     },
     {
@@ -133,7 +118,14 @@ module.exports = [
         aliases: [
             '/s',
         ],
-        description: 'Speak in local chat. Only people in same spot can see it. Usage: /say <message>',
+        params: [
+            {
+                name: 'Message',
+                desc: 'The message you wish to send to the player.',
+                rules: 'required|minlen:1|maxlen:500',
+            },
+        ],
+        description: 'Speak in local chat. Only people in same spot can see it.',
         method: cmdSay,
     },
     {
@@ -143,7 +135,19 @@ module.exports = [
             '/tell',
             '/pm',
         ],
-        description: 'Send a private message to another player. Usage: /whisper <player name> <message>',
+        params: [
+            {
+                name: 'Target',
+                desc: 'The name of the player you want to send a private message to',
+                rules: 'required|player',
+            },
+            {
+                name: 'Message',
+                desc: 'The message you wish to send to the player.',
+                rules: 'required|minlen:1|maxlen:500',
+            },
+        ],
+        description: 'Send a private message to another player.',
         method: cmdWhisper,
     },
 ];

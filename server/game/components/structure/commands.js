@@ -306,7 +306,7 @@ module.exports = [
     {
         command: '/withdraw',
         aliases: [],
-        description: 'Withdraw money from your bank account. Usage: /withdraw <amount>',
+        description: 'Withdraw money from your bank account.',
         method: cmdWithdraw,
     },
     {
@@ -318,7 +318,7 @@ module.exports = [
     {
         command: '/heal',
         aliases: [],
-        description: 'Regain health. Costs {cost} per {heal_amount} point(s) of health to heal. Usage: /heal <points-to-heal>',
+        description: 'Regain health. Costs {cost} per {heal_amount} point(s) of health to heal. Usage: /heal <amount>',
         method: cmdHeal,
         modifiers: {
             cost: 10,

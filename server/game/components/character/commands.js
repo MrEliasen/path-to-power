@@ -13,102 +13,52 @@ function checkAttackCooldown (character, Game, callback) {
     callback();
 }
 
-function cmdAim(socket, command, params, cmdObject, Game) {
-    if (!params[0]) {
-        return;
+function cmdAim(socket, character, command, params, cmdObject, Game) {
+    const target = params[1];
+
+    // check if the character has an existing cooldown for this action, if they are trying to hide
+    const ticksLeft = Game.cooldownManager.ticksLeft(character, 'action_aim');
+
+    if (ticksLeft) {
+        return Game.eventToUser(character.user_id, 'error', `You cannot change target so quickly. You must wait another ${(ticksLeft / 10)} seconds.`);
     }
 
-    let userName = params[0].toString().toLowerCase();
+    // add the search cooldown to the character
+    const newCooldown = Game.cooldownManager.add(character, 'aim');
 
-    // get the character
-    Game.characterManager.get(socket.user.user_id)
-        .then((character) => {
-            Game.commandManager.findAtLocation(userName, character.location)
-                .then((target) => {
-                    // check if the character has an existing cooldown for this action, if they are trying to hide
-                    const ticksLeft = Game.cooldownManager.ticksLeft(character, 'action_aim');
+    // set the new target, releasing the old target's gridlock, and gridlocking the new target.
+    character.setTarget(target);
 
-                    if (ticksLeft) {
-                        return Game.eventToUser(character.user_id, 'error', `You cannot change target so quickly. You must wait another ${(ticksLeft / 10)} seconds.`);
-                    }
+    // let the player know they are aimed at
+    Game.eventToUser(target.user_id, 'warning', `${character.name} has taken aim at you. The only way get out of this, is to kill ${character.name} or /flee <n|s|w|e>`);
+    // let the character know they have a target
+    Game.eventToSocket(socket, 'info', `You take aim at ${target.name}. You can release your aim with /release`);
+    Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} take aim at ${target.name}.`, [target.user_id, character.user_id]);
 
-                    // add the search cooldown to the character
-                    const newCooldown = Game.cooldownManager.add(character, 'aim');
-
-                    // set the new target, releasing the old target's gridlock, and gridlocking the new target.
-                    character.setTarget(target);
-
-                    // let the player know they are aimed at
-                    Game.eventToUser(target.user_id, 'warning', `${character.name} has taken aim at you. The only way get out of this, is to kill ${character.name} or /flee <n|s|w|e>`);
-                    // let the character know they have a target
-                    Game.eventToSocket(socket, 'info', `You take aim at ${target.name}. You can release your aim with /release`);
-                    Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} take aim at ${target.name}.`, [target.user_id, character.user_id]);
-
-                    // start the cooldown
-                    newCooldown.start();
-                })
-                .catch((message) => {
-                    Game.eventToSocket(socket, 'error', message);
-                });
-        })
-        .catch((err) => {
-            Game.logger.error(err)
-        });
+    // start the cooldown
+    newCooldown.start();
 }
 
-function cmdGive(socket, command, params, cmdObject, Game) {
-    if (params.length !== 2) {
-        return Game.eventToSocket(socket, 'error', `Your must specify player and amount to give. Syntax: /give <player> <amount>`);
+function cmdGive(socket, character, command, params, cmdObject, Game) {
+    const receiver = params[0];
+    const amount = params[1];
+
+    // check if they have enough money (in cash)
+    if (character.stats.money < amount) {
+        return Game.eventToSocket(socket, 'error', `You do not have enough money on you, to give them that much.`);
     }
 
-    const playerName = params[0];
-    const amount = parseInt(params[1], 10) || 0;
+    // remove money from giver, add it to the receiver
+    character.updateCash(amount * -1);
+    receiver.updateCash(amount);
 
-    // make sure they are giving at least 1
-    if (amount <= 0) {
-        return Game.eventToSocket(socket, 'error', `You must give something, you cannot leave the amount blank.`);
-    }
+    // let them both know what happened
+    Game.eventToSocket(socket, 'success', `You gave ${amount} to ${receiver.name}`);
+    Game.eventToUser(receiver.user_id, 'info', `${character.name} just gave you ${amount}!`);
 
-    // get the character of the player
-    Game.characterManager.get(socket.user.user_id)
-        .then((character) => {
-            Game.commandManager.findAtLocation(playerName, character.location, true, false)
-            .then((receiver) => {
-                // check if they have enough money (in cash)
-                if (character.stats.money < amount) {
-                    return Game.eventToSocket(socket, 'error', `You do not have enough money on you, to give them that much.`);
-                }
-
-                let inSameLocation = true;
-                // make sure the receiver is at the same location
-                Object.keys(character.location).forEach((key) => {
-                    if (character.location[key] !== receiver.location[key]) {
-                        inSameLocation = false;
-                    }
-                });
-
-                // if they are not in the same location, tell them
-                if (!inSameLocation) {
-                    return Game.eventToSocket(socket, 'error', 'You must be at the same location as the person you are giving money to.')
-                }
-
-                // remove money from giver, add it to the receiver
-                character.updateCash(amount * -1);
-                receiver.updateCash(amount);
-
-                // let them both know what happened
-                Game.eventToSocket(socket, 'success', `You gave ${amount} to ${receiver.name}`);
-                Game.eventToUser(receiver.user_id, 'info', `${character.name} just gave you ${amount}!`);
-
-                // update the character stats of the two players
-                Game.characterManager.updateClient(character.user_id, 'stats');
-                Game.characterManager.updateClient(receiver.user_id, 'stats');
-            })
-            .catch((message) => {
-                Game.eventToSocket(socket, 'error', message);
-            });
-        })
-        .catch(() => {});
+    // update the character stats of the two players
+    Game.characterManager.updateClient(character.user_id, 'stats');
+    Game.characterManager.updateClient(receiver.user_id, 'stats');
 }
 
 function cmdPunch(socket, command, params, cmdObject, Game) {
@@ -356,13 +306,32 @@ module.exports = [
         aliases: [
             '/target',
         ],
+        params: [
+            {
+                name: 'Player',
+                desc: 'The name of the player you want to give cash to',
+                rules: 'required|target:grid',
+            },
+        ],
         description: 'Take aim at another player/npc, locking them in the current location. Usage: /aim <target name>',
         method: cmdAim,
     },
     {
         command: '/give',
         aliases: [],
-        description: 'Give cash to another player. Usage: /give <player name> <amount>',
+        params: [
+            {
+                name: 'Player',
+                desc: 'The name of the player you want to give cash to',
+                rules: 'required|player:grid',
+            },
+            {
+                name: 'Amount',
+                desc: 'The amount of cash you wish to give to the player.',
+                rules: 'required|number|min:1',
+            },
+        ],
+        description: 'Give cash to another player.',
         method: cmdGive,
     },
     {

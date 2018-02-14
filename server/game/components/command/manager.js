@@ -93,17 +93,25 @@ export default class CommandManager {
             return this.Game.eventToSocket(socket, 'error', `Command ${command} is not a valid command.`);
         }
 
-        this.Game.logger.info('CommandManager::exec', {command, params});
-        this.commands[command].method(
-            socket,
-            command,
-            params,
-            {
-                modifiers: this.commands[command].modifiers ? deepCopyObject(this.commands[command].modifiers) : null,
-                description: this.commands[command].description,
-            },
-            this.Game
-        );
+        const character = this.Game.characterManager.getSync(socket.user.user_id);
+
+        this.validate(character, params, this.commands[command].params)
+            .then((validParams) => {
+                this.commands[command].method(
+                    socket,
+                    character,
+                    command,
+                    validParams,
+                    {
+                        modifiers: this.commands[command].modifiers ? deepCopyObject(this.commands[command].modifiers) : null,
+                        description: this.commands[command].description,
+                    },
+                    this.Game
+                );
+            })
+            .catch((error) => {
+                return this.Game.eventToSocket(socket, 'error', error.toString());
+            });
     }
 
     /**
@@ -129,56 +137,188 @@ export default class CommandManager {
 
     /**
      * Find a specific target at the given location, by name
-     * @param  {String} findName      The name, or part of, to search for
-     * @param  {Object} location      A character/npc location object
-     * @param  {Bool}   ignoreHiding  Whether to include hidden players or not
-     * @param  {Bool}   ignoreNPCs    Whether to include NPCs or not
+     * @param  {String}   findName      The name, or part of, to search for
+     * @param  {Object}   location      A character/npc location object
+     * @param  {Bool}     ignoreNPCs    Whether to include NPCs or not
+     * @param  {Bool}     ignorePlayers Whether to include players or not
+     */
+    findAtLocation(findName, location, ignoreNPCs = false, ignorePlayers = false) {
+        // get he list of players and NPCS at the grid
+        const playersAtGrid = this.Game.characterManager.getLocationList(location.map, location.x, location.y);
+        const NPCsAtGrid = this.Game.npcManager.getLocationList(location.map, location.x, location.y);
+
+        // Find target matching the name
+        const characters = ignorePlayers ? [] : playersAtGrid.filter((user) => {
+            return user.name_lowercase.indexOf(findName) === 0 && !user.hidden;
+        });
+        const NPCs = ignoreNPCs ? [] : NPCsAtGrid.filter((npc) => {
+            return `${npc.name} the ${npc.type}`.toLowerCase().indexOf(findName) === 0;
+        });
+
+        // Check if there where any matches
+        if (!characters.length && !NPCs.length) {
+            return 'There are nobody around with that name.';
+        }
+
+        // get the full list of potential targets
+        let matchingTargets = characters.concat(NPCs);
+        let target;
+
+        // If there are more than 1 match, see if there is anyone matching the name exactly
+        if (matchingTargets.length > 1) {
+            target = matchingTargets.find((user) => {
+                // must be a player
+                if (!user.type) {
+                    return user.name_lowercase === findName;
+                } else {
+                    return `${npc.name} the ${npc.type}`.toLowerCase() === findName;
+                }
+            });
+
+            // if there are noone matching the name exactly, tell them to spell out the full name
+            if (!target) {
+                return 'You must be more specific with who you want to target.';
+            }
+        } else {
+            // otherwise select the first and only one in the list
+            target = matchingTargets[0];
+        }
+
+        return target;
+    }
+
+    /**
+     * Validates a command's params
+     * @param  {Character} player The character object of the player executing the command
+     * @param  {array}     params Params from the client commandnt command
+     * @param  {array}     rules  Param rules for the command
      * @return {Promise}
      */
-    findAtLocation(findName, location, ignoreHiding = true, ignoreNPCs = false) {
+    validate(player, msgParams, cmdParams) {
         return new Promise((resolve, reject) => {
-            // get he list of players and NPCS at the grid
-            const playersAtGrid = this.Game.characterManager.getLocationList(location.map, location.x, location.y);
-            const NPCsAtGrid = this.Game.npcManager.getLocationList(location.map, location.x, location.y);
-
-            // Find target matching the name
-            const characters = playersAtGrid.filter((user) => {
-                return user.name_lowercase.indexOf(findName) === 0 && (ignoreHiding ? true : !user.hidden);
-            });
-            const NPCs = ignoreNPCs ? [] : NPCsAtGrid.filter((npc) => {
-                return `${npc.name} the ${npc.type}`.toLowerCase().indexOf(findName) === 0;
-            });
-
-            // Check if there where any matches
-            if (!characters.length && !NPCs.length) {
-                return reject('There are nobody around with that name.');
+            // check if there are any params defined for the command at all
+            if (!cmdParams) {
+                return resolve(msgParams);
             }
 
-            // get the full list of potential targets
-            let matchingTargets = characters.concat(NPCs);
-            let target;
+            // prepare the params, so they match the number of expected params.
+            msgParams = msgParams.slice(0, cmdParams.length - 1).concat(msgParams.slice(cmdParams.length - 1).join(' '));
+            // run the params through each of the rules
+            for (let index = 0; index < cmdParams.length; index++) {
+                let param = cmdParams[index];
 
-            // If there are more than 1 match, see if there is anyone matching the name exactly
-            if (matchingTargets.length > 1) {
-                target = matchingTargets.find((user) => {
-                    // must be a player
-                    if (!user.type) {
-                        return user.name_lowercase === findName;
-                    } else {
-                        return `${npc.name} the ${npc.type}`.toLowerCase() === findName;
+                // only if the parameter has rules..
+                if (param.rules.length) {
+                    let rules = param.rules.toLowerCase().split('|');
+
+                    // will we run through and validate the message parameter the rule is for
+                    for (let i = 0; i < rules.length; i++) {
+                        let rule = rules[i];
+
+                        console.log(rule);
+
+                        // get the corresponding message parameter
+                        let msgParam = msgParams[index];
+                        // holds the value we will overwrite the parameter with, if the test succeeds.
+                        let value = msgParam;
+                        //null placeholder for 2nd rule param, if not set
+                        rule = rule.split(':').concat([null]);
+
+                        switch (rule[0]) {
+                            case 'required':
+                                if (typeof msgParam === 'undefined') {
+                                    return reject(`Missing parameter: ${param.name}`);
+                                }
+                                break;
+
+                            case 'number':
+                                value = parseInt(msgParam, 10);
+
+                                if (isNaN(value)) {
+                                    return reject(`${param.name} must be a number.`);
+                                }
+                                break;
+
+                            case 'min':
+                                value = parseInt(msgParam, 10);
+
+                                if (!isNaN(value) && value < parseInt(rule[1], 10)) {
+                                    return reject(`${param.name} cannot be less than ${rule[1]}.`);
+                                }
+                                break;
+
+                            case 'minlen':
+                                if (msgParam.length < parseInt(rule[1], 10)) {
+                                    return reject(`${param.name} must be at least ${rule[1]} characters long.`);
+                                }
+                                break;
+
+                            case 'maxlen':
+                                if (msgParam.length > parseInt(rule[1], 10)) {
+                                    return reject(`${param.name} cannot be longer than ${rule[1]} characters.`);
+                                }
+                                break;
+
+                            case 'player':
+                            case 'target':
+                            case 'npc':
+                                // if there is no rule modifiers, assume no location restrictions
+                                // and player (since actions towards NPCs are inherently restricted to grid)
+                                if (!rule[1]) {
+                                    value = this.Game.characterManager.getByNameSync(msgParam);
+
+                                    if (!value) {
+                                        return reject(`There is no ${param.name} online by that name.`);
+                                    }
+                                    break;
+                                }
+
+                                // assume we will search in the grid by detault
+                                let location = {
+                                    ...player.location,
+                                };
+
+                                // if rule modifier is set to map, null out the x an y so
+                                // we will search the map instead of grid
+                                if (rule[1] !== 'grid') {
+                                    location.x = null;
+                                    location.y = null;
+                                }
+
+                                value = this.findAtLocation(
+                                    msgParam,
+                                    location,
+                                    rule[0] === 'player',
+                                    rule[0] === 'npc',
+                                );
+
+                                if (typeof value === 'string') {
+                                    return reject(value);
+                                }
+                                break;
+                        };
+
+                        msgParams[index] = value;
                     }
-                });
-
-                // if there are noone matching the name exactly, tell them to spell out the full name
-                if (!target) {
-                    return reject('You must be more specific with who you want to target.');
                 }
-            } else {
-                // otherwise select the first and only one in the list
-                target = matchingTargets[0];
             }
 
-            resolve(target);
+            resolve(msgParams);
         });
     }
+
+    /*
+    params: [
+        {
+            name: 'Target',
+            desc: 'The name of the player you want to send a private message to',
+            rules: 'required|character:grid',
+        },
+        {
+            name: 'Message',
+            desc: 'The message you wish to send to the player.',
+            rules: 'required|minlen:1|maxlen:20',
+        },
+    ],
+     */
 }

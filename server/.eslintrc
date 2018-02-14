@@ -13,8 +13,8 @@
     "strict": [2, "never"],
     "max-len": "off",
     "spaced-comment": "off",
-    "camelcase": "off"
-    "valid-jsdoc": ["error", { "requireReturn": false }]
+    "camelcase": "off",
+    "valid-jsdoc": "off"
   },
   "plugins": []
 }

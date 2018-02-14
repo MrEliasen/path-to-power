@@ -89,13 +89,7 @@ export default class CharacterManager {
      */
     getByName(characterName) {
         return new Promise((resolve, reject) =>{
-            characterName = characterName.toLowerCase();
-
-            let character = this.characters.find((obj) => {
-                if (obj.name_lowercase === characterName || obj.name_lowercase.indexOf(characterName) === 0) {
-                    return true;
-                }
-            });
+            const character = this.getByNameSync(characterName);
 
             if (!character) {
                 return reject();
@@ -106,24 +100,50 @@ export default class CharacterManager {
     }
 
     /**
+     * Synchronously get the character object by character name, if exists.
+     * @param  {String} characterName Character name to search for
+     * @return {Mixed}                Character object or null.
+     */
+    getByNameSync(characterName) {
+        characterName = characterName.toLowerCase();
+
+        const character = this.characters.find((obj) => {
+            if (obj.name_lowercase === characterName || obj.name_lowercase.indexOf(characterName) === 0) {
+                return true;
+            }
+        });
+
+        return character || null;
+    }
+
+    /**
      * gets the character of the user ID, if one exists
      * @param  {String} user_id User ID
      * @return {Promise}
      */
     get(user_id) {
         return new Promise((resolve, reject) => {
-            if (!user_id) {
-                return reject();
-            }
-
-            const character = this.characters.find((obj) => obj.user_id === user_id);
+            const character = this.getSync(user_id);
 
             if (!character) {
                 return reject(`Character ${user_id} was not found. It was likely never loaded.`);
             }
 
             resolve(character);
-        })
+        });
+    }
+
+    /**
+     * Synchronously get the character object by user ID, if exists.
+     * @param  {String} user_id User ID of character to find
+     * @return {Mixed}          The character object or null
+     */
+    getSync(user_id) {
+        if (!user_id) {
+            return null;
+        }
+
+        return this.characters.find((obj) => obj.user_id === user_id) || null;
     }
 
     /**
@@ -525,8 +545,15 @@ export default class CharacterManager {
      * @param  {Boolean} toClient   Whether to return the references or list of user_ids and names (to be sent to client)
      * @return {Array}     Array of players
      */
-    getLocationList(map, x, y, ignore = null, toClient = false) {
-        let players = this.characters.filter((obj) => obj.location.map == map && obj.location.y == y && obj.location.x == x);
+    getLocationList(map, x = null, y = null, ignore = null, toClient = false) {
+        let players;
+
+        // if we need to get NPCs from a specific grid within a map
+        if (x !== null && y !== null) {
+            players = this.characters.filter((obj) => obj.location.map == map && obj.location.y == y && obj.location.x == x);
+        } else {
+            players = this.characters.filter((obj) => obj.location.map === map);
+        }
 
         if (!toClient) {
             return players;
