@@ -154,6 +154,13 @@ module.exports = [
     {
         command: '/flee',
         aliases: [],
+        params: [
+            {
+                name: 'Direction',
+                desc: 'The specific direction you wish to flee to.',
+                rules: '',
+            },
+        ],
         description: 'Flee from a grid, if you are aimed at. You will loose items and reputation when doing so. Usage: /flee <n|s|w|e>(optional)',
         method: cmdFlee,
     },

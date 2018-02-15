@@ -1,4 +1,5 @@
 import Promise from 'bluebird';
+import escapeStringRegex from 'escape-string-regexp';
 import {GAME_COMMAND} from './types';
 import commandCommands from './commands';
 import {deepCopyObject} from '../../helper';
@@ -195,7 +196,7 @@ export default class CommandManager {
      * @return {Promise}
      */
     validate(player, msgParams, cmdParams) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             // check if there are any params defined for the command at all
             if (!cmdParams) {
                 return resolve(msgParams);
@@ -214,8 +215,6 @@ export default class CommandManager {
                     // will we run through and validate the message parameter the rule is for
                     for (let i = 0; i < rules.length; i++) {
                         let rule = rules[i];
-
-                        console.log(rule);
 
                         // get the corresponding message parameter
                         let msgParam = msgParams[index];
@@ -257,6 +256,18 @@ export default class CommandManager {
                                 if (msgParam.length > parseInt(rule[1], 10)) {
                                     return reject(`${param.name} cannot be longer than ${rule[1]} characters.`);
                                 }
+                                break;
+
+                            case 'alphanum':
+                                if (msgParam !== escapeStringRegex(msgParam.toString()).replace(/[^a-z0-9]/gi, '')) {
+                                    return reject(`${param.name} may only consist of alphanumeric characters (a-z, 0-9).`);
+                                }
+                                break;
+
+                            case 'faction':
+                                value = await this.Game.factionManager.getByName(msgParam).catch(() => {
+                                    return reject(`The ${param.name} is not a valid faction.`);
+                                });
                                 break;
 
                             case 'player':

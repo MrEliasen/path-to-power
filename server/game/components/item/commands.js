@@ -1,58 +1,51 @@
 import {UPDATE_GROUND_ITEMS} from './types';
 
-function cmdDrop(socket, command, params, cmdObject, Game) {
-    if (!params[0]) {
-        return;
+function cmdDrop(socket, character, command, params, cmdObject, Game) {
+    let amount = params[1];
+    let item_name = params[0];
+
+    // If the last parameter is not considered a number
+    // assume its part of the item name, and set amount default 1
+    if (!parseInt(amount, 10)) {
+        item_name.push(amount);
+        amount = 1;
     }
 
-    Game.characterManager.get(socket.user.user_id)
-        .then((character) => {
-            let amount = params.pop();
-            let item_name = params || [];
+    // the finished item name we will look for
+    item_name = item_name.join(' ').toLowerCase();
 
-            // If the last parameter is not considered a number
-            // assume its part of the item name, and set amount default 1
-            if (!parseInt(amount, 10)) {
-                item_name.push(amount);
-                amount = 1;
-            }
+    // drop the item from the inventory, should it exist
+    let droppedItem = character.dropItem(item_name, amount);
 
-            // the finished item name we will look for
-            item_name = item_name.join(' ').toLowerCase();
+    if (!droppedItem) {
+        return Game.eventToSocket(socket, 'error', `You do not have any items, which name begins with ${item_name}.`);
+    }
 
-            // drop the item from the inventory, should it exist
-            let droppedItem = character.dropItem(item_name, amount);
+    // add the item to the grid location
+    const items_list = Game.itemManager.drop(character.location.map, character.location.x, character.location.y, droppedItem);
+    // holds the items data we will send to the rooms
+    const items_ground = items_list.map((obj) => {
+        return {
+            id: obj.id,
+            ...obj.getModifiers(),
+        };
+    });
 
-            if (!droppedItem) {
-                return Game.eventToSocket(socket, 'error', `You do not have any items, which name begins with ${item_name}.`);
-            }
+    // update the clients character informatiom
+    Game.characterManager.updateClient(character.user_id, 'inventory');
+    // send the updated items list to the grid
+    Game.socketManager.dispatchToRoom(character.getLocationId(), {
+        type: UPDATE_GROUND_ITEMS,
+        payload: items_ground
+    });
 
-            // add the item to the grid location
-            const items_list = Game.itemManager.drop(character.location.map, character.location.x, character.location.y, droppedItem);
-            // holds the items data we will send to the rooms
-            const items_ground = items_list.map((obj) => {
-                return {
-                    id: obj.id,
-                    ...obj.getModifiers(),
-                };
-            });
-
-            // update the clients character informatiom
-            Game.characterManager.updateClient(character.user_id, 'inventory');
-            // send the updated items list to the grid
-            Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                type: UPDATE_GROUND_ITEMS,
-                payload: items_ground
-            });
-
-            // dispatch events to the user
-            Game.eventToSocket(socket, 'info', `You dropped ${(droppedItem.stats.stackable ? 'a' : `${amount}x`)} ${droppedItem.name} on the ground`);
-            // dispatch events to the grid
-            Game.eventToRoom(character.getLocationId(), 'info', `${character.name} dropped ${(droppedItem.stats.stackable ? 'a' : `${amount}x`)} ${droppedItem.name} on the ground`, [character.user_id]);
-        });
+    // dispatch events to the user
+    Game.eventToSocket(socket, 'info', `You dropped ${(droppedItem.stats.stackable ? 'a' : `${amount}x`)} ${droppedItem.name} on the ground`);
+    // dispatch events to the grid
+    Game.eventToRoom(character.getLocationId(), 'info', `${character.name} dropped ${(droppedItem.stats.stackable ? 'a' : `${amount}x`)} ${droppedItem.name} on the ground`, [character.user_id]);
 }
 
-function cmdDropByIndex(socket, command, params, cmdObject, Game) {
+function cmdDropByIndex(socket, character, command, params, cmdObject, Game) {
     if (!params[0]) {
         return;
     }
@@ -108,7 +101,7 @@ function cmdDropByIndex(socket, command, params, cmdObject, Game) {
         });
 }
 
-function cmdGiveItem(socket, command, params, cmdObject, Game) {
+function cmdGiveItem(socket, character, command, params, cmdObject, Game) {
     if (!params[0]) {
         return;
     }
@@ -139,7 +132,7 @@ function cmdGiveItem(socket, command, params, cmdObject, Game) {
         });
 }
 
-function cmdPickup(socket, command, params, cmdObject, Game) {
+function cmdPickup(socket, character, command, params, cmdObject, Game) {
     // get the character
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
@@ -192,7 +185,7 @@ function cmdPickup(socket, command, params, cmdObject, Game) {
         });
 }
 
-function cmdUseItem(socket, command, params, cmdObject, Game) {
+function cmdUseItem(socket, character, command, params, cmdObject, Game) {
     // get the character
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
@@ -221,19 +214,45 @@ module.exports = [
     {
         command: '/usebyindex',
         aliases: [],
-        description: 'use an inventory item, based on the item\'s inventory index. Usage: /usebyindex <index>',
+        params: [
+            {
+                name: 'Index',
+                desc: 'The item\'s index in your inventory',
+                rules: 'required|item',
+            },
+        ],
+        description: 'use an inventory item, based on the item\'s inventory index.',
         method: cmdUseItem,
     },
     {
         command: '/drop',
         aliases: [],
-        description: 'Drop an item on the ground. Usage: /drop <item name>',
+        params: [
+            {
+                name: 'Item Name',
+                desc: 'The name of the item in your inventory to drop.',
+                rules: 'required|item',
+            },
+            {
+                name: 'Amount',
+                desc: 'The amount of an item to drop (stackable items only).',
+                rules: 'number|min:1',
+            },
+        ],
+        description: 'Drop an item on the ground.',
         method: cmdDrop,
     },
     {
         command: '/dropbyindex',
         aliases: [],
-        description: 'Drop an item, based on the item\'s inventory index, on the ground. Usage: /dropbyindex <index>',
+        params: [
+            {
+                name: 'Index',
+                desc: 'The item\'s index in your inventory.',
+                rules: 'required|number|min:0',
+            },
+        ],
+        description: 'Drop an item, based on the item\'s inventory index, on the ground.',
         method: cmdDropByIndex,
     },
     {
@@ -241,13 +260,27 @@ module.exports = [
         aliases: [
             '/get',
         ],
-        description: 'Pickup an item from the ground. If the name is omitted, the first item will be picked up. Usage: /pickup <item name>',
+        params: [
+            {
+                name: 'Item Name',
+                desc: 'The name of the item you want to pick up',
+                rules: '',
+            },
+        ],
+        description: 'Pickup an item from the ground. If the name is omitted, the first item will be picked up.',
         method: cmdPickup,
     },
     {
         command: '/giveitem',
         aliases: [],
-        description: 'Gives an item to the player. Usage: /giveitem <itemId>',
+        params: [
+            {
+                name: 'Item ID',
+                desc: 'The item ID of the item you wish to give yourself.',
+                rules: 'required|item:id',
+            },
+        ],
+        description: 'Gives an item to the player.',
         method: cmdGiveItem,
     },
 ];
