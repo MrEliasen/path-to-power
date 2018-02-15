@@ -1,4 +1,4 @@
-function checkAttackCooldown (character, Game, callback) {
+function checkAttackCooldown(character, Game, callback) {
     // check if the character has an existing cooldown for this action, if they are trying to hide
     const ticksLeft = Game.cooldownManager.ticksLeft(character, 'attack');
 
@@ -9,7 +9,7 @@ function checkAttackCooldown (character, Game, callback) {
     // add the search cooldown to the character
     Game.cooldownManager.add(character, 'attack', null, true);
 
-    // return the new cooldown 
+    // return the new cooldown
     callback();
 }
 
@@ -45,7 +45,7 @@ function cmdGive(socket, character, command, params, cmdObject, Game) {
 
     // check if they have enough money (in cash)
     if (character.stats.money < amount) {
-        return Game.eventToSocket(socket, 'error', `You do not have enough money on you, to give them that much.`);
+        return Game.eventToSocket(socket, 'error', 'You do not have enough money on you, to give them that much.');
     }
 
     // remove money from giver, add it to the receiver
@@ -315,7 +315,7 @@ module.exports = [
             {
                 name: 'Amount',
                 desc: 'The amount of cash you wish to give to the player.',
-                rules: 'required|number|min:1',
+                rules: 'required|integer|min:1',
             },
         ],
         description: 'Give cash to another player.',

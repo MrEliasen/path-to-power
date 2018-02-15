@@ -15,7 +15,7 @@ function checkChatCooldown(character, Game, callback) {
     callback();
 }
 
-function cmdGlobal(socket, command, params, cmdObject, Game) {
+function cmdGlobal(socket, character, command, params, cmdObject, Game) {
     const message = params.join(' ').trim();
 
     // check if the message is empty
@@ -23,25 +23,21 @@ function cmdGlobal(socket, command, params, cmdObject, Game) {
         return Game.eventToSocket(socket, 'error', 'You must specify a message to send. Syntax: /g <message>');
     }
 
-    Game.characterManager.get(socket.user.user_id)
-        .then((character) => {
-            // check for cooldowns
-            checkChatCooldown(character, Game, () => {
-                Game.socketManager.dispatchToServer({
-                    type: CHAT_MESSAGE,
-                    payload: {
-                        user_id: character.user_id,
-                        name: character.name,
-                        message: params.join(' '),
-                        type: 'global',
-                    },
-                });
-            });
-        })
-        .catch(() => {});
+    // check for cooldowns
+    checkChatCooldown(character, Game, () => {
+        Game.socketManager.dispatchToServer({
+            type: CHAT_MESSAGE,
+            payload: {
+                user_id: character.user_id,
+                name: character.name,
+                message: params.join(' '),
+                type: 'global',
+            },
+        });
+    });
 }
 
-function cmdSay(socket, command, params, cmdObject, Game) {
+function cmdSay(socket, character, command, params, cmdObject, Game) {
     const message = params.join(' ').trim();
 
     // check if the message is empty
@@ -49,27 +45,23 @@ function cmdSay(socket, command, params, cmdObject, Game) {
         return Game.eventToSocket(socket, 'error', 'You must specify a message to send. Syntax: /s <message>');
     }
 
-    Game.characterManager.get(socket.user.user_id)
-        .then((character) => {
-            // check for cooldowns
-            checkChatCooldown(character, Game, () => {
-                Game.socketManager.dispatchToRoom(`${character.location.map}_${character.location.y}_${character.location.x}`, {
-                    type: CHAT_MESSAGE,
-                    payload: {
-                        user_id: character.user_id,
-                        name: character.name,
-                        message: message,
-                        type: 'local',
-                    },
-                });
-            });
-        })
-        .catch(() => {});
+    // check for cooldowns
+    checkChatCooldown(character, Game, () => {
+        Game.socketManager.dispatchToRoom(`${character.location.map}_${character.location.y}_${character.location.x}`, {
+            type: CHAT_MESSAGE,
+            payload: {
+                user_id: character.user_id,
+                name: character.name,
+                message: message,
+                type: 'local',
+            },
+        });
+    });
 }
 
-function cmdWhisper(socket, player, command, params, cmdObject, Game) {
+function cmdWhisper(socket, character, command, params, cmdObject, Game) {
     // check for cooldowns
-    checkChatCooldown(player, Game, () => {
+    checkChatCooldown(character, Game, () => {
         const whisperTarget = params[0];
         const message = params[1];
 
@@ -88,8 +80,8 @@ function cmdWhisper(socket, player, command, params, cmdObject, Game) {
             type: CHAT_MESSAGE,
             payload: {
                 type: 'whisper-in',
-                user_id: player.user_id,
-                name: player.name,
+                user_id: character.user_id,
+                name: character.name,
                 message: message,
             },
         });

@@ -212,10 +212,15 @@ export default class CommandManager {
                 if (param.rules.length) {
                     let rules = param.rules.toLowerCase().split('|');
 
+                    // check if the message param is not set and is optional
+                    // if so, we will ignore the rules.
+                    if (!msgParams[index] && !rules.includes('required')) {
+                        break;
+                    }
+
                     // will we run through and validate the message parameter the rule is for
                     for (let i = 0; i < rules.length; i++) {
                         let rule = rules[i];
-
                         // get the corresponding message parameter
                         let msgParam = msgParams[index];
                         // holds the value we will overwrite the parameter with, if the test succeeds.
@@ -230,19 +235,31 @@ export default class CommandManager {
                                 }
                                 break;
 
-                            case 'number':
+                            case 'integer':
                                 value = parseInt(msgParam, 10);
 
                                 if (isNaN(value)) {
-                                    return reject(`${param.name} must be a number.`);
+                                    return reject(`${param.name} must be a integer.`);
+                                }
+                                break;
+
+                            case 'float':
+                                value = parseFloat(msgParam, 10);
+
+                                if (isNaN(value)) {
+                                    return reject(`${param.name} must be a float.`);
                                 }
                                 break;
 
                             case 'min':
-                                value = parseInt(msgParam, 10);
-
-                                if (!isNaN(value) && value < parseInt(rule[1], 10)) {
+                                if (isNaN(msgParam) || msgParam < parseFloat(rule[1], 10)) {
                                     return reject(`${param.name} cannot be less than ${rule[1]}.`);
+                                }
+                                break;
+
+                            case 'max':
+                                if (isNaN(msgParam) || msgParam > parseFloat(rule[1], 10)) {
+                                    return reject(`${param.name} cannot be greater than ${rule[1]}.`);
                                 }
                                 break;
 
@@ -264,10 +281,50 @@ export default class CommandManager {
                                 }
                                 break;
 
+                            case 'direction':
+                                const directions = [
+                                    'north', 'east', 'south', 'west',
+                                    'n', 'e', 's', 'w',
+                                ];
+
+                                if (!directions.includes(msgParam.toLowerCase())) {
+                                    return reject(`${param.name} does not appear to be a valid direction.`);
+                                }
+                                break;
+
                             case 'faction':
                                 value = await this.Game.factionManager.getByName(msgParam).catch(() => {
                                     return reject(`The ${param.name} is not a valid faction.`);
                                 });
+                                break;
+
+                            case 'shop':
+                                value = await this.Game.structureManager.getWithShop(player.location.map, player.location.x, player.location.y)
+                                    .catch(() => {
+                                        return reject(`The ${param.name} is not a valid shop, at your current location.`);
+                                    });
+                                break;
+
+                            case 'item':
+                                if (!rule[1]) {
+                                    value = await this.Game.itemManager.getTemplateByName(msgParam.toLowerCase());
+
+                                    // if no item was found by name, see if the msgParam was an itemId instead
+                                    if (!value) {
+                                        value = await this.Game.itemManager.getTemplate(msgParam);
+                                    }
+                                } else {
+                                    if (rule[1] === 'id') {
+                                        value = await this.Game.itemManager.getTemplate(msgParam);
+                                    } else if (rule[1] === 'name') {
+                                        value = await this.Game.itemManager.getTemplateByName(msgParam.toLowerCase());
+                                    }
+                                }
+
+                                // no item found by name or ID
+                                if (!value) {
+                                    return reject(`The ${param.name} is not a valid item.`);
+                                }
                                 break;
 
                             case 'player':

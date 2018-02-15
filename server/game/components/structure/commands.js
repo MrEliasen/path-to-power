@@ -1,76 +1,69 @@
 import {LEFT_GRID} from '../map/types';
 
-function cmdHeal(socket, command, params, cmdObject, Game) {
-    // Fetch the character first
-    Game.characterManager.get(socket.user.user_id)
-        .then((character) => {
-            // get the structures list at the character location
-            Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
-                .then((structures) => {
-                    // if we get multiple structures, but only one parameter, the client didnt specify
-                    // the structure to use the command with.
-                    if (structures.length > 1 && params.length <= 1) {
-                        return Game.eventToSocket(socket, 'error', 'Invalid structure. There are multiple structures with that command use: /heal <amount> <structure-name>');
-                    }
+function cmdHeal(socket, character, command, params, cmdObject, Game) {
+    // get the structures list at the character location
+    Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
+        .then((structures) => {
+            // if we get multiple structures, but only one parameter, the client didnt specify
+            // the structure to use the command with.
+            if (structures.length > 1 && params.length <= 1) {
+                return Game.eventToSocket(socket, 'error', 'Invalid structure. There are multiple structures with that command use: /heal <amount> <structure-name>');
+            }
 
-                    // set the first structure by default
-                    let structure = structures[0];
+            // set the first structure by default
+            let structure = structures[0];
 
-                    // overwrite if they specified a structure, and its name didn't match their criteria
-                    if (params.length > 1 && structure.name.toLowerCase().indexOf(structures[1].toLowerCase()) !== 0) {
-                        structure = structures.find((structureItem) => structureItem.name.toLowerCase().indexOf(params[1].toLowerCase()) === 0);
-                    }
+            // overwrite if they specified a structure, and its name didn't match their criteria
+            if (params.length > 1 && structure.name.toLowerCase().indexOf(structures[1].toLowerCase()) !== 0) {
+                structure = structures.find((structureItem) => structureItem.name.toLowerCase().indexOf(params[1].toLowerCase()) === 0);
+            }
 
-                    //overwrite the command modifiers with the structure specific once.
-                    Object.assign(cmdObject.modifiers, structure.commands[command]);
+            //overwrite the command modifiers with the structure specific once.
+            Object.assign(cmdObject.modifiers, structure.commands[command]);
 
-                    // if there are 2 params, the client is likely specifying the structure they want to use the command with
-                    // meaning the 2nd param would be the amount, and not the first.
-                    let heal_ticks = parseInt(params[0], 10);
-                    let heal_amount = heal_ticks * cmdObject.modifiers.heal_amount;
+            // if there are 2 params, the client is likely specifying the structure they want to use the command with
+            // meaning the 2nd param would be the amount, and not the first.
+            let heal_ticks = parseInt(params[0], 10);
+            let heal_amount = heal_ticks * cmdObject.modifiers.heal_amount;
 
-                    // Check if the heal_amount is valid
-                    if (!heal_ticks || heal_ticks < 1) {
-                        return Game.eventToSocket(socket, 'error', 'Invalid heal amount. Syntax: /heal <amount>');
-                    }
+            // Check if the heal_amount is valid
+            if (!heal_ticks || heal_ticks < 1) {
+                return Game.eventToSocket(socket, 'error', 'Invalid heal amount. Syntax: /heal <amount>');
+            }
 
-                    // Check if full health
-                    if (character.stats.health === character.stats.health_max) {
-                        return Game.eventToSocket(socket, 'warning', 'You are already at full health!');
-                    }
+            // Check if full health
+            if (character.stats.health === character.stats.health_max) {
+                return Game.eventToSocket(socket, 'warning', 'You are already at full health!');
+            }
 
-                    // Check if the heal would exceed 100%, if so, cap it.
-                    if ((character.stats.health + heal_amount) > character.stats.health_max) {
-                        heal_amount = (character.stats.health_max - character.stats.health);
-                        heal_ticks = Math.ceil(heal_amount / cmdObject.modifiers.heal_amount);
-                    }
+            // Check if the heal would exceed 100%, if so, cap it.
+            if ((character.stats.health + heal_amount) > character.stats.health_max) {
+                heal_amount = (character.stats.health_max - character.stats.health);
+                heal_ticks = Math.ceil(heal_amount / cmdObject.modifiers.heal_amount);
+            }
 
-                    // continue below
-                    const price = heal_ticks * cmdObject.modifiers.cost;
+            // continue below
+            const price = heal_ticks * cmdObject.modifiers.cost;
 
-                    // Check if they have the money
-                    if (cmdObject.modifiers.cost && price > character.stats.money) {
-                        return Game.eventToSocket(socket, 'error', 'You do not have enough money to heal that amount.');
-                    }
+            // Check if they have the money
+            if (cmdObject.modifiers.cost && price > character.stats.money) {
+                return Game.eventToSocket(socket, 'error', 'You do not have enough money to heal that amount.');
+            }
 
-                    // remove money and add health
-                    character.updateCash(price * -1);
-                    character.stats.health = character.stats.health + heal_amount;
+            // remove money and add health
+            character.updateCash(price * -1);
+            character.stats.health = character.stats.health + heal_amount;
 
-                    // update the client
-                    Game.characterManager.updateClient(character.user_id, 'stats');
-                    Game.eventToSocket(socket, 'success', `You healed ${heal_amount}, costing you ${price}`);
-                })
-                .catch((err) => {
-                    Game.logger.debug(err);
-                });
+            // update the client
+            Game.characterManager.updateClient(character.user_id, 'stats');
+            Game.eventToSocket(socket, 'success', `You healed ${heal_amount}, costing you ${price}`);
         })
         .catch((err) => {
             Game.logger.debug(err);
         });
 }
 
-function cmdTravel(socket, command, params, cmdObject, Game) {
+function cmdTravel(socket, character, command, params, cmdObject, Game) {
     // Fetch the character first
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
@@ -175,7 +168,7 @@ function cmdTravel(socket, command, params, cmdObject, Game) {
         });
 }
 
-function cmdWithdraw(socket, command, params, cmdObject, Game) {
+function cmdWithdraw(socket, character, command, params, cmdObject, Game) {
     // Fetch the character first
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
@@ -206,7 +199,7 @@ function cmdWithdraw(socket, command, params, cmdObject, Game) {
         .catch(() => {});
 }
 
-function cmdDeposit(socket, command, params, cmdObject, Game) {
+function cmdDeposit(socket, character, command, params, cmdObject, Game) {
     // Fetch the character first
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
@@ -238,7 +231,7 @@ function cmdDeposit(socket, command, params, cmdObject, Game) {
         .catch(() => {});
 }
 
-function cmdDrink(socket, command, params, cmdObject, Game) {
+function cmdDrink(socket, character, command, params, cmdObject, Game) {
     // Fetch the character first
     Game.characterManager.get(socket.user.user_id)
         .then((character) => {
@@ -306,18 +299,39 @@ module.exports = [
     {
         command: '/withdraw',
         aliases: [],
+        params: [
+            {
+                name: 'Amount',
+                desc: 'The amount you wish to withdraw.',
+                rules: 'required|integer|min:1',
+            },
+        ],
         description: 'Withdraw money from your bank account.',
         method: cmdWithdraw,
     },
     {
         command: '/deposit',
         aliases: [],
-        description: 'Deposite money to your bank account. Usage: /deposit <amount>',
+        params: [
+            {
+                name: 'Amount',
+                desc: 'The amount you wish to deposit.',
+                rules: 'required|integer|min:1',
+            },
+        ],
+        description: 'Deposite money to your bank account.',
         method: cmdDeposit,
     },
     {
         command: '/heal',
         aliases: [],
+        params: [
+            {
+                name: 'Amount',
+                desc: 'The number of times you wish to heal.',
+                rules: 'required|integer|min:1',
+            },
+        ],
         description: 'Regain health. Costs {cost} per {heal_amount} point(s) of health to heal. Usage: /heal <amount>',
         method: cmdHeal,
         modifiers: {
@@ -328,6 +342,13 @@ module.exports = [
     {
         command: '/travel',
         aliases: [],
+        params: [
+            {
+                name: 'Destination',
+                desc: 'The name of the destination you wish to travel to.',
+                rules: 'required|minlen:1',
+            },
+        ],
         description: 'Travel to another city. Available destinations: {destinations}. Usage: /travel <destination name>',
         method: cmdTravel,
         modifiers: {
@@ -337,6 +358,13 @@ module.exports = [
     {
         command: '/drink',
         aliases: [],
+        params: [
+            {
+                name: 'Amount',
+                desc: 'The number of drinks you want to drink.',
+                rules: 'required|integer|min:1',
+            },
+        ],
         description: 'Costs {cost} per drink. Gain {expReward} reputation and loose {healthDamage} health per drink. Usage: /drink <amount>',
         method: cmdDrink,
         modifiers: {

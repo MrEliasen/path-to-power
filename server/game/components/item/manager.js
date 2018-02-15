@@ -229,7 +229,22 @@ export default class ItemManager {
      * @return {Object}         Plain object of the item template
      */
     getTemplate(item_id) {
-        return this.templates[item_id];
+        return this.templates[item_id.toLowerCase()];
+    }
+
+    /**
+     * Retrives an item template, from an item name
+     * @param  {String} itemName Item ID
+     * @return {Object}         Plain object of the item template
+     */
+    getTemplateByName(itemName) {
+        for (let itemId in this.templates) {
+            if (this.templates[itemId].name.toLowerCase().indexOf(itemName) === 0) {
+                return this.templates[itemId];
+            }
+        }
+
+        return null;
     }
 
     loadNPCInventory(NPC) {
