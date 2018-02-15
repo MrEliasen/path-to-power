@@ -238,7 +238,7 @@ export default class CommandManager {
                             case 'integer':
                                 value = parseInt(msgParam, 10);
 
-                                if (isNaN(value)) {
+                                if (isNaN(value) || parseFloat(msgParam, 10) % 1 !== 0) {
                                     return reject(`${param.name} must be a integer.`);
                                 }
                                 break;
