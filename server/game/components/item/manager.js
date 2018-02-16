@@ -76,11 +76,11 @@ export default class ItemManager {
 
     /**
      * Adds an item to the ground at the given location.
-     * @param  {String} map_id     Map ID
-     * @param  {Number} x          East
-     * @param  {Number} y          North
+     * @param  {String}      map_id     Map ID
+     * @param  {Number}      x          East
+     * @param  {Number}      y          North
      * @param  {Item Object} itemObject The item reference
-     * @return {Array}            List of items at the given location
+     * @return {Array}                  List of items at the given location
      */
     drop(map_id, x, y, itemObject) {
         const gridId = `${map_id}_${y}_${x}`;
@@ -137,9 +137,15 @@ export default class ItemManager {
 
             // find the item at the location, the user wants to pickup
             if (itemName) {
-                foundItemIndex = locationItems.findIndex((obj) => obj.name.toLowerCase().indexOf(itemName) !== -1);
+                // check if there is a direct match for the item name
+                foundItemIndex = locationItems.findIndex((obj) => obj.name.toLowerCase() === itemName);
 
-                // if not found, let them know
+                if (foundItemIndex === -1) {
+                    // otherwise check if there is an item beginning with the name
+                    foundItemIndex = locationItems.findIndex((obj) => obj.name.toLowerCase().indexOf(itemName) !== -1);
+                }
+
+                // if still not found, reject
                 if (foundItemIndex === -1) {
                     return reject();
                 }
@@ -245,6 +251,16 @@ export default class ItemManager {
      * @return {Object}         Plain object of the item template
      */
     getTemplateByName(itemName) {
+        itemName = itemName.toLowerCase();
+
+        // first check if there is a direct match between the name and a player
+        for (let itemId in this.templates) {
+            if (this.templates[itemId].name.toLowerCase() === itemName) {
+                return this.templates[itemId];
+            }
+        }
+
+        // otherwise see if there are any items which begins with the string
         for (let itemId in this.templates) {
             if (this.templates[itemId].name.toLowerCase().indexOf(itemName) === 0) {
                 return this.templates[itemId];

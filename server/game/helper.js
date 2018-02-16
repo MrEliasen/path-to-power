@@ -20,3 +20,21 @@ export function dice(min = 0, max) {
 export function deepCopyObject(toCopy) {
     return JSON.parse(JSON.stringify(toCopy));
 }
+
+/**
+ * Find objects matching the search string. Will do direct comparison first.
+ * @param  {Array}  list            The list of objects to search in
+ * @param  {String} compareProperty The property of an object within the array to compare with
+ * @param  {[type]} searchString    The search string
+ * @return {Mixed}                  Returns the matchinf object or undefined
+ */
+export function findInArray(list, compareProperty = 'name', searchString) {
+    searchString = searchString.toLowerCase();
+    let found = list.find((obj) => obj[compareProperty].toLowerCase() === searchString);
+
+    if (!found) {
+        found = list.find((obj) => obj[compareProperty].toLowerCase().indexOf(searchString));
+    }
+
+    return found;
+}

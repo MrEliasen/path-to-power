@@ -160,11 +160,22 @@ export default class CommandManager {
         // get he list of players and NPCS at the grid
         const playersAtGrid = this.Game.characterManager.getLocationList(location.map, location.x, location.y);
         const NPCsAtGrid = this.Game.npcManager.getLocationList(location.map, location.x, location.y);
+        let characters = [];
 
-        // Find target matching the name
-        const characters = ignorePlayers ? [] : playersAtGrid.filter((user) => {
-            return user.name_lowercase.indexOf(findName) === 0 && !user.hidden;
-        });
+        if (!ignorePlayers) {
+            // Find target matching the name exactly
+            characters = playersAtGrid.filter((user) => {
+                return user.name_lowercase === findName && !user.hidden;
+            });
+
+            if (!characters.length) {
+                // Otherwise find target matching the beginning of the name
+                characters = playersAtGrid.filter((user) => {
+                    return user.name_lowercase.indexOf(findName) === 0 && !user.hidden;
+                });
+            }
+        }
+
         const NPCs = ignoreNPCs ? [] : NPCsAtGrid.filter((npc) => {
             return `${npc.name} the ${npc.type}`.toLowerCase().indexOf(findName) === 0;
         });
