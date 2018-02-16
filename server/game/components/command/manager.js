@@ -81,14 +81,14 @@ export default class CommandManager {
             return;
         }
 
-        const payload = action.payload.toString().trim().split(' ');
+        const payload = action.payload.toString().trim();
 
         if (!payload[0]) {
             return;
         }
 
-        const command = payload.shift().toLowerCase();
-        const params = payload;
+        const params = this.parseParameters(payload);
+        const command = params.shift().toLowerCase();
 
         if (!this.commands[command]) {
             return this.Game.eventToSocket(socket, 'error', `Command ${command} is not a valid command.`);
@@ -186,6 +186,40 @@ export default class CommandManager {
         }
 
         return target;
+    }
+
+    /**
+     * Parses a commands parameters
+     * @param  {String} paramString Command string, without the command
+     * @return {array}              Array of parameters
+     */
+    parseParameters(paramString) {
+        const stringLength = paramString.length;
+        const params = [];
+        let insideString = false;
+        let param = '';
+        let char;
+
+        for (let i = 0; i < stringLength; i++) {
+            char = paramString[i];
+
+            if (char == ' ' && !insideString) {
+                params.push(param);
+                param = '';
+            } else {
+                if (char == '"') {
+                    insideString = !insideString;
+                } else {
+                    param += char;
+                }
+            }
+        }
+
+        if (param.length) {
+            params.push(param);
+        }
+
+        return params;
     }
 
     /**
