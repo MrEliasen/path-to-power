@@ -334,6 +334,11 @@ export default class Shop {
                 // send event to client
                 this.Game.eventToUser(character.user_id, 'success', `You have purchased 1x ${itemTemplate.name} for ${price}`);
 
+                // remove the item from the shop, us quantity is 0
+                if (item.shopQuantity == 0) {
+                    this.sell.list.splice(itemIndex, 1);
+                }
+
                 // update the shop content for all in the grid (only if the item is limited quantity)
                 if (item.shopQuantity !== -1) {
                     this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
@@ -343,11 +348,6 @@ export default class Shop {
                             inventory: this.getSellList(true),
                         },
                     });
-                }
-
-                // remove the item from the shop, us quantity is 0
-                if (item.shopQuantity <= 0) {
-                    this.sell.list.splice(itemIndex, 1);
                 }
             })
             .catch((err) => {
