@@ -8,16 +8,23 @@ import {
     UNEQUIP_ITEM,
     UPDATE_CHARACTER,
     MOVE_CHARACTER,
-    LEFT_GRID
+    LEFT_GRID,
 } from './types';
-import { UPDATE_GROUND_ITEMS } from '../item/types';
+import {UPDATE_GROUND_ITEMS} from '../item/types';
 import Character from './object';
 import CharacterModel from './model';
 import characterCommands from './commands';
-import { joinedGrid } from './actions';
+import {joinedGrid} from './actions';
 import Levels from '../../data/levels.json';
 
+/**
+ * Character Manager
+ */
 export default class CharacterManager {
+    /**
+     * Class constructor
+     * @param  {Game} Game The game obejct
+     */
     constructor(Game) {
         this.Game = Game;
         // keeps track of all current in-game characters
@@ -28,7 +35,7 @@ export default class CharacterManager {
         this.Game.socketManager.on('dispatch', this.onDispatch.bind(this));
         this.Game.socketManager.on('disconnect', (user) => {
             this.remove(user.user_id);
-        })
+        });
     }
 
     /**
@@ -37,7 +44,6 @@ export default class CharacterManager {
      */
     init() {
         return new Promise((resolve, reject) => {
-            // register all the 
             this.Game.commandManager.registerManager(characterCommands);
             resolve();
         });
@@ -74,7 +80,7 @@ export default class CharacterManager {
 
             this.Game.socketManager.dispatchToUser(user_id, {
                 type: UPDATE_CHARACTER,
-                payload: property ? {[property]: characterData[property]} : characterData
+                payload: property ? {[property]: characterData[property]} : characterData,
             });
         })
         .catch(() => {
@@ -148,23 +154,13 @@ export default class CharacterManager {
 
     /**
      * Dispatches an event to all sockets, adding a player to the playerlist
-     * @param  {String} user_id The user ID 
+     * @param  {String} user_id The user ID
      * @param  {String} name    Name of the character
      */
     dispatchUpdatePlayerList(user_id) {
         // get the player
         this.get(user_id)
             .then((character) => {
-                let faction = null;
-
-                // only add faction data if they are in a faction, and it is not disbanded
-                if (character.faction && !character.faction.remove) {
-                    faction = {
-                        tag: character.faction.tag,
-                        name: character.faction.name
-                    }
-                }
-
                 // update the clients online player list
                 this.Game.socketManager.dispatchToServer({
                     type: ADD_ONLINE_PLAYER,
@@ -175,9 +171,9 @@ export default class CharacterManager {
                         faction: character.faction ? {
                             tag: character.faction.tag,
                             name: character.faction.name,
-                            faction_id: character.faction.faction_id
-                        } : null
-                    }
+                            faction_id: character.faction.faction_id,
+                        } : null,
+                    },
                 });
             });
     }
@@ -191,9 +187,9 @@ export default class CharacterManager {
         this.Game.socketManager.dispatchToServer({
             type: REMOVE_ONLINE_PLAYER,
             payload: {
-                user_id
-            }
-        })
+                user_id,
+            },
+        });
     }
 
     /**
@@ -224,7 +220,7 @@ export default class CharacterManager {
         // check if they are in a faction, and load the faction if so
         const faction = await this.Game.factionManager.get(character.faction_id).catch(() => {});
 
-        // if they are in a faction, add them to the online list in the faction, and 
+        // if they are in a faction, add them to the online list in the faction, and
         // add the faction object to the character
         if (faction) {
             faction.linkCharacter(character);
@@ -263,7 +259,7 @@ export default class CharacterManager {
                     // remove player from the grid list of players
                     this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
                         type: LEFT_GRID,
-                        payload: character.user_id
+                        payload: character.user_id,
                     });
 
                     if (character.faction) {
@@ -276,7 +272,7 @@ export default class CharacterManager {
                 })
                 .catch((err) => {
                     this.Game.logger.error(err);
-                    resolve()
+                    resolve();
                 });
         });
     }
@@ -315,7 +311,7 @@ export default class CharacterManager {
                     callback(null, newCharacter);
                 })
                 .catch((error) => this.Game.logger.error(error));
-        })
+        });
     }
 
     /**
@@ -330,8 +326,8 @@ export default class CharacterManager {
                 faction: character.faction ? {
                     tag: character.faction.tag,
                     name: character.faction.name,
-                    faction_id: character.faction.faction_id
-                } : null
+                    faction_id: character.faction.faction_id,
+                } : null,
             })
         );
     }
@@ -342,12 +338,12 @@ export default class CharacterManager {
      * @param  {Function} callback returns error and character object
      */
     dbLoad(user_id, callback) {
-        CharacterModel.findOne({ user_id: user_id }, function(err, character) {
+        CharacterModel.findOne({user_id: user_id}, (err, character) => {
             if (err) {
                 this.Game.logger.error('CharacterManager::dbLoad', err);
                 return callback({
                     type: 'error',
-                    message: 'Internal server error.'
+                    message: 'Internal server error.',
                 });
             }
 
@@ -366,7 +362,7 @@ export default class CharacterManager {
     create(userData, city, callback) {
         this.dbCreate(userData.user_id, userData.display_name, city, async (error, character) => {
             if (error) {
-                return callback(error)
+                return callback(error);
             }
 
             const newCharacter = new Character(this.Game, character.toObject());
@@ -374,7 +370,7 @@ export default class CharacterManager {
 
             await this.manage(newCharacter);
             callback(null, newCharacter);
-        })
+        });
     }
 
     /**
@@ -388,7 +384,7 @@ export default class CharacterManager {
         if (!city || city === '') {
             return callback({
                 type: 'warning',
-                message: 'You must choose a city.'
+                message: 'You must choose a city.',
             });
         }
 
@@ -398,24 +394,24 @@ export default class CharacterManager {
             user_id: user_id,
             name: character_name,
             location: {
-                map: city
+                map: city,
             },
-            stats: {...this.Game.config.game.defaultStats}
+            stats: {...this.Game.config.game.defaultStats},
         });
 
-        newCharacter.save(function(err) {
+        newCharacter.save((err) => {
             if (err) {
                 if (err.code === 11000) {
                     return callback({
                         type: 'warning',
-                        message: `That character name is already taken.`
+                        message: 'That character name is already taken.',
                     });
                 }
 
                 this.Game.logger.error('CharacterManager::dbCreate', err);
                 return callback({
                     type: 'error',
-                    message: 'Internal server error.'
+                    message: 'Internal server error.',
                 });
             }
 
@@ -447,9 +443,9 @@ export default class CharacterManager {
                         if (saves === total) {
                             resolve();
                         }
-                    })
-            })
-        })
+                    });
+            });
+        });
     }
 
     /**
@@ -488,7 +484,7 @@ export default class CharacterManager {
      */
     dbSave(character) {
         return new Promise((resolve, reject) => {
-            CharacterModel.findOne({ user_id: character.user_id }, (err, dbCharacter) => {
+            CharacterModel.findOne({user_id: character.user_id}, (err, dbCharacter) => {
                 if (err) {
                     this.Game.logger.error('CharacterManager::dbSave', err);
                     return reject(err);
@@ -496,11 +492,11 @@ export default class CharacterManager {
 
                 // update the character db object, and save the changes
                 // NOTE: add any information you want to save here.
-                dbCharacter.stats       = {...character.stats};
-                dbCharacter.abilities   = character.exportAbilities();
-                dbCharacter.skills      = character.exportSkills();
-                dbCharacter.location    = {...character.location};
-                dbCharacter.faction_id  = character.faction ? character.faction.faction_id : '';
+                dbCharacter.stats = {...character.stats};
+                dbCharacter.abilities = character.exportAbilities();
+                dbCharacter.skills = character.exportSkills();
+                dbCharacter.location = {...character.location};
+                dbCharacter.faction_id = character.faction ? character.faction.faction_id : '';
 
                 dbCharacter.save((err) => {
                     if (err) {
@@ -511,7 +507,7 @@ export default class CharacterManager {
                     resolve(dbCharacter);
                 });
             });
-        })
+        });
     }
 
     /**
@@ -521,7 +517,7 @@ export default class CharacterManager {
      */
     dbGetByName(targetName) {
         return new Promise((resolve, reject) => {
-            CharacterModel.findOne({ name_lowercase: targetName.toLowerCase() }, function(err, character) {
+            CharacterModel.findOne({name_lowercase: targetName.toLowerCase()}, (err, character) => {
                 if (err) {
                     this.Game.logger.error('CharacterManager::dbGetByName', err);
                     return reject('Internal server error.');
@@ -533,7 +529,7 @@ export default class CharacterManager {
 
                 resolve(character.toObject());
             });
-        })
+        });
     }
 
     /**
@@ -562,7 +558,7 @@ export default class CharacterManager {
         return players
             .filter((obj) => obj.user_id !== ignore && !obj.hidden)
             .map((character) => {
-                return this.joinedGrid(character, false)
+                return this.joinedGrid(character, false);
             });
     }
 
@@ -575,7 +571,7 @@ export default class CharacterManager {
     joinedGrid(character, action = true) {
         const details = {
             name: character.name,
-            user_id: character.user_id
+            user_id: character.user_id,
         };
 
         if (!action) {
@@ -605,11 +601,16 @@ export default class CharacterManager {
         }
     }
 
+    /**
+     * Get the rank name, based on the amount of EXP
+     * @param  {Number} exp The exp amount
+     * @return {String}     The rank name
+     */
     getRank(exp) {
         const levelCount = Levels.length - 1;
         let rank;
 
-        for (var i = 0; i < levelCount; i++) {
+        for (let i = 0; i < levelCount; i++) {
             if (Levels[i].exp > exp) {
                 rank = Levels[i - 1].name;
                 break;
@@ -670,12 +671,12 @@ export default class CharacterManager {
                     return obj.name;
                 }).join(', ');
 
-                return this.Game.eventToSocket(socket, 'warning', `You can't move as the following players are aiming at you: ${list}`)
+                return this.Game.eventToSocket(socket, 'warning', `You can't move as the following players are aiming at you: ${list}`);
             }
 
             // check if the player is hidden
             if (character.hidden) {
-                return this.Game.eventToSocket(socket, 'warning', `You can't move as long as you are hidden. type /unhide to come out of hiding.`);
+                return this.Game.eventToSocket(socket, 'warning', 'You can\'t move as long as you are hidden. type /unhide to come out of hiding.');
             }
 
             const cooldownAction = 'move';
@@ -694,7 +695,7 @@ export default class CharacterManager {
             this.Game.mapManager.isValidLocation(newLocation.map, newLocation.x, newLocation.y)
                 .then((newLocation) => {
                     // determin the direction names for the JOIN/LEAVE events
-                    switch(moveAction.grid) {
+                    switch (moveAction.grid) {
                         case 'y':
                             if (moveAction.direction === 1) {
                                 directionOut = 'South';
@@ -721,11 +722,11 @@ export default class CharacterManager {
                         socket.leave(character.getLocationId());
 
                         // dispatch leave message to grid
-                        this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} leaves to the ${directionOut}`, [character.user_id])
+                        this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} leaves to the ${directionOut}`, [character.user_id]);
                         // remove player from the grid list of players
                         this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
                             type: LEFT_GRID,
-                            payload: character.user_id
+                            payload: character.user_id,
                         });
 
                         // save the old location
@@ -733,7 +734,7 @@ export default class CharacterManager {
 
                         // update character location
                         character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
-                        
+
                         // change location on the map
                         this.changeLocation(character, newLocation, oldLocation);
 
@@ -789,7 +790,7 @@ export default class CharacterManager {
                         // the respawn location
                         const newLocation = {
                             map: gameMap.id,
-                            ...gameMap.respawn
+                            ...gameMap.respawn,
                         };
 
                         // leave the old grid room
@@ -798,12 +799,12 @@ export default class CharacterManager {
                         // remove player from the grid list of players
                         this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
                             type: LEFT_GRID,
-                            payload: character.user_id
+                            payload: character.user_id,
                         });
 
                         // update character location
                         character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
-                        
+
                         // change location on the map
                         this.changeLocation(character, newLocation, oldLocation);
 
@@ -814,7 +815,7 @@ export default class CharacterManager {
 
                         // TODO: Test if this works! Need more players to test.
                         const cashReward = Math.floor(droppedLoot.cash / droppedLoot.targetedBy.length);
-                        const expReward  = Math.floor(droppedLoot.exp / droppedLoot.targetedBy.length);
+                        const expReward = Math.floor(droppedLoot.exp / droppedLoot.targetedBy.length);
                         droppedLoot.targetedBy.forEach((char) => {
                             // give them an equal amount of cash and exp, from the dropped loot
                             char.updateCash(cashReward);
@@ -834,8 +835,8 @@ export default class CharacterManager {
                         // update the client's ground look at the location
                         this.Game.socketManager.dispatchToRoom(oldLocationId, {
                             type: UPDATE_GROUND_ITEMS,
-                            payload: this.Game.itemManager.getLocationList(oldLocation.map, oldLocation.x, oldLocation.y, true)
-                        })
+                            payload: this.Game.itemManager.getLocationList(oldLocation.map, oldLocation.x, oldLocation.y, true),
+                        });
 
                         // add player from the grid list of players
                         this.Game.socketManager.dispatchToRoom(
