@@ -1,6 +1,13 @@
 import Cooldown from './object';
 
+/**
+ * Cooldown Manager
+ */
 export default class CooldownManager {
+    /**
+     * Class constructor
+     * @param  {Game} Game The main Game object
+     */
     constructor(Game) {
         this.Game = Game;
         this.cleanup = this.cleanup.bind(this);
@@ -20,7 +27,7 @@ export default class CooldownManager {
                 duraction = this.Game.config.game.playerCooldowns[action];
             }
 
-            // if no duration is set after the above, just stop it here as the 
+            // if no duration is set after the above, just stop it here as the
             // cooldown is poinless without a duration
             if (!duraction) {
                 return;
@@ -35,6 +42,12 @@ export default class CooldownManager {
         return newCooldown;
     }
 
+    /**
+     * Finds out how many ticks a cooldown has left, 0 if expired
+     * @param  {Character} character The character whos cooldown to check
+     * @param  {String}    action    The cooldown key
+     * @return {Number}              Number of ticks left in a cooldown
+     */
     ticksLeft(character, action) {
         const cooldown = character.cooldowns.find((cd) => cd.action === action && cd.ticks > 0);
 

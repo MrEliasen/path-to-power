@@ -6,12 +6,19 @@ import {
     ACCOUNT_AUTHENTICATE_ERROR,
     ACCOUNT_AUTHENTICATE_SUCCESS,
     ACCOUNT_AUTHENTICATE_NEW,
-    CREATE_CHARACTER
+    CREATE_CHARACTER,
 } from './types';
 import AccountModel from './model';
 import Levels from '../../data/levels.json';
 
+/**
+ * Account manager class
+ */
 export default class AccountManager {
+    /**
+     * Class constructor
+     * @param  {Game} Game The main game object
+     */
     constructor(Game) {
         this.Game = Game;
 
@@ -47,8 +54,8 @@ export default class AccountManager {
             ...action,
             payload: {
                 ...action.payload,
-                twitch_token: '<redacted from log>'
-            }
+                twitch_token: '<redacted from log>',
+            },
         });
 
         if (!action.payload.twitch_token) {
@@ -59,14 +66,14 @@ export default class AccountManager {
             if (error) {
                 return this.Game.socketManager.dispatchToSocket(socket, {
                     type: ACCOUNT_AUTHENTICATE_ERROR,
-                    payload: error
+                    payload: error,
                 });
             }
 
             // add the authenticated use to the socket object
             socket.user = {
                 ...account,
-                user_id: account.user_id.toString()
+                user_id: account.user_id.toString(),
             };
 
             // add the socket to the list of active clients
@@ -80,7 +87,7 @@ export default class AccountManager {
                 if (error) {
                     return this.Game.socketManager.dispatchToSocket(socket, {
                         type: ACCOUNT_AUTHENTICATE_ERROR,
-                        payload: error
+                        payload: error,
                     });
                 }
 
@@ -91,9 +98,9 @@ export default class AccountManager {
                         payload: {
                             routeTo: '/character',
                             gameData: {
-                                maps: gameData.maps
-                            }
-                        }
+                                maps: gameData.maps,
+                            },
+                        },
                     });
                 }
 
@@ -107,8 +114,8 @@ export default class AccountManager {
                     type: ACCOUNT_AUTHENTICATE_SUCCESS,
                     payload: {
                         character: character.exportToClient(),
-                        gameData
-                    }
+                        gameData,
+                    },
                 });
 
                 // send the welcome after 2 seconds
@@ -116,10 +123,14 @@ export default class AccountManager {
                 setTimeout(() => {
                     this.Game.sendMotdToSocket(socket);
                 }, 1000);
-            })
-        })
+            });
+        });
     }
 
+    /**
+     * Compiles an object containing all relevant game data for the client
+     * @return {[type]} [description]
+     */
     getGameData() {
         // game data we will send to the client, with the autentication success
         return {
@@ -127,7 +138,7 @@ export default class AccountManager {
             items: this.Game.itemManager.getTemplates(),
             players: [],
             commands: this.Game.commandManager.getList(),
-            levels: Levels
+            levels: Levels,
         };
     }
 
@@ -141,8 +152,8 @@ export default class AccountManager {
             return this.Game.socketManager.dispatchToSocket(socket, {
                 type: ACCOUNT_AUTHENTICATE_ERROR,
                 payload: {
-                    message: 'You must select a start location.'
-                }
+                    message: 'You must select a start location.',
+                },
             });
         }
 
@@ -151,8 +162,8 @@ export default class AccountManager {
             return this.Game.socketManager.dispatchToSocket(socket, {
                 type: ACCOUNT_AUTHENTICATE_ERROR,
                 payload: {
-                    routeTo: '/'
-                }
+                    routeTo: '/',
+                },
             });
         }
 
@@ -168,8 +179,8 @@ export default class AccountManager {
                         return this.Game.socketManager.dispatchToSocket(socket, {
                             type: ACCOUNT_AUTHENTICATE_ERROR,
                             payload: {
-                                'message': 'Something went wrong while creating your character! Sorry, please try again in a moment.'
-                            }
+                                'message': 'Something went wrong while creating your character! Sorry, please try again in a moment.',
+                            },
                         });
                     }
 
@@ -183,17 +194,17 @@ export default class AccountManager {
                         type: ACCOUNT_AUTHENTICATE_SUCCESS,
                         payload: {
                             character: newCharacter.exportToClient(),
-                            gameData
-                        }
-                    })
+                            gameData,
+                        },
+                    });
                 });
             })
             .catch(() => {
                 return this.Game.socketManager.dispatchToSocket(socket, {
                     type: ACCOUNT_AUTHENTICATE_ERROR,
                     payload: {
-                        message: 'Invalid start location.'
-                    }
+                        message: 'Invalid start location.',
+                    },
                 });
             });
     }
@@ -214,13 +225,13 @@ export default class AccountManager {
                 this.Game.logger.error('AccountManager::dbLogin (Request)', twitchErr);
                 return callback({
                     type: 'error',
-                    message: 'Twitch communication error.'
+                    message: 'Twitch communication error.',
                 });
             }
 
             const twitchData = JSON.parse(twitchRes.text).data[0];
 
-            AccountModel.findOne({ twitch_id: escape(twitchData.id) }, { _id: 1 }, function (err, user) {
+            AccountModel.findOne({twitch_id: escape(twitchData.id)}, {_id: 1}, (err, user) => {
                 if (err) {
                     this.Game.logger.error('AccountManager::dbLogin (Account findOne)', err);
                     return callback({
@@ -231,7 +242,7 @@ export default class AccountManager {
 
                 if (!user) {
                     user = new AccountModel({
-                        twitch_id: twitchData.id
+                        twitch_id: twitchData.id,
                     });
                 }
 
@@ -242,14 +253,14 @@ export default class AccountManager {
                         this.Game.logger.error('AccountManager::dbLogin (Save)', err);
                         return callback({
                             type: 'error',
-                            message: 'Internal server error'
+                            message: 'Internal server error',
                         });
                     }
 
                     callback(null, {
                         user_id: user._id,
                         display_name: twitchData.display_name,
-                        profile_image: twitchData.profile_image_url
+                        profile_image: twitchData.profile_image_url,
                     });
                 });
             });

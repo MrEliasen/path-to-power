@@ -1,5 +1,14 @@
 import {CHAT_MESSAGE} from '../command/types';
 
+/**
+ * Faction create command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdFactionCreate(socket, character, command, params, cmdObject, Game) {
     const factionName = params[0];
     const factionTag = params[1];
@@ -33,6 +42,15 @@ function cmdFactionCreate(socket, character, command, params, cmdObject, Game) {
         });
 }
 
+/**
+ * Faction disband command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdFactionDisband(socket, character, command, params, cmdObject, Game) {
     // make sure they are in a faction
     if (!character.faction) {
@@ -59,6 +77,15 @@ function cmdFactionDisband(socket, character, command, params, cmdObject, Game) 
         });
 }
 
+/**
+ * Faction invite command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdFactionInvite(socket, character, command, params, cmdObject, Game) {
     // make sure they are in a faction
     if (!character.faction) {
@@ -96,6 +123,15 @@ function cmdFactionInvite(socket, character, command, params, cmdObject, Game) {
     Game.eventToUser(targetCharacter.user_id, 'info', `You have been invited to join the faction ${character.faction.name}. To join type: /factionjoin ${character.faction.name}`);
 }
 
+/**
+ * Faction join command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdFactionAcceptInvite(socket, character, command, params, cmdObject, Game) {
     const faction = params[0];
 
@@ -123,6 +159,15 @@ function cmdFactionAcceptInvite(socket, character, command, params, cmdObject, G
         });
 }
 
+/**
+ * Faction chat command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdFactionSay(socket, character, command, params, cmdObject, Game) {
     // make sure they are in a faction
     if (!character.faction) {
@@ -150,6 +195,15 @@ function cmdFactionSay(socket, character, command, params, cmdObject, Game) {
     });
 }
 
+/**
+ * Faction kick command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdFactionKick(socket, character, command, params, cmdObject, Game) {
     // make sure they are in a faction
     if (!character.faction) {
@@ -216,6 +270,15 @@ function cmdFactionKick(socket, character, command, params, cmdObject, Game) {
         });
 }
 
+/**
+ * Faction promote command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdFactionMakeLeader(socket, character, command, params, cmdObject, Game) {
     // make sure they are in a faction
     if (!character.faction) {

@@ -1,27 +1,27 @@
 // Load required packages
-var mongoose = require('mongoose'),
-    moment = require('moment'),
-    uuid = require('uuid/v4');
+import mongoose from 'mongoose';
+import moment from 'moment';
+import uuid from 'uuid/v4';
 
 // Define our product schema
-var AccountSchema = new mongoose.Schema({
+const AccountSchema = new mongoose.Schema({
     twitch_id: {
         type: String,
         unique: true,
-        required: true
+        required: true,
     },
     display_name: {
         type: String,
     },
     session_token: {
-        type: String
+        type: String,
     },
     date_added: String,
-    date_updated: String
+    date_updated: String,
 });
 
 // Execute before each user.save() call
-AccountSchema.pre('save', function (callback) {
+AccountSchema.pre('save', function(callback) {
     if (!this.date_added) {
         // set the date for when it was created
         this.date_added = moment().format('ddd, D MMM YYYY H:mm:ss [GMT]');

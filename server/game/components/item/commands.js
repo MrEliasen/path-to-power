@@ -1,5 +1,14 @@
 import {UPDATE_GROUND_ITEMS} from './types';
 
+/**
+ * Drop item command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdDrop(socket, character, command, params, cmdObject, Game) {
     let item = params[0];
     let amount = params[1] || 1;
@@ -37,6 +46,15 @@ function cmdDrop(socket, character, command, params, cmdObject, Game) {
     Game.eventToRoom(character.getLocationId(), 'info', `${character.name} dropped ${(droppedItem.stats.stackable ? 'a' : `${amount}x`)} ${droppedItem.name} on the ground`, [character.user_id]);
 }
 
+/**
+ * Drop item by index command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdDropByIndex(socket, character, command, params, cmdObject, Game) {
     let itemIndex = params[0];
     let amount = params[1] || 1;
@@ -72,6 +90,15 @@ function cmdDropByIndex(socket, character, command, params, cmdObject, Game) {
     Game.eventToRoom(character.getLocationId(), 'info', `${character.name} dropped ${(droppedItem.stats.stackable ? 'a' : `${amount}x`)} ${droppedItem.name} on the ground`, [character.user_id]);
 }
 
+/**
+ * Give item command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdGiveItem(socket, character, command, params, cmdObject, Game) {
     const amount = params[1] || 1;
     const item = Game.itemManager.add(params[0].id);
@@ -86,9 +113,17 @@ function cmdGiveItem(socket, character, command, params, cmdObject, Game) {
     Game.characterManager.updateClient(socket.user.user_id, 'inventory');
 }
 
-
-// TODO: test commmand validation, after item drop method has been fixed
+/**
+ * Item pickup command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdPickup(socket, character, command, params, cmdObject, Game) {
+    // TODO: test commmand validation, after item drop method has been fixed
     let itemName = params[0];
     let amount = params[1] || 1;
     const location = [
@@ -125,6 +160,15 @@ function cmdPickup(socket, character, command, params, cmdObject, Game) {
         });
 }
 
+/**
+ * Item use command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdUseItem(socket, character, command, params, cmdObject, Game) {
     const index = params[0];
     const item = character.inventory[index];

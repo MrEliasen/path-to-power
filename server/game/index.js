@@ -1,6 +1,6 @@
 // Required for compiling
-require("babel-core/register");
-require("babel-polyfill");
+require('babel-core/register');
+require('babel-polyfill');
 
 // native modules
 import fs from 'fs';
@@ -60,8 +60,8 @@ mongoose.connect(config.mongo_db).then(
                 key: fs.readFileSync(config.server.certificate.key, 'utf8'),
                 cert: fs.readFileSync(config.server.certificate.cert, 'utf8'),
                 ca: [
-                    fs.readFileSync(config.server.certificate.ca, 'utf8')
-                ]
+                    fs.readFileSync(config.server.certificate.ca, 'utf8'),
+                ],
             }, app);
         } else {
             // otherwise an HTTP server

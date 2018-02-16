@@ -1,4 +1,13 @@
+
+/**
+ * Snoop skill logic
+ */
 export default class SkillSnoop {
+    /**
+     * class constructor
+     * @param  {Game}   Game      The game object
+     * @param  {object} modifiers The skill plain object
+     */
     constructor(Game, modifiers) {
         this.Game = Game;
         this.id = 'snoop';
@@ -16,7 +25,7 @@ export default class SkillSnoop {
      */
     getModifiers() {
         return {
-            value: this.value
+            value: this.value,
         };
     }
 
@@ -34,17 +43,17 @@ export default class SkillSnoop {
             name: targetCharacter.name,
             location: {
                 map: targetCharacter.location.map,
-            }
-        }
+            },
+        };
 
         // if they have rank 2 or higher
         if (this.value >= 2) {
             Object.assign(details, {
                 equipped: {
-                    ...(targetCharacter.getEquippedSync() || {})
+                    ...(targetCharacter.getEquippedSync() || {}),
                 },
-                rank: Game.characterManager.getRank(targetCharacter.stats.exp)
-            })
+                rank: Game.characterManager.getRank(targetCharacter.stats.exp),
+            });
         }
 
         // if they have rank 3 or higher
@@ -52,15 +61,15 @@ export default class SkillSnoop {
             Object.assign(details, {
                 location: {
                     map: targetCharacter.location.map,
-                    x: targetCharacter.location.x
+                    x: targetCharacter.location.x,
                 },
                 skills: {
-                    ...targetCharacter.exportSkills(true)
+                    ...targetCharacter.exportSkills(true),
                 },
                 stats: {
-                    health: targetCharacter.stats.health
-                }
-            })
+                    health: targetCharacter.stats.health,
+                },
+            });
         }
 
         // if they have rank 4 or higher
@@ -69,17 +78,17 @@ export default class SkillSnoop {
                 location: {
                     map: targetCharacter.location.map,
                     x: targetCharacter.location.x,
-                    y: targetCharacter.location.y
+                    y: targetCharacter.location.y,
                 },
                 abilities: {
-                    ...targetCharacter.exportAbilities(true)
+                    ...targetCharacter.exportAbilities(true),
                 },
                 stats: {
                     health: targetCharacter.stats.health,
                     money: targetCharacter.stats.money,
-                    bank: targetCharacter.stats.bank
-                }
-            })
+                    bank: targetCharacter.stats.bank,
+                },
+            });
         }
 
         return details;

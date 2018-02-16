@@ -1,8 +1,16 @@
 import {
-    JOINED_GRID
+    JOINED_GRID,
 } from '../../character/types';
 
-export default class SkillHide {
+/**
+ * Search Skill logic
+ */
+export default class SkillSearch {
+    /**
+     * class constructor
+     * @param  {Game}   Game      The game object
+     * @param  {object} modifiers The skill plain object
+     */
     constructor(Game, modifiers) {
         this.Game = Game;
         this.id = 'search';
@@ -20,7 +28,7 @@ export default class SkillHide {
      */
     getModifiers() {
         return {
-            value: this.value
+            value: this.value,
         };
     }
 
@@ -55,12 +63,12 @@ export default class SkillHide {
             type: JOINED_GRID,
             payload: {
                 name: target.name,
-                user_id: target.user_id
-            }
+                user_id: target.user_id,
+            },
         });
 
         // train the skill
-        if (character.train) { 
+        if (character.train) {
             this.train();
         }
     }

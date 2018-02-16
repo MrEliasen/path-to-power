@@ -1,6 +1,14 @@
 import Promise from 'bluebird';
 
+/**
+ * Character class
+ */
 export default class Character {
+    /**
+     * Class constructor
+     * @param  {Game} Game      The Game object
+     * @param  {Object} character The mongoDB character data object
+     */
     constructor(Game, character) {
         this.Game = Game;
         // the character objest of the characters who are currently aiming at this character
@@ -14,7 +22,7 @@ export default class Character {
         // Whether their skills and abilities should improve when used
         this.train = true;
         // Whether to ignore quantities on items, like ammo, so they dont run out of ammo etc.
-        this.ignoreQuantity = false
+        this.ignoreQuantity = false;
         // holds all the abilities for the character
         // This is set in the object assign, if not set it to blank
         this.abilities = [];
@@ -30,7 +38,7 @@ export default class Character {
             bank: 200,
             exp: 0,
             inventorySize: 30,
-        }
+        };
         // keeps track of all timers
         this.timers = [];
 
@@ -39,8 +47,8 @@ export default class Character {
             ...character,
             stats: {
                 ...this.stats,
-                ...character.stats
-            }
+                ...character.stats,
+            },
         });
 
         // if the location does not have an X or Y coordinate, set the location to the
@@ -56,11 +64,14 @@ export default class Character {
         this.gridLock = this.gridLock.bind(this);
     }
 
+    /**
+     * Setup timers related to the character
+     */
     initTimers() {
         // run the "garbage collection" every N seconds
         this.timers.push({
-            name: "cooldownGc",
-            timer: setInterval(this.Game.cooldownManager.cleanup, 1000, this)
+            name: 'cooldownGc',
+            timer: setInterval(this.Game.cooldownManager.cleanup, 1000, this),
         });
     }
 
@@ -76,7 +87,7 @@ export default class Character {
             if (toClient) {
                 abilities[ability.id] = {
                     value: ability.value,
-                    name: ability.name
+                    name: ability.name,
                 };
             } else {
                 abilities[ability.id] = ability.value;
@@ -98,13 +109,13 @@ export default class Character {
             if (toClient) {
                 exportedSkills[skill.id] = {
                     name: skill.name,
-                    modifiers: skill.getModifiers()
+                    modifiers: skill.getModifiers(),
                 };
             } else {
                 exportedSkills[skill.id] = {
                     id: skill.id,
-                    modifiers: skill.getModifiers()
-                }
+                    modifiers: skill.getModifiers(),
+                };
             }
         });
 
@@ -127,7 +138,7 @@ export default class Character {
      */
     updateLocation(map, x, y) {
         map = map || this.location.map;
-        this.location = { map, x, y };
+        this.location = {map, x, y};
     }
 
     /**
@@ -153,8 +164,8 @@ export default class Character {
             abilities: this.exportAbilities(true),
             faction: this.faction ? this.faction.toObject(true) : null,
             skills: this.exportSkills(true),
-            location: this.location
-        }
+            location: this.location,
+        };
     }
 
     /**
@@ -169,7 +180,6 @@ export default class Character {
                 this.target = target;
                 // and gridlock them
                 this.target.gridLock(this);
-
             })
             .catch(() => {});
     }
@@ -257,10 +267,10 @@ export default class Character {
                     }
 
                     // return what is dropped by the character
-                    resolve({ items, cash, exp: expLost, targetedBy})
+                    resolve({items, cash, exp: expLost, targetedBy});
                 })
                 .catch((err) => {
-                    reject(err)
+                    reject(err);
                 });
         });
     }
@@ -295,7 +305,7 @@ export default class Character {
                         })
                         .catch(() => {
                             reject();
-                        })
+                        });
                 })
                 .catch(() => {
                     reject();
@@ -351,7 +361,6 @@ export default class Character {
         return new Promise((resolve, reject) => {
             this.getEquipped(slot)
                 .then((equippedItem) => {
-
                     if (!equippedItem) {
                         return reject();
                     }
@@ -466,7 +475,6 @@ export default class Character {
 
             default:
                 return false;
-
         }
 
         this.getEquipped(slot)
@@ -476,7 +484,6 @@ export default class Character {
                 // equip the item
                 item.equipped_slot = slot;
                 this.Game.characterManager.updateClient(this.user_id);
-
             })
             .catch(() => {
                 // equip the item
@@ -510,7 +517,7 @@ export default class Character {
 
         // if the item (after accounting for the amount to drop), is 0, remove it
         selectedItem.durability = selectedItem.durability - amount;
- 
+
         if (selectedItem.durability <= 0) {
             this.inventory.splice(inventoryIndex, 1);
         }
@@ -546,7 +553,7 @@ export default class Character {
      * @param  {Boolean} isFleeing If the drop is caused by fleeing, random the amount dropped, if its a stackable item.
      * @return {Object}            The item (with amount if stackable) which has been removed from the inventory.
      */
-    dropItem (item, amount = 1, isFleeing = false) {
+    dropItem(item, amount = 1, isFleeing = false) {
         let itemIndex = parseInt(item, 10);
         amount = parseInt(amount, 10);
 
@@ -600,7 +607,7 @@ export default class Character {
         inventoryItem.removeDurability(amount);
 
         // return a new item, with the dropped amount
-        return this.Game.itemManager.add(inventoryItem.id, { durability: amount });
+        return this.Game.itemManager.add(inventoryItem.id, {durability: amount});
     }
 
     /**
@@ -620,7 +627,7 @@ export default class Character {
             } else {
                 // set the amount of the item to the correct amount, before adding to the inventory
                 itemObj.setDurability(amount);
-                this.inventory.push(itemObj)
+                this.inventory.push(itemObj);
             }
         } else {
             this.inventory.push(itemObj);
@@ -631,14 +638,18 @@ export default class Character {
             }
 
             // if its non-stackable, we have to create the item several items.
-            for (var i = amount - 1; i > 0; i--) {
+            for (let i = amount - 1; i > 0; i--) {
                 this.giveItem(this.Game.itemManager.add(itemObj.id), 1);
             }
         }
     }
 
+    /**
+     * Check if an attack will hit, based on the accuracy ability of the character
+     * @return {Bool} True if hit
+     */
     attackHit() {
-        const acc =  this.abilities.find((obj) => obj.id = 'acc');
+        const acc = this.abilities.find((obj) => obj.id = 'acc');
         return acc.use();
     }
 
@@ -662,13 +673,13 @@ export default class Character {
 
         // Either you block the damage dealt if it's lower than your armor/durability combo
         // Or you block whatever you can afford to from either low armor or low durability
-        let damageBlocked   = Math.min(damage, armor, durability);
+        let damageBlocked = Math.min(damage, armor, durability);
         // The damage dealt after the block, but keeping it at 0 if going negative
-        let damageDealt     = Math.max(0, damage - damageBlocked);
+        let damageDealt = Math.max(0, damage - damageBlocked);
         // New health, but keeping it at 0 if going negative
-        let healthLeft       = Math.max(0, health - damageDealt);
+        let healthLeft = Math.max(0, health - damageDealt);
         // Now full damage as you said, but keeping it at 0 if going negative
-        let durabilityLeft   = Math.max(0, durability - damage);
+        let durabilityLeft = Math.max(0, durability - damage);
 
         // update the durability of the equipped armor
         if (!ignoreArmor && armorItem) {
@@ -688,7 +699,7 @@ export default class Character {
             damageDealt,
             healthLeft,
             durabilityLeft,
-            armorRuined
+            armorRuined,
         };
     }
 

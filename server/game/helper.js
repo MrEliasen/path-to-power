@@ -1,7 +1,7 @@
 /**
  * Generates a random value between min and max
  * @param  {Number} min
- * @param  {Number} max 
+ * @param  {Number} max
  * @return {Number}
  */
 export function dice(min = 0, max) {

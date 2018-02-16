@@ -3,7 +3,15 @@ import uuid from 'uuid/v4';
 import {SHOP_UPDATE} from '../../../shared/types';
 import {dice} from '../../helper';
 
+/**
+ * Shop object class
+ */
 export default class Shop {
+    /**
+     * class constructor
+     * @param  {Game}   Game     The Game Object
+     * @param  {object} shopData The shop template object
+     */
     constructor(Game, shopData) {
         this.Game = Game;
         Object.assign(this, shopData);
@@ -110,6 +118,11 @@ export default class Shop {
         };
     }
 
+    /**
+     * Selling an item from the shop
+     * @param  {String} user_id     The player who is buying the item
+     * @param  {String} fingerprint The item fingerprint
+     */
     sellItem(user_id, fingerprint) {
         // get the character of the player
         this.Game.characterManager.get(user_id)
@@ -200,6 +213,11 @@ export default class Shop {
             .catch(() => {});
     }
 
+    /**
+     * Add an item to the shop inventory
+     * @param {Item}   itemObj The item to add
+     * @param {Number} amount  The number of a given item to add
+     */
     addToInventory(itemObj, amount = null) {
         let inventoryItem;
 

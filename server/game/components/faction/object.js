@@ -1,6 +1,14 @@
 import Promise from 'bluebird';
 
+/**
+ * Faction object class
+ */
 export default class Faction {
+    /**
+     * Class constructor
+     * @param  {Game} Game    Main Game object
+     * @param  {Object} faction Plain faction object from the database
+     */
     constructor(Game, faction) {
         this.Game = Game;
         // assign all the faction information to the object
@@ -17,7 +25,7 @@ export default class Faction {
     /**
      * Check if there is an outstanding invite for the character
      * @param  {Character Obj}  character The character to check
-     * @return {Boolean}           
+     * @return {Boolean}
      */
     isInvited(character) {
         if (this.invites.findIndex((user_id) => user_id === character.user_id) === -1) {
@@ -130,7 +138,7 @@ export default class Faction {
                             resolve(character.user_id);
                         })
                         .catch((err) => {
-                            // if the character is not online, we just resolve without needing to 
+                            // if the character is not online, we just resolve without needing to
                             // make the socket leave the chat room.
                             resolve(character.user_id);
                         });
@@ -172,7 +180,7 @@ export default class Faction {
                 })
                 .catch((err) => {
                     reject(err);
-                })
+                });
         });
     }
 
@@ -210,9 +218,9 @@ export default class Faction {
             members: !ignoreMembers ? this.onlineMembers.map((character) => {
                 return {
                     user_id: character.user_id,
-                    name: character.name
-                }
-            }) : null
-        }
+                    name: character.name,
+                };
+            }) : null,
+        };
     }
 }

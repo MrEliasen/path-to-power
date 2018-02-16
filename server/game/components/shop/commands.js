@@ -1,5 +1,14 @@
 import {SHOP_LOAD} from '../../../shared/types';
 
+/**
+ * shop command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdShop(socket, character, command, params, cmdObject, Game) {
     const shopName = params[0] || null;
 
@@ -36,6 +45,15 @@ function cmdShop(socket, character, command, params, cmdObject, Game) {
         });
 }
 
+/**
+ * trade command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdBuy(socket, character, command, params, cmdObject, Game) {
     const npcName = params[0] || null;
     // get the NPC list at the character location

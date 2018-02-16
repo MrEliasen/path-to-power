@@ -1,5 +1,11 @@
 import {CHAT_MESSAGE} from './types';
 
+/**
+ * Check if there is an active cooldown or not, for chatting
+ * @param  {Character} character The character object to check cooldowns for
+ * @param  {Game}      Game      The main Game object
+ * @param  {Function}  callback  Callback function
+ */
 function checkChatCooldown(character, Game, callback) {
     // check if the character has an existing cooldown for this action, if they are trying to hide
     const ticksLeft = Game.cooldownManager.ticksLeft(character, 'chat');
@@ -15,6 +21,15 @@ function checkChatCooldown(character, Game, callback) {
     callback();
 }
 
+/**
+ * Global command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
 function cmdGlobal(socket, character, command, params, cmdObject, Game) {
     const message = params.join(' ').trim();
 
@@ -37,6 +52,15 @@ function cmdGlobal(socket, character, command, params, cmdObject, Game) {
     });
 }
 
+/**
+ * Say command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
 function cmdSay(socket, character, command, params, cmdObject, Game) {
     const message = params.join(' ').trim();
 
@@ -59,6 +83,15 @@ function cmdSay(socket, character, command, params, cmdObject, Game) {
     });
 }
 
+/**
+ * Whisper command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
 function cmdWhisper(socket, character, command, params, cmdObject, Game) {
     // check for cooldowns
     checkChatCooldown(character, Game, () => {

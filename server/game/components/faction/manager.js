@@ -5,7 +5,14 @@ import Faction from './object';
 import CharacterModel from '../character/model';
 import factionCommands from './commands';
 
+/**
+ * Faction manager
+ */
 export default class FactionManager {
+    /**
+     * Class constructor
+     * @param  {Game} Game Main Game object
+     */
     constructor(Game) {
         this.Game = Game;
         // list of all factions in the game (populated at runtime)
@@ -18,7 +25,7 @@ export default class FactionManager {
      */
     init() {
         return new Promise((resolve, reject) => {
-            // register all the 
+            // register all the
             this.Game.commandManager.registerManager(factionCommands);
 
             // load our factions
@@ -47,12 +54,12 @@ export default class FactionManager {
      */
     characterAddTo(user_id, faction_id) {
         return new Promise((resolve, reject) => {
-            CharacterModel.update({_id: user_id }, { $set: { faction_id }}, (err, updated) => {
+            CharacterModel.update({_id: user_id}, {$set: {faction_id}}, (err, updated) => {
                 if (err) {
                     return reject(err);
                 }
 
-                resolve({ user_id, faction_id });
+                resolve({user_id, faction_id});
             });
         });
     }
@@ -64,12 +71,12 @@ export default class FactionManager {
      */
     dbCharacterRemove(user_id) {
         return new Promise((resolve, reject) => {
-            CharacterModel.update({_id: user_id }, { $set: { faction_id: '' }}, (err, updated) => {
+            CharacterModel.update({_id: user_id}, {$set: {faction_id: ''}}, (err, updated) => {
                 if (err) {
                     return reject(err);
                 }
 
-                resolve({ user_id });
+                resolve({user_id});
             });
         });
     }
@@ -106,7 +113,7 @@ export default class FactionManager {
             }
 
             resolve(faction);
-        })
+        });
     }
 
     /**
@@ -129,7 +136,7 @@ export default class FactionManager {
             }
 
             resolve(faction);
-        })
+        });
     }
 
     /**
@@ -146,14 +153,19 @@ export default class FactionManager {
 
         return factions.map((faction) => {
             return {
-                ...faction.toObject()
-            }
-        })
+                ...faction.toObject(),
+            };
+        });
     }
 
+    /**
+     * Saves a factions sate to the database
+     * @param  {Faction} faction The faction object to save
+     * @return {Promise}
+     */
     save(faction) {
         return new Promise((resolve, reject) => {
-            FactionModel.findOne({ faction_id: faction.faction_id }, (err, dbFaction) => {
+            FactionModel.findOne({faction_id: faction.faction_id}, (err, dbFaction) => {
                 if (err) {
                     this.Game.logger.error(err);
                     return reject('Something went wrong.');
@@ -196,8 +208,8 @@ export default class FactionManager {
                     $or: [
                         {name_lowercase: factionName.toLowerCase()},
                         {tag_lowercase: factionTag.toLowerCase()},
-                        {leader_id: user_id}
-                    ]
+                        {leader_id: user_id},
+                    ],
                 }, (err, factions) => {
                     if (err) {
                         this.Game.logger.error(err);
@@ -206,7 +218,7 @@ export default class FactionManager {
 
                     // faction(s) with same name, tag or leader was found
                     if (factions.length) {
-                        return reject(factions)
+                        return reject(factions);
                     }
 
                     // no duplicates found, create new faction
@@ -214,21 +226,21 @@ export default class FactionManager {
                         faction_id: uuid(),
                         name: factionName,
                         tag: factionTag,
-                        leader_id: user_id.toString()
+                        leader_id: user_id.toString(),
                     });
 
                     if (!newFaction) {
-                        this.Game.logger.error(`Error creating faction object`);
+                        this.Game.logger.error('Error creating faction object');
                         return reject();
                     }
 
                     const dbFaction = new FactionModel({
-                        ...newFaction.toObject()
+                        ...newFaction.toObject(),
                     });
 
                     dbFaction.save(async (err) => {
                         if (err) {
-                            this.Game.logger.error(`Error saving new faction in DB`, err);
+                            this.Game.logger.error('Error saving new faction in DB', err);
                             return this.Game.logger.error(err);
                         }
                         // Add the faction object to the character
@@ -240,7 +252,7 @@ export default class FactionManager {
                     });
                 });
             })
-            .catch(() => {})
+            .catch(() => {});
         });
     }
 
@@ -261,14 +273,14 @@ export default class FactionManager {
                     this.factions = this.factions.filter((obj) => !obj.remove);
 
                     // remove from databse
-                    FactionModel.remove({ faction_id: factionId }, (err, deleted) => {
+                    FactionModel.remove({faction_id: factionId}, (err, deleted) => {
                         if (err) {
                             this.Game.logger.error(err);
                             reject();
                             return this.Game.logger.error(err);
                         }
 
-                        CharacterModel.update({faction_id: factionId }, { $set: {faction_id: ''}}, { multi: true }, (error, raw) => {
+                        CharacterModel.update({faction_id: factionId}, {$set: {faction_id: ''}}, {multi: true}, (error, raw) => {
                             if (err) {
                                 this.Game.logger.error(err);
                             }

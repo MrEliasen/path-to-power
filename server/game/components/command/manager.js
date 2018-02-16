@@ -4,7 +4,14 @@ import {GAME_COMMAND} from './types';
 import commandCommands from './commands';
 import {deepCopyObject} from '../../helper';
 
+/**
+ * Command class
+ */
 export default class CommandManager {
+    /**
+     * Class constructor
+     * @param  {Game} Game The main Game object
+     */
     constructor(Game) {
         this.Game = Game;
 
@@ -48,6 +55,12 @@ export default class CommandManager {
         });
     }
 
+    /**
+     * Register a command object
+     * @param  {String}  commandName   Command, eg /say
+     * @param  {Object}  commandObject The command object from the component/<name>/command.js
+     * @param  {Boolean} isAlias       Whether this is an alias of a command
+     */
     register(commandName, commandObject, isAlias = false) {
         // in case the commandName didn't have a / in the beginning, add it.
         if (commandName[0] !== '/') {
@@ -408,19 +421,4 @@ export default class CommandManager {
             resolve(msgParams);
         });
     }
-
-    /*
-    params: [
-        {
-            name: 'Target',
-            desc: 'The name of the player you want to send a private message to',
-            rules: 'required|character:grid',
-        },
-        {
-            name: 'Message',
-            desc: 'The message you wish to send to the player.',
-            rules: 'required|minlen:1|maxlen:20',
-        },
-    ],
-     */
 }
