@@ -557,7 +557,8 @@ export default class Character {
         let itemIndex = parseInt(item, 10);
         amount = parseInt(amount, 10);
 
-        if (isNaN(itemIndex)) {
+        if (isNaN(itemIndex) && typeof item === 'string') {
+            item = item.toLowerCase();
             // get the first matching items from the inventory
             itemIndex = this.inventory.findIndex((obj) =>obj.name.toLowerCase().indexOf(item) === 0);
         }

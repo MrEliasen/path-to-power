@@ -22,6 +22,11 @@ function cmdDrop(socket, character, command, params, cmdObject, Game) {
         return Game.eventToSocket(socket, 'error', `You do not have any ${item.name} in your inventory.`);
     }
 
+    // if the item was non-stackable, set amount to 1
+    if (!droppedItem.stats.stackable) {
+        amount = 1;
+    }
+
     // add the item to the grid location
     const items_list = Game.itemManager.drop(character.location.map, character.location.x, character.location.y, droppedItem);
     // holds the items data we will send to the rooms
@@ -124,7 +129,7 @@ function cmdGiveItem(socket, character, command, params, cmdObject, Game) {
  */
 function cmdPickup(socket, character, command, params, cmdObject, Game) {
     // TODO: test commmand validation, after item drop method has been fixed
-    let itemName = params[0];
+    let item = params[0];
     let amount = params[1] || 1;
     const location = [
         character.location.map,
@@ -133,7 +138,7 @@ function cmdPickup(socket, character, command, params, cmdObject, Game) {
     ];
 
     // get the item from the ground
-    Game.itemManager.pickup(...location, itemName, amount)
+    Game.itemManager.pickup(...location, item.name, amount)
         .then((itemObject) => {
             // make sure the character has room
             if (!character.hasRoomForItem(itemObject)) {

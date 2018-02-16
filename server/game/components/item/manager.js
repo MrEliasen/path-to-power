@@ -137,6 +137,8 @@ export default class ItemManager {
 
             // find the item at the location, the user wants to pickup
             if (itemName) {
+                itemName = itemName.toLowerCase();
+
                 // check if there is a direct match for the item name
                 foundItemIndex = locationItems.findIndex((obj) => obj.name.toLowerCase() === itemName);
 

@@ -233,9 +233,9 @@ export default class CommandManager {
             } else {
                 if (char == '"') {
                     insideString = !insideString;
-                } else {
-                    param += char;
                 }
+
+                param += char;
             }
         }
 
@@ -244,6 +244,23 @@ export default class CommandManager {
         }
 
         return params;
+    }
+
+    /**
+     * Strips the " character from the beginning and end of a parameter
+     * @param  {String} param The parameter
+     * @return {String}       The parameter with the "" encapsulation
+     */
+    stripEncapsulation(param) {
+        if (param[0] === '"') {
+            param = param.substring(1, param.length - 1);
+        }
+
+        if (param[param.length - 1] === '"') {
+            param = param.substring(0, param.length - 2);
+        }
+
+        return param;
     }
 
     /**
@@ -262,9 +279,13 @@ export default class CommandManager {
 
             // prepare the params, so they match the number of expected params.
             msgParams = msgParams.slice(0, cmdParams.length - 1).concat(msgParams.slice(cmdParams.length - 1).join(' '));
+
             // run the params through each of the rules
             for (let index = 0; index < cmdParams.length; index++) {
                 let param = cmdParams[index];
+
+                // remove encapsulation from the parameter
+                msgParams[index] = this.stripEncapsulation(msgParams[index]);
 
                 // only if the parameter has rules..
                 if (param.rules.length) {

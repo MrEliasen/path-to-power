@@ -30,8 +30,10 @@ export function deepCopyObject(toCopy) {
  */
 export function findInArray(list, compareProperty = 'name', searchString) {
     searchString = searchString.toLowerCase();
+    // direct search for objects matching the searchString
     let found = list.find((obj) => obj[compareProperty].toLowerCase() === searchString);
 
+    // search objects matching the beginning of string
     if (!found) {
         found = list.find((obj) => obj[compareProperty].toLowerCase().indexOf(searchString));
     }
