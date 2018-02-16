@@ -2,6 +2,10 @@
 
 This is the server for the game "Path to Power". Path to Power is an open source [MUD](https://en.wikipedia.org/wiki/MUD), made with NodeJS and React.
 
+## Requirements
+
+You must have mongoDB installed and running (recommend 3.6+).
+
 ## Installation
 
 1. Create a new project on [Twitch.tv](https://dev.twitch.tv).
@@ -15,5 +19,4 @@ You can skip step 5, if you manually moved/copied the `./server/game/data.new` t
 
 ## Add/Remove/Update Content
 
-All content, like shops, NPCS, items etc. are all stored in `*.json` files, and loaded at server boot up.
 To learn about how you add/edit content, please see the [wiki](https://github.com/MrEliasen/path-to-power/wiki) for more information.
