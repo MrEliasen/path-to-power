@@ -2,7 +2,16 @@ import Promise from 'bluebird';
 import Character from '../character/object';
 import uuid from 'uuid/v4';
 
+/**
+ * NPC Object class
+ */
 export default class NPC extends Character {
+    /**
+     * class constructor
+     * @param  {Game}   Game    The Game object
+     * @param  {Object} npcData The plain npc tempalate object
+     * @param  {String} npcId   The npc template ID
+     */
     constructor(Game, npcData, npcId) {
         super(Game, npcData);
         // bind the NPC template ID
@@ -15,16 +24,16 @@ export default class NPC extends Character {
         this.train = false;
         // keeps track of the timers for the NPC
         this.timers = [];
-        // Anyone who takes aim at the NPC, for the duration of its life, will be 
+        // Anyone who takes aim at the NPC, for the duration of its life, will be
         // added to the list, and attacked on sight.
         this.hostiles = [];
         // Set the default timers, overwrite with NPC specific timers (in seconds)
         this.logic = {
-            ...this.logic, 
+            ...this.logic,
             timers: Object.assign({
-                "move": [15,60],
-                "attack": 2
-            }, this.logic.timers)
+                'move': [15, 60],
+                'attack': 2,
+            }, this.logic.timers),
         };
         // start the NPC logic
         this.initTimers();
@@ -40,8 +49,8 @@ export default class NPC extends Character {
             npc_id: this.npc_id,
             name: this.name,
             type: this.type,
-            health: this.stats.health
-        }
+            health: this.stats.health,
+        };
     }
 
     /**
@@ -66,8 +75,7 @@ export default class NPC extends Character {
                     } else {
                         clearInterval(timer.ref);
                     }
-                }
-                catch(err) {
+                } catch (err) {
                     // supress errors caused by clearing a timer/interval
                     // which is no longer active.
                 }
@@ -94,10 +102,10 @@ export default class NPC extends Character {
             if (Array.isArray(timerValue)) {
                 const timer = {
                     key: timerKey,
-                    type: "timeout",
+                    type: 'timeout',
                     range: [...timerValue],
                     method: method.bind(this),
-                    ref: null
+                    ref: null,
                 };
                 // add to the managed timer list
                 this.timers.push(timer);
@@ -106,8 +114,8 @@ export default class NPC extends Character {
             } else {
                 this.timers.push({
                     key: timerKey,
-                    type: "interval",
-                    ref: setInterval(method.bind(this), timerValue * 1000)
+                    type: 'interval',
+                    ref: setInterval(method.bind(this), timerValue * 1000),
                 });
             }
         });
@@ -142,14 +150,14 @@ export default class NPC extends Character {
         .catch(() => {
             const moveAction = {
                 grid: (Math.floor(Math.random() * 2) ? 'y' : 'x'),
-                direction: (Math.floor(Math.random() * 2) ? 1 : -1)
-            }
+                direction: (Math.floor(Math.random() * 2) ? 1 : -1),
+            };
 
             // set the location we intend to move the NPC to
             let newLocation = {
                 ...this.location,
-                [moveAction.grid]: this.location[moveAction.grid] + moveAction.direction
-            }
+                [moveAction.grid]: this.location[moveAction.grid] + moveAction.direction,
+            };
 
             this.Game.mapManager.get(newLocation.map)
                 .then((gameMap) => {
@@ -160,8 +168,8 @@ export default class NPC extends Character {
                         // update the new location
                         newLocation = {
                             map: this.location.map,
-                            [moveAction.grid]: (this.location[moveAction.grid] + moveAction.direction)
-                        }
+                            [moveAction.grid]: (this.location[moveAction.grid] + moveAction.direction),
+                        };
                     }
 
                     // If the new location is out of bounds, just ignore the movement action this time.
@@ -193,7 +201,7 @@ export default class NPC extends Character {
                 // let the target know they are aimed at.
                 this.Game.eventToUser(target.user_id, 'warning', `${this.name} the ${this.type} has taken aim at you. The only way get out of this, is to kill ${this.name} or /flee <n|s|w|e>`);
             })
-            .catch(() => {})
+            .catch(() => {});
         })
         .catch(() => {});
     }
@@ -228,11 +236,11 @@ export default class NPC extends Character {
                 // if there are no one currently aiming at them, check for hostiles
                 if (this.hostiles.length) {
                     const targets = this.hostiles.filter((obj) => {
-                        return obj.location.map === this.location.map && obj.location.x === this.location.x && obj.location.y === this.location.y
+                        return obj.location.map === this.location.map && obj.location.x === this.location.x && obj.location.y === this.location.y;
                     });
 
                     if (targets.length) {
-                        newTarget = targets[Math.max(0, Math.round((Math.random() * targets.length) - 1))]
+                        newTarget = targets[Math.max(0, Math.round((Math.random() * targets.length) - 1))];
                         this.setTarget(newTarget.user_id);
                         return resolve();
                     }
@@ -278,7 +286,7 @@ export default class NPC extends Character {
                         key: 'respawn',
                         ref: setTimeout(() => {
                             this.Game.npcManager.reset(this);
-                        }, this.logic.respawn * 1000)
+                        }, this.logic.respawn * 1000),
                     });
 
                     loot.exp = this.stats.exp;

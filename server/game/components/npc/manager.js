@@ -1,12 +1,19 @@
 import Promise from 'bluebird';
 import NPC from './object';
 import NPCList from '../../data/npcs.json';
-import { NPC_JOINED_GRID, NPC_LEFT_GRID, UPDATE_GRID_NPCS } from './types';
-import { UPDATE_GROUND_ITEMS } from '../item/types';
+import {NPC_JOINED_GRID, NPC_LEFT_GRID, UPDATE_GRID_NPCS} from './types';
+import {UPDATE_GROUND_ITEMS} from '../item/types';
 import namesList from '../../data/names.json';
 import {deepCopyObject} from '../../helper';
 
+/**
+ * NPC Manager
+ */
 export default class NPCManager {
+    /**
+     * class constructor
+     * @param  {Game} Game The Game object
+     */
     constructor(Game) {
         this.Game = Game;
         // list of managed NPCs in the game
@@ -14,7 +21,7 @@ export default class NPCManager {
         // log manager progress
         this.Game.logger.debug('NPCManager::constructor Loaded');
         // keeps track of character locations on the maps
-        this.locations = {}
+        this.locations = {};
     }
 
     /**
@@ -31,7 +38,7 @@ export default class NPCManager {
             }
 
             resolve(NPC);
-        })
+        });
     }
 
     /**
@@ -53,15 +60,15 @@ export default class NPCManager {
         if (!npcTemplate.location) {
             npcTemplate.location = {
                 x: Math.round(Math.random() * map.gridSize.x),
-                y: Math.round(Math.random() * map.gridSize.y)
-            }
+                y: Math.round(Math.random() * map.gridSize.y),
+            };
         }
 
         // add the map id to the location
         npcTemplate.location.map = map.id;
 
         // randomise gender, and pick a name
-        npcTemplate.gender = Math.round(Math.random() * 1) ? "male" : "female";
+        npcTemplate.gender = Math.round(Math.random() * 1) ? 'male' : 'female';
         npcTemplate.name = namesList[npcTemplate.gender][Math.round(Math.random() * (namesList[npcTemplate.gender].length - 1))];
 
         const newNPC = new NPC(this.Game, npcTemplate, npcData.id);
@@ -76,7 +83,7 @@ export default class NPCManager {
         if (npcTemplate.shop) {
             newNPC.shop = await this.Game.shopManager.add(npcTemplate.shop);
         }
-        
+
         await new Promise((resolve) => {
             this.Game.itemManager.loadNPCInventory(newNPC)
             .then((items) => {
@@ -105,8 +112,8 @@ export default class NPCManager {
                         type: NPC_JOINED_GRID,
                         payload: {
                             name: newNPC.name,
-                            id: newNPC.id
-                        }
+                            id: newNPC.id,
+                        },
                     });
                 }
 
@@ -139,8 +146,8 @@ export default class NPCManager {
             if (!NPC.location) {
                 NPC.location = {
                     x: Math.round(Math.random() * gameMap.gridSize.x),
-                    y: Math.round(Math.random() * gameMap.gridSize.y)
-                }
+                    y: Math.round(Math.random() * gameMap.gridSize.y),
+                };
             }
 
             // set the default inventory
@@ -153,7 +160,7 @@ export default class NPCManager {
             NPC.stats = {...npcTemplate.stats};
 
             // randomise gender, and pick a name
-            NPC.gender = Math.round(Math.random() * 1) ? "male" : "female";
+            NPC.gender = Math.round(Math.random() * 1) ? 'male' : 'female';
             NPC.name = namesList[NPC.gender][Math.round(Math.random() * (namesList[NPC.gender].length - 1))];
 
             this.Game.itemManager.loadNPCInventory(NPC)
@@ -182,15 +189,15 @@ export default class NPCManager {
                         type: NPC_JOINED_GRID,
                         payload: {
                             name: NPC.name,
-                            id: NPC.id
-                        }
+                            id: NPC.id,
+                        },
                     });
 
                     this.Game.logger.info(`NPC Reset. Type: "${NPC.npc_id}"; Map "${NPC.location.map}; Location "${NPC.location.y}-${NPC.location.x}"`);
                 })
                 .catch((err) => {});
         })
-        .catch(() => {})
+        .catch(() => {});
     }
 
     /**
@@ -204,7 +211,7 @@ export default class NPCManager {
                     // remove npc from the grid list of npcs
                     this.Game.socketManager.dispatchToRoom(NPC.getLocationId(), {
                         type: NP_LEFT_GRID,
-                        payload: NPC.id
+                        payload: NPC.id,
                     });
 
                     this.npcs = this.npcs.filter((obj) => obj.id !== npcId);
@@ -212,7 +219,7 @@ export default class NPCManager {
                 })
                 .catch((err) => {
                     this.Game.logger.error(err);
-                    resolve()
+                    resolve();
                 });
         });
     }
@@ -240,7 +247,7 @@ export default class NPCManager {
         }
 
         return npcs.map((npc) => {
-            return npc.exportToClient()
+            return npc.exportToClient();
         });
     }
 
@@ -298,7 +305,7 @@ export default class NPCManager {
         // dispatch to client
         this.Game.socketManager.dispatchToRoom(locationId, {
             type: UPDATE_GRID_NPCS,
-            payload: this.getLocationList(location.map, location.x, location.y, true)
+            payload: this.getLocationList(location.map, location.x, location.y, true),
         });
     }
 
@@ -314,7 +321,7 @@ export default class NPCManager {
         let directionOut;
 
         // determin the direction names for the JOIN/LEAVE events
-        switch(moveAction.grid) {
+        switch (moveAction.grid) {
             case 'y':
                 if (moveAction.direction === 1) {
                     directionOut = 'South';
@@ -341,15 +348,15 @@ export default class NPCManager {
         // remove player from the grid list of players
         this.Game.socketManager.dispatchToRoom(NPC.getLocationId(), {
             type: NPC_LEFT_GRID,
-            payload: NPC.id
+            payload: NPC.id,
         });
 
         // save the old location
-        const oldLocation = {...NPC.location};
+        //const oldLocation = {...NPC.location};
 
         // update character location
         NPC.updateLocation(newLocation.map, newLocation.x, newLocation.y);
-        
+
         // change location on the map
         //this.changeLocation(NPC, newLocation, oldLocation);
 
@@ -359,10 +366,10 @@ export default class NPCManager {
         // add player from the grid list of players
         this.Game.socketManager.dispatchToRoom(NPC.getLocationId(), {
             type: NPC_JOINED_GRID,
-            payload: NPC.exportToClient()
+            payload: NPC.exportToClient(),
         });
 
-        this.Game.logger.debug(`NPC ${NPC.npc_id} (${NPC.id}) moved to ${NPC.location.map} ${NPC.location.y}-${NPC.location.x}`)   
+        this.Game.logger.debug(`NPC ${NPC.npc_id} (${NPC.id}) moved to ${NPC.location.map} ${NPC.location.y}-${NPC.location.x}`);
     }
 
     /**
@@ -385,12 +392,12 @@ export default class NPCManager {
                     // remove player from the grid list of players
                     this.Game.socketManager.dispatchToRoom(NPC.getLocationId(), {
                         type: NPC_LEFT_GRID,
-                        payload: NPC.id
+                        payload: NPC.id,
                     });
 
                     // Hide the NPC
                     //this.removeFromGrid(NPC.location, NPC);
-                    
+
                     // drop all items on the ground
                     droppedLoot.items.forEach((item) => {
                         this.Game.itemManager.drop(oldLocation.map, oldLocation.x, oldLocation.y, item);
@@ -409,7 +416,7 @@ export default class NPCManager {
                     // update the client's ground look at the location
                     this.Game.socketManager.dispatchToRoom(oldLocationId, {
                         type: UPDATE_GROUND_ITEMS,
-                        payload: this.Game.itemManager.getLocationList(oldLocation.map, oldLocation.x, oldLocation.y, true)
+                        payload: this.Game.itemManager.getLocationList(oldLocation.map, oldLocation.x, oldLocation.y, true),
                     });
 
                     resolve(oldLocationId);

@@ -1,43 +1,43 @@
 // Load required packages
-var mongoose = require('mongoose'),
-    moment = require('moment');
+import mongoose from 'mongoose';
+import moment from 'moment';
 
 // Define our product schema
-var CharacterSchema = new mongoose.Schema({
+const CharacterSchema = new mongoose.Schema({
     user_id: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
     },
     name: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
     },
     name_lowercase: {
         type: String,
     },
     location: {
-        type: {}
+        type: {},
     },
     stats: {
-        type: {}
+        type: {},
     },
     abilities: {
-        type: {}
+        type: {},
     },
     skills: {
-        type: {}
+        type: {},
     },
     faction_id: {
         type: String,
     },
     date_added: String,
-    date_updated: String
+    date_updated: String,
 });
 
 // Execute before each user.save() call
-CharacterSchema.pre('save', function (callback) {
+CharacterSchema.pre('save', function(callback) {
     if (!this.date_added) {
         // set the date for when it was created
         this.date_added = moment().format('ddd, D MMM YYYY H:mm:ss [GMT]');

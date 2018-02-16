@@ -3,24 +3,32 @@ import winston from 'winston';
 import Promise from 'bluebird';
 
 // component manager
-import accountManager from './components/account/manager';
-import characterManager from './components/character/manager';
-import socketManager from './components/socket/manager';
-import mapManager from './components/map/manager';
-import structureManager from './components/structure/manager';
-import itemManager from './components/item/manager';
-import shopManager from './components/shop/manager';
-import commandManager from './components/command/manager';
-import factionManager from './components/faction/manager';
-import abilityManager from './components/ability/manager';
-import skillManager from './components/skill/manager';
-import cooldownManager from './components/cooldown/manager';
-import npcManager from './components/npc/manager';
-import effectManager from './components/effect/manager';
+import AccountManager from './components/account/manager';
+import CharacterManager from './components/character/manager';
+import SocketManager from './components/socket/manager';
+import MapManager from './components/map/manager';
+import StructureManager from './components/structure/manager';
+import ItemManager from './components/item/manager';
+import ShopManager from './components/shop/manager';
+import CommandManager from './components/command/manager';
+import FactionManager from './components/faction/manager';
+import AbilityManager from './components/ability/manager';
+import SkillManager from './components/skill/manager';
+import CooldownManager from './components/cooldown/manager';
+import NpcManager from './components/npc/manager';
+import EffectManager from './components/effect/manager';
 
-import { newEvent, addNews } from './actions';
+import {newEvent, addNews} from './actions';
 
+/**
+ * The Game object class
+ */
 class Game {
+    /**
+     * class constructor
+     * @param  {Express} server Express/http server object
+     * @param  {Object}  config The server config file object
+     */
     constructor(server, config) {
         this.config = config;
 
@@ -31,20 +39,20 @@ class Game {
         this.timers = [];
 
         // Manager placeholders
-        this.socketManager = new socketManager(this, server);
-        this.accountManager = new accountManager(this);
-        this.characterManager = new characterManager(this);
-        this.mapManager = new mapManager(this);
-        this.structureManager = new structureManager(this);
-        this.itemManager = new itemManager(this);
-        this.shopManager = new shopManager(this);
-        this.commandManager = new commandManager(this);
-        this.factionManager = new factionManager(this);
-        this.abilityManager = new abilityManager(this);
-        this.skillManager = new skillManager(this);
-        this.cooldownManager = new cooldownManager(this);
-        this.npcManager = new npcManager(this);
-        this.effectManager = new effectManager(this);
+        this.socketManager = new SocketManager(this, server);
+        this.accountManager = new AccountManager(this);
+        this.characterManager = new CharacterManager(this);
+        this.mapManager = new MapManager(this);
+        this.structureManager = new StructureManager(this);
+        this.itemManager = new ItemManager(this);
+        this.shopManager = new ShopManager(this);
+        this.commandManager = new CommandManager(this);
+        this.factionManager = new FactionManager(this);
+        this.abilityManager = new AbilityManager(this);
+        this.skillManager = new SkillManager(this);
+        this.cooldownManager = new CooldownManager(this);
+        this.npcManager = new NpcManager(this);
+        this.effectManager = new EffectManager(this);
 
         // load game data
         this.init();
@@ -61,20 +69,20 @@ class Game {
                 new winston.transports.File({
                     filename: 'error.log',
                     level: 'error',
-                    timestamp: true
+                    timestamp: true,
                 }),
                 new winston.transports.File({
                     filename: 'debug.log',
                     level: 'debug',
-                    timestamp: true
-                })
-            ]
+                    timestamp: true,
+                }),
+            ],
         });
 
         // if we are not in a production environment, add console logging as well
         if (process.env.NODE_ENV !== 'production') {
             this.logger.add(new winston.transports.Console({
-                format: winston.format.simple()
+                format: winston.format.simple(),
             }));
 
             // enable long stack traces to promises, while in dev
@@ -84,6 +92,9 @@ class Game {
         this.logger.info('Logger initiated.');
     }
 
+    /**
+     * Init the game server managers
+     */
     async init() {
         await this.itemManager.init().then((count) => {
             console.log(`ITEM MANAGER LOADED ${count} ITEMS TEMPLATES`);
@@ -98,23 +109,23 @@ class Game {
         });
 
         await this.shopManager.init().then(() => {
-            console.log(`SHOP MANAGER LOADED`);
+            console.log('SHOP MANAGER LOADED');
         });
 
         await this.structureManager.init().then(() => {
-            console.log(`STRUCTURES MANAGER LOADED`);
+            console.log('STRUCTURES MANAGER LOADED');
         });
 
         await this.commandManager.init().then(() => {
-            console.log(`COMMAND MANAGER LOADED`);
+            console.log('COMMAND MANAGER LOADED');
         });
 
         await this.characterManager.init().then(() => {
-            console.log(`CHARACTERS MANAGER LOADED`);
+            console.log('CHARACTERS MANAGER LOADED');
         });
 
         await this.skillManager.init().then(() => {
-            console.log(`SKILL MANAGER LOADED`);
+            console.log('SKILL MANAGER LOADED');
         });
 
         // setup autosave
@@ -124,10 +135,14 @@ class Game {
         this.socketManager.listen();
     }
 
+    /**
+     * Timer call method
+     * @param  {String} timerName The name of the timer
+     */
     onTimer(timerName) {
         let callback = () => {};
 
-        switch(timerName) {
+        switch (timerName) {
             case 'autosave':
                 callback = () => {
                     // NOTE: if you want to add anything to the auto save, do it here
@@ -159,8 +174,8 @@ class Game {
         this.timers = this.config.game.timers.filter((timer) => timer.enabled).map((timer) => {
             return {
                 name: timer.name,
-                timer: setInterval(this.onTimer.bind(this), timer.interval, timer.name)
-            }
+                timer: setInterval(this.onTimer.bind(this), timer.interval, timer.name),
+            };
         });
     }
 

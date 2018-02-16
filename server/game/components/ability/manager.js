@@ -3,7 +3,14 @@ import Promise from 'bluebird';
 // manager specific imports
 import AbilityAccuracy from './abilities/accuracy';
 
+/**
+ * Handles the management of assigning abilities to characters
+ */
 export default class AbilityManager {
+    /**
+     * Class constructore
+     * @param  {Game} Game The Game object
+     */
     constructor(Game) {
         this.Game = Game;
     }

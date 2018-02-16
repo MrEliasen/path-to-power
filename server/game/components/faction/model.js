@@ -1,33 +1,33 @@
 // Load required packages
-var mongoose = require('mongoose'),
-    moment = require('moment');
+import mongoose from 'mongoose';
+import moment from 'moment';
 
 // Define our product schema
-var FactionSchema = new mongoose.Schema({
+const FactionSchema = new mongoose.Schema({
     faction_id: {
         type: String,
-        unique: true
+        unique: true,
     },
     name: {
         type: String,
-        unique: true
+        unique: true,
     },
     name_lowercase: String,
     tag: {
         type: String,
-        unique: true
+        unique: true,
     },
     tag_lowercase: String,
     leader_id: {
         type: String,
-        required: true
+        required: true,
     },
     date_added: String,
-    date_updated: String
+    date_updated: String,
 });
 
 // Execute before each user.save() call
-FactionSchema.pre('save', function (callback) {
+FactionSchema.pre('save', function(callback) {
     if (!this.date_added) {
         // set the date for when it was created
         this.date_added = moment().format('ddd, D MMM YYYY H:mm:ss [GMT]');

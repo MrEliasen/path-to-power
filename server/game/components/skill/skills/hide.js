@@ -1,8 +1,16 @@
 import {
-    LEFT_GRID
+    LEFT_GRID,
 } from '../../character/types';
 
+/**
+ * Hide skill logic
+ */
 export default class SkillHide {
+    /**
+     * class constructor
+     * @param  {Game}   Game      The game object
+     * @param  {object} modifiers The skill plain object
+     */
     constructor(Game, modifiers) {
         this.Game = Game;
         this.id = 'hide';
@@ -20,7 +28,7 @@ export default class SkillHide {
      */
     getModifiers() {
         return {
-            value: this.value
+            value: this.value,
         };
     }
 
@@ -49,7 +57,7 @@ export default class SkillHide {
             // re-add the character to the grid player list
             this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
                 type: LEFT_GRID,
-                payload: character.user_id
+                payload: character.user_id,
             });
 
             // train the skill

@@ -1,6 +1,15 @@
 import Promise from 'bluebird';
 
+/**
+ * Structure Object class
+ */
 export default class Structure {
+    /**
+     * class constructor
+     * @param  {Game} Game          The Game object
+     * @param  {Object} structureData The structure template object
+     * @param  {Object} location      The location object {map, x, y}
+     */
     constructor(Game, structureData, location) {
         this.Game = Game;
         // add the building details
@@ -9,6 +18,10 @@ export default class Structure {
         this.location = location;
     }
 
+    /**
+     * Loads structure shops
+     * @return {Promise}
+     */
     loadShops() {
         return new Promise((resolve, reject) => {
             if (!this.shops || !this.shops.length) {
@@ -24,7 +37,7 @@ export default class Structure {
                 const shop = await this.Game.shopManager.add(shopId);
                 this.shops.push(shop);
 
-                loaded++
+                loaded++;
 
                 if (loaded >= total) {
                     resolve(loaded);

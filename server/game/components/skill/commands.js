@@ -1,3 +1,12 @@
+/**
+ * Snoop skill command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdSkillSnoop(socket, character, command, params, cmdObject, Game) {
     const skill = character.skills.find((obj) => obj.id === 'snoop');
 
@@ -20,6 +29,15 @@ function cmdSkillSnoop(socket, character, command, params, cmdObject, Game) {
     return Game.eventToSocket(socket, 'success', JSON.stringify(snoopInfo));
 }
 
+/**
+ * Hide skill command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdSkillHide(socket, character, command, params, cmdObject, Game) {
     const skill = character.skills.find((obj) => obj.id === 'hide');
 
@@ -42,6 +60,15 @@ function cmdSkillHide(socket, character, command, params, cmdObject, Game) {
     skill.use(character);
 }
 
+/**
+ * Search skill command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdSkillSearch(socket, character, command, params, cmdObject, Game) {
     const skill = character.skills.find((obj) => obj.id === 'search');
 

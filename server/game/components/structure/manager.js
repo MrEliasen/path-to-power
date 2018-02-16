@@ -2,10 +2,17 @@ import Promise from 'bluebird';
 
 // manager specific imports
 import Structure from './object';
-import structureList from '../../data/structures.json' ;
+import structureList from '../../data/structures.json';
 import structureCommands from './commands';
 
+/**
+ * Structure Manager
+ */
 export default class StructureManager {
+    /**
+     * class constructor
+     * @param  {Game} Game The game object
+     */
     constructor(Game) {
         this.Game = Game;
         // list of structures to manage
@@ -27,8 +34,8 @@ export default class StructureManager {
     /**
      * Add map structures to the managed object
      * @param {String} map_id       Map ID
-     * @param {Number} x            
-     * @param {Number} y            
+     * @param {Number} x
+     * @param {Number} y
      * @param {String} structure_id Structure ID
      * @return {Promise}
      */
@@ -55,8 +62,8 @@ export default class StructureManager {
     /**
      * returns a list of buildings, at a given location, which has the speicifc command available
      * @param  {String} map_id  Map ID
-     * @param  {Number} x       
-     * @param  {Number} y       
+     * @param  {Number} x
+     * @param  {Number} y
      * @param  {String} command the command to search for
      * @return {Promise}
      */
@@ -67,7 +74,7 @@ export default class StructureManager {
             let matches = [];
 
             if (structures.length) {
-                matches = structures.filter((structure) => structure.commands[command])
+                matches = structures.filter((structure) => structure.commands[command]);
             }
 
             // if we didn't find any matching buildings..
@@ -76,7 +83,7 @@ export default class StructureManager {
             }
 
             resolve(matches);
-        })
+        });
     }
 
     /**
@@ -115,8 +122,8 @@ export default class StructureManager {
     /**
      * Returns the list of structures at a given position
      * @param  {String} map_id Map Id
-     * @param  {Number} x      
-     * @param  {Number} y      
+     * @param  {Number} x
+     * @param  {Number} y
      * @param  {Boolean} forClient Whether the structure objects should be returns or a plain obj
      * @return {Array}        list of buildings
      */
@@ -138,11 +145,11 @@ export default class StructureManager {
                     return {
                         id: shop.id,
                         name: shop.name,
-                        description: shop.description
-                    }
+                        description: shop.description,
+                    };
                 }),
-            }
-        })
+            };
+        });
     }
 
     /**
@@ -162,9 +169,9 @@ export default class StructureManager {
                     name: obj.name,
                     location: {
                         x: obj.location.x,
-                        y: obj.location.y
-                    }
-                })
+                        y: obj.location.y,
+                    },
+                });
             });
         });
 

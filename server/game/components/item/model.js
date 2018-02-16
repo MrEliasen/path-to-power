@@ -1,12 +1,12 @@
 // Load required packages
-var mongoose = require('mongoose'),
-    moment = require('moment');
+import mongoose from 'mongoose';
+import moment from 'moment';
 
 // Define our product schema
-var ItemSchema = new mongoose.Schema({
+const ItemSchema = new mongoose.Schema({
     user_id: {
         type: String,
-        required: true
+        required: true,
     },
     item_id: {
         type: String,
@@ -16,14 +16,14 @@ var ItemSchema = new mongoose.Schema({
         type: {},
     },
     equipped_slot: {
-        type: String
+        type: String,
     },
     date_added: String,
-    date_updated: String
+    date_updated: String,
 });
 
 // Execute before each user.save() call
-ItemSchema.pre('save', function (callback) {
+ItemSchema.pre('save', function(callback) {
     if (!this.date_added) {
         // set the date for when it was created
         this.date_added = moment().format('ddd, D MMM YYYY H:mm:ss [GMT]');
@@ -31,7 +31,7 @@ ItemSchema.pre('save', function (callback) {
 
     // set the date for when it was updated
     this.date_updated = moment().format('ddd, D MMM YYYY H:mm:ss [GMT]');
-    
+
     callback();
 });
 

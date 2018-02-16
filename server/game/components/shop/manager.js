@@ -11,7 +11,14 @@ import {
     SHOP_GET_PRICE,
 } from '../../../shared/types';
 
+/**
+ * Shop Manager
+ */
 export default class ShopManager {
+    /**
+     * class constructor
+     * @param  {Game} Game The Game object
+     */
     constructor(Game) {
         this.Game = Game;
         this.shops = [];
@@ -41,7 +48,7 @@ export default class ShopManager {
             return;
         }
 
-        switch(action.type) {
+        switch (action.type) {
             case SHOP_BUY:
                 this.get(action.payload.shop)
                     .then((shop) => shop.buyItem(socket.user.user_id, action.payload.index, action.payload.item))
@@ -76,6 +83,11 @@ export default class ShopManager {
         }
     }
 
+    /**
+     * Get a shop byt fingerprint
+     * @param  {String} fingerprint unigue fingerprint for the shop
+     * @return {Promise}
+     */
     get(fingerprint) {
         return new Promise((resolve, reject) => {
             const shop = this.shops.find((obj) => obj.fingerprint === fingerprint);
@@ -85,7 +97,7 @@ export default class ShopManager {
             }
 
             resolve(shop);
-        })
+        });
     }
 
     /**

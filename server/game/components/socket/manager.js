@@ -1,10 +1,17 @@
 import Promise from 'bluebird';
 import io from 'socket.io';
 import EventEmitter from 'events';
+import {ACCOUNT_AUTHENTICATE} from '../account/types';
 
-import { ACCOUNT_AUTHENTICATE } from '../account/types';
-
+/**
+ * Socket manager
+ */
 export default class SocketManager extends EventEmitter {
+    /**
+     * class constructor
+     * @param  {Game}    Game   The game object
+     * @param  {Express} server The express/http server object
+     */
     constructor(Game, server) {
         super(Game, server);
 
@@ -18,10 +25,15 @@ export default class SocketManager extends EventEmitter {
         // disconnect timers (for DC events)
         this.timers = {};
 
-        this.onDisconnect = this.onDisconnect.bind(this)
+        this.onDisconnect = this.onDisconnect.bind(this);
         this.clearTimer = this.clearTimer.bind(this);
     }
 
+    /**
+     * Get a socket belonging to the user
+     * @param  {String} user_id The user id of the user whos socket we are looking for
+     * @return {Promise}
+     */
     get(user_id) {
         return new Promise((resolve, reject) => {
             const socket = this.clients[user_id];
@@ -31,14 +43,14 @@ export default class SocketManager extends EventEmitter {
             }
 
             resolve(socket);
-        })
+        });
     }
 
     /**
      * Will make the IO server start listening for connections
      */
     listen() {
-        this.Game.logger.info(`Socket is listing on port ${this.Game.config.server.port}`)
+        this.Game.logger.info(`Socket is listing on port ${this.Game.config.server.port}`);
         // setup event listeners
         this.io.on('connection', this.onConnection.bind(this));
 

@@ -1,7 +1,15 @@
+/**
+ * The drug use effect
+ * @param  {Character} character The character object of the user
+ * @param  {Object}    modifiers The effect's modifiers
+ * @param  {Item}      item      The item object
+ * @param  {Game}      Game      The main Game object
+ * @return {Object}              The use effect object
+ */
 function drug(character, modifiers = {}, item, Game) {
     const effects = Object.assign({
         exp: 0,
-        health: 0
+        health: 0,
     }, modifiers);
 
     // check if the character has enough health to use the drug
@@ -25,9 +33,17 @@ function drug(character, modifiers = {}, item, Game) {
     return effects;
 }
 
+/**
+ * The phone use effect
+ * @param  {Character} character The character object of the user
+ * @param  {Object}    modifiers The effect's modifiers
+ * @param  {Item}      item      The item object
+ * @param  {Game}      Game      The main Game object
+ * @return {Object}              The use effect object
+ */
 function miscPhone(character, modifiers = {}, item, Game) {
     const effects = Object.assign({
-        cost: 0
+        cost: 0,
     }, modifiers);
 
     // check if the character has enough health to use the drug
@@ -40,15 +56,14 @@ function miscPhone(character, modifiers = {}, item, Game) {
     const npcTypes = ['Drug Dealer'];
     let messageArray = [
         `You use your ${item.name} to call some contacts. Your current reputation allowed you to get the following information:`,
-        "----------------"
-    ]
+        '----------------',
+    ];
 
     // if they have over a certain amount of EXP, show druggies location as well.
     if (character.stats.exp > 22563) {
         npcTypes.push('Druggie');
         // overwrite the initial message
         messageArray[0] = `You use your ${item.name} to call some contacts.`;
-
     }
 
     // return only NPCs of the given types
@@ -73,14 +88,22 @@ function miscPhone(character, modifiers = {}, item, Game) {
     );
 }
 
+/**
+ * The item heal effect
+ * @param  {Character} character The character object of the user
+ * @param  {Object}    modifiers The effect's modifiers
+ * @param  {Item}      item      The item object
+ * @param  {Game}      Game      The main Game object
+ * @return {Object}              The use effect object
+ */
 function miscItemHeal(character, modifiers = {}, item, Game) {
     const effects = Object.assign({
-        health: 0
+        health: 0,
     }, modifiers);
 
     // if a character is at full health, don't waste the item
     if (character.stats.health >= character.stats.health_max) {
-        return Game.eventToUser(character.user_id, 'info', `You are already at full health.`);
+        return Game.eventToUser(character.user_id, 'info', 'You are already at full health.');
     }
 
     // give EXP and update health of player
@@ -104,5 +127,5 @@ function miscItemHeal(character, modifiers = {}, item, Game) {
 module.exports = {
     drug,
     miscPhone,
-    miscItemHeal
+    miscItemHeal,
 };

@@ -33,14 +33,21 @@ import {dice} from '../../helper';
     }
 }*/
 
+/**
+ * Item Object class
+ */
 export default class Item {
+    /**
+     * class constructor
+     * @param  {Game} Game        The Game Object
+     * @param  {Object} itemData  The item template object
+     * @param  {Object} modifiers Item modifiers
+     */
     constructor(Game, itemData, modifiers = {}) {
         Object.assign(this, itemData);
         Object.assign(this.stats, modifiers);
         this.Game = Game;
-
         this.fingerprint = uuid();
-
         this.shufflePrice = this.shufflePrice.bind(this);
     }
 
@@ -65,8 +72,8 @@ export default class Item {
             subtype: this.subtype,
             stats: {...this.stats},
             equipped_slot: this.equipped_slot,
-            hasUseEffect: (this.stats.useEffect ? true : false)
-        }
+            hasUseEffect: (this.stats.useEffect ? true : false),
+        };
     }
 
     /**
@@ -76,7 +83,7 @@ export default class Item {
     getModifiers() {
         // TODO: optimise this so it is not a manually set list
         const modifiers = {
-            durability: parseInt(this.stats.durability, 10)
+            durability: parseInt(this.stats.durability, 10),
         };
 
         return modifiers;
@@ -94,7 +101,7 @@ export default class Item {
      * @param {Number} amount
      */
     setDurability(amount) {
-        this.stats.durability = parseInt(amount,10);
+        this.stats.durability = parseInt(amount, 10);
     }
 
     /**
@@ -102,7 +109,7 @@ export default class Item {
      * @param {Number} amount
      */
     addDurability(amount) {
-        this.stats.durability = parseInt(this.stats.durability, 10) + parseInt(amount,10);
+        this.stats.durability = parseInt(this.stats.durability, 10) + parseInt(amount, 10);
     }
 
     /**
@@ -110,7 +117,7 @@ export default class Item {
      * @param {Number} amount
      */
     removeDurability(amount) {
-        this.stats.durability = parseInt(this.stats.durability, 10) - parseInt(amount,10);
+        this.stats.durability = parseInt(this.stats.durability, 10) - parseInt(amount, 10);
     }
 
     /**

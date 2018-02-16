@@ -4,7 +4,14 @@ import {GAME_COMMAND} from './types';
 import commandCommands from './commands';
 import {deepCopyObject} from '../../helper';
 
+/**
+ * Command class
+ */
 export default class CommandManager {
+    /**
+     * Class constructor
+     * @param  {Game} Game The main Game object
+     */
     constructor(Game) {
         this.Game = Game;
 
@@ -48,6 +55,12 @@ export default class CommandManager {
         });
     }
 
+    /**
+     * Register a command object
+     * @param  {String}  commandName   Command, eg /say
+     * @param  {Object}  commandObject The command object from the component/<name>/command.js
+     * @param  {Boolean} isAlias       Whether this is an alias of a command
+     */
     register(commandName, commandObject, isAlias = false) {
         // in case the commandName didn't have a / in the beginning, add it.
         if (commandName[0] !== '/') {
@@ -147,11 +160,22 @@ export default class CommandManager {
         // get he list of players and NPCS at the grid
         const playersAtGrid = this.Game.characterManager.getLocationList(location.map, location.x, location.y);
         const NPCsAtGrid = this.Game.npcManager.getLocationList(location.map, location.x, location.y);
+        let characters = [];
 
-        // Find target matching the name
-        const characters = ignorePlayers ? [] : playersAtGrid.filter((user) => {
-            return user.name_lowercase.indexOf(findName) === 0 && !user.hidden;
-        });
+        if (!ignorePlayers) {
+            // Find target matching the name exactly
+            characters = playersAtGrid.filter((user) => {
+                return user.name_lowercase === findName && !user.hidden;
+            });
+
+            if (!characters.length) {
+                // Otherwise find target matching the beginning of the name
+                characters = playersAtGrid.filter((user) => {
+                    return user.name_lowercase.indexOf(findName) === 0 && !user.hidden;
+                });
+            }
+        }
+
         const NPCs = ignoreNPCs ? [] : NPCsAtGrid.filter((npc) => {
             return `${npc.name} the ${npc.type}`.toLowerCase().indexOf(findName) === 0;
         });
@@ -209,9 +233,9 @@ export default class CommandManager {
             } else {
                 if (char == '"') {
                     insideString = !insideString;
-                } else {
-                    param += char;
                 }
+
+                param += char;
             }
         }
 
@@ -220,6 +244,23 @@ export default class CommandManager {
         }
 
         return params;
+    }
+
+    /**
+     * Strips the " character from the beginning and end of a parameter
+     * @param  {String} param The parameter
+     * @return {String}       The parameter with the "" encapsulation
+     */
+    stripEncapsulation(param) {
+        if (param[0] === '"') {
+            param = param.substring(1, param.length - 1);
+        }
+
+        if (param[param.length - 1] === '"') {
+            param = param.substring(0, param.length - 2);
+        }
+
+        return param;
     }
 
     /**
@@ -238,9 +279,13 @@ export default class CommandManager {
 
             // prepare the params, so they match the number of expected params.
             msgParams = msgParams.slice(0, cmdParams.length - 1).concat(msgParams.slice(cmdParams.length - 1).join(' '));
+
             // run the params through each of the rules
             for (let index = 0; index < cmdParams.length; index++) {
                 let param = cmdParams[index];
+
+                // remove encapsulation from the parameter
+                msgParams[index] = this.stripEncapsulation(msgParams[index]);
 
                 // only if the parameter has rules..
                 if (param.rules.length) {
@@ -408,19 +453,4 @@ export default class CommandManager {
             resolve(msgParams);
         });
     }
-
-    /*
-    params: [
-        {
-            name: 'Target',
-            desc: 'The name of the player you want to send a private message to',
-            rules: 'required|character:grid',
-        },
-        {
-            name: 'Message',
-            desc: 'The message you wish to send to the player.',
-            rules: 'required|minlen:1|maxlen:20',
-        },
-    ],
-     */
 }

@@ -1,6 +1,11 @@
-import { UPDATE_GROUND_ITEMS } from '../item/types';
-import { LEFT_GRID } from '../character/types';
+import {UPDATE_GROUND_ITEMS} from '../item/types';
+import {LEFT_GRID} from '../character/types';
 
+/**
+ * Get the direction based on the movement action
+ * @param  {Object} move The move action object
+ * @return {String}      Direction full name
+ */
 function getDirectionName(move) {
     if (move.grid === 'x') {
         return move.direction === 1 ? 'South' : 'North';
@@ -9,6 +14,15 @@ function getDirectionName(move) {
     return move.direction === 1 ? 'West' : 'East';
 }
 
+/**
+ * Flee command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdFlee(socket, character, command, params, cmdObject, Game) {
     let direction = params[0] || null;
     let moveAction = {grid: '', direction: 0};

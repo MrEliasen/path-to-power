@@ -1,6 +1,15 @@
 import uuid from 'uuid/v4';
 
+/**
+ * Cooldown Object class
+ */
 export default class Cooldown {
+    /**
+     * Class constructor
+     * @param  {String} action    The cooldown key
+     * @param  {Number} duration  How long the cooldown is
+     * @param  {Bool}   autostart Whether the timer starts when the object is created
+     */
     constructor(action, duration, autostart) {
         // create a new unique identifier
         this.id = uuid();
@@ -20,6 +29,9 @@ export default class Cooldown {
         }
     }
 
+    /**
+     * Starts the cooldown timer
+     */
     start() {
         if (this.timer !== null) {
             return;

@@ -1,5 +1,14 @@
 import {LEFT_GRID} from '../map/types';
 
+/**
+ * Heal command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdHeal(socket, character, command, params, cmdObject, Game) {
     // get the structures list at the character location
     Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
@@ -63,6 +72,15 @@ function cmdHeal(socket, character, command, params, cmdObject, Game) {
         });
 }
 
+/**
+ * Travel command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdTravel(socket, character, command, params, cmdObject, Game) {
     // Fetch the character first
     Game.characterManager.get(socket.user.user_id)
@@ -88,7 +106,7 @@ function cmdTravel(socket, character, command, params, cmdObject, Game) {
                     let destination = params[0];
                     // check if the destination exists for the airport
                     if (!modifiers.destinations[destination]) {
-                        return Game.eventToSocket(socket, 'error', `Invalid destination.`);
+                        return Game.eventToSocket(socket, 'error', 'Invalid destination.');
                     }
 
                     // if there are 2 params, the client is likely specifying the structure they want to use the command with
@@ -110,12 +128,12 @@ function cmdTravel(socket, character, command, params, cmdObject, Game) {
                             socket.leave(character.getLocationId());
 
                             // dispatch leave message to grid
-                            Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} enter the airport, traveling to an unknown destination.`)
+                            Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} enter the airport, traveling to an unknown destination.`);
 
                             // remove player from the grid list of players
                             Game.socketManager.dispatchToRoom(character.getLocationId(), {
                                 type: LEFT_GRID,
-                                payload: character.user_id
+                                payload: character.user_id,
                             });
 
                             // save the old location
@@ -125,12 +143,12 @@ function cmdTravel(socket, character, command, params, cmdObject, Game) {
                             const newLocation = {
                                 map: destination,
                                 x: travel_details.x,
-                                y: travel_details.y
-                            }
+                                y: travel_details.y,
+                            };
 
                             // update character location
                             character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
-                            
+
                             // change location on the map
                             Game.characterManager.changeLocation(character, newLocation, oldLocation);
 
@@ -168,6 +186,15 @@ function cmdTravel(socket, character, command, params, cmdObject, Game) {
         });
 }
 
+/**
+ * Withdraw command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdWithdraw(socket, character, command, params, cmdObject, Game) {
     // Fetch the character first
     Game.characterManager.get(socket.user.user_id)
@@ -199,6 +226,15 @@ function cmdWithdraw(socket, character, command, params, cmdObject, Game) {
         .catch(() => {});
 }
 
+/**
+ * Deposit command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdDeposit(socket, character, command, params, cmdObject, Game) {
     // Fetch the character first
     Game.characterManager.get(socket.user.user_id)
@@ -231,6 +267,15 @@ function cmdDeposit(socket, character, command, params, cmdObject, Game) {
         .catch(() => {});
 }
 
+/**
+ * Drink command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
 function cmdDrink(socket, character, command, params, cmdObject, Game) {
     // Fetch the character first
     Game.characterManager.get(socket.user.user_id)

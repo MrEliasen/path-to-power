@@ -3,11 +3,18 @@ import Promise from 'bluebird';
 
 // manager specific imports
 import GameMap from './object';
-import descriptionList from '../../data/descriptions.json'; 
-import { JOIN_GRID } from './types';
+import descriptionList from '../../data/descriptions.json';
+import {JOIN_GRID} from './types';
 import mapCommands from './commands';
 
+/**
+ * Map Manager
+ */
 export default class MapManager {
+    /**
+     * class constructor
+     * @param  {Game} Game The Game object
+     */
     constructor(Game) {
         this.Game = Game;
         // the list of maps to manage
@@ -44,8 +51,8 @@ export default class MapManager {
                     .catch((err) => {
                         this.Game.logger.error('MAP LOAD ERROR', err);
                     });
-            })
-        })
+            });
+        });
     }
 
     /**
@@ -67,8 +74,8 @@ export default class MapManager {
                 const location = [
                     character.location.map,
                     character.location.x,
-                    character.location.y
-                ]
+                    character.location.y,
+                ];
 
                 // dispatch to client
                 this.Game.socketManager.dispatchToUser(user_id, {
@@ -78,8 +85,8 @@ export default class MapManager {
                         players: this.Game.characterManager.getLocationList(...location, character.user_id, true),
                         npcs: this.Game.npcManager.getLocationList(...location, true),
                         items: this.Game.itemManager.getLocationList(...location, true),
-                        structures: this.Game.structureManager.getGrid(...location, true)
-                    }
+                        structures: this.Game.structureManager.getGrid(...location, true),
+                    },
                 });
             })
             .catch((err) => {
@@ -101,7 +108,7 @@ export default class MapManager {
             }
 
             resolve(gameMap);
-        })
+        });
     }
 
     /**
@@ -114,9 +121,9 @@ export default class MapManager {
             // NOTE: if you want to change what map information the client get, change it here
             list[mapId] = {
                 name: this.maps[mapId].name,
-                buildings: this.Game.structureManager.getMapData(mapId)
+                buildings: this.Game.structureManager.getMapData(mapId),
             };
-        })
+        });
 
         return list;
     }
@@ -139,8 +146,8 @@ export default class MapManager {
     /**
      * Checks the specific map, if the location is valid.
      * @param  {String}  map_id Map Id
-     * @param  {Number}  x 
-     * @param  {Number}  y   
+     * @param  {Number}  x
+     * @param  {Number}  y
      * @return {Promise}
      */
     isValidLocation(map_id, x, y) {
@@ -153,10 +160,10 @@ export default class MapManager {
                 resolve({
                     map: gameMap.id,
                     x: parseInt(x, 10),
-                    y: parseInt(y, 10)
-                })
+                    y: parseInt(y, 10),
+                });
             })
-            .catch(() => {})
-        })
+            .catch(() => {});
+        });
     }
 }

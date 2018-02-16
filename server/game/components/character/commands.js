@@ -1,3 +1,9 @@
+/**
+ * Check attack cooldown ticks of character
+ * @param  {Character}   character The character whos cooldown to check
+ * @param  {Game}        Game      The Game object
+ * @param  {Function} callback     Callback function
+ */
 function checkAttackCooldown(character, Game, callback) {
     // check if the character has an existing cooldown for this action, if they are trying to hide
     const ticksLeft = Game.cooldownManager.ticksLeft(character, 'attack');
@@ -13,6 +19,15 @@ function checkAttackCooldown(character, Game, callback) {
     callback();
 }
 
+/**
+ * Aim command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
 function cmdAim(socket, character, command, params, cmdObject, Game) {
     const target = params[0];
 
@@ -39,6 +54,15 @@ function cmdAim(socket, character, command, params, cmdObject, Game) {
     newCooldown.start();
 }
 
+/**
+ * Give money command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
 function cmdGive(socket, character, command, params, cmdObject, Game) {
     const receiver = params[0];
     const amount = params[1];
@@ -61,6 +85,15 @@ function cmdGive(socket, character, command, params, cmdObject, Game) {
     Game.characterManager.updateClient(receiver.user_id, 'stats');
 }
 
+/**
+ * Punch command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
 function cmdPunch(socket, character, command, params, cmdObject, Game) {
     const target = character.target;
 
@@ -121,6 +154,15 @@ function cmdPunch(socket, character, command, params, cmdObject, Game) {
     });
 }
 
+/**
+ * Release command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
 function cmdRelease(socket, character, command, params, cmdObject, Game) {
     // if they do not have a target, simply ignore the command
     if (!character.target) {
@@ -143,6 +185,15 @@ function cmdRelease(socket, character, command, params, cmdObject, Game) {
         .catch(() => {});
 }
 
+/**
+ * Shoot command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
 function cmdShoot(socket, character, command, params, cmdObject, Game) {
     const target = character.target;
 
@@ -215,6 +266,15 @@ function cmdShoot(socket, character, command, params, cmdObject, Game) {
     });
 }
 
+/**
+ * Strike command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
 function cmdStrike(socket, character, command, params, cmdObject, Game) {
     const target = character.target;
 

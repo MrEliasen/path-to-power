@@ -1,6 +1,13 @@
 import * as Effects from './effects';
 
+/**
+ * The Effect manager
+ */
 export default class EffectManager {
+    /**
+     * Class constructor
+     * @param  {Game} Game The main Game object
+     */
     constructor(Game) {
         this.Game = Game;
 
@@ -30,7 +37,7 @@ export default class EffectManager {
                 return resolve(effectOutput);
             }
 
-            // if its a promise, wait for the resolve/reject 
+            // if its a promise, wait for the resolve/reject
             effectOutput.then((output) => {
                 resolve(output);
             })

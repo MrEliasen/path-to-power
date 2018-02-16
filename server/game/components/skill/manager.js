@@ -2,9 +2,16 @@ import Promise from 'bluebird';
 
 // manager specific imports
 import SkillList from './skills';
-import skillCommands from './commands'; 
+import skillCommands from './commands';
 
+/**
+ * Skill manager
+ */
 export default class SkillManager {
+    /**
+     * class constructor
+     * @param  {Game} Game The game object
+     */
     constructor(Game) {
         this.Game = Game;
     }
@@ -30,21 +37,21 @@ export default class SkillManager {
             {
                 id: 'snoop',
                 modifiers: {
-                    value: 1
-                }
+                    value: 1,
+                },
             },
             {
                 id: 'hide',
                 modifiers: {
-                    value: 1
-                }
+                    value: 1,
+                },
             },
             {
                 id: 'search',
                 modifiers: {
-                    value: 1
-                }
-            }
+                    value: 1,
+                },
+            },
         ];
     }
 
@@ -54,13 +61,13 @@ export default class SkillManager {
      * @return {Skill Obj}    The skill object for the new skill
      */
     new(skill) {
-        const skillTemplate = SkillList[skill.id];
+        const SkillTemplate = SkillList[skill.id];
 
-        if (!skillTemplate) {
+        if (!SkillTemplate) {
             return null;
         }
 
-        return new skillTemplate(this.Game, skill.modifiers);
+        return new SkillTemplate(this.Game, skill.modifiers);
     }
 
     /**
@@ -70,7 +77,7 @@ export default class SkillManager {
      */
     load(character) {
         return new Promise((resolve, reject) => {
-            // save the players skills list 
+            // save the players skills list
             const playerSkills = character.skills ? {...character.skills} : {};
             // get the default skills, and overwrite their values (if any) with the value of the players matching skill
             let skills = this.getDefaults().map((obj) => {
@@ -81,7 +88,7 @@ export default class SkillManager {
                     // remove the skill from the list, so we dont end up with 2 of the same skill when we merge in the
                     // rest of the skills the player might have, which are not part of the defaults
                     delete playerSkills[obj.id];
-                } 
+                }
 
                 return obj;
             });

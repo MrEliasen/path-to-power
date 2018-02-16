@@ -1,10 +1,19 @@
+/**
+ * Accuracy ability skill class
+ */
 export default class AbilityAccuracy {
-    constructor(base, value, improve = true) {
-        this.id       = 'acc';
-        this.name     = 'Accuracy';
-        this.base     = base;
-        this.improve  = improve;
-        this.value    = value || base;
+    /**
+     * Class constrcutor
+     * @param  {Number}  base    Default skill value/level
+     * @param  {Number}  value   If set, will overwrite the base value
+     * @param  {Boolean} improve Whether the skill should improve on use or not
+     */
+    constructor(base, value = null, improve = true) {
+        this.id = 'acc';
+        this.name = 'Accuracy';
+        this.base = base;
+        this.improve = improve;
+        this.value = value || base;
     }
 
     /**

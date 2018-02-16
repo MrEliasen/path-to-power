@@ -6,7 +6,14 @@ import ItemList from '../../data/items.json';
 import Item from './object';
 import ItemCommands from './commands';
 
+/**
+ * Item Manager
+ */
 export default class ItemManager {
+    /**
+     * Class constructor
+     * @param  {Game} Game The main Game object
+     */
     constructor(Game) {
         this.Game = Game;
         // list of all items in the game, for reference
@@ -45,7 +52,7 @@ export default class ItemManager {
      * @param  {String} map        Map Id
      * @param  {Number} x
      * @param  {Number} y
-     * @param  {Boolean} toClient  If true, will return a new object with minimal info (for clients) 
+     * @param  {Boolean} toClient  If true, will return a new object with minimal info (for clients)
      * @return {Array}     Array of items
      */
     getLocationList(map_id, x, y, toClient = false) {
@@ -62,18 +69,18 @@ export default class ItemManager {
         return location.map((item) => {
             return {
                 id: item.id,
-                ...item.getModifiers()
-            }
+                ...item.getModifiers(),
+            };
         });
     }
 
     /**
      * Adds an item to the ground at the given location.
-     * @param  {String} map_id     Map ID
-     * @param  {Number} x          East
-     * @param  {Number} y          North
+     * @param  {String}      map_id     Map ID
+     * @param  {Number}      x          East
+     * @param  {Number}      y          North
      * @param  {Item Object} itemObject The item reference
-     * @return {Array}            List of items at the given location
+     * @return {Array}                  List of items at the given location
      */
     drop(map_id, x, y, itemObject) {
         const gridId = `${map_id}_${y}_${x}`;
@@ -130,9 +137,17 @@ export default class ItemManager {
 
             // find the item at the location, the user wants to pickup
             if (itemName) {
-                foundItemIndex = locationItems.findIndex((obj) => obj.name.toLowerCase().indexOf(itemName) !== -1);
+                itemName = itemName.toLowerCase();
 
-                // if not found, let them know
+                // check if there is a direct match for the item name
+                foundItemIndex = locationItems.findIndex((obj) => obj.name.toLowerCase() === itemName);
+
+                if (foundItemIndex === -1) {
+                    // otherwise check if there is an item beginning with the name
+                    foundItemIndex = locationItems.findIndex((obj) => obj.name.toLowerCase().indexOf(itemName) !== -1);
+                }
+
+                // if still not found, reject
                 if (foundItemIndex === -1) {
                     return reject();
                 }
@@ -205,12 +220,12 @@ export default class ItemManager {
         if (itemClone._id) {
             this.dbLoad(itemClone).then((dbItem) => {
                 dbItem.remove();
-            })
+            });
         }
     }
 
     /**
-     * Get the list of all item templates, to return to the client 
+     * Get the list of all item templates, to return to the client
      * @return {Object} Plain object of all item templates
      */
     getTemplates() {
@@ -218,7 +233,7 @@ export default class ItemManager {
 
         Object.keys(this.templates).map((itemId) => {
             list[itemId] = this.templates[itemId].toObject();
-        })
+        });
 
         return list;
     }
@@ -238,6 +253,16 @@ export default class ItemManager {
      * @return {Object}         Plain object of the item template
      */
     getTemplateByName(itemName) {
+        itemName = itemName.toLowerCase();
+
+        // first check if there is a direct match between the name and a player
+        for (let itemId in this.templates) {
+            if (this.templates[itemId].name.toLowerCase() === itemName) {
+                return this.templates[itemId];
+            }
+        }
+
+        // otherwise see if there are any items which begins with the string
         for (let itemId in this.templates) {
             if (this.templates[itemId].name.toLowerCase().indexOf(itemName) === 0) {
                 return this.templates[itemId];
@@ -247,6 +272,11 @@ export default class ItemManager {
         return null;
     }
 
+    /**
+     * Load an NPC's inventory
+     * @param  {NPN} NPC The NPC object whos inventory to load
+     * @return {Promise}
+     */
     loadNPCInventory(NPC) {
         return new Promise((resolve, reject) => {
             // If the npc does not have any inventory, just ignore this
@@ -262,7 +292,7 @@ export default class ItemManager {
             });
 
             resolve(inventory);
-        })
+        });
     }
 
     /**
@@ -272,7 +302,7 @@ export default class ItemManager {
      */
     loadCharacterInventory(character) {
         return new Promise((resolve, reject) => {
-            ItemModel.find({ user_id: character.user_id}, {_id: 1, item_id: 1, modifiers: 1, equipped_slot: 1}, (err, items) => {
+            ItemModel.find({user_id: character.user_id}, {_id: 1, item_id: 1, modifiers: 1, equipped_slot: 1}, (err, items) => {
                 if (err) {
                     this.Game.logger.error(`Error loading inventory for user: ${user_id}`, err);
                     return reject(err);
@@ -286,8 +316,8 @@ export default class ItemManager {
                 });
 
                 resolve(inventory);
-            })
-        })
+            });
+        });
     }
 
     /**
@@ -325,11 +355,15 @@ export default class ItemManager {
                                 this.cleanupDbInventory(character);
                                 resolve(failed, succeeded);
                             }
-                    })
-            })
+                    });
+            });
         });
     }
 
+    /**
+     * Delete items no longer owned by a character from the database
+     * @param  {Character} character The player to cleanup
+     */
     cleanupDbInventory(character) {
         const itemDbIds = [];
 
@@ -339,7 +373,7 @@ export default class ItemManager {
             }
         });
 
-        ItemModel.deleteMany({ user_id: character.user_id, _id: { $nin: itemDbIds }}, (err, deleted) => {
+        ItemModel.deleteMany({user_id: character.user_id, _id: {$nin: itemDbIds}}, (err, deleted) => {
             if (err) {
                 return this.Game.logger.error(err);
             }
@@ -363,8 +397,8 @@ export default class ItemManager {
                 user_id,
                 item_id: item.id,
                 modifiers: item.getModifiers(),
-                equipped_slot: item.equipped_slot
-            })
+                equipped_slot: item.equipped_slot,
+            });
 
             newItem.save((error) => {
                 if (error) {
@@ -373,14 +407,14 @@ export default class ItemManager {
 
                 item._id = newItem._id;
                 resolve(newItem);
-            })
-        })
+            });
+        });
     }
 
     /**
      * Saves an Item Object in the DB, creates a new entry if no existing is found for the item.
      * @param  {String} user_id  User ID of the item owner
-     * @param  {Item Object} item    
+     * @param  {Item Object} item
      * @return {[type]}         [description]
      */
     dbSave(user_id, item) {
@@ -405,13 +439,13 @@ export default class ItemManager {
                         }
 
                         resolve(loadedItem);
-                    })
-                })
-        })
+                    });
+                });
+        });
     }
 
     /**
-     * Loads an item from the DB, by item DB _id. 
+     * Loads an item from the DB, by item DB _id.
      * @param  {String} item_db_id The _id mongo has assigned to the item
      * @return {Object}
      */
@@ -421,7 +455,7 @@ export default class ItemManager {
                 return resolve(null);
             }
 
-            ItemModel.findOne({ _id: item._id.toString() }, (error, item) => {
+            ItemModel.findOne({_id: item._id.toString()}, (error, item) => {
                 if (error) {
                     return reject(error);
                 }
@@ -431,8 +465,8 @@ export default class ItemManager {
                 }
 
                 resolve(item);
-            })
-        })
+            });
+        });
     }
 
     /**
