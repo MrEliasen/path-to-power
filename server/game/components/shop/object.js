@@ -37,7 +37,7 @@ export default class Shop {
             const newItem = this.Game.itemManager.add(item.id);
 
             if (!newItem) {
-                this.Game.logger.info(`The item ${item.id} does not exists in shop ${this.id}`);
+                this.Game.logger.info(`The item ${item.id} does not exist in shop ${this.id}`);
                 return null;
             }
 

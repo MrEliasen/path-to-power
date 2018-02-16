@@ -3,6 +3,7 @@ import Promise from 'bluebird';
 // manager specific imports
 import shopCommands from './commands';
 import ShopList from '../../data/shops.json';
+import {deepCopyObject} from '../../helper';
 import Shop from './object';
 import {
     SHOP_BUY,
@@ -109,7 +110,7 @@ export default class ShopManager {
             //this.Game.logger.info('ShopManager::add', {shopId})
 
             const ShopData = ShopList.find((obj) => obj.id === shopId);
-            const newShop = new Shop(this.Game, ShopData);
+            const newShop = new Shop(this.Game, deepCopyObject(ShopData));
 
             // load the shop items
             newShop.load();
