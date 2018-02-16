@@ -9,7 +9,7 @@
     "build": "cross-env NODE_ENV=production webpack --progress --config webpack.production.js"
   },
   "engines": {
-      "node" : ">=8.9.4"
+    "node": ">=8.9.4"
   },
   "repository": {
     "type": "git",
