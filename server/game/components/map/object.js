@@ -98,6 +98,13 @@ export default class GameMap {
      * @return {Boolean}
      */
     isValidPostion(x, y) {
+        x = parseInt(x);
+        y = parseInt(y);
+
+        if (isNaN(x) || isNaN(y)) {
+            return false;
+        }
+
         if (y < 0 || y > this.gridSize.y) {
             return false;
         }

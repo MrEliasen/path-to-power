@@ -137,8 +137,11 @@ export default class Character {
      * @param  {Number} y   North coordinate
      */
     updateLocation(map, x, y) {
-        map = map || this.location.map;
-        this.location = {map, x, y};
+        this.location = {
+            map: map || this.location.map,
+            x,
+            y,
+        };
     }
 
     /**

@@ -167,7 +167,7 @@ export default class NPC extends Character {
                         moveAction.direction = (moveAction.direction === 1 ? -1 : 1);
                         // update the new location
                         newLocation = {
-                            map: this.location.map,
+                            ...this.location,
                             [moveAction.grid]: (this.location[moveAction.grid] + moveAction.direction),
                         };
                     }
