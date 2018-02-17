@@ -26,12 +26,6 @@ export default class CooldownManager {
             if (this.Game.config.game.playerCooldowns[action]) {
                 duraction = this.Game.config.game.playerCooldowns[action];
             }
-
-            // if no duration is set after the above, just stop it here as the
-            // cooldown is poinless without a duration
-            if (!duraction) {
-                return;
-            }
         }
 
         // create the new cooldown

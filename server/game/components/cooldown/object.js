@@ -16,7 +16,7 @@ export default class Cooldown {
         // The action which is on cooldown (unique key/id per skill/action/etc)
         this.action = action;
         // not used directly, but merely for informative purposes.
-        this.duration = duration;
+        this.duration = duration || 0;
         // number of ticks the cooldown lasts
         this.ticks = (1000 * duration) / 100;
         // hold the tick interval
@@ -34,6 +34,10 @@ export default class Cooldown {
      */
     start() {
         if (this.timer !== null) {
+            return;
+        }
+
+        if (this.duration <= 0) {
             return;
         }
 
