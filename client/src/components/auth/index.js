@@ -8,7 +8,7 @@ import config from '../../config';
 import Paper from 'material-ui/Paper';
 
 // Actions
-import {authLogin, authError} from './actions';
+import {authLogin, newAuthError} from './actions';
 
 class Auth extends React.Component {
     constructor(props) {
@@ -36,7 +36,7 @@ class Auth extends React.Component {
             clientId: config.twitch.clientId,
         }, (error, status) => {
             if (error) {
-                return authError({
+                return this.props.newAuthError({
                     message: 'An error occured with Twitch.tv!',
                     type: 'error',
                 });
@@ -44,6 +44,13 @@ class Auth extends React.Component {
 
             // if not authenticated already.
             if (!status.authenticated) {
+                if (!status.token) {
+                    return this.props.newAuthError({
+                        message: 'Authentication error. Twitch login was likely cancelled.',
+                        type: 'error',
+                    });
+                }
+
                 return Twitch.login({
                     scope: config.twitch.scope,
                 });
@@ -86,7 +93,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({authError}, dispatch);
+    return bindActionCreators({newAuthError}, dispatch);
 }
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Auth));

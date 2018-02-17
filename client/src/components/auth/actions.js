@@ -18,7 +18,7 @@ export function authLogin(data) {
     };
 }
 
-export function authError(notification) {
+export function newAuthError(notification) {
     return {
         type: ACCOUNT_AUTHENTICATE_ERROR,
         payload: notification,
