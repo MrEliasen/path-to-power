@@ -155,8 +155,9 @@ export default class CommandManager {
      * @param  {Object}   location      A character/npc location object
      * @param  {Bool}     ignoreNPCs    Whether to include NPCs or not
      * @param  {Bool}     ignorePlayers Whether to include players or not
+     * @param  {String}   playerId      Player who we should exclude from the list
      */
-    findAtLocation(findName, location, ignoreNPCs = false, ignorePlayers = false) {
+    findAtLocation(findName, location, ignoreNPCs = false, ignorePlayers = false, playerId = null) {
         // get he list of players and NPCS at the grid
         const playersAtGrid = this.Game.characterManager.getLocationList(location.map, location.x, location.y);
         const NPCsAtGrid = this.Game.npcManager.getLocationList(location.map, location.x, location.y);
@@ -165,13 +166,13 @@ export default class CommandManager {
         if (!ignorePlayers) {
             // Find target matching the name exactly
             characters = playersAtGrid.filter((user) => {
-                return user.name_lowercase === findName && !user.hidden;
+                return user.name_lowercase === findName && !user.hidden && user.user_id !== playerId;
             });
 
             if (!characters.length) {
                 // Otherwise find target matching the beginning of the name
                 characters = playersAtGrid.filter((user) => {
-                    return user.name_lowercase.indexOf(findName) === 0 && !user.hidden;
+                    return user.name_lowercase.indexOf(findName) === 0 && !user.hidden && user.user_id !== playerId;
                 });
             }
         }
@@ -190,7 +191,7 @@ export default class CommandManager {
         let target;
 
         // If there are more than 1 match, see if there is anyone matching the name exactly
-        if (matchingTargets.length > 1) {
+        /*if (matchingTargets.length > 1) {
             target = matchingTargets.find((user) => {
                 // must be a player
                 if (!user.type) {
@@ -204,10 +205,10 @@ export default class CommandManager {
             if (!target) {
                 return 'You must be more specific with who you want to target.';
             }
-        } else {
+        } else {*/
             // otherwise select the first and only one in the list
             target = matchingTargets[0];
-        }
+        //}
 
         return target;
     }
@@ -443,6 +444,7 @@ export default class CommandManager {
                                     location,
                                     rule[0] === 'player',
                                     rule[0] === 'npc',
+                                    player.user_id,
                                 );
 
                                 if (typeof value === 'string') {
