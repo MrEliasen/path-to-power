@@ -281,6 +281,13 @@ export default class NPC extends Character {
                 .then(async (loot) => {
                     await this.clearTimers();
 
+                    // if the NPC has a shop, drop the items they are selling
+                    if (this.shop && this.shop.sell.enabled) {
+                        this.shop.sell.list.forEach((item) => {
+                            loot.items.push(this.Game.itemManager.add(item.id));
+                        });
+                    }
+
                     // Initiates the NPC's respawn timer
                     this.timers.push({
                         key: 'respawn',
