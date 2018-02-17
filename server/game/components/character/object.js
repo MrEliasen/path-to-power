@@ -59,7 +59,10 @@ export default class Character {
             this.location.y = spawn.y;
         }
 
-        this.initTimers();
+        // only start timers for players
+        if (this.user_id) {
+            this.initTimers();
+        }
 
         this.gridLock = this.gridLock.bind(this);
     }
