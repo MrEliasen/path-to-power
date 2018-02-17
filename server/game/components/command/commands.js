@@ -132,7 +132,7 @@ module.exports = [
             {
                 name: 'Message',
                 desc: 'The message you wish to send to the player.',
-                rules: 'required|minlen:1|maxlen:500',
+                rules: 'required|maxlen:500',
             },
         ],
         description: 'Speak in global chat.',
@@ -169,7 +169,7 @@ module.exports = [
             {
                 name: 'Message',
                 desc: 'The message you wish to send to the player.',
-                rules: 'required|minlen:1|maxlen:500',
+                rules: 'required|maxlen:500',
             },
         ],
         description: 'Send a private message to another player.',

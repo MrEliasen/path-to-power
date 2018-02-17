@@ -382,7 +382,7 @@ module.exports = [
             {
                 name: 'Message',
                 desc: 'The message you wish to send',
-                rules: 'required|minlen:1|maxlen:500',
+                rules: 'required|maxlen:500',
             },
         ],
         description: 'Speak in the faction-only chat. Will only be visible to members of the same faction.',
