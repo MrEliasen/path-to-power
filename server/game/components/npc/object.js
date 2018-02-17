@@ -24,6 +24,8 @@ export default class NPC extends Character {
         this.train = false;
         // keeps track of the timers for the NPC
         this.timers = [];
+        // Keeps track of whether or not the NPC is dead.
+        this.dead = false;
         // Anyone who takes aim at the NPC, for the duration of its life, will be
         // added to the list, and attacked on sight.
         this.hostiles = [];
@@ -279,6 +281,9 @@ export default class NPC extends Character {
      */
     die() {
         return new Promise((resolve, reject) => {
+            // set NPC as dead, so it is not included in actions/commands etc.
+            this.dead = true;
+
             Character.prototype.die.call(this)
                 .then(async (loot) => {
                     await this.clearTimers();

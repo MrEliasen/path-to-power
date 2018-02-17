@@ -184,6 +184,9 @@ export default class NPCManager {
                     // reinitiate the timers
                     NPC.initLogicTimers();
 
+                    // Set the NPC as alive (in case it was dead)
+                    NPC.dead = false;
+
                     // update the grid's player list
                     this.Game.socketManager.dispatchToRoom(NPC.getLocationId(), {
                         type: NPC_JOINED_GRID,
@@ -237,9 +240,9 @@ export default class NPCManager {
 
         // if we need to get NPCs from a specific grid within a map
         if (x !== null && y !== null) {
-            npcs = this.npcs.filter((obj) => obj.location.map === map && obj.location.x === x && obj.location.y === y);
+            npcs = this.npcs.filter((obj) => !obj.dead && obj.location.map === map && obj.location.x === x && obj.location.y === y);
         } else {
-            npcs = this.npcs.filter((obj) => obj.location.map === map);
+            npcs = this.npcs.filter((obj) => !obj.dead && obj.location.map === map);
         }
 
         if (!toClient) {
