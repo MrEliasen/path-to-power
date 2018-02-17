@@ -182,7 +182,7 @@ export default class NPCManager {
                     this.Game.eventToRoom(NPC.getLocationId(), 'info', `${NPC.name} emerges from a nearby sidewalk.`);
 
                     // reinitiate the timers
-                    NPC.initTimers();
+                    NPC.initLogicTimers();
 
                     // update the grid's player list
                     this.Game.socketManager.dispatchToRoom(NPC.getLocationId(), {
