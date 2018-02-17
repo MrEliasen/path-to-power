@@ -377,6 +377,12 @@ export default class CommandManager {
                                 });
                                 break;
 
+                            case 'gamemap':
+                                value = await this.Game.mapManager.getByName(msgParam).catch(() => {
+                                    return reject(`The ${param.name} is not a valid location.`);
+                                });
+                                break;
+
                             case 'shop':
                                 value = await this.Game.structureManager.getWithShop(player.location.map, player.location.x, player.location.y)
                                     .catch(() => {

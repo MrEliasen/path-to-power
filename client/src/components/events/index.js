@@ -27,10 +27,22 @@ class Events extends React.Component {
         let modifiers = this.props.commandlist[command].modifiers || {};
         Object.assign(modifiers, modOverwrites);
 
-        Object.keys(modifiers).map((key) => {
-            const exp = new RegExp(`({${key}})+`, 'gi');
-            description = description.replace(exp, modifiers[key]);
-        });
+        switch (command) {
+            case '/travel':
+                const destinations = Object.keys(modifiers.destinations).map((mapId) => {
+                    return `${this.props.maps[mapId].name} (${modifiers.destinations[mapId].cost})`;
+                });
+
+                description = `${description} Available destinations: ${destinations.join(', ')}`;
+                break;
+
+            default:
+                Object.keys(modifiers).map((key) => {
+                    const exp = new RegExp(`({${key}})+`, 'gi');
+                    description = description.replace(exp, modifiers[key]);
+                });
+                break;
+        }
 
         return description;
     }
@@ -38,8 +50,7 @@ class Events extends React.Component {
     buildingInfo(event, index) {
         return <div key={index}>
             <p>
-                The following is available in the
-                <span style={{color: event.structure.colour}}>
+                The following is available in the <span style={{color: event.structure.colour}}>
                     [{ event.structure.name }]
                 </span>:
             </p>
@@ -136,6 +147,7 @@ class Events extends React.Component {
 function mapStateToProps(state) {
     return {
         events: [...state.events],
+        maps: {...state.game.maps},
         commandlist: {...state.game.commands},
     };
 }

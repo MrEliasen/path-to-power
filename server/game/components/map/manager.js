@@ -112,6 +112,41 @@ export default class MapManager {
     }
 
     /**
+     * Return a map object, matching the name
+     * @param  {Strinmg} mapName Name or part of name to search for
+     * @return {Map}
+     */
+    getByName(mapName) {
+        return new Promise((resolve, reject) =>{
+            const gameMap = this.getByNameSync(mapName);
+
+            if (!gameMap) {
+                return reject();
+            }
+
+            resolve(gameMap);
+        });
+    }
+
+    /**
+     * Synchronously get the Map object by name, if exists.
+     * @param  {String} mapName Map name to search for
+     * @return {Map}
+     */
+    getByNameSync(mapName) {
+        mapName = mapName.toLowerCase();
+        // first check if there is a direct match between the name and a map name
+        let mapId = Object.keys(this.maps).find((mapId) => this.maps[mapId].name.toLowerCase() === mapName);
+
+        // If the is no direct map, check for matches at the begining of the names
+        if (!mapId) {
+            mapId = Object.keys(this.maps).find((mapId) => this.maps[mapId].name.toLowerCase().indexOf(mapName) === 0);
+        }
+
+        return mapId ? this.maps[mapId] : null;
+    }
+
+    /**
      * Get a list of all map names by ID
      * @return {Object} {"mapId": "map name", ...}
      */

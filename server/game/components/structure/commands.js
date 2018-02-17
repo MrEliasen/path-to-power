@@ -82,100 +82,93 @@ function cmdHeal(socket, character, command, params, cmdObject, Game) {
  * @param  {Game}   Game                The main Game object
  */
 function cmdTravel(socket, character, command, params, cmdObject, Game) {
-    // Fetch the character first
-    Game.characterManager.get(socket.user.user_id)
-        .then((character) => {
-            // get the structures list at the character location
-            Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
-                .then((structures) => {
-                    // if we get multiple structures, but only one parameter, the client didnt specify
-                    // the structure to use the command with.
-                    if (structures.length > 1 && params.length <= 1) {
-                        return Game.eventToSocket(socket, 'error', 'Invalid structure. There are multiple structures with that command use: /travel <destination name> <structure-name>');
-                    }
+    // get the structures list at the character location
+    Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
+        .then((structures) => {
+            // if we get multiple structures, but only one parameter, the client didnt specify
+            // the structure to use the command with.
+            if (structures.length > 1 && params.length <= 1) {
+                return Game.eventToSocket(socket, 'error', 'Invalid structure. There are multiple structures with that command use: /travel <destination name> <structure name>');
+            }
 
-                    // set the first structure by default
-                    let structure = structures[0];
+            // set the first structure by default
+            let structure = structures[0];
 
-                    // overwrite if they specified a structure, and its name didn't match their criteria
-                    if (params.length > 1 && structure.name.toLowerCase().indexOf(structures[1].toLowerCase()) !== 0) {
-                        structure = structures.find((structureItem) => structureItem.name.toLowerCase().indexOf(params[1].toLowerCase()) === 0);
-                    }
+            // overwrite if they specified a structure, and its name didn't match their criteria
+            if (params.length > 1 && structure.name.toLowerCase().indexOf(params[1].toLowerCase()) !== 0) {
+                structure = structures.find((structureItem) => structureItem.name.toLowerCase().indexOf(params[1].toLowerCase()) === 0);
+            }
 
-                    const modifiers = structure.commands[command];
-                    let destination = params[0];
-                    // check if the destination exists for the airport
-                    if (!modifiers.destinations[destination]) {
-                        return Game.eventToSocket(socket, 'error', 'Invalid destination.');
-                    }
+            const modifiers = structure.commands[command];
+            let destination = params[0];
+            // check if the destination exists for the airport
+            if (!modifiers.destinations[destination.id]) {
+                return Game.eventToSocket(socket, 'error', 'Invalid destination.');
+            }
 
-                    // if there are 2 params, the client is likely specifying the structure they want to use the command with
-                    // meaning the 2nd param would be the amount, and not the first.
-                    let travel_details = modifiers.destinations[destination];
+            // if there are 2 params, the client is likely specifying the structure they want to use the command with
+            // meaning the 2nd param would be the amount, and not the first.
+            let travel_details = modifiers.destinations[destination.id];
 
-                    // Check if they have the money
-                    if (travel_details.cost > character.stats.money) {
-                        return Game.eventToSocket(socket, 'error', 'You do not have enough money to travel there.');
-                    }
+            // Check if they have the money
+            if (travel_details.cost > character.stats.money) {
+                return Game.eventToSocket(socket, 'error', 'You do not have enough money to travel there.');
+            }
 
-                    // remove aim from current target, if set
-                    character.releaseTarget()
-                        .then(() => {
-                            // remove money
-                            character.updateCash(travel_details.cost * -1);
+            // remove aim from current target, if set
+            character.releaseTarget()
+                .then(() => {
+                    // remove money
+                    character.updateCash(travel_details.cost * -1);
 
-                            // leave the old grid room
-                            socket.leave(character.getLocationId());
+                    // leave the old grid room
+                    socket.leave(character.getLocationId());
 
-                            // dispatch leave message to grid
-                            Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} enter the airport, traveling to an unknown destination.`);
+                    // dispatch leave message to grid
+                    Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} enter the ${structure.name}, traveling to an unknown destination.`);
 
-                            // remove player from the grid list of players
-                            Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                                type: LEFT_GRID,
-                                payload: character.user_id,
-                            });
+                    // remove player from the grid list of players
+                    Game.socketManager.dispatchToRoom(character.getLocationId(), {
+                        type: LEFT_GRID,
+                        payload: character.user_id,
+                    });
 
-                            // save the old location
-                            const oldLocation = {...character.location};
+                    // save the old location
+                    const oldLocation = {...character.location};
 
-                            // get the airport location on the destination map
-                            const newLocation = {
-                                map: destination,
-                                x: travel_details.x,
-                                y: travel_details.y,
-                            };
+                    // get the airport location on the destination map
+                    const newLocation = {
+                        map: destination.id,
+                        x: travel_details.x,
+                        y: travel_details.y,
+                    };
 
-                            // update character location
-                            character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
+                    // update character location
+                    character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
 
-                            // change location on the map
-                            Game.characterManager.changeLocation(character, newLocation, oldLocation);
+                    // change location on the map
+                    Game.characterManager.changeLocation(character, newLocation, oldLocation);
 
-                            // dispatch join message to new grid
-                            Game.eventToRoom(character.getLocationId(), 'info', `${character.name} emerge from a plane which just landed`, [character.user_id]);
+                    // dispatch join message to new grid
+                    Game.eventToRoom(character.getLocationId(), 'info', `${character.name} emerge from a plane which just landed`, [character.user_id]);
 
-                            // add player from the grid list of players
-                            Game.socketManager.dispatchToRoom(
-                                character.getLocationId(),
-                                Game.characterManager.joinedGrid(character)
-                            );
+                    // add player from the grid list of players
+                    Game.socketManager.dispatchToRoom(
+                        character.getLocationId(),
+                        Game.characterManager.joinedGrid(character)
+                    );
 
-                            // update the socket room
-                            socket.join(character.getLocationId());
+                    // update the socket room
+                    socket.join(character.getLocationId());
 
-                            // update client/socket character and location information
-                            Game.characterManager.updateClient(character.user_id);
+                    // update client/socket character and location information
+                    Game.characterManager.updateClient(character.user_id);
 
-                            // send the new grid details to the client
-                            Game.mapManager.updateClient(character.user_id);
+                    // send the new grid details to the client
+                    Game.mapManager.updateClient(character.user_id);
 
-                            // let the character know they traveled
-                            Game.eventToSocket(socket, 'info', `You land at your new destination, at the price of ${travel_details.cost}.`);
-                        })
-                        .catch((err) => {
-                            Game.logger.info(err);
-                        });
+                    // let the character know they traveled
+                    Game.eventToSocket(socket, 'info', `You land at your new destination, at the price of ${travel_details.cost}.`);
                 })
                 .catch((err) => {
                     Game.logger.info(err);
@@ -391,10 +384,15 @@ module.exports = [
             {
                 name: 'Destination',
                 desc: 'The name of the destination you wish to travel to.',
-                rules: 'required|minlen:1',
+                rules: 'required|gamemap',
+            },
+            {
+                name: 'Structure Name',
+                desc: 'The name of the building you want to travel from.',
+                rules: 'minlen:1',
             },
         ],
-        description: 'Travel to another city. Available destinations: {destinations}. Usage: /travel <destination name>',
+        description: 'Travel to another city.',
         method: cmdTravel,
         modifiers: {
             destinations: {},
