@@ -121,6 +121,84 @@ function cmdWhisper(socket, character, command, params, cmdObject, Game) {
     });
 }
 
+/**
+ * Help command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
+function cmdHelp(socket, character, command, params, cmdObject, Game) {
+    const cmdNotFound = [
+        'The command you where looking for was not found.',
+        'To see a list of commands available to you, type /commands',
+    ];
+    let message = [
+        'IN-GAME HELP OPTIONS',
+        '--------------------',
+        'If you need help learning how to play the name, see the "How to play" link in the top-right navigation.',
+        'To see a list of commands available to you, type /commands',
+        'If you would like information on a particular item, npc, map etc. type /info',
+        'If you need information about a specific command, type /help <command>. Eg: /help /info',
+    ];
+
+    // if the player provided a parameter we will search through everything to see if we have a match
+    if (params[0]) {
+        message = Game.commandManager.getInfo(params[0]) || cmdNotFound;
+    }
+
+    Game.eventToUser(
+        character.user_id,
+        'multiline',
+        message,
+    );
+}
+
+/**
+ * Info command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
+function cmdInfo(socket, character, command, params, cmdObject, Game) {
+    let message;
+
+    switch (params[0].toLowerCase()) {
+        case 'item':
+            message = Game.itemManager.getInfo(params[1]) || [];
+            break;
+
+        case 'npc':
+            message = Game.npcManager.getInfo(params[1]) || [];
+            break;
+
+        case 'command':
+            message = Game.commandManager.getInfo(params[1]) || [];
+            break;
+
+        case 'map':
+            message = Game.mapManager.getInfo(params[1]) || [];
+            break;
+
+        default:
+            message = [
+                'Invalid Object type',
+            ];
+            break;
+    }
+
+    Game.eventToUser(
+        character.user_id,
+        'multiline',
+        message,
+    );
+}
+
 module.exports = [
     {
         command: '/global',
@@ -147,11 +225,42 @@ module.exports = [
             {
                 name: 'Message',
                 desc: 'The message you wish to send to the player.',
-                rules: 'required|minlen:1|maxlen:500',
+                rules: 'required|maxlen:500',
             },
         ],
         description: 'Speak in local chat. Only people in same spot can see it.',
         method: cmdSay,
+    },
+    {
+        command: '/help',
+        aliases: [],
+        params: [
+            {
+                name: 'Question',
+                desc: 'The thing you would like more information about. Eg. an item name, NPC type or command.',
+                rules: 'minlen:1',
+            },
+        ],
+        description: 'To get help with anything in the game, try this command.',
+        method: cmdHelp,
+    },
+    {
+        command: '/info',
+        aliases: [],
+        params: [
+            {
+                name: 'Object',
+                desc: 'The type of object you are searching for, eg: item',
+                rules: 'required',
+            },
+            {
+                name: 'Name or ID',
+                desc: 'The thing you would like more information about. Eg. an item name, NPC type or command.',
+                rules: 'required',
+            },
+        ],
+        description: 'Get information about specific objects.',
+        method: cmdInfo,
     },
     {
         command: '/whisper',

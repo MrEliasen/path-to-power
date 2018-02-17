@@ -1,7 +1,7 @@
 import Promise from 'bluebird';
 
 // manager specific imports
-import AbilityAccuracy from './abilities/accuracy';
+import Abilities from './abilities';
 
 /**
  * Handles the management of assigning abilities to characters
@@ -30,9 +30,24 @@ export default class AbilityManager {
 
             // set each of the abilities to the character
             // TODO: interrate over the object and instanciate a new ability matching the key
-            character.abilities.push(new AbilityAccuracy(20, abilities.acc, character.train));
+            character.abilities.push(new Abilities.Acc(20, abilities.acc, character.train));
 
             resolve();
         });
+    }
+
+    /**
+     * Get an ability Class object template from ability ID
+     * @param  {String} abilityId ID of the ability you want
+     * @return {Ability}          Ability object or null
+     */
+    getTemplate(abilityId) {
+        const id = Object.keys(Abilities).find((key) => key.toLowerCase() === abilityId);
+
+        if (!id) {
+            return null;
+        }
+
+        return new Abilities[id](1, 1, false);
     }
 }

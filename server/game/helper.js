@@ -22,6 +22,15 @@ export function deepCopyObject(toCopy) {
 }
 
 /**
+ * Uppercases the first letter in a string
+ * @param {String} string
+ * @return {String}
+ */
+export function ucfirst(string) {
+    return string.charAt(0).toUpperCase() + string.substr(1, string.length);
+}
+
+/**
  * Find objects matching the search string. Will do direct comparison first.
  * @param  {Array}  list            The list of objects to search in
  * @param  {String} compareProperty The property of an object within the array to compare with

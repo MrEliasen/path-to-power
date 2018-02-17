@@ -4,9 +4,11 @@ import {dice} from '../../helper';
 /*{
     id: "",
     name: "",
+    description: "",
     type: "weapon|armour|consumable|trash",
     subtype: "[melee|ranged|ammo]|[body]|[food|drug]",
     stats: {
+        equipable: true|false,
         price: 123,
         stackable: true|false,
         // armour: it would be max damage item can soak before getting ruined/useless

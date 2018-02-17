@@ -196,6 +196,7 @@ class Game {
             '               ░  ░         ░  ░  ░                ░ ░                  ░ ░      ░       ░  ░   ░     ',
             'OPEN SOURCE: https://github.com/MrEliasen/path-to-power',
             'HOW TO PLAY: Click the menu in the top-right.',
+            'IN-GAME HELP: If you want get help without leading the game, type: /help',
             'A game by SirMrE. Coded live on Twitch.tv. Big thank you to all my viewers!',
         ]);
     }

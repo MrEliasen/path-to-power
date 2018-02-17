@@ -201,4 +201,30 @@ export default class MapManager {
             .catch(() => {});
         });
     }
+
+    /**
+     * Generates helper output for a map
+     * @param  {Mixed}  map  Game map object or string. if string, it will search for the map object
+     * @return {Mixed}       Message array if found, null otherwise.
+     */
+    getInfo(mapObject) {
+        if (typeof mapObject === 'string') {
+            mapObject = this.getByNameSync(mapObject);
+
+            // if the command does not exist
+            if (!mapObject) {
+                return null;
+            }
+        }
+
+        const tab = '    ';
+        let message = [
+            'Map:',
+            `${tab}${mapObject.name}`,
+            'Size:',
+            `${tab}${mapObject.gridSize.y}x${mapObject.gridSize.x}`,
+        ];
+
+        return message;
+    }
 }

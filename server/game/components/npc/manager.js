@@ -4,7 +4,7 @@ import NPCList from '../../data/npcs.json';
 import {NPC_JOINED_GRID, NPC_LEFT_GRID, UPDATE_GRID_NPCS} from './types';
 import {UPDATE_GROUND_ITEMS} from '../item/types';
 import namesList from '../../data/names.json';
-import {deepCopyObject} from '../../helper';
+import {deepCopyObject, ucfirst} from '../../helper';
 
 /**
  * NPC Manager
@@ -428,5 +428,68 @@ export default class NPCManager {
             })
             .catch(reject);
         });
+    }
+
+    /**
+     * Generates helper output of an NPC
+     * @param  {Mixed}  npc  NPC Object or string. if string, it will search for the NPC type
+     * @return {Mixed}       Message array if found, null otherwise.
+     */
+    getInfo(npcObject) {
+        if (typeof npcObject === 'string') {
+            const npcString = npcObject.toLowerCase();
+            const NPCkeys = Object.keys(NPCList);
+
+            // do direct comparison first
+            npcObject = NPCList[NPCkeys.find((npcId) => NPCList[npcId].type.toLowerCase() === npcString)];
+
+            // if the npc was not found, compare beginning of type string
+            if (!npcObject) {
+                npcObject = NPCList[NPCkeys.find((npcId) => NPCList[npcId].type.toLowerCase().indexOf(npcString) === 0)];
+
+                if (!npcObject) {
+                    return null;
+                }
+            }
+        }
+
+        const tab = '    ';
+        let message = [
+            'NPC:',
+            `${tab}${npcObject.type}`,
+        ];
+
+        // add description, if found
+        if (npcObject.description) {
+            message.push(`${tab}${npcObject.description}`);
+        }
+
+        // add NPC equipment, if anything
+        const equipped = npcObject.inventory.filter((obj) => obj.equipped_slot);
+        if (equipped.length) {
+            message.push('Equipment:');
+            message = message.concat(equipped.map((obj) => {
+                let equippedItem = this.Game.itemManager.getTemplate(obj.item_id);
+                return `${tab}${equippedItem.name}`;
+            }));
+        }
+
+        // add abilities if found
+        const abilities = Object.keys(npcObject.abilities);
+        if (abilities.length) {
+            message.push('Abilities:');
+            message = message.concat(abilities.map((abilityId) => {
+                let ability = this.Game.abilityManager.getTemplate(abilityId);
+                return `${tab}${ability.name}: ${npcObject.abilities[abilityId]}`;
+            }));
+        }
+
+        const stats = Object.keys(npcObject.stats);
+        message.push('Stats:');
+        message = message.concat(stats.map((statName) => {
+            return `${tab}${ucfirst(statName)}${(statName === 'exp' ? ' Reward' : '')}: ${npcObject.stats[statName]}`;
+        }));
+
+        return message;
     }
 }

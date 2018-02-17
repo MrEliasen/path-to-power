@@ -150,6 +150,36 @@ export default class CommandManager {
     }
 
     /**
+     * Get the command object matching the name
+     * @param  {String} commandName The command to get
+     * @return {Object}             The command object or null
+     */
+    getCommand(commandName) {
+        commandName = commandName.toLowerCase();
+
+        // check if the commandName begins with a forward slash
+        if (commandName[0] !== '/') {
+            commandName = '/' + commandName;
+        }
+
+        // check if the command exists (if its not an alias)
+        let command = this.commands[commandName] || null;
+
+        // if the command was not found, check aliases
+        if (!command) {
+            // otherwise see if there are any items which begins with the string
+            for (let commandId in this.commands) {
+                if (this.commands[commandId].aliases.includes(commandName)) {
+                    command = this.templates[commandId];
+                    break;
+                }
+            }
+        }
+
+        return command;
+    }
+
+    /**
      * Find a specific target at the given location, by name
      * @param  {String}   findName      The name, or part of, to search for
      * @param  {Object}   location      A character/npc location object
@@ -460,5 +490,48 @@ export default class CommandManager {
 
             resolve(msgParams);
         });
+    }
+
+    /**
+     * Generates a helper output for a command
+     * @param  {Mixed}  command  Command Object or string. if string, it will search for the commands
+     * @return {Mixed}           Message array if found, null otherwise.
+     */
+    getInfo(command) {
+        if (typeof command === 'string') {
+            command = this.getCommand(command);
+            // if the command does not exist
+            if (!command) {
+                return null;
+            }
+        }
+
+        const tab = '    ';
+        let message = [
+            command.description,
+            'Command:',
+            `${tab}${command.command}`,
+        ];
+
+        // add aliases if found
+        if (command.aliases && command.aliases.length) {
+            message.push('Aliases:');
+            message.push(tab + command.aliases.join(', '));
+        }
+
+        // add params if found
+        if (command.params && command.params.length) {
+            message.push('Arguments:');
+
+            command.params.forEach((param) => {
+                const optional = param.rules ? !param.rules.includes('required') : true;
+                // append the param to the command syntax
+                message[2] = message[2] + (optional ? ` [${param.name}]` : ` <${param.name}>`);
+                // add the argument
+                message.push(`${tab}${param.name}: ${(optional ? '(optional) ' : '')}${param.desc}`);
+            });
+        }
+
+        return message;
     }
 }

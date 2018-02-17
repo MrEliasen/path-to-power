@@ -5,6 +5,7 @@ import ItemModel from './model';
 import ItemList from '../../data/items.json';
 import Item from './object';
 import ItemCommands from './commands';
+import {ucfirst} from '../../helper';
 
 /**
  * Item Manager
@@ -501,5 +502,54 @@ export default class ItemManager {
 
             resolve(template.stats.price);
         });
+    }
+
+    /**
+     * Generates helper output for an item
+     * @param  {Mixed}  item  Command Object or string. if string, it will search for the commands
+     * @return {Mixed}        Message array if found, null otherwise.
+     */
+    getInfo(item) {
+        if (typeof item === 'string') {
+            item = this.getTemplateByName(item);
+            // if the command does not exist
+            if (!item) {
+                return null;
+            }
+        }
+
+        const tab = '    ';
+        let message = [
+            'Item:',
+            `${tab}${item.name}`,
+            `${tab}${item.description}`,
+            'Type:',
+            `${tab}${ucfirst(item.type)}${(item.subtype ? ` (${ucfirst(item.subtype)})` : '')}`,
+            'Stats:',
+            `${tab}Equipable: ${item.stats.equipable ? 'Yes' : 'No'}`,
+            `${tab}Stackable: ${item.stats.stackable ? 'Yes' : 'No'}`,
+        ];
+
+        switch (item.subtype) {
+            case 'ranged':
+            case 'melee':
+                message.push(`${tab}Damage: ${item.stats.damage_min}-${item.stats.damage_max}`);
+                break;
+
+            case 'ammo':
+                message.push(`${tab}Damage Bonus: ${item.stats.damage_bonus}`);
+                break;
+
+            case 'body':
+                message.push(`${tab}Damage Reduction: ${item.stats.damage_reduction}`);
+                message.push(`${tab}Durability: ${item.stats.durability} total damage absorbed.`);
+                break;
+
+            default:
+                message.push(`${tab}Has Use Effect: ${item.stats.useEffect ? 'Yes' : 'No'}`);
+                break;
+        }
+
+        return message;
     }
 }
