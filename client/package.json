@@ -6,7 +6,8 @@
     "start": "webpack-dev-server --progress --colors --inline --config webpack.development.js",
     "lint": "eslint src",
     "prebuild": "rimraf dist",
-    "build": "cross-env NODE_ENV=production webpack --progress --config webpack.production.js"
+    "build": "cross-env NODE_ENV=production webpack --progress --config webpack.production.js",
+    "postinstall": "cp -n src/config.new.js src/config.js && echo 'Config file created at src/config.js. Remember to edit it!'"
   },
   "engines": {
     "node": ">=8.9.4"

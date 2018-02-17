@@ -5,7 +5,8 @@
     "scripts": {
         "start": "nodemon -L ./game --inspect --exec babel-node --presets env,stage-0",
         "build": "babel game --out-dir dist --source-maps inline --copy-files",
-        "serve": "NODE_ENV=production node dist/index.js"
+        "serve": "cross-env NODE_ENV=production node dist/index.js",
+        "postinstall": "cp -Rn game/data.sample game/data && cp -n config.sample.json config.json && echo 'Data files has been setup in game/data. New config generated in ./config.json'"
     },
     "engines": {
         "node": ">=8.9.4"
@@ -45,6 +46,7 @@
         "babel-polyfill": "^6.26.0",
         "babel-preset-env": "^1.6.1",
         "babel-preset-stage-0": "^6.24.1",
+        "cross-env": "^5.1.3",
         "eslint": "^4.15.0",
         "eslint-config-google": "^0.9.1",
         "nodemon": "^1.14.12"
