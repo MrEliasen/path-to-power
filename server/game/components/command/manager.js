@@ -310,7 +310,7 @@ export default class CommandManager {
 
                         switch (rule[0]) {
                             case 'required':
-                                if (typeof msgParam === 'undefined') {
+                                if (typeof msgParam === 'undefined' || !msgParam) {
                                     return reject(`Missing parameter: ${param.name}`);
                                 }
                                 break;
