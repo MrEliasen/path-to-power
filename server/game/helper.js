@@ -44,7 +44,7 @@ export function findInArray(list, compareProperty = 'name', searchString) {
 
     // search objects matching the beginning of string
     if (!found) {
-        found = list.find((obj) => obj[compareProperty].toLowerCase().indexOf(searchString));
+        found = list.find((obj) => obj[compareProperty].toLowerCase().indexOf(searchString) === 0);
     }
 
     return found;

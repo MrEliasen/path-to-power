@@ -42,7 +42,11 @@ export default class AbilityManager {
      * @return {Ability}          Ability object or null
      */
     getTemplate(abilityId) {
-        const id = Object.keys(Abilities).find((key) => key.toLowerCase() === abilityId);
+        if (!abilityId){
+            return null;
+        }
+
+        const id = Object.keys(Abilities).find((key) => key.toLowerCase() === abilityId.toLowerCase());
 
         if (!id) {
             return null;
