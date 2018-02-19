@@ -55,7 +55,7 @@ class Events extends React.Component {
                 </span>:
             </p>
             {
-                event.structure.commands &&
+                Object.keys(event.structure.commands).length > 0 &&
                 <React.Fragment>
                     <strong>Commands</strong>
                     {
@@ -73,7 +73,7 @@ class Events extends React.Component {
                 </React.Fragment>
             }
             {
-                event.structure.shops &&
+                event.structure.shops.length > 0 &&
                 <React.Fragment>
                     <strong>Shops</strong>
                     {
