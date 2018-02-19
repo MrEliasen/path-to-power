@@ -38,7 +38,6 @@ class Game extends React.Component {
         this.isActiveTab = this.isActiveTab.bind(this);
         this.sendCommand = this.sendCommand.bind(this);
         this.setCommand = this.setCommand.bind(this);
-        this.movePosition = this.movePosition.bind(this);
         this.sendAction = this.sendAction.bind(this);
     }
 
@@ -47,11 +46,11 @@ class Game extends React.Component {
             return this.props.history.push('/auth');
         }
 
-        document.addEventListener('keydown', this.movePosition);
+        document.addEventListener('keydown', this.onKeyPress.bind(this));
     }
 
     componentWillUnmount() {
-        document.removeEventListener('keydown', this.movePosition);
+        document.removeEventListener('keydown', this.onKeyPress.bind(this));
     }
 
     componentDidUpdate(prevProps) {
@@ -60,11 +59,29 @@ class Game extends React.Component {
         }
     }
 
-    movePosition(e) {
+    onKeyPress(e) {
         if (!this.props.character) {
             return;
         }
 
+        switch (e.key) {
+            case 'ArrowUp':
+            case 'ArrowDown':
+            case 'ArrowLeft':
+            case 'ArrowRight':
+                this.movePosition(e);
+                break;
+
+            case '/':
+                // set focus if they are not typing into an input field
+                if (!document.activeElement.value) {
+                    document.querySelector('.c-game_command input').focus();
+                }
+                break;
+        }
+    }
+
+    movePosition(e) {
         // Only act of movement input if we dont have any focused elements, other than body.
         if (document.activeElement !== document.getElementsByTagName('body')[0]) {
             // ignore if an element from the autocomplete is in focus (which is a span)
