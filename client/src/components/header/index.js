@@ -4,19 +4,16 @@ import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
 import config from '../../config';
-import loginImage from '../../assets/images/connect_dark.png';
 
 // actions
 import {authLogout} from '../auth/actions';
 
 // UI
 import {Toolbar, ToolbarGroup, ToolbarTitle} from 'material-ui/Toolbar';
-import FlatButton from 'material-ui/FlatButton';
-import IconMenu from 'material-ui/IconMenu';
-import MenuItem from 'material-ui/MenuItem';
-import IconButton from 'material-ui/IconButton';
-import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
-import Divider from 'material-ui/Divider';
+import RaisedButton from 'material-ui/RaisedButton';
+import BugReportIcon from 'material-ui/svg-icons/action/bug-report';
+import HelpIcon from 'material-ui/svg-icons/action/help';
+import LogoutIcon from 'material-ui/svg-icons/action/exit-to-app';
 
 class Header extends React.Component {
     constructor(props) {
@@ -37,38 +34,64 @@ class Header extends React.Component {
         }
     }
 
+    goHome() {
+        this.props.history.push('/');
+    }
+
     logout() {
         Twitch.logout((error) => {
             localStorage.removeItem('account');
             this.props.authLogout();
-            this.props.history.push('/');
-            //this.props.socket.close();
+            // this.props.socket.close();
             this.props.socket.emit('logout');
+            this.goHome();
         });
     }
 
-    renderContent() {
-        if (!this.props.isConnected) {
-            return <span>Connecting..</span>;
-        }
-
-        if (!this.props.character) {
-            return <FlatButton
+    renderToolbarButtons() {
+        let authButton = null;
+        let twitchIcon = <svg style={{width: '24px', height: '24px'}} viewBox="0 0 24 24"><path fill="#ffffff" d="M4,2H22V14L17,19H13L10,22H7V19H2V6L4,2M20,13V4H6V16H9V19L12,16H17L20,13M15,7H17V12H15V7M12,7V12H10V7H12Z" /></svg>;
+        if (this.props.character) {
+            authButton = <RaisedButton
+                label="Log Out"
+                labelColor="#ffffff"
+                backgroundColor="#6441A4"
+                icon={<LogoutIcon />}
+                onClick={this.logout.bind(this)}
+            />;
+        } else {
+            authButton = <RaisedButton
+                label="Login With Twitch"
+                labelColor="#ffffff"
+                backgroundColor="#6441A4"
+                icon={twitchIcon}
                 href={`https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=${config.twitch.clientId}&redirect_uri=${config.twitch.callbackUrl}&scope=${config.twitch.scope.join(',')}`}
-                icon={<img src={loginImage} />}
             />;
         }
 
-        return <IconMenu
-            iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
-            anchorOrigin={{horizontal: 'right', vertical: 'top'}}
-            targetOrigin={{horizontal: 'right', vertical: 'top'}}
-        >
-            <MenuItem href="https://github.com/MrEliasen/path-to-power/wiki" primaryText="How To Play" target="_blank"/>
-            <MenuItem href={this.state.issueUrl} target="_blank" primaryText="Report A Bug" />
-            <Divider />
-            <MenuItem onClick={this.logout.bind(this)} primaryText="Log Out" />
-        </IconMenu>;
+        return (
+            <ToolbarGroup className="c-header__toolbar">
+                {
+                    !this.props.isConnected &&
+                    <ToolbarTitle text="Connecting.." />
+                }
+                {authButton}
+                <RaisedButton
+                    label="How To Play"
+                    icon={<HelpIcon />}
+                    primary={true}
+                    href="https://github.com/MrEliasen/path-to-power/wiki"
+                    target="_blank"
+                />
+                <RaisedButton
+                    label="Report A Bug"
+                    icon={<BugReportIcon />}
+                    secondary={true}
+                    href={this.state.issueUrl}
+                    target="_blank"
+                />
+            </ToolbarGroup>
+        );
     }
 
     generateIssueLink() {
@@ -95,11 +118,11 @@ class Header extends React.Component {
         return (
             <Toolbar className="c-header">
                 <ToolbarGroup>
-                    <ToolbarTitle text="Path To Power" />
+                    <a onClick={this.goHome.bind(this)}>
+                        <ToolbarTitle text="Path To Power" style={{color: 'inherit'}} />
+                    </a>
                 </ToolbarGroup>
-                <ToolbarGroup>
-                    {this.renderContent()}
-                </ToolbarGroup>
+                {this.renderToolbarButtons()}
             </Toolbar>
         );
     }

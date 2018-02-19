@@ -384,7 +384,7 @@ module.exports = [
                 rules: 'required|integer|min:1',
             },
         ],
-        description: 'Regain health. Costs {cost} per {heal_amount} point(s) of health to heal. Usage: /heal <amount>',
+        description: 'Regain health. Costs {cost} per {heal_amount} point(s) of health to heal.',
         method: cmdHeal,
         modifiers: {
             cost: 10,
@@ -422,7 +422,7 @@ module.exports = [
                 rules: 'required|integer|min:1',
             },
         ],
-        description: 'Costs {cost} per drink. Gain {expReward} reputation and loose {healthDamage} health per drink. Usage: /drink <amount>',
+        description: 'Costs {cost} per drink. Gain {expReward} reputation and loose {healthDamage} health per drink.',
         method: cmdDrink,
         modifiers: {
             cost: 1,
