@@ -1,6 +1,7 @@
 // our logger
 import winston from 'winston';
 import Promise from 'bluebird';
+import child_process from 'child_process';
 
 // component manager
 import AccountManager from './components/account/manager';
@@ -34,6 +35,9 @@ class Game {
 
         // setup the winston logger
         this.setupLogger();
+
+        // will hold the latest commit ID of the server
+        this.version = '';
 
         // Game timers
         this.timers = [];
@@ -98,6 +102,10 @@ class Game {
      * Init the game server managers
      */
     async init() {
+        // set the current server revision/version
+        // TODO: Before 0.1.0 is released - implement husky package and auto bump version on push.
+        this.version = child_process.execSync('git rev-parse --short=7 HEAD').toString().trim();
+
         await this.itemManager.init().then((count) => {
             this.logger.info(`ITEM MANAGER LOADED ${count} ITEMS TEMPLATES`);
         });
@@ -195,7 +203,7 @@ class Game {
             '▒▓▒░ ░  ░ ▒▒   ▓▒█░ ▒ ░░    ▒ ░░▒░▒     ▒ ░░   ░ ▒░▒░▒░    ▒▓▒░ ░  ░░ ▒░▒░▒░ ░ ▓░▒ ▒  ░░ ▒░ ░░ ▒▓ ░▒▓░',
             '░▒ ░       ▒   ▒▒ ░   ░     ▒ ░▒░ ░       ░      ░ ▒ ▒░    ░▒ ░       ░ ▒ ▒░   ▒ ░ ░   ░ ░  ░  ░▒ ░ ▒░',
             '░░         ░   ▒    ░       ░  ░░ ░     ░      ░ ░ ░ ▒     ░░       ░ ░ ░ ▒    ░   ░     ░     ░░   ░ ',
-            '               ░  ░         ░  ░  ░                ░ ░                  ░ ░      ░       ░  ░   ░     ',
+            `Revision: ${this.version.toUpperCase()}           ░  ░  ░                ░ ░                  ░ ░      ░       ░  ░   ░     `,
             'OPEN SOURCE: https://github.com/MrEliasen/path-to-power',
             'HOW TO PLAY: Click the menu in the top-right.',
             'IN-GAME HELP: If you want get help without leading the game, type: /help',

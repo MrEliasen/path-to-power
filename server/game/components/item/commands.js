@@ -14,8 +14,6 @@ function cmdDrop(socket, character, command, params, cmdObject, Game) {
     let amount = params[1] || 1;
 
     // drop the item from the inventory, should it exist
-    // FIX: convery dropItem method to take an itemObject instead of inventory index.
-    // Check dropItem uses to confirm that we can just use item objects only.
     let droppedItem = character.dropItem(item.name, amount);
 
     if (!droppedItem) {
@@ -128,7 +126,6 @@ function cmdGiveItem(socket, character, command, params, cmdObject, Game) {
  * @param  {Game}   Game                The main Game object
  */
 function cmdPickup(socket, character, command, params, cmdObject, Game) {
-    // TODO: test commmand validation, after item drop method has been fixed
     let item = params[0];
     let amount = params[1] || 1;
     const location = [
