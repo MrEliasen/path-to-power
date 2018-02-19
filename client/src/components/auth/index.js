@@ -44,6 +44,10 @@ class Auth extends React.Component {
 
             // if not authenticated already.
             if (!status.authenticated) {
+                if (window.location.pathname === '/auth') {
+                    return this.props.history.push('/');
+                }
+
                 if (!status.token) {
                     return this.props.newAuthError({
                         message: 'Authentication error. Twitch login was likely cancelled.',
