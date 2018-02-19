@@ -217,6 +217,11 @@ function cmdFactionKick(socket, character, command, params, cmdObject, Game) {
 
     const targetCharacter = params[0];
 
+    // Don't let players kick themselves
+    if (targetCharacter.user_id === character.user_id) {
+        return Game.eventToSocket(socket, 'error', 'You cannot kick yourself.');
+    }
+
     // if they are online, run them through the faction.removeMember()
     character.faction.removeMember(targetCharacter)
         .then(() => {
