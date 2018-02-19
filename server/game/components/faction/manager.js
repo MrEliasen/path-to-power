@@ -4,7 +4,7 @@ import FactionModel from './model';
 import Faction from './object';
 import CharacterModel from '../character/model';
 import factionCommands from './commands';
-import {findInArray} from '../../helper';
+import {findObjectInArray} from '../../helper';
 
 /**
  * Faction manager
@@ -131,7 +131,7 @@ export default class FactionManager {
             }
 
             // first check if there is a direct match between the name and a player
-            let faction = findInArray(this.factions, 'name_lowercase', factionName);
+            let faction = findObjectInArray(this.factions, 'name_lowercase', factionName);
 
             if (!faction) {
                 return reject();

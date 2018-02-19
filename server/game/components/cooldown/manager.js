@@ -16,20 +16,20 @@ export default class CooldownManager {
     /**
      * Adds a new cooldown to the list
      * @param {String}     action    The unique action/skill identifier
-     * @param {Number}     duraction The cooldown duration in seconds
+     * @param {Number}     duration The cooldown duration in seconds
      * @param {character}  character The character object to add the cooldown to.
      * @param {Boolean} autostart Will being the timer when created, instead of manually.
      */
-    add(character, action, duraction = null, autostart = false) {
-        if (!duraction) {
+    add(character, action, duration = null, autostart = false) {
+        if (!duration) {
             // if no duration is specified, load the default from the config (if its not an NPC)
             if (this.Game.config.game.playerCooldowns[action]) {
-                duraction = this.Game.config.game.playerCooldowns[action];
+                duration = this.Game.config.game.playerCooldowns[action];
             }
         }
 
         // create the new cooldown
-        const newCooldown = new Cooldown(action, duraction, autostart);
+        const newCooldown = new Cooldown(action, duration, autostart);
         // add it to the characters cooldown list cooldowns
         character.cooldowns.push(newCooldown);
 
@@ -63,6 +63,6 @@ export default class CooldownManager {
      * @param  {Character} character The character object
      */
     cleanup(character) {
-        character.cooldowns = character.cooldowns.filter((obj) => obj.remove);
+        character.cooldowns = character.cooldowns.filter((obj) => !obj.remove);
     }
 }

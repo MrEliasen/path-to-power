@@ -29,7 +29,7 @@ class Game {
      * @param  {Express} server Express/http server object
      * @param  {Object}  config The server config file object
      */
-    constructor(server, config) {
+    constructor(server, config, autoInit = true) {
         this.config = config;
 
         // setup the winston logger
@@ -54,8 +54,10 @@ class Game {
         this.npcManager = new NpcManager(this);
         this.effectManager = new EffectManager(this);
 
-        // load game data
-        this.init();
+        if (autoInit) {
+            // load game data
+            this.init();
+        }
     }
 
     /**
@@ -80,7 +82,7 @@ class Game {
         });
 
         // if we are not in a production environment, add console logging as well
-        if (process.env.NODE_ENV !== 'production') {
+        if (process.env.NODE_ENV === 'development') {
             this.logger.add(new winston.transports.Console({
                 format: winston.format.simple(),
             }));
@@ -97,35 +99,35 @@ class Game {
      */
     async init() {
         await this.itemManager.init().then((count) => {
-            console.log(`ITEM MANAGER LOADED ${count} ITEMS TEMPLATES`);
+            this.logger.info(`ITEM MANAGER LOADED ${count} ITEMS TEMPLATES`);
         });
 
         await this.mapManager.init().then((count) => {
-            console.log(`MAP MANAGER LOADED ${count} MAPS`);
+            this.logger.info(`MAP MANAGER LOADED ${count} MAPS`);
         });
 
         await this.factionManager.init().then((count) => {
-            console.log(`FACTION MANAGER LOADED ${count} FACTIONS`);
+            this.logger.info(`FACTION MANAGER LOADED ${count} FACTIONS`);
         });
 
         await this.shopManager.init().then(() => {
-            console.log('SHOP MANAGER LOADED');
+            this.logger.info('SHOP MANAGER LOADED');
         });
 
         await this.structureManager.init().then(() => {
-            console.log('STRUCTURES MANAGER LOADED');
+            this.logger.info('STRUCTURES MANAGER LOADED');
         });
 
         await this.commandManager.init().then(() => {
-            console.log('COMMAND MANAGER LOADED');
+            this.logger.info('COMMAND MANAGER LOADED');
         });
 
         await this.characterManager.init().then(() => {
-            console.log('CHARACTERS MANAGER LOADED');
+            this.logger.info('CHARACTERS MANAGER LOADED');
         });
 
         await this.skillManager.init().then(() => {
-            console.log('SKILL MANAGER LOADED');
+            this.logger.info('SKILL MANAGER LOADED');
         });
 
         // setup autosave

@@ -4,12 +4,18 @@
  * @param  {Number} max
  * @return {Number}
  */
-export function dice(min = 0, max) {
-    return Math.floor(
+export function dice(min, max) {
+    if (isNaN(parseInt(min)) || isNaN(parseInt(max))) {
+        return 0;
+    }
+
+    const result = Math.floor(
         (Math.random() * (
             Math.max(min, max) - Math.min(min, max)
         )) + Math.min(min, max)
     );
+
+    return result;
 }
 
 /**
@@ -27,6 +33,7 @@ export function deepCopyObject(toCopy) {
  * @return {String}
  */
 export function ucfirst(string) {
+    string = '' + string;
     return string.charAt(0).toUpperCase() + string.substr(1, string.length);
 }
 
@@ -37,15 +44,26 @@ export function ucfirst(string) {
  * @param  {[type]} searchString    The search string
  * @return {Mixed}                  Returns the matchinf object or undefined
  */
-export function findInArray(list, compareProperty = 'name', searchString) {
-    searchString = searchString.toLowerCase();
-    // direct search for objects matching the searchString
-    let found = list.find((obj) => obj[compareProperty].toLowerCase() === searchString);
-
-    // search objects matching the beginning of string
-    if (!found) {
-        found = list.find((obj) => obj[compareProperty].toLowerCase().indexOf(searchString) === 0);
+export function findObjectInArray(list, compareProperty = 'name', searchString) {
+    if (searchString === null || searchString === undefined) {
+        return undefined;
     }
 
-    return found;
+    return [...list].sort((a, b) => {
+        if (a[compareProperty] < b[compareProperty]) {
+            return -1;
+        }
+
+        if (a[compareProperty] > b[compareProperty]) {
+            return 1;
+        }
+
+        return 0;
+    }).find((obj) => {
+        if (typeof obj[compareProperty] !== 'string') {
+            return false;
+        }
+
+        return obj[compareProperty].toLowerCase().indexOf(searchString) === 0;
+    });
 }

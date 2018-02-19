@@ -42,7 +42,7 @@ export default class AbilityManager {
      * @return {Ability}          Ability object or null
      */
     getTemplate(abilityId) {
-        if (!abilityId){
+        if (!abilityId) {
             return null;
         }
 

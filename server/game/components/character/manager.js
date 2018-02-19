@@ -16,7 +16,7 @@ import CharacterModel from './model';
 import characterCommands from './commands';
 import {joinedGrid} from './actions';
 import Levels from '../../data/levels.json';
-import {findInArray} from '../../helper';
+import {findObjectInArray} from '../../helper';
 
 /**
  * Character Manager
@@ -114,7 +114,7 @@ export default class CharacterManager {
     getByNameSync(characterName) {
         characterName = characterName.toLowerCase();
         // first check if there is a direct match between the name and a player
-        let character = findInArray(this.characters, 'name_lowercase', characterName);
+        let character = findObjectInArray(this.characters, 'name_lowercase', characterName);
 
         return character || null;
     }
