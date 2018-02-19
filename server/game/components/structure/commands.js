@@ -255,7 +255,7 @@ function cmdDeposit(socket, character, command, params, cmdObject, Game) {
                     }
 
                     // make sure they have that much money in the bank
-                    if (character.stats.cash < amount) {
+                    if (character.stats.money < amount) {
                         return Game.eventToSocket(socket, 'error', `You do not have that much cash on you. You currently have ${character.stats.money} cash on you.`);
                     }
 
