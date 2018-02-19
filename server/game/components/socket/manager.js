@@ -2,6 +2,7 @@ import Promise from 'bluebird';
 import io from 'socket.io';
 import EventEmitter from 'events';
 import {ACCOUNT_AUTHENTICATE} from '../account/types';
+import {REMOTE_LOGOUT} from '../../../shared/types';
 
 /**
  * Socket manager
@@ -76,6 +77,33 @@ export default class SocketManager extends EventEmitter {
     }
 
     /**
+     * Disconnect/logout a user
+     * @param  {String} user_id The user_id of the user to logout
+     * @return {promise}
+     */
+    logoutOutSession(user_id) {
+        return new Promise((resolve, reject) => {
+            this.get(user_id)
+                .then((socket) => {
+                    const user = {...socket.user};
+                    socket.user = null;
+                    this.onDisconnect(user);
+
+                    this.dispatchToSocket(socket, {
+                        type: REMOTE_LOGOUT,
+                        payload: {
+                            routeTo: '/',
+                        },
+                    });
+                    resolve();
+                })
+                .catch((err) => {
+                    resolve();
+                });
+        });
+    }
+
+    /**
      * Add a socket to track in the list
      * @param {Socket.Io object} socket The socket object to track
      */
@@ -109,6 +137,7 @@ export default class SocketManager extends EventEmitter {
     /**
      * Handles socket disconnections
      * @param  {Socket.IO Socket} socket
+     * @param  {Bool}             forced Wether this disconnection was forced or not
      */
     onDisconnect(user = null, forced = false) {
         // if the user is logged in, set a timer for when we remove them from the game.

@@ -9,6 +9,7 @@ import {
     NPC_JOINED_GRID,
     NPC_LEFT_GRID,
 } from './types';
+import {REMOTE_LOGOUT} from '../../../../server/shared/types';
 
 const defaultState = {
     description: '',
@@ -120,6 +121,8 @@ export default function(state = defaultState, action) {
                 ...state,
                 npcs,
             };
+        case REMOTE_LOGOUT:
+            return defaultState;
     }
 
     return state;

@@ -70,10 +70,15 @@ export default class AccountManager {
                 });
             }
 
+            const user_id = account.user_id.toString();
+
+            // logout any other session(s) if found
+            await this.Game.socketManager.logoutOutSession(user_id);
+
             // add the authenticated use to the socket object
             socket.user = {
                 ...account,
-                user_id: account.user_id.toString(),
+                user_id: user_id,
             };
 
             // add the socket to the list of active clients
@@ -83,7 +88,7 @@ export default class AccountManager {
             const gameData = this.getGameData();
 
             // attempt to load the character from the database
-            this.Game.characterManager.load(socket.user, async (error, character) => {
+            this.Game.characterManager.load(socket.user, (error, character) => {
                 if (error) {
                     return this.Game.socketManager.dispatchToSocket(socket, {
                         type: ACCOUNT_AUTHENTICATE_ERROR,

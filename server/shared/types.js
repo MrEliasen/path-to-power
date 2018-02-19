@@ -5,3 +5,5 @@ export const SHOP_BUY = 'SHOP_BUY';
 export const SHOP_LOAD = 'SHOP_LOAD';
 export const SHOP_UPDATE = 'SHOP_UPDATE';
 export const SHOP_EVENT = 'SHOP_EVENT';
+
+export const REMOTE_LOGOUT = 'REMOTE_LOGOUT';

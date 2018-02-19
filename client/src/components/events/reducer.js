@@ -1,4 +1,5 @@
 import {NEW_EVENT, COMMAND_ERROR, CLEAR_EVENTS} from './types';
+import {REMOTE_LOGOUT} from '../../../../server/shared/types';
 
 export default function(state = [], action) {
     let events;
@@ -17,7 +18,7 @@ export default function(state = [], action) {
             }
 
             events.push(action.payload);
-            return events.reverse().splice(0,150).reverse();
+            return events.reverse().splice(0, 150).reverse();
 
         case COMMAND_ERROR:
             events = [...state];
@@ -33,6 +34,9 @@ export default function(state = [], action) {
                 type: 'command_error',
             });
             return events.reverse().splice(0, 100).reverse();
+
+        case REMOTE_LOGOUT:
+            return [];
     }
 
     return state;
