@@ -1,4 +1,9 @@
 .c-header {
     position: relative;
     z-index: 1600;
+
+    &__toolbar > * {
+        margin-left: 10px !important;
+        margin-right: 0 !important;
+    }
 }
