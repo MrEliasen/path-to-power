@@ -140,6 +140,7 @@ export default class CommandManager {
                 const data = {
                     description: this.commands[command].description || '',
                     aliases: this.commands[command].aliases || [],
+                    modifiers: this.commands[command].modifiers || {},
                 };
 
                 listOfCommands[command] = data;
