@@ -124,7 +124,13 @@ export default class CommandManager {
                 );
             })
             .catch((error) => {
-                return this.Game.eventToSocket(socket, 'error', error.toString());
+                if (typeof error !== 'string') {
+                    this.Game.eventToSocket(socket, 'error', 'Something went wrong while trying to execute your command.');
+                    return this.Game.logger.error(error);
+                }
+
+                this.Game.eventToSocket(socket, 'error', error);
+                return this.Game.eventToSocket(socket, 'multiline', this.getInfo(command));
             });
     }
 
