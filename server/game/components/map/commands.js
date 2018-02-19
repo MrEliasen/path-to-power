@@ -169,7 +169,7 @@ module.exports = [
                 rules: 'direction',
             },
         ],
-        description: 'Flee from a grid, if you are aimed at. You will loose items and reputation when doing so. Usage: /flee <n|s|w|e>(optional)',
+        description: 'Flee from a grid, if you are aimed at. You will lose items and reputation when doing so.',
         method: cmdFlee,
     },
 ];
