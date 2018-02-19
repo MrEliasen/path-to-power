@@ -68,6 +68,8 @@ export default class CharacterManager {
             case MOVE_CHARACTER:
                 return this.move(socket, action.payload);
         }
+
+        return null;
     }
 
     /**

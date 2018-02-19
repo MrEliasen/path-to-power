@@ -29,7 +29,6 @@ export default class AbilityManager {
             character.abilities = [];
 
             // set each of the abilities to the character
-            // TODO: interrate over the object and instanciate a new ability matching the key
             character.abilities.push(new Abilities.Acc(20, abilities.acc, character.train));
 
             resolve();

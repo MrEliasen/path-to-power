@@ -40,8 +40,10 @@ export default class AccountManager {
             case ACCOUNT_AUTHENTICATE:
                 return this.authenticate(socket, action);
             case CREATE_CHARACTER:
-                return this.signUp(socket, action);
+                return this.newCharacter(socket, action);
         }
+
+        return null;
     }
 
     /**
@@ -62,7 +64,7 @@ export default class AccountManager {
             return;
         }
 
-        this.dbLogin(action, (error, account) => {
+        this.dbLogin(action, async (error, account) => {
             if (error) {
                 return this.Game.socketManager.dispatchToSocket(socket, {
                     type: ACCOUNT_AUTHENTICATE_ERROR,
@@ -123,8 +125,6 @@ export default class AccountManager {
                     },
                 });
 
-                // send the welcome after 2 seconds
-                // TODO: Recode this!
                 setTimeout(() => {
                     this.Game.sendMotdToSocket(socket);
                 }, 1000);
@@ -152,7 +152,7 @@ export default class AccountManager {
      * @param  {Socket.IO Object} socket The socket the request from made from
      * @param  {Object}           action Redux action object
      */
-    signUp(socket, action) {
+    newCharacter(socket, action) {
         if (!action.payload.location) {
             return this.Game.socketManager.dispatchToSocket(socket, {
                 type: ACCOUNT_AUTHENTICATE_ERROR,
@@ -215,6 +215,32 @@ export default class AccountManager {
     }
 
     /**
+     * Creates a new account for a given twitch user
+     * @param  {String}   twitch_id    Twitch account ID
+     * @param  {String}   display_name Twitch Username
+     * @param  {Function} callback
+     * @return {ObjectId}              MongoDB objectID (_id) of user
+     */
+    dbSignup(twitch_id, display_name, callback) {
+        user = new AccountModel({
+            twitch_id: twitch_id,
+            display_name,
+        });
+
+        user.save((err) => {
+            if (err) {
+                this.Game.logger.error('AccountManager::dbSignup', err);
+                return callback({
+                    type: 'error',
+                    message: 'Internal server error',
+                });
+            }
+
+            callback(null, user._id);
+        });
+    }
+
+    /**
      * Database Method, attempts to authenticate the user, by twitch token
      * @param  {Object}   action   Redux action object from the client
      * @param  {Function} callback Returns 2 params, error and account
@@ -245,15 +271,15 @@ export default class AccountManager {
                     });
                 }
 
-                if (!user) {
-                    user = new AccountModel({
-                        twitch_id: twitchData.id,
+                if (user) {
+                    return callback(null, {
+                        user_id: user._id,
+                        display_name: twitchData.display_name,
+                        profile_image: twitchData.profile_image_url,
                     });
                 }
 
-                user.display_name = twitchData.display_name;
-
-                user.save((err) => {
+                this.dbSignup(twitchData.id, display_name, (err, user_id) => {
                     if (err) {
                         this.Game.logger.error('AccountManager::dbLogin (Save)', err);
                         return callback({
@@ -263,7 +289,7 @@ export default class AccountManager {
                     }
 
                     callback(null, {
-                        user_id: user._id,
+                        user_id: user_id,
                         display_name: twitchData.display_name,
                         profile_image: twitchData.profile_image_url,
                     });
