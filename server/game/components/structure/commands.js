@@ -68,7 +68,7 @@ function cmdHeal(socket, character, command, params, cmdObject, Game) {
             Game.eventToSocket(socket, 'success', `You healed ${heal_amount}, costing you ${price}`);
         })
         .catch((err) => {
-            Game.logger.debug(err);
+            return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
         });
 }
 
@@ -175,7 +175,7 @@ function cmdTravel(socket, character, command, params, cmdObject, Game) {
                 });
         })
         .catch((err) => {
-            Game.logger.info(err);
+            return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
         });
 }
 
@@ -189,34 +189,41 @@ function cmdTravel(socket, character, command, params, cmdObject, Game) {
  * @param  {Game}   Game                The main Game object
  */
 function cmdWithdraw(socket, character, command, params, cmdObject, Game) {
-    // Fetch the character first
-    Game.characterManager.get(socket.user.user_id)
-        .then((character) => {
-            let amount = parseInt(params[0], 10);
+    // get the structures list at the character location
+    Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
+        .then((structures) => {
+            // Fetch the character first
+            Game.characterManager.get(socket.user.user_id)
+                .then((character) => {
+                    let amount = parseInt(params[0], 10);
 
-            // make sure the amount is valid
-            if (isNaN(amount)) {
-                return Game.eventToSocket(socket, 'error', 'You must specify a valid amount to withdraw.');
-            }
+                    // make sure the amount is valid
+                    if (isNaN(amount)) {
+                        return Game.eventToSocket(socket, 'error', 'You must specify a valid amount to withdraw.');
+                    }
 
-            // make sure the amount is a positive number
-            if (amount < 0) {
-                return Game.eventToSocket(socket, 'error', 'You must specify a positive amount to withdraw.');
-            }
+                    // make sure the amount is a positive number
+                    if (amount < 0) {
+                        return Game.eventToSocket(socket, 'error', 'You must specify a positive amount to withdraw.');
+                    }
 
-            // make sure they have that much money in the bank
-            if (character.stats.bank < amount) {
-                return Game.eventToSocket(socket, 'error', `You do not have that much in your account. You have ${character.stats.bank}.`);
-            }
+                    // make sure they have that much money in the bank
+                    if (character.stats.bank < amount) {
+                        return Game.eventToSocket(socket, 'error', `You do not have that much in your account. You have ${character.stats.bank}.`);
+                    }
 
-            character.updateBank(amount * -1);
-            character.updateCash(amount);
+                    character.updateBank(amount * -1);
+                    character.updateCash(amount);
 
-            // update the client's character object
-            Game.characterManager.updateClient(character.user_id, 'stats');
-            Game.eventToSocket(socket, 'success', `You withdrew ${amount} from your bank account. You have ${character.stats.bank} left in your account.`);
+                    // update the client's character object
+                    Game.characterManager.updateClient(character.user_id, 'stats');
+                    Game.eventToSocket(socket, 'success', `You withdrew ${amount} from your bank account. You have ${character.stats.bank} left in your account.`);
+                })
+                .catch(() => {});
         })
-        .catch(() => {});
+        .catch((err) => {
+            return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
+        });
 }
 
 /**
@@ -229,35 +236,42 @@ function cmdWithdraw(socket, character, command, params, cmdObject, Game) {
  * @param  {Game}   Game                The main Game object
  */
 function cmdDeposit(socket, character, command, params, cmdObject, Game) {
-    // Fetch the character first
-    Game.characterManager.get(socket.user.user_id)
-        .then((character) => {
-            let amount = parseInt(params[0], 10);
+    // get the structures list at the character location
+    Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
+        .then((structures) => {
+            // Fetch the character first
+            Game.characterManager.get(socket.user.user_id)
+                .then((character) => {
+                    let amount = parseInt(params[0], 10);
 
-            // make sure the amount is valid
-            if (isNaN(amount)) {
-                return Game.eventToSocket(socket, 'error', 'You must specify a valid amount to deposit.');
-            }
+                    // make sure the amount is valid
+                    if (isNaN(amount)) {
+                        return Game.eventToSocket(socket, 'error', 'You must specify a valid amount to deposit.');
+                    }
 
-            // make sure the amount is a positive number
-            if (amount < 0) {
-                return Game.eventToSocket(socket, 'error', 'You must specify a positive amount to deposit.');
-            }
+                    // make sure the amount is a positive number
+                    if (amount < 0) {
+                        return Game.eventToSocket(socket, 'error', 'You must specify a positive amount to deposit.');
+                    }
 
-            // make sure they have that much money in the bank
-            if (character.stats.cash < amount) {
-                return Game.eventToSocket(socket, 'error', `You do not have that much cash on you. You currently have ${character.stats.money} cash on you.`);
-            }
+                    // make sure they have that much money in the bank
+                    if (character.stats.cash < amount) {
+                        return Game.eventToSocket(socket, 'error', `You do not have that much cash on you. You currently have ${character.stats.money} cash on you.`);
+                    }
 
-            character.updateCash(amount * -1);
-            character.updateBank(amount);
+                    character.updateCash(amount * -1);
+                    character.updateBank(amount);
 
-            // update the client's character object
-            Game.characterManager.updateClient(character.user_id, 'stats');
+                    // update the client's character object
+                    Game.characterManager.updateClient(character.user_id, 'stats');
 
-            Game.eventToSocket(socket, 'success', `You deposit ${amount} into your bank account. Your account is now at ${character.stats.bank}.`);
+                    Game.eventToSocket(socket, 'success', `You deposit ${amount} into your bank account. Your account is now at ${character.stats.bank}.`);
+                })
+                .catch(() => {});
         })
-        .catch(() => {});
+        .catch((err) => {
+            return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
+        });
 }
 
 /**
@@ -325,7 +339,7 @@ function cmdDrink(socket, character, command, params, cmdObject, Game) {
                     Game.eventToSocket(socket, 'success', `You drink ${drinks} drinks, costing you ${price} and ${health} health. (+${exp} rep)`);
                 })
                 .catch((err) => {
-                    Game.logger.debug(err);
+                    return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
                 });
         })
         .catch((err) => {
