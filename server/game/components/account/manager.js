@@ -86,49 +86,60 @@ export default class AccountManager {
             // add the socket to the list of active clients
             this.Game.socketManager.add(socket);
 
-            // game data we will send to the client, with the autentication success
-            const gameData = this.getGameData();
+            // load/setup the account data, like characters
+            this.loadAccountData(socket);
+        });
+    }
 
-            // attempt to load the character from the database
-            this.Game.characterManager.load(socket.user, (error, character) => {
-                if (error) {
-                    return this.Game.socketManager.dispatchToSocket(socket, {
-                        type: ACCOUNT_AUTHENTICATE_ERROR,
-                        payload: error,
-                    });
-                }
+    /**
+     * Loads a logged in account's character data.
+     * @param  {Socket.io Socket} socket The socket belonging to the logged in account
+     */
+    loadAccountData(socket) {
+        // game data we will send to the client, with the autentication success
+        const gameData = this.getGameData();
 
-                // If they do not have a character yet, send them to the character creation screen
-                if (!character) {
-                    return this.Game.socketManager.dispatchToSocket(socket, {
-                        type: ACCOUNT_AUTHENTICATE_NEW,
-                        payload: {
-                            routeTo: '/character',
-                            gameData: {
-                                maps: gameData.maps,
-                            },
-                        },
-                    });
-                }
+        // attempt to load the character from the database
+        this.Game.characterManager.load(socket.user, async (error, character) => {
+            if (error) {
+                return this.Game.socketManager.dispatchToSocket(socket, {
+                    type: ACCOUNT_AUTHENTICATE_ERROR,
+                    payload: error,
+                });
+            }
 
-                // Update the client
-                this.Game.mapManager.updateClient(character.user_id);
-
-                // get the list of online players (after we loaded the character to make sure it is included)
-                gameData.players = this.Game.characterManager.getOnline();
-
-                this.Game.socketManager.dispatchToSocket(socket, {
-                    type: ACCOUNT_AUTHENTICATE_SUCCESS,
+            // If they do not have a character yet, send them to the character creation screen
+            if (!character) {
+                return this.Game.socketManager.dispatchToSocket(socket, {
+                    type: ACCOUNT_AUTHENTICATE_NEW,
                     payload: {
-                        character: character.exportToClient(),
-                        gameData,
+                        routeTo: '/character',
+                        gameData: {
+                            maps: gameData.maps,
+                        },
                     },
                 });
+            }
 
-                setTimeout(() => {
-                    this.Game.sendMotdToSocket(socket);
-                }, 1000);
+            // Update the client
+            this.Game.mapManager.updateClient(character.user_id);
+
+            // get the list of online players (after we loaded the character to make sure it is included)
+            gameData.players = this.Game.characterManager.getOnline();
+
+            this.Game.socketManager.dispatchToSocket(socket, {
+                type: ACCOUNT_AUTHENTICATE_SUCCESS,
+                payload: {
+                    character: character.exportToClient(),
+                    gameData,
+                },
             });
+
+            // send the welcome after 2 seconds
+            // TODO: Recode this!
+            setTimeout(() => {
+                this.Game.sendMotdToSocket(socket);
+            }, 1000);
         });
     }
 
