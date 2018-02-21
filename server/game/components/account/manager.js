@@ -182,8 +182,6 @@ export default class AccountManager {
         // check we have the starting location
         this.Game.mapManager.get(action.payload.location)
             .then((gameMap) => {
-                const gameData = this.getGameData();
-
                 // create a new character
                 this.Game.characterManager.create(socket.user, gameMap.id, (error, newCharacter) => {
                      if (error) {
@@ -195,9 +193,6 @@ export default class AccountManager {
                         });
                     }
 
-                    // get the list of online players (after we loaded the character to make sure it is included)
-                    gameData.players = this.Game.characterManager.getOnline();
-
                     // Update the client
                     this.Game.mapManager.updateClient(newCharacter.user_id);
 
@@ -205,7 +200,10 @@ export default class AccountManager {
                         type: ACCOUNT_AUTHENTICATE_SUCCESS,
                         payload: {
                             character: newCharacter.exportToClient(),
-                            gameData,
+                            gameData: {
+                                ...this.getGameData(),
+                                players: this.Game.characterManager.getOnline(),
+                            },
                         },
                     });
                 });
