@@ -87,7 +87,7 @@ export default class SocketManager extends EventEmitter {
                 .then((socket) => {
                     const user = {...socket.user};
                     socket.user = null;
-                    this.onDisconnect(user);
+                    this.onDisconnect(user, true);
 
                     this.dispatchToSocket(socket, {
                         type: REMOTE_LOGOUT,

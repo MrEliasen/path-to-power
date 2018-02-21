@@ -224,7 +224,7 @@ export default class AccountManager {
      * @return {ObjectId}              MongoDB objectID (_id) of user
      */
     dbSignup(twitch_id, display_name, callback) {
-        user = new AccountModel({
+        const user = new AccountModel({
             twitch_id: twitch_id,
             display_name,
         });
