@@ -34,8 +34,6 @@ export default class AccountManager {
      * @param  {Object} action Redux action object
      */
     handleDispatch(socket, action) {
-        this.Game.logger.debug('AccountManager::handleDispatch', action);
-
         switch (action.type) {
             case ACCOUNT_AUTHENTICATE:
                 return this.authenticate(socket, action);
@@ -283,7 +281,7 @@ export default class AccountManager {
                     });
                 }
 
-                this.dbSignup(twitchData.id, display_name, (err, user_id) => {
+                this.dbSignup(twitchData.id, twitchData.display_name, (err, user_id) => {
                     if (err) {
                         this.Game.logger.error('AccountManager::dbLogin (Save)', err);
                         return callback({
