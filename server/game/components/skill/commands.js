@@ -85,15 +85,7 @@ function cmdSkillSearch(socket, character, command, params, cmdObject, Game) {
     // add the search cooldown to the character
     Game.cooldownManager.add(character, `skill_${skill.id}`, null, true);
 
-    // get he list of characters at the grid
-    const target = params[0];
-
-    // check if they are hiding
-    if (!target.hidden) {
-        return Game.eventToSocket(socket, 'warning', 'This player is not hiding.');
-    }
-
-    skill.use(character, target);
+    skill.use(character);
 }
 
 module.exports = [
@@ -126,14 +118,8 @@ module.exports = [
         aliases: [
             '/find',
         ],
-        params: [
-            {
-                name: 'Target',
-                desc: 'The target player you are searching for.',
-                rules: 'required|player:grid',
-            },
-        ],
-        description: 'Search for a hidden player, at your current location.',
+        params: [],
+        description: 'Search for a hidden players at your current location.',
         method: cmdSkillSearch,
     },
 ];
