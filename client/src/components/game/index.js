@@ -50,7 +50,7 @@ class Game extends React.Component {
 
     componentDidUpdate(prevProps) {
         if (this.state.autoscroll) {
-            document.getElementsByClassName('c-game__chat')[0].scrollTop = document.getElementsByClassName('c-game__chat')[0].scrollHeight;
+            document.querySelector('.log').scrollTop = document.querySelector('.log').scrollHeight;
         }
     }
 
@@ -70,7 +70,7 @@ class Game extends React.Component {
             case '/':
                 // set focus if they are not typing into an input field
                 if (!document.activeElement.value) {
-                    document.querySelector('.c-game_command input').focus();
+                    document.querySelector('#input-command').focus();
                 }
                 break;
         }
@@ -146,58 +146,85 @@ class Game extends React.Component {
     setCommand(command) {
         this.setState({command});
         setTimeout(() => {
-            document.querySelector('.c-game_command input').focus();
-            document.querySelector('.c-game_command input').setSelectionRange(command.length, command.length);
+            document.querySelector('#input-command').focus();
+            document.querySelector('#input-command').setSelectionRange(command.length, command.length);
         }, 250);
     }
 
     render() {
         return (
-            <div className="c-game">
-                <div className="c-game__location e-padding">
-                    <Location />
-                </div>
-                <div className="c-game__communication">
-                    <div className="c-game__news e-padding">
-                        {
-                            this.props.game.news &&
-                            <h3 style={this.props.game.news.colour}>{this.props.game.news.message}</h3>
-                        }
-                    </div>
-                    <div className="c-game__chat e-padding">
-                        <Chat />
-                    </div>
-                </div>
-                <Events />
-                <div className="c-game_command">
-                    <input
-                        ref={(e) => this.$autocomplete = e}
-                        id="input-command"
-                        onKeyPress={(e) => {
-                            if (e.key && e.key == 'Enter') {
-                                this.sendCommand();
-                            }
-                        }}
-                        placeholder="Type your commands here, and hit Enter."
-                        style={{color: '#fff'}}
-                    />
-                </div>
-
-                <InventoryMenu sendCommand={this.sendCommand} sendAction={this.sendAction} />
-                <PlayersMenu sendCommand={this.sendCommand} setCommand={this.setCommand} />
-                <StatsMenu />
-                <Shop sendAction={this.sendAction} />
-
-                <div style={{textAlign: 'center'}}
-                >{this.props.connection.lastEvent}<br />
-                {!this.props.connection.isConnected}
+            <React.Fragment>
+                {
+                    this.props.game.news &&
+                    <h3 style={this.props.game.news.colour}>{this.props.game.news.message}</h3>
+                }
+                <div style={{textAlign: 'center'}}>
+                    {this.props.connection.lastEvent}<br />
+                    {!this.props.connection.isConnected}
                     <div mode="indeterminate" />
                 </div>
-                {
-                    this.props.character &&
-                    <BottomMenu className="c-bottom-menu" socket={this.props.socket} />
-                }
-            </div>
+                <div id="game">
+                    <div className="left">
+                        <div className="panel">
+                            <div className="panel-title">Character</div>
+                            <div className="panel-body">
+                                <StatsMenu />
+                            </div>
+                        </div>
+                        <div className="panel">
+                            <div className="panel-title">Equipment</div>
+                            <div className="panel-body">
+                                <InventoryMenu sendCommand={this.sendCommand} sendAction={this.sendAction} />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="middle">
+                        <div className="panel">
+                            <div className="panel-body log">
+                                <Events />
+                                <Chat />
+                            </div>
+                        </div>
+                        <input
+                            id="input-command"
+                            onKeyPress={(e) => {
+                                if (e.key && e.key == 'Enter') {
+                                    this.sendCommand();
+                                }
+                            }}
+                            onChange={(e) => {
+                                this.setState({command: e.target.value});
+                            }}
+                            value={this.state.command}
+                            placeholder="Type your commands here, and hit Enter."
+                            className="input"
+                            type="input"
+                            name="input"
+                        />
+                    </div>
+                    <div className="right">
+                        <div className="panel">
+                            <div className="panel-title">Minimap</div>
+                            <div className="panel-body">
+                                Damn...
+                            </div>
+                        </div>
+                        <div className="panel">
+                            <div className="panel-title">Location</div>
+                            <div className="panel-body">
+                                <Location />
+                                <PlayersMenu sendCommand={this.sendCommand} setCommand={this.setCommand} />
+                            </div>
+                        </div>
+                        Old menu:
+                        {
+                            this.props.character &&
+                            <BottomMenu className="c-bottom-menu" socket={this.props.socket} />
+                        }
+                    </div>
+                </div>
+                <Shop sendAction={this.sendAction} />
+            </React.Fragment>
         );
     }
 }

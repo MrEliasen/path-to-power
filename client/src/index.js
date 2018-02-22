@@ -7,6 +7,9 @@ import {BrowserRouter} from 'react-router-dom';
 import reducers from './reducers';
 import App from './components/app';
 
+// Styles
+import './assets/styles/all.scss';
+
 let store;
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {

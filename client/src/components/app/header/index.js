@@ -104,7 +104,7 @@ class Header extends React.Component {
         if (this.props.character) {
             return (
                 <React.Fragment>
-                    <li><NavLink to="/game">Play</NavLink></li>
+                    <li><NavLink to="/game">Play Game</NavLink></li>
                     <li><NavLink to="/auth/settings">Settings</NavLink></li>
                     <li><NavLink to="/auth/logout" onClick={this.logout.bind(this)}>Logout</NavLink></li>
                 </React.Fragment>
@@ -127,13 +127,10 @@ class Header extends React.Component {
                         <ul className="nav-pages">
                             <li><Link to="/" className="logo">Path To Power</Link></li>
                             <li><NavLink exact to="/">Home</NavLink></li>
-                            <li><NavLink to="/page">The Game</NavLink></li>
+                            <li><NavLink to="/info">Gameplay</NavLink></li>
+                            <li><NavLink to="/guides">Guides</NavLink></li>
                             <li><NavLink to="/about">About</NavLink></li>
                             <li><a href={this.state.issueUrl} target="_blank">Report a bug</a></li>
-                            <li><Link to="/">Link</Link></li>
-                            <li><Link to="/">Link</Link></li>
-                            <li><Link to="/">Link</Link></li>
-                            <li><Link to="/">Link</Link></li>
                         </ul>
                         <ul className="nav-auth">
                             {this.renderNavAuth()}

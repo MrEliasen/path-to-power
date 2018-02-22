@@ -1,0 +1,72 @@
+html,
+body {
+    height: 100%;
+    background: $color-light;
+
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: $color-dark;
+
+    #root {
+        height: 100%;
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: inline-block;
+}
+
+a {
+    color: $color-link;
+    text-decoration: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0;
+}
+
+hr {
+    height: 1px;
+    border: none;
+    background: #ddd;
+    margin: 10px 0;
+    padding: 0;
+}
+
+input, .input {
+    display: block;
+    width: 100%;
+    border: 1px #ddd solid;
+    padding: 5px 10px;
+    background: #f9f9f9;
+}
+
+button, .button {
+    display: inline-block;
+    cursor: pointer;
+    background: $color-link;
+    color: $color-light;
+    padding: 5px 15px;
+    text-align: center;
+    margin: 0;
+    border: 0;
+
+    &:hover {
+        opacity: .9;
+        color: #fff;
+    }
+}
+
+input, .input, button, .button {
+    font: inherit;
+    line-height: inherit;
+    margin-bottom: 10px;
+    border-radius: 2px;
+}

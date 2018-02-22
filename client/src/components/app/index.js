@@ -5,8 +5,11 @@ import {connect} from 'react-redux';
 import {Route} from 'react-router-dom';
 
 // Pages
-import HomeContainer from '../home';
-import PageContainer from '../page';
+import PageHome from '../page/home';
+import PageInfo from '../page/info';
+import PageGuides from '../page/guides';
+import PageAbout from '../page/about';
+
 import AuthContainer from '../auth';
 import GameContainer from '../game';
 import Character from '../game/character';
@@ -17,9 +20,6 @@ import Header from './header';
 // Twitch old ass lib
 // TODO: Code own implementation
 import '../../assets/twitch';
-
-// extra styles
-import '../../assets/styles/app.scss';
 
 // client config
 import config from '../../config';
@@ -103,9 +103,10 @@ class App extends React.Component {
                 <Route exact path="/" component={() => (<div id="featured" />)} />
                 <main id="main">
                     <div className="container">
-                        <Route exact path="/" component={HomeContainer} />
-                        <Route path="/page" component={PageContainer} />
-                        <Route path="/about" component={PageContainer} />
+                        <Route exact path="/" component={PageHome} />
+                        <Route path="/info" component={PageInfo} />
+                        <Route path="/guides" component={PageGuides} />
+                        <Route path="/about" component={PageAbout} />
                         <Route path="/auth" component={AuthContainer} />
                         <Route path="/game" component={GameContainer} />
                         <Route path="/character" component={Character} />

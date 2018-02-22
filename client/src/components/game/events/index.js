@@ -14,7 +14,7 @@ class Events extends React.Component {
 
     componentDidUpdate(prevProps) {
         if (this.state.autoscroll) {
-            const elem = document.getElementsByClassName('c-game__events')[0];
+            const elem = document.getElementsByClassName('events')[0];
             elem.scrollTop = elem.scrollHeight;
         }
     }
@@ -124,7 +124,7 @@ class Events extends React.Component {
 
     render() {
         return (
-            <div className="c-game__events e-padding">
+            <div className="events e-padding">
                 {
                     this.props.events &&
                     this.props.events.map((event, index) => <React.Fragment key={index}>

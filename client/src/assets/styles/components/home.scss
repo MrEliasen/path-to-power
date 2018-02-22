@@ -1,0 +1,23 @@
+#home {
+    position: fixed;
+    top: 50px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+    background-image: url(https://i.imgur.com/UKlkMvm.jpg?1);
+    background-size: cover;
+    background-position: center;
+
+    .panel {
+        width: 800px;
+        max-width: 100%;
+        opacity: .95;
+        background: $color-primary;
+        color: #fff;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+    }
+}

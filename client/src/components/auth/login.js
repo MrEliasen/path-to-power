@@ -76,11 +76,18 @@ class AuthLogin extends React.Component {
     render() {
         return (
             <div className="panel">
-                <h1>Let's login</h1>
-                {this.showStatus()}
-                <p>...</p>
-                <hr />
-                <a href={`https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=${config.twitch.clientId}&redirect_uri=${config.twitch.callbackUrl}&scope=${config.twitch.scope.join(',')}`}>Login with Twitch.tv</a>
+                <div className="panel-title">Let's do this!</div>
+                <div className="panel-body">
+                    {this.showStatus()}
+                    <form>
+                        <input className="input" type="email" name="email" value="" placeholder="Email" />
+                        <input className="input" type="password" name="password" value="" placeholder="Password" />
+                        <button>Login</button>
+                    </form>
+                    <hr />
+                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, laboriosam!</p>
+                    <a className="button block" href={`https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=${config.twitch.clientId}&redirect_uri=${config.twitch.callbackUrl}&scope=${config.twitch.scope.join(',')}`}>Login with Twitch.tv</a>
+                </div>
             </div>
         );
     }
