@@ -1,5 +1,5 @@
 import React from 'react';
-import {withRouter} from 'react-router-dom';
+import {withRouter, NavLink, Link} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
@@ -7,13 +7,6 @@ import config from '../../config';
 
 // actions
 import {authLogout} from '../auth/actions';
-
-// UI
-import {Toolbar, ToolbarGroup, ToolbarTitle} from 'material-ui/Toolbar';
-import RaisedButton from 'material-ui/RaisedButton';
-import BugReportIcon from 'material-ui/svg-icons/action/bug-report';
-import HelpIcon from 'material-ui/svg-icons/action/help';
-import LogoutIcon from 'material-ui/svg-icons/action/exit-to-app';
 
 class Header extends React.Component {
     constructor(props) {
@@ -52,45 +45,37 @@ class Header extends React.Component {
         let authButton = null;
         let twitchIcon = <svg style={{width: '24px', height: '24px'}} viewBox="0 0 24 24"><path fill="#ffffff" d="M4,2H22V14L17,19H13L10,22H7V19H2V6L4,2M20,13V4H6V16H9V19L12,16H17L20,13M15,7H17V12H15V7M12,7V12H10V7H12Z" /></svg>;
         if (this.props.character) {
-            authButton = <RaisedButton
-                label="Log Out"
-                labelColor="#ffffff"
-                backgroundColor="#6441A4"
-                icon={<LogoutIcon />}
+            authButton = <button
+                labelcolor="#ffffff"
+                backgroundcolor="#6441A4"
+                icon={<span />}
                 onClick={this.logout.bind(this)}
-            />;
+            >Log Out</button>;
         } else {
-            authButton = <RaisedButton
-                label="Login With Twitch"
-                labelColor="#ffffff"
-                backgroundColor="#6441A4"
+            authButton = <a
+                labelcolor="#ffffff"
+                backgroundcolor="#6441A4"
                 icon={twitchIcon}
                 href={`https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=${config.twitch.clientId}&redirect_uri=${config.twitch.callbackUrl}&scope=${config.twitch.scope.join(',')}`}
-            />;
+            >Login With Twitch</a>;
         }
 
         return (
-            <ToolbarGroup className="c-header__toolbar">
+            <div className="c-header__toolbar">
                 {
                     !this.props.isConnected &&
-                    <ToolbarTitle text="Connecting.." />
+                    <span text="Connecting.." />
                 }
                 {authButton}
-                <RaisedButton
-                    label="How To Play"
-                    icon={<HelpIcon />}
-                    primary={true}
+                <a
                     href="https://github.com/MrEliasen/path-to-power/wiki"
                     target="_blank"
-                />
-                <RaisedButton
-                    label="Report A Bug"
-                    icon={<BugReportIcon />}
-                    secondary={true}
+                >How To Play</a>
+                <a
                     href={this.state.issueUrl}
                     target="_blank"
-                />
-            </ToolbarGroup>
+                >Report A Bug</a>
+            </div>
         );
     }
 
@@ -114,16 +99,48 @@ class Header extends React.Component {
             });
     }
 
+
+    renderNavAuth() {
+        if (this.props.character) {
+            return (
+                <React.Fragment>
+                    <li><NavLink to="/game">Play</NavLink></li>
+                    <li><NavLink to="/auth/settings">Settings</NavLink></li>
+                    <li><NavLink to="/auth/logout" onClick={this.logout.bind(this)}>Logout</NavLink></li>
+                </React.Fragment>
+            );
+        } else {
+            return (
+                <React.Fragment>
+                    <li><NavLink exact to="/auth">Login</NavLink></li>
+                    <li><NavLink to="/auth/register">Sign up</NavLink></li>
+                </React.Fragment>
+            );
+        }
+    }
+
     render() {
         return (
-            <Toolbar className="c-header">
-                <ToolbarGroup>
-                    <a onClick={this.goHome.bind(this)}>
-                        <ToolbarTitle text="Path To Power" style={{color: 'inherit'}} />
-                    </a>
-                </ToolbarGroup>
-                {this.renderToolbarButtons()}
-            </Toolbar>
+            <React.Fragment>
+                <header id="header">
+                    <div className="container">
+                        <ul className="nav-pages">
+                            <li><Link to="/" className="logo">Path To Power</Link></li>
+                            <li><NavLink exact to="/">Home</NavLink></li>
+                            <li><NavLink to="/page">The Game</NavLink></li>
+                            <li><NavLink to="/about">About</NavLink></li>
+                            <li><a href={this.state.issueUrl} target="_blank">Report a bug</a></li>
+                            <li><Link to="/">Link</Link></li>
+                            <li><Link to="/">Link</Link></li>
+                            <li><Link to="/">Link</Link></li>
+                            <li><Link to="/">Link</Link></li>
+                        </ul>
+                        <ul className="nav-auth">
+                            {this.renderNavAuth()}
+                        </ul>
+                    </div>
+                </header>
+            </React.Fragment>
         );
     }
 }

@@ -6,6 +6,7 @@ import {bindActionCreators} from 'redux';
 import Events from '../events';
 import Location from '../location';
 import Shop from '../shop';
+import BottomMenu from '../bottom-menu';
 
 import {clearEvents, newEvent} from '../events/actions';
 import {newCommand} from './actions';
@@ -16,12 +17,6 @@ import InventoryMenu from '../inventory-menu';
 import PlayersMenu from '../players-menu';
 import StatsMenu from '../stats-menu';
 import Chat from '../chat';
-
-// UI
-import Paper from 'material-ui/Paper';
-import Dialog from 'material-ui/Dialog';
-import LinearProgress from 'material-ui/LinearProgress';
-import AutoComplete from 'material-ui/AutoComplete';
 
 class Game extends React.Component {
     constructor(props) {
@@ -159,59 +154,32 @@ class Game extends React.Component {
     render() {
         return (
             <div className="c-game">
-                <Paper zDepth={1} rounded={true} className="c-game__location e-padding">
+                <div className="c-game__location e-padding">
                     <Location />
-                </Paper>
+                </div>
                 <div className="c-game__communication">
-                    <Paper zDepth={1} rounded={true} className="c-game__news e-padding">
+                    <div className="c-game__news e-padding">
                         {
                             this.props.game.news &&
                             <h3 style={this.props.game.news.colour}>{this.props.game.news.message}</h3>
                         }
-                    </Paper>
-                    <Paper zDepth={1} rounded={true} className="c-game__chat e-padding">
+                    </div>
+                    <div className="c-game__chat e-padding">
                         <Chat />
-                    </Paper>
+                    </div>
                 </div>
                 <Events />
                 <div className="c-game_command">
-                    <AutoComplete
+                    <input
                         ref={(e) => this.$autocomplete = e}
                         id="input-command"
-                        fullWidth={true}
-                        searchText={this.state.command}
-                        onUpdateInput={(command) => {
-                            this.setState({command: command});
-                            setTimeout(() => {
-                                document.querySelector('.c-game_command input').focus();
-                            }, 100);
-                        }}
                         onKeyPress={(e) => {
                             if (e.key && e.key == 'Enter') {
                                 this.sendCommand();
                             }
                         }}
-                        onNewRequest={() => {
-                            document.querySelector('.c-game_command input').focus();
-                        }}
-                        floatingLabelText="Type your commands here, and hit Enter."
-                        floatingLabelStyle={{color: '#FF9800'}}
-                        floatingLabelFocusStyle={{color: '#2196F3'}}
-                        inputStyle={{color: '#fff'}}
-                        filter={(searchText, key) => searchText.length > 1 && key.indexOf(searchText) !== -1}
-                        dataSource={Object.keys(this.props.game.commands).concat(['/commandlist', '/commands', '/clear'])}
-                        anchorOrigin={{vertical: 'top', horizontal: 'left'}}
-                        targetOrigin={{vertical: 'bottom', horizontal: 'left'}}
-                        listStyle={{
-                            background: '#40C4FF',
-                        }}
-                        menuStyle={{
-                            maxHeight: '150px',
-                            overflowY: 'auto',
-                        }}
-                        menuProps={{
-                            id: 'c-autocomplete__menu',
-                        }}
+                        placeholder="Type your commands here, and hit Enter."
+                        style={{color: '#fff'}}
                     />
                 </div>
 
@@ -220,14 +188,15 @@ class Game extends React.Component {
                 <StatsMenu />
                 <Shop sendAction={this.sendAction} />
 
-                <Dialog
-                    title={this.props.connection.lastEvent}
-                    open={!this.props.connection.isConnected}
-                    modal={true}
-                    titleStyle={{textAlign: 'center'}}
-                >
-                    <LinearProgress mode="indeterminate" />
-                </Dialog>
+                <div style={{textAlign: 'center'}}
+                >{this.props.connection.lastEvent}<br />
+                {!this.props.connection.isConnected}
+                    <div mode="indeterminate" />
+                </div>
+                {
+                    this.props.character &&
+                    <BottomMenu className="c-bottom-menu" socket={this.props.socket} />
+                }
             </div>
         );
     }

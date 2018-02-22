@@ -2,13 +2,6 @@ import React from 'react';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
-// UI
-import Dialog from 'material-ui/Dialog';
-import RaisedButton from 'material-ui/RaisedButton';
-import {Tabs, Tab} from 'material-ui/Tabs';
-import {List, ListItem} from 'material-ui/List';
-import CircularProgress from 'material-ui/CircularProgress';
-
 // Actions
 import {shopBuy, shopSell, shopClose, getItemDetails} from './actions';
 
@@ -103,7 +96,7 @@ class Shop extends React.Component {
         }
 
         if (!this.props.shop.details || this.props.shop.details.itemId !== this.state.selected.item.id) {
-            return <CircularProgress size={80} thickness={5} />;
+            return <div size={80} thickness={5} />;
         }
 
         const itemTemplate = this.props.items[this.state.selected.item.id];
@@ -124,7 +117,7 @@ class Shop extends React.Component {
 
     renderInventory() {
         if (!this.props.shop.buy.enabled) {
-            return <ListItem disabled={true}>Not interested in buying.</ListItem>;
+            return <li disabled={true}>Not interested in buying.</li>;
         }
 
         if (!this.props.inventory) {
@@ -132,7 +125,7 @@ class Shop extends React.Component {
         }
 
         return this.props.inventory.map((item, index) =>
-            <ListItem
+            <li
                 key={index}
                 rightIcon={(
                     !item.stats.stackable ? null : <span style={badgeStyle}>{item.stats.durability}</span>
@@ -142,7 +135,7 @@ class Shop extends React.Component {
                 className={this.isSelected(item.fingerprint, 'inventory')}
             >
                 {item.name}
-            </ListItem>
+            </li>
         );
     }
 
@@ -151,7 +144,7 @@ class Shop extends React.Component {
             return null;
         }
 
-        const closeButton = <RaisedButton
+        const closeButton = <button
             label="Close"
             secondary={true}
             onClick={this.props.shopClose}
@@ -159,13 +152,13 @@ class Shop extends React.Component {
         />;
 
         return (
-            <Dialog
+            <div
                 title={this.props.shop.title}
                 onRequestClose={this.props.shopClose}
                 open={this.props.shop.open}
                 bodyStyle={{padding: '0px'}}
             >
-                <Tabs
+                <ul
                     value={this.state.tab}
                     onChange={(value) => {
                         this.setState({
@@ -175,7 +168,7 @@ class Shop extends React.Component {
                 >
                     {
                         this.props.shop.sell.enabled &&
-                        <Tab label="Buy" value="buy">
+                        <li label="Buy" value="buy">
                             <div className="c-shop-items">
                                 <div className="__item-list">
                                     <strong>Selling</strong>
@@ -191,7 +184,7 @@ class Shop extends React.Component {
                                                     Object.assign(style, {'color': 'rgba(0,0,0, 0.3)'});
                                                 }
 
-                                                return <ListItem
+                                                return <li
                                                     key={index}
                                                     rightIcon={rightIcon}
                                                     innerDivStyle={style}
@@ -199,7 +192,7 @@ class Shop extends React.Component {
                                                     className={this.isSelected(index, 'selling')}
                                                 >
                                                     {this.props.items[item.id].name}
-                                                </ListItem>;
+                                                </li>;
                                             })
                                         }
                                     </List>
@@ -207,7 +200,7 @@ class Shop extends React.Component {
                                 <div className="__item-details">
                                     <strong>Item Details</strong><br/>
                                     {this.renderItemDetails('selling')}
-                                    <RaisedButton
+                                    <button
                                         label="Buy Item"
                                         primary={true}
                                         className="__action-shop"
@@ -217,11 +210,11 @@ class Shop extends React.Component {
                                     {closeButton}
                                 </div>
                             </div>
-                        </Tab>
+                        </li>
                     }
                     {
                         this.props.shop.buy.enabled &&
-                        <Tab label="Sell" value="sell">
+                        <li label="Sell" value="sell">
                             <div className="c-shop-items">
                                 <div className="__item-list">
                                     <strong>Your Inventory</strong>
@@ -232,7 +225,7 @@ class Shop extends React.Component {
                                 <div className="__item-details">
                                     <strong>Item Details</strong><br/>
                                     {this.renderItemDetails('inventory')}
-                                    <RaisedButton
+                                    <button
                                         label="Sell Item"
                                         primary={true}
                                         className="__action-shop"
@@ -242,10 +235,10 @@ class Shop extends React.Component {
                                     {closeButton}
                                 </div>
                             </div>
-                        </Tab>
+                        </li>
                     }
-                </Tabs>
-            </Dialog>
+                </ul>
+            </div>
         );
     }
 };

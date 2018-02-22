@@ -2,12 +2,6 @@ import React from 'react';
 import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 
-// UI
-import Paper from 'material-ui/Paper';
-import RaisedButton from 'material-ui/RaisedButton';
-import SelectField from 'material-ui/SelectField';
-import MenuItem from 'material-ui/MenuItem';
-
 // actions
 import {createCharacter} from './actions';
 
@@ -41,10 +35,10 @@ class Character extends React.Component {
     render() {
         return (
             <div className="c-character">
-                <Paper zDepth={1} rounded={true} className="__form">
+                <div className="__form">
                     <h3>Create Character</h3>
 
-                    <SelectField
+                    <select
                         fullWidth={true}
                         onChange={(event, key, payload) => {
                             this.setState({city: payload});
@@ -56,27 +50,21 @@ class Character extends React.Component {
                     >
                         {
                             Object.keys(this.props.game.maps).map((mapId) =>
-                                <MenuItem
+                                <option
                                     key={mapId}
                                     value={mapId}
-                                    primaryText={this.props.game.maps[mapId].name}
-                                />
+                                >{this.props.game.maps[mapId].name}</option>
                             )
                         }
-                    </SelectField>
+                    </select>
 
                     {
                         this.props.error &&
                         <p>{this.props.error}</p>
                     }
 
-                    <RaisedButton
-                        onClick={this.signup.bind(this)}
-                        label="Create Character"
-                        primary={true}
-                        fullWidth={true}
-                    />
-                </Paper>
+                    <button onClick={this.signup.bind(this)}>Create Character</button>
+                </div>
             </div>
         );
     }

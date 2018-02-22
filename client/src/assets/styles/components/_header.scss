@@ -1,9 +1,43 @@
-.c-header {
-    position: relative;
-    z-index: 1600;
+#header {
+    background: #2b284e;
+    color: #ddd;
+    line-height: 50px;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, .2);
 
-    &__toolbar > * {
-        margin-left: 10px !important;
-        margin-right: 0 !important;
+    .container {
+        display: flex;
+        flex-direction: row;
+
+        .logo {
+            font-size: 150%;
+            color: #fff;
+        }
+        ul, ul li {
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+        }
+        ul {
+            margin: 0 -15px;
+            flex: auto;
+            display: flex;
+
+            li {
+                a {
+                    display: block;
+                    padding: 0 15px;
+                    color: inherit;
+                    &:hover {
+                        color: #fff;
+                    }
+                    &.active {
+                        text-decoration: underline;
+                    }
+                }
+            }
+        }
+        ul.nav-auth {
+            justify-content: flex-end;
+        }
     }
 }

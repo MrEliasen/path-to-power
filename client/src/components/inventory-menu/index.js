@@ -5,18 +5,6 @@ import {bindActionCreators} from 'redux';
 // actions
 import {toggleInventoryMenu, equipItem, unequipItem} from './actions';
 
-// UI
-import Drawer from 'material-ui/Drawer';
-import Subheader from 'material-ui/Subheader';
-import Divider from 'material-ui/Divider';
-import MenuItem from 'material-ui/MenuItem';
-import AppBar from 'material-ui/AppBar';
-import {ListItem} from 'material-ui/List';
-import IconButton from 'material-ui/IconButton';
-import RaisedButton from 'material-ui/RaisedButton';
-import NavigationClose from 'material-ui/svg-icons/navigation/close';
-import NavigationBack from 'material-ui/svg-icons/navigation/last-page';
-
 const menuItemStyle = {
     'lineHeight': '32px',
     'minHeight': '32px',
@@ -92,23 +80,9 @@ class InventoryMenu extends React.Component {
 
         return (
             <React.Fragment>
-                <Drawer
-                    width={275}
-                    openSecondary={true}
-                    open={this.props.open}
-                    docked={false}
-                    className="c-inventory-menu"
-                    onRequestChange={this.props.toggleInventoryMenu}
-                >
-                    <AppBar
-                        title={`Inventory (${this.props.inventory.length}/${this.props.charcterStats.inventorySize})`}
-                        iconElementLeft={
-                            <IconButton onClick={this.props.toggleInventoryMenu}>
-                                <NavigationClose />
-                            </IconButton>
-                        }
-                    />
-                    <Subheader>Equipped Items</Subheader>
+                <div className="c-inventory-menu" >
+                    <div>{`Inventory (${this.props.inventory.length}/${this.props.charcterStats.inventorySize})`}</div>
+                    <div>Equipped Items</div>
                     {
                         hasEquippedItems &&
                         this.props.inventory.map((item, index) => {
@@ -116,25 +90,19 @@ class InventoryMenu extends React.Component {
                                 return null;
                             }
 
-                            return <MenuItem
+                            return <div
                                 onClick={(e) => this.setState({open: true, item, index})}
                                 key={item.fingerprint}
                                 style={menuItemStyle}
-                                primaryText={item.name}
-                            />;
+                            >{item.name}</div>;
                         })
                     }
                     {
                         !hasEquippedItems &&
-                        <ListItem
-                            primaryText="Nothing Equipped"
-                            secondaryText="Click an item to show more info."
-                            disabled={true}
-                            style={{fontSize: '14px', paddingTop: '0px'}}
-                        />
+                        <div style={{fontSize: '14px', paddingTop: '0px'}}>Nothing Equipped<br />Click an item to show more info.</div>
                     }
-                    <Divider/>
-                    <Subheader>Inventory Items</Subheader>
+                    <div className="divider"/>
+                    <div>Inventory Items</div>
                     <div className="c-inventory-list">
                         {
                             this.props.inventory &&
@@ -143,56 +111,30 @@ class InventoryMenu extends React.Component {
                                     return null;
                                 }
 
-                                return <MenuItem
+                                return <div
                                     onClick={(e) => this.setState({open: true, item, index})}
                                     key={item.fingerprint}
                                     style={menuItemStyle}
-                                    primaryText={item.name}
                                     className="__inventory-item"
-                                    secondaryText={(item.stats.stackable ? `${item.stats.durability}` : '')}
-                                />;
+                                >{item.name}<br />{(item.stats.stackable ? `${item.stats.durability}` : '')}</div>;
                             })
                         }
                         {
                             !hasInventoryItems &&
-                            <ListItem
-                                primaryText="Inventory is empty"
-                                secondaryText="You can buy items from the Pawn Shop, take them from NPCs and more."
-                                secondaryTextLines={2}
-                                disabled={true}
-                                style={{backgroundColor: 'none', fontSize: '14px', paddingTop: '0px'}}
-                            />
+                            <div style={{backgroundColor: 'none', fontSize: '14px', paddingTop: '0px'}}>Inventory is empty<br />You can buy items from the Pawn Shop, take them from NPCs and more.</div>
                         }
                     </div>
-                </Drawer>
-                <Drawer
-                    width={325}
-                    openSecondary={true}
-                    open={this.state.open}
-                    docked={false}
-                    onRequestChange={() => {
-                        this.setState({open: false});
-                    }}
+                </div>
+                <div
                 >
                     {
                         this.state.index >= 0 &&
                         <React.Fragment>
-                            <AppBar
-                                title={this.props.inventory[this.state.index].name}
-                                showMenuIconButton={false}
-                                iconElementRight={
-                                    <IconButton onClick={() => {
-                                        this.setState({open: false});
-                                    }}>
-                                        <NavigationBack />
-                                    </IconButton>
-                                }
-                            />
-                            <Subheader>Description</Subheader>
+                            <div>{this.props.inventory[this.state.index].name}</div>
+                            <div>Description</div>
                             <p style={styles.info}>{this.generateDescription(this.props.inventory[this.state.index])}</p>
-
-                            <Divider/>
-                            <Subheader>Stats</Subheader>
+                            <div className="divider"/>
+                            <div>Stats</div>
                             {
                                 this.props.inventory[this.state.index].stats &&
                                 Object.keys(this.props.inventory[this.state.index].stats).map((statKey) => {
@@ -201,27 +143,27 @@ class InventoryMenu extends React.Component {
                                     }
                                 })
                             }
-                            <Divider/>
+                            <div className="divider"/>
                             <div className="c-item-actions">
                                 {
                                     this.props.inventory[this.state.index].stats.equipable &&
                                     this.props.inventory[this.state.index].equipped_slot &&
-                                    <RaisedButton onClick={this.unequip.bind(this)} label="Un-Equip" secondary={true} />
+                                    <button onClick={this.unequip.bind(this)} label="Un-Equip" secondary={true} />
                                 }
                                 {
                                     this.props.inventory[this.state.index].stats.equipable &&
                                     !this.props.inventory[this.state.index].equipped_slot &&
-                                    <RaisedButton onClick={this.equip.bind(this)} label="Equip" primary={true}/>
+                                    <button onClick={this.equip.bind(this)} label="Equip" primary={true}/>
                                 }
                                 {
                                     this.props.inventory[this.state.index].hasUseEffect &&
-                                    <RaisedButton onClick={this.useItem.bind(this)} label="Use" primary={true}/>
+                                    <button onClick={this.useItem.bind(this)} label="Use" primary={true}/>
                                 }
-                                <RaisedButton label="Drop" onClick={this.drop.bind(this)}/>
+                                <button label="Drop" onClick={this.drop.bind(this)}/>
                             </div>
                         </React.Fragment>
                     }
-                </Drawer>
+                </div>
             </React.Fragment>
         );
     }

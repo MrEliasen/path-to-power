@@ -7,9 +7,6 @@ import {BrowserRouter} from 'react-router-dom';
 import reducers from './reducers';
 import App from './components/app';
 
-// UI
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-
 let store;
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
@@ -30,9 +27,7 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
 ReactDOM.render(
     <Provider store={store}>
         <BrowserRouter>
-            <MuiThemeProvider>
                 <App/>
-            </MuiThemeProvider>
         </BrowserRouter>
     </Provider>,
     document.querySelector('#root')

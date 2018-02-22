@@ -5,14 +5,14 @@ import {connect} from 'react-redux';
 import {Route} from 'react-router-dom';
 
 // Pages
-import Game from '../game';
-import Auth from '../auth';
-import Home from '../home';
+import HomeContainer from '../home';
+import PageContainer from '../page';
+import AuthContainer from '../auth';
+import GameContainer from '../game';
 import Character from '../character';
 
 // Components
 import Header from '../header';
-import BottomMenu from '../bottom-menu';
 
 // Twitch old ass lib
 // TODO: Code own implementation
@@ -100,18 +100,17 @@ class App extends React.Component {
         return (
             <React.Fragment>
                 <Header />
-                <div className="c-main">
-                    <React.Fragment>
-                        <Route exact path="/" component={Home} />
-                        <Route path="/auth" component={Auth} />
-                        <Route path="/game" component={Game} />
+                <Route exact path="/" component={() => (<div id="featured" />)} />
+                <main id="main">
+                    <div className="container">
+                        <Route exact path="/" component={HomeContainer} />
+                        <Route path="/page" component={PageContainer} />
+                        <Route path="/about" component={PageContainer} />
+                        <Route path="/auth" component={AuthContainer} />
+                        <Route path="/game" component={GameContainer} />
                         <Route path="/character" component={Character} />
-                    </React.Fragment>
-                </div>
-                {
-                    this.props.character &&
-                    <BottomMenu className="c-bottom-menu" socket={this.socket} />
-                }
+                    </div>
+                </main>
             </React.Fragment>
         );
     }

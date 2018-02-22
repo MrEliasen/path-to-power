@@ -1,9 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
 
-// UI
-import Paper from 'material-ui/Paper';
-
 class Events extends React.Component {
     constructor(props) {
         super(props);
@@ -127,11 +124,7 @@ class Events extends React.Component {
 
     render() {
         return (
-            <Paper
-                zDepth={1}
-                rounded={true}
-                className="c-game__events e-padding"
-            >
+            <div className="c-game__events e-padding">
                 {
                     this.props.events &&
                     this.props.events.map((event, index) => <React.Fragment key={index}>
@@ -139,7 +132,7 @@ class Events extends React.Component {
                         {this.renderEvent(event, index)}
                     </React.Fragment>)
                 }
-            </Paper>
+            </div>
         );
     }
 }
