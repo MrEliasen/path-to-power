@@ -6,7 +6,7 @@ import {bindActionCreators} from 'redux';
 import {toggleInventoryMenu} from '../inventory-menu/actions';
 import {togglePlayersMenu} from '../players-menu/actions';
 import {toggleStatsMenu} from '../stats-menu/actions';
-import {newCommand} from '../game/actions';
+import {newCommand} from '../actions';
 import {clearEvents, newEvent} from '../events/actions';
 
 class BottomMenu extends React.Component {

@@ -3,20 +3,20 @@ import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
-import Events from '../events';
-import Location from '../location';
-import Shop from '../shop';
-import BottomMenu from '../bottom-menu';
+import Events from './events';
+import Location from './location';
+import Shop from './shop';
+import BottomMenu from './bottom-menu';
 
-import {clearEvents, newEvent} from '../events/actions';
+import {clearEvents, newEvent} from './events/actions';
 import {newCommand} from './actions';
-import {moveCharacter} from '../character/actions';
+import {moveCharacter} from './character/actions';
 
 // Components
-import InventoryMenu from '../inventory-menu';
-import PlayersMenu from '../players-menu';
-import StatsMenu from '../stats-menu';
-import Chat from '../chat';
+import InventoryMenu from './inventory-menu';
+import PlayersMenu from './players-menu';
+import StatsMenu from './stats-menu';
+import Chat from './chat';
 
 class Game extends React.Component {
     constructor(props) {

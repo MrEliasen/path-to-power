@@ -9,10 +9,10 @@ import HomeContainer from '../home';
 import PageContainer from '../page';
 import AuthContainer from '../auth';
 import GameContainer from '../game';
-import Character from '../character';
+import Character from '../game/character';
 
 // Components
-import Header from '../header';
+import Header from './header';
 
 // Twitch old ass lib
 // TODO: Code own implementation

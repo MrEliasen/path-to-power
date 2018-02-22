@@ -1,6 +1,6 @@
-import {SHOP_LOAD, SHOP_EVENT, SHOP_UPDATE, SHOP_ITEM_PRICE} from '../../../../server/shared/types';
+import {SHOP_LOAD, SHOP_EVENT, SHOP_UPDATE, SHOP_ITEM_PRICE} from '../../../../../server/shared/types';
 import {SHOP_CLOSE} from './types';
-import {REMOTE_LOGOUT} from '../../../../server/shared/types';
+import {REMOTE_LOGOUT} from '../../../../../server/shared/types';
 
 export default function(state = null, action) {
     switch (action.type) {

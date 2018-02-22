@@ -3,10 +3,10 @@ import {withRouter, NavLink, Link} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
-import config from '../../config';
+import config from '../../../config';
 
 // actions
-import {authLogout} from '../auth/actions';
+import {authLogout} from '../../auth/actions';
 
 class Header extends React.Component {
     constructor(props) {

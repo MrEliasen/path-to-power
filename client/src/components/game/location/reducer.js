@@ -5,11 +5,10 @@ import {
     UPDATE_GROUND_ITEMS,
     CLIENT_PICKUP_ITEM,
     CLIENT_DROP_MULTIPLE_ITEMS,
-
     NPC_JOINED_GRID,
     NPC_LEFT_GRID,
 } from './types';
-import {REMOTE_LOGOUT} from '../../../../server/shared/types';
+import {REMOTE_LOGOUT} from '../../../../../server/shared/types';
 
 const defaultState = {
     description: '',

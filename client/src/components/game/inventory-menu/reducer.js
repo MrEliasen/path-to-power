@@ -1,7 +1,7 @@
-import {STATS_MENU_TOGGLE} from './types';
-import {INVENTORY_MENU_TOGGLE} from '../inventory-menu/types';
+import {INVENTORY_MENU_TOGGLE} from './types';
 import {PLAYERS_MENU_TOGGLE} from '../players-menu/types';
-import {REMOTE_LOGOUT} from '../../../../server/shared/types';
+import {STATS_MENU_TOGGLE} from './types';
+import {REMOTE_LOGOUT} from '../../../../../server/shared/types';
 
 const defaultState = {
     open: false,
@@ -9,13 +9,13 @@ const defaultState = {
 
 export default function(state = defaultState, action) {
     switch (action.type) {
-        case STATS_MENU_TOGGLE:
+        case INVENTORY_MENU_TOGGLE:
             return {
                 open: !state.open,
             };
 
-        case INVENTORY_MENU_TOGGLE:
         case PLAYERS_MENU_TOGGLE:
+        case STATS_MENU_TOGGLE:
             return {
                 open: false,
             };
