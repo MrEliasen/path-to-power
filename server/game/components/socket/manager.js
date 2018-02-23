@@ -51,12 +51,13 @@ export default class SocketManager extends EventEmitter {
      * Will make the IO server start listening for connections
      */
     listen() {
-        this.Game.logger.info(`Socket is listing on port ${this.Game.config.server.port}`);
         // setup event listeners
         this.io.on('connection', this.onConnection.bind(this));
 
         // listen for connections
         this.server.listen(this.Game.config.server.port);
+
+        console.log(`Socket is listing on port ${this.Game.config.server.port}`);
     }
 
     /**

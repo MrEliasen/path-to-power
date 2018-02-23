@@ -378,7 +378,7 @@ export default class ItemManager {
 
         ItemModel.deleteMany({user_id: character.user_id, _id: {$nin: itemDbIds}}, (err, deleted) => {
             if (err) {
-                return this.Game.logger.error(err);
+                return this.Game.logger.error(err.message);
             }
 
             if (deleted.deletedCount) {

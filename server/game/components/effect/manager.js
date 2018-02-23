@@ -27,7 +27,7 @@ export default class EffectManager {
 
             if (!effect) {
                 this.Game.logger.error(`The effect ID ${effectId}, did not match any effects.`);
-                return reject();
+                return reject(new Error(`The effect ID ${effectId}, did not match any effects.`));
             }
 
             await effect(character, effectModifiers || {}, item, this.Game)

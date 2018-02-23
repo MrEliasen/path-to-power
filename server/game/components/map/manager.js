@@ -49,7 +49,7 @@ export default class MapManager {
                         }
                     })
                     .catch((err) => {
-                        this.Game.logger.error('MAP LOAD ERROR', err);
+                        this.Game.logger.error(err.message);
                     });
             });
         });

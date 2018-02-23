@@ -87,7 +87,7 @@ export default class CharacterManager {
             });
         })
         .catch((err) => {
-            this.Game.logger.error(err);
+            this.Game.logger.error(err.message);
         });
     }
 

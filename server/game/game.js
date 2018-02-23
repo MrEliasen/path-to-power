@@ -85,6 +85,10 @@ class Game {
             ],
         });
 
+        this.logger.error = () => {
+            console.log(arguments);
+        };
+
         // if we are not in a production environment, add console logging as well
         if (process.env.NODE_ENV === 'development') {
             this.logger.add(new winston.transports.Console({
@@ -107,35 +111,35 @@ class Game {
         this.version = child_process.execSync('git rev-parse --short=7 HEAD').toString().trim();
 
         await this.itemManager.init().then((count) => {
-            this.logger.info(`ITEM MANAGER LOADED ${count} ITEMS TEMPLATES`);
+            console.log(`ITEM MANAGER LOADED ${count} ITEMS TEMPLATES`);
         });
 
         await this.mapManager.init().then((count) => {
-            this.logger.info(`MAP MANAGER LOADED ${count} MAPS`);
+            console.log(`MAP MANAGER LOADED ${count} MAPS`);
         });
 
         await this.factionManager.init().then((count) => {
-            this.logger.info(`FACTION MANAGER LOADED ${count} FACTIONS`);
+            console.log(`FACTION MANAGER LOADED ${count} FACTIONS`);
         });
 
         await this.shopManager.init().then(() => {
-            this.logger.info('SHOP MANAGER LOADED');
+            console.log('SHOP MANAGER LOADED');
         });
 
         await this.structureManager.init().then(() => {
-            this.logger.info('STRUCTURES MANAGER LOADED');
+            console.log('STRUCTURES MANAGER LOADED');
         });
 
         await this.commandManager.init().then(() => {
-            this.logger.info('COMMAND MANAGER LOADED');
+            console.log('COMMAND MANAGER LOADED');
         });
 
         await this.characterManager.init().then(() => {
-            this.logger.info('CHARACTERS MANAGER LOADED');
+            console.log('CHARACTERS MANAGER LOADED');
         });
 
         await this.skillManager.init().then(() => {
-            this.logger.info('SKILL MANAGER LOADED');
+            console.log('SKILL MANAGER LOADED');
         });
 
         // setup autosave
