@@ -34,7 +34,7 @@ export default class NPCManager {
             const NPC = this.npcs.find((obj) => obj.id === npcId);
 
             if (!NPC) {
-                return reject(`NPC ${npcId} was not found.`);
+                return reject(new Error(`NPC ${npcId} was not found.`));
             }
 
             resolve(NPC);
@@ -85,7 +85,7 @@ export default class NPCManager {
         }
 
         await new Promise((resolve) => {
-            this.Game.itemManager.loadNPCInventory(newNPC)
+            return this.Game.itemManager.loadNPCInventory(newNPC)
             .then((items) => {
                 if (items.length) {
                     newNPC.setInventory(items);
@@ -99,9 +99,6 @@ export default class NPCManager {
 
                 // add the NPC to the managed list of npcs
                 this.npcs.push(newNPC);
-
-                // track the NPC location
-                this.changeLocation(newNPC, newNPC.location);
 
                 if (dispatchEvents) {
                     // dispatch join event to grid
@@ -118,11 +115,9 @@ export default class NPCManager {
                 }
 
                 resolve();
-
-                //this.Game.logger.info(`NPC generated. Type: "${newNPC.npc_id}"; Map "${newNPC.location.map}; Location "${newNPC.location.y}-${newNPC.location.x}"`);
             })
             .catch((err) => {
-                this.Game.logger.info(err);
+                this.Game.logger.error(err.message);
                 resolve();
             });
         });
@@ -133,74 +128,72 @@ export default class NPCManager {
      * @param  {NPC} NPC  The NPC object to reset
      */
     reset(NPC) {
-        this.Game.mapManager.get(NPC.location.map).then((gameMap) => {
-            // get the NPC template
-            const npcTemplate = deepCopyObject(NPCList[NPC.npc_id]);
+        return this.Game.mapManager.get(NPC.location.map)
+            .then(async (gameMap) => {
+                // get the NPC template
+                const npcTemplate = deepCopyObject(NPCList[NPC.npc_id]);
 
-            // generate location is one of not set
-            NPC.location = npcTemplate.location;
+                // generate location is one of not set
+                NPC.location = npcTemplate.location;
 
-            // reset all hostiles
-            NPC.hostiles = [];
+                // reset all hostiles
+                NPC.hostiles = [];
 
-            if (!NPC.location) {
-                NPC.location = {
-                    x: Math.round(Math.random() * gameMap.gridSize.x),
-                    y: Math.round(Math.random() * gameMap.gridSize.y),
-                };
-            }
+                if (!NPC.location) {
+                    NPC.location = {
+                        x: Math.round(Math.random() * gameMap.gridSize.x),
+                        y: Math.round(Math.random() * gameMap.gridSize.y),
+                    };
+                }
 
-            // set the default inventory
-            NPC.inventory = npcTemplate.inventory;
+                // set the default inventory
+                NPC.inventory = npcTemplate.inventory;
 
-            // add the map id to the location
-            NPC.location.map = gameMap.id;
+                // add the map id to the location
+                NPC.location.map = gameMap.id;
 
-            // add the map id to the location
-            NPC.stats = {...npcTemplate.stats};
+                // add the map id to the location
+                NPC.stats = {...npcTemplate.stats};
 
-            // randomise gender, and pick a name
-            NPC.gender = Math.round(Math.random() * 1) ? 'male' : 'female';
-            NPC.name = namesList[NPC.gender][Math.round(Math.random() * (namesList[NPC.gender].length - 1))];
+                // randomise gender, and pick a name
+                NPC.gender = Math.round(Math.random() * 1) ? 'male' : 'female';
+                NPC.name = namesList[NPC.gender][Math.round(Math.random() * (namesList[NPC.gender].length - 1))];
 
-            this.Game.itemManager.loadNPCInventory(NPC)
-                .then((items) => {
-                    if (items.length) {
-                        NPC.setInventory(items);
+                await this.Game.itemManager.loadNPCInventory(NPC)
+                    .then(async (items) => {
+                        if (items.length) {
+                            NPC.setInventory(items);
 
-                        items.map((item, index) => {
-                            if (item.equipped_slot) {
-                                NPC.equip(index);
-                            }
+                            items.map((item, index) => {
+                                if (item.equipped_slot) {
+                                    NPC.equip(index);
+                                }
+                            });
+                        }
+
+                        // dispatch join event to grid
+                        this.Game.eventToRoom(NPC.getLocationId(), 'info', `${NPC.name} emerges from a nearby sidewalk.`);
+
+                        // reinitiate the timers
+                        await NPC.initLogicTimers();
+
+                        // Set the NPC as alive (in case it was dead)
+                        NPC.dead = false;
+
+                        // update the grid's player list
+                        this.Game.socketManager.dispatchToRoom(NPC.getLocationId(), {
+                            type: NPC_JOINED_GRID,
+                            payload: {
+                                name: NPC.name,
+                                id: NPC.id,
+                            },
                         });
-                    }
 
-                    // track the NPC location
-                    this.changeLocation(NPC, NPC.location);
-
-                    // dispatch join event to grid
-                    this.Game.eventToRoom(NPC.getLocationId(), 'info', `${NPC.name} emerges from a nearby sidewalk.`);
-
-                    // reinitiate the timers
-                    NPC.initLogicTimers();
-
-                    // Set the NPC as alive (in case it was dead)
-                    NPC.dead = false;
-
-                    // update the grid's player list
-                    this.Game.socketManager.dispatchToRoom(NPC.getLocationId(), {
-                        type: NPC_JOINED_GRID,
-                        payload: {
-                            name: NPC.name,
-                            id: NPC.id,
-                        },
-                    });
-
-                    this.Game.logger.info(`NPC Reset. Type: "${NPC.npc_id}"; Map "${NPC.location.map}; Location "${NPC.location.y}-${NPC.location.x}"`);
-                })
-                .catch((err) => {});
-        })
-        .catch(() => {});
+                        this.Game.logger.info(`NPC Reset. Type: "${NPC.npc_id}"; Map "${NPC.location.map}; Location "${NPC.location.y}-${NPC.location.x}"`);
+                    })
+                    .catch((err) => {});
+            })
+            .catch(() => {});
     }
 
     /**
@@ -209,7 +202,7 @@ export default class NPCManager {
      */
     remove(npcId) {
         return new Promise((resolve, reject) => {
-            this.get(npcId)
+            return this.get(npcId)
                 .then((NPC) => {
                     // remove npc from the grid list of npcs
                     this.Game.socketManager.dispatchToRoom(NPC.getLocationId(), {
@@ -221,7 +214,7 @@ export default class NPCManager {
                     resolve();
                 })
                 .catch((err) => {
-                    this.Game.logger.error(err);
+                    this.Game.logger.error(err.message);
                     resolve();
                 });
         });
@@ -290,17 +283,6 @@ export default class NPCManager {
     }
 
     /**
-     * Updated the tracked NPCs location
-     * @param  {NPC}    NPC         The NPC
-     * @param  {Object} oldLocation {map, x, y}
-     * @param  {Object} newLocation {map, x ,y}
-     */
-    changeLocation(NPC, newLocation = {}, oldLocation = {}) {
-        //this.removeFromGrid(oldLocation, NPC);
-        //this.addToGrid(newLocation, NPC);
-    }
-
-    /**
      * Updates the client map location information
      * @param  {String} locationId  Grid Location Id to update
      */
@@ -354,14 +336,8 @@ export default class NPCManager {
             payload: NPC.id,
         });
 
-        // save the old location
-        //const oldLocation = {...NPC.location};
-
         // update character location
         NPC.updateLocation(newLocation.map, newLocation.x, newLocation.y);
-
-        // change location on the map
-        //this.changeLocation(NPC, newLocation, oldLocation);
 
         // dispatch join message to new grid
         this.Game.eventToRoom(NPC.getLocationId(), 'info', `${NPC.name} the ${NPC.type}, moves in from the ${directionIn}`);
@@ -384,49 +360,54 @@ export default class NPCManager {
     kill(NPC, killer) {
         return new Promise((resolve, reject) => {
             // get the map so we know where to respawn the player
-            this.Game.mapManager.get(NPC.location.map).then((gameMap) => {
-                // kill the NPC
-                NPC.die().then((droppedLoot) => {
-                    // save the old location before it is overwritten by the die() method on the character
-                    const oldLocationId = NPC.getLocationId();
-                    // save the old location
-                    const oldLocation = {...NPC.location};
+            return this.Game.mapManager.get(NPC.location.map)
+                .then((gameMap) => {
+                    // kill the NPC
+                    return NPC.die()
+                        .then(async (droppedLoot) => {
+                            // save the old location before it is overwritten by the die() method on the character
+                            const oldLocationId = NPC.getLocationId();
+                            // save the old location
+                            const oldLocation = {...NPC.location};
 
-                    // remove player from the grid list of players
-                    this.Game.socketManager.dispatchToRoom(NPC.getLocationId(), {
-                        type: NPC_LEFT_GRID,
-                        payload: NPC.id,
-                    });
+                            // remove player from the grid list of players
+                            this.Game.socketManager.dispatchToRoom(NPC.getLocationId(), {
+                                type: NPC_LEFT_GRID,
+                                payload: NPC.id,
+                            });
 
-                    // Hide the NPC
-                    //this.removeFromGrid(NPC.location, NPC);
+                            // drop all items on the ground
+                            droppedLoot.items.forEach((item) => {
+                                this.Game.itemManager.drop(oldLocation.map, oldLocation.x, oldLocation.y, item);
+                            });
 
-                    // drop all items on the ground
-                    droppedLoot.items.forEach((item) => {
-                        this.Game.itemManager.drop(oldLocation.map, oldLocation.x, oldLocation.y, item);
-                    });
+                            // give the cash to the killer
+                            killer.updateCash(droppedLoot.cash);
+                            killer.updateExp(droppedLoot.exp);
 
-                    // give the cash to the killer
-                    killer.updateCash(droppedLoot.cash);
-                    killer.updateExp(droppedLoot.exp);
+                            // Update the killers character stats
+                            await this.Game.characterManager.updateClient(killer.user_id);
 
-                    // Update the killers character stats
-                    this.Game.characterManager.updateClient(killer.user_id);
+                            // Let the killer know how much money they received
+                            this.Game.eventToUser(killer.user_id, 'info', `You find ${droppedLoot.cash} money on ${NPC.name} the ${NPC.type}.`);
 
-                    // Let the killer know how much money they received
-                    this.Game.eventToUser(killer.user_id, 'info', `You find ${droppedLoot.cash} money on ${NPC.name} the ${NPC.type}.`);
+                            // update the client's ground look at the location
+                            this.Game.socketManager.dispatchToRoom(oldLocationId, {
+                                type: UPDATE_GROUND_ITEMS,
+                                payload: this.Game.itemManager.getLocationList(oldLocation.map, oldLocation.x, oldLocation.y, true),
+                            });
 
-                    // update the client's ground look at the location
-                    this.Game.socketManager.dispatchToRoom(oldLocationId, {
-                        type: UPDATE_GROUND_ITEMS,
-                        payload: this.Game.itemManager.getLocationList(oldLocation.map, oldLocation.x, oldLocation.y, true),
-                    });
-
-                    resolve(oldLocationId);
+                            resolve(oldLocationId);
+                        })
+                        .catch((err) => {
+                            this.Game.logger.error(err.message);
+                            reject(new Error(err.message));
+                        });
                 })
-                .catch(reject);
-            })
-            .catch(reject);
+                .catch((err) => {
+                    this.Game.logger.error(err.message);
+                    reject(new Error(err.message));
+                });
         });
     }
 

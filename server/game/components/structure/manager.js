@@ -40,8 +40,6 @@ export default class StructureManager {
      * @return {Promise}
      */
     async add(map_id, x, y, structure_id) {
-        //this.Game.logger.debug('StructureManager::add', {map_id, structure_id, x, y});
-
         const structureData = structureList[structure_id];
         const newStructure = new Structure(this.Game, structureData, {map: map_id, x, y});
 
@@ -79,7 +77,7 @@ export default class StructureManager {
 
             // if we didn't find any matching buildings..
             if (!matches.length) {
-                return reject(`No buildings at ${map_id}/${y}/${x}, matching command ${command}`);
+                return reject(new Error(`No buildings at ${map_id}/${y}/${x}, matching command ${command}`));
             }
 
             resolve(matches);
@@ -112,7 +110,7 @@ export default class StructureManager {
 
             // if we didn't find any matching buildings..
             if (!shops.length) {
-                return reject();
+                return reject(new Error('No shop found'));
             }
 
             resolve(shops);

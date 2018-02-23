@@ -9,7 +9,7 @@ import {UPDATE_GROUND_ITEMS} from './types';
  * @param  {Object} cmdObject           The command object template
  * @param  {Game}   Game                The main Game object
  */
-function cmdDrop(socket, character, command, params, cmdObject, Game) {
+async function cmdDrop(socket, character, command, params, cmdObject, Game) {
     let item = params[0];
     let amount = params[1] || 1;
 
@@ -36,7 +36,8 @@ function cmdDrop(socket, character, command, params, cmdObject, Game) {
     });
 
     // update the clients character informatiom
-    Game.characterManager.updateClient(character.user_id, 'inventory');
+    await Game.characterManager.updateClient(character.user_id, 'inventory');
+
     // send the updated items list to the grid
     Game.socketManager.dispatchToRoom(character.getLocationId(), {
         type: UPDATE_GROUND_ITEMS,
@@ -58,7 +59,7 @@ function cmdDrop(socket, character, command, params, cmdObject, Game) {
  * @param  {Object} cmdObject           The command object template
  * @param  {Game}   Game                The main Game object
  */
-function cmdDropByIndex(socket, character, command, params, cmdObject, Game) {
+async function cmdDropByIndex(socket, character, command, params, cmdObject, Game) {
     let itemIndex = params[0];
     let amount = params[1] || 1;
 
@@ -80,7 +81,8 @@ function cmdDropByIndex(socket, character, command, params, cmdObject, Game) {
     });
 
     // update the clients character informatiom
-    Game.characterManager.updateClient(character.user_id, 'inventory');
+    await Game.characterManager.updateClient(character.user_id, 'inventory');
+
     // send the updated items list to the grid
     Game.socketManager.dispatchToRoom(character.getLocationId(), {
         type: UPDATE_GROUND_ITEMS,
@@ -102,7 +104,7 @@ function cmdDropByIndex(socket, character, command, params, cmdObject, Game) {
  * @param  {Object} cmdObject           The command object template
  * @param  {Game}   Game                The main Game object
  */
-function cmdGiveItem(socket, character, command, params, cmdObject, Game) {
+async function cmdGiveItem(socket, character, command, params, cmdObject, Game) {
     const amount = params[1] || 1;
     const item = Game.itemManager.add(params[0].id);
 
@@ -113,7 +115,7 @@ function cmdGiveItem(socket, character, command, params, cmdObject, Game) {
 
     character.giveItem(item, amount);
     Game.eventToSocket(socket, 'info', `You received ${amount}x ${item.name}`);
-    Game.characterManager.updateClient(socket.user.user_id, 'inventory');
+    await Game.characterManager.updateClient(socket.user.user_id, 'inventory');
 }
 
 /**
@@ -125,7 +127,7 @@ function cmdGiveItem(socket, character, command, params, cmdObject, Game) {
  * @param  {Object} cmdObject           The command object template
  * @param  {Game}   Game                The main Game object
  */
-function cmdPickup(socket, character, command, params, cmdObject, Game) {
+async function cmdPickup(socket, character, command, params, cmdObject, Game) {
     let item = params[0];
     let amount = params[1] || 1;
     const location = [
@@ -135,8 +137,8 @@ function cmdPickup(socket, character, command, params, cmdObject, Game) {
     ];
 
     // get the item from the ground
-    Game.itemManager.pickup(...location, item.name, amount)
-        .then((itemObject) => {
+    await Game.itemManager.pickup(...location, item.name, amount)
+        .then(async (itemObject) => {
             // make sure the character has room
             if (!character.hasRoomForItem(itemObject)) {
                 return Game.eventToUser(user_id, 'error', 'You do not have enough inventory space to pickup that item.');
@@ -145,7 +147,7 @@ function cmdPickup(socket, character, command, params, cmdObject, Game) {
             // add to user inventory
             character.giveItem(itemObject);
             // update the character details, client side
-            Game.characterManager.updateClient(character.user_id);
+            await Game.characterManager.updateClient(character.user_id);
             // update the grid item list for the clients
             Game.socketManager.dispatchToRoom(character.getLocationId(), {
                 type: UPDATE_GROUND_ITEMS,
@@ -158,6 +160,7 @@ function cmdPickup(socket, character, command, params, cmdObject, Game) {
             Game.eventToRoom(character.getLocationId(), 'info', `${character.name} picked up ${(!itemObject.stats.stackable ? 'a' : `${itemObject.stats.durability}x`)} ${itemObject.name} from the ground`, [character.user_id]);
         })
         .catch((error) => {
+            Game.logger.error(error.message);
             Game.eventToSocket(socket, 'error', 'There are no items on the ground, matching that name.');
         });
 }
@@ -171,7 +174,7 @@ function cmdPickup(socket, character, command, params, cmdObject, Game) {
  * @param  {Object} cmdObject           The command object template
  * @param  {Game}   Game                The main Game object
  */
-function cmdUseItem(socket, character, command, params, cmdObject, Game) {
+async function cmdUseItem(socket, character, command, params, cmdObject, Game) {
     const index = params[0];
     const item = character.inventory[index];
 
@@ -180,7 +183,15 @@ function cmdUseItem(socket, character, command, params, cmdObject, Game) {
         return;
     }
 
-    item.use(character);
+    const useEffect = item.use(character);
+
+    if (typeof useEffect.then === 'function') {
+        await useEffect
+            .then()
+            .catch((err) => {
+                Game.logger.error(err.message);
+            });
+    }
 }
 
 module.exports = [

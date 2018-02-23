@@ -203,8 +203,8 @@ export default class CharacterManager {
         if (wasLoggedIn && existingCharacter) {
             // re-add targetedBy, if the player has any
             // NOTE: reapply any temporary effects here to avoid relogging to clear them
-            existingCharacter.targetedBy.forEach((user) => {
-                character.gridLock(user);
+            existingCharacter.targetedBy.forEach(async (user) => {
+                await character.gridLock(user);
             });
 
             await this.remove(character.user_id);

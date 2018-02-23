@@ -24,7 +24,7 @@ export default class GameMap {
             let loaded = 0;
 
             // Load all NPCS for map
-            this.npcs.forEach(async (npc) => {
+            await this.npcs.forEach(async (npc) => {
                 let amount = npc.amount || 1;
 
                 for (let i = amount; i > 0; i--) {
@@ -46,12 +46,12 @@ export default class GameMap {
      * @return {Promise}
      */
     loadStructures() {
-        return new Promise((resolve) => {
+        return new Promise(async (resolve) => {
             const total = this.structures.length;
             let loaded = 0;
 
             // Load all structures for map
-            this.structures.forEach(async (structure) => {
+            await this.structures.forEach(async (structure) => {
                 await this.Game.structureManager.add(this.id, structure.x, structure.y, structure.id);
 
                 loaded++;
@@ -70,23 +70,23 @@ export default class GameMap {
      * @return {Promise}
      */
     generate() {
-        return new Promise((resolve) => {
+        return new Promise(async (resolve) => {
             // Save the character information (stats/location/etc)
-            this.loadNpcs()
-                .then((npcs) => {
+            await this.loadNpcs()
+                .then(async (npcs) => {
                     this.Game.logger.info(`Generated ${npcs} NPCs in map "${this.id}"`);
 
-                    this.loadStructures()
+                    await this.loadStructures()
                         .then((structures) => {
                             this.Game.logger.info(`Generated ${structures} structures in map "${this.id}"`);
                             resolve();
                         })
                         .catch((err) => {
-                            this.Game.logger.error(err);
+                            this.Game.logger.error(err.message);
                         });
                 })
                 .catch((err) => {
-                    this.Game.logger.error(err);
+                    this.Game.logger.error(err.message);
                 });
         });
     }

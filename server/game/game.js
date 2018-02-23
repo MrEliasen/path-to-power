@@ -78,8 +78,8 @@ class Game {
                     timestamp: true,
                 }),
                 new winston.transports.File({
-                    filename: 'debug.log',
-                    level: 'debug',
+                    filename: 'info.log',
+                    level: 'info',
                     timestamp: true,
                 }),
             ],
@@ -150,31 +150,26 @@ class Game {
      * @param  {String} timerName The name of the timer
      */
     onTimer(timerName) {
-        let callback = () => {};
+        this.logger.debug(`Running timer ${timerName}`);
 
         switch (timerName) {
             case 'autosave':
-                callback = () => {
-                    // NOTE: if you want to add anything to the auto save, do it here
-                    this.characterManager.saveAll();
-                };
-                break;
+                // NOTE: if you want to add anything to the auto save, do it here
+                return this.characterManager.saveAll()
+                    .catch((err) => {
+                        this.logger.error(err.message);
+                    });
+
             case 'newday':
-                callback = () => {
-                    // NOTE: if you want to add anything to the "new day" timer, do it here
-                    this.shopManager.resupplyAll()
-                        .then(() => {
-                            this.socketManager.dispatchToServer(addNews('The sun rises once again, and wave of new drugs flood the streets.'));
-                        })
-                        .catch(() => {
-
-                        });
-                };
-                break;
+                // NOTE: if you want to add anything to the "new day" timer, do it here
+                return this.shopManager.resupplyAll()
+                    .then(() => {
+                        this.socketManager.dispatchToServer(addNews('The sun rises once again, and wave of new drugs flood the streets.'));
+                    })
+                    .catch((err) => {
+                        this.logger.error(err.message);
+                    });
         }
-
-        this.logger.debug(`Running timer ${timerName}`);
-        callback();
     }
 
     /**
@@ -262,7 +257,11 @@ class Game {
      */
     async shutdown(callback) {
         this.Game.logger.info('Received shutdown signal, Running shutdown procedure');
-        await this.characterManager.saveAll();
+        await this.characterManager.saveAll()
+            .catch((err) => {
+                this.logger.error(err.message);
+            });
+
         callback();
     }
 }

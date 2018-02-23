@@ -125,8 +125,8 @@ export default class Shop {
      */
     sellItem(user_id, fingerprint) {
         // get the character of the player
-        this.Game.characterManager.get(user_id)
-            .then((character) => {
+        return this.Game.characterManager.get(user_id)
+            .then(async (character) => {
                 const amount = 1;
 
                 // check if shop is buying anything
@@ -199,7 +199,7 @@ export default class Shop {
                 this.Game.eventToUser(user_id, 'success', `You sold 1x ${soldItem.name} for ${(amount * pricePerUnit)}`);
 
                 // update client character object
-                this.Game.characterManager.updateClient(character.user_id);
+                await this.Game.characterManager.updateClient(character.user_id);
 
                 // update grid, with the shop update
                 this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
@@ -210,7 +210,9 @@ export default class Shop {
                     },
                 });
             })
-            .catch(() => {});
+            .catch((err) => {
+                this.Game.logger.error(err.message);
+            });
     }
 
     /**
@@ -267,8 +269,8 @@ export default class Shop {
      */
     buyItem(user_id, index, itemId) {
         // get the character of the player
-        this.Game.characterManager.get(user_id)
-            .then((character) => {
+        return this.Game.characterManager.get(user_id)
+            .then(async (character) => {
                 // check if shop is selling anything
                 if (!this.sell.enabled) {
                     return this.Game.eventToUser(user_id, 'error', 'They are not selling anything.');
@@ -329,7 +331,7 @@ export default class Shop {
                 character.giveItem(itemToAdd, 1);
 
                 // update the client player object
-                this.Game.characterManager.updateClient(character.user_id);
+                await this.Game.characterManager.updateClient(character.user_id);
 
                 // send event to client
                 this.Game.eventToUser(character.user_id, 'success', `You have purchased 1x ${itemTemplate.name} for ${price}`);
@@ -351,7 +353,7 @@ export default class Shop {
                 }
             })
             .catch((err) => {
-                this.Game.logger.error(err);
+                this.Game.logger.error(err.message);
             });
     }
 
@@ -404,13 +406,6 @@ export default class Shop {
 
         // If a location ID is set, dispatch an inventory update to the grid
         // TODO: when a player opens a shop window, join a socket room for the shop, on move, leave the room.
-        /*this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-            type: SHOP_UPDATE,
-            payload: {
-                shopId: this.id,
-                inventory: this.getSellList(true)
-            }
-        });*/
     }
 
     /**
@@ -423,16 +418,16 @@ export default class Shop {
         return new Promise((resolve, reject) => {
             priceType = priceType.toString().toLowerCase();
 
-            this.Game.itemManager.getItemPrice(itemId)
+            return this.Game.itemManager.getItemPrice(itemId)
                 .then((itemPrice) => {
                     if (!['sell', 'buy'].includes(priceType)) {
-                        return reject();
+                        return reject(new Error('Invalid price list'));
                     }
 
                     resolve(itemPrice * this[priceType].priceMultiplier);
                 })
-                .catch(() => {
-                    reject();
+                .catch((err) => {
+                    reject(new Error(err.message));
                 });
         });
     }

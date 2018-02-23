@@ -67,9 +67,9 @@ export default class MapManager {
      * Updates the client map location information
      * @param  {String} user_id  User Id of client to update
      */
-    updateClient(user_id) {
+    async updateClient(user_id) {
         // Get the character object
-        return this.Game.characterManager.get(user_id)
+        await this.Game.characterManager.get(user_id)
             .then((character) => {
                 const location = [
                     character.location.map,
@@ -104,7 +104,7 @@ export default class MapManager {
             const gameMap = this.maps[map_id];
 
             if (!gameMap) {
-                return reject(`Map with id ${map_id} was not found`);
+                return reject(new Error(`Map with id ${map_id} was not found`));
             }
 
             resolve(gameMap);
@@ -121,7 +121,7 @@ export default class MapManager {
             const gameMap = this.getByNameSync(mapName);
 
             if (!gameMap) {
-                return reject();
+                return reject(new Error('Game map not found'));
             }
 
             resolve(gameMap);
@@ -198,7 +198,9 @@ export default class MapManager {
                     y: parseInt(y, 10),
                 });
             })
-            .catch(() => {});
+            .catch((err) => {
+                this.Game.logger.error(err.message);
+            });
         });
     }
 

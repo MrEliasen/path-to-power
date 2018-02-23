@@ -40,7 +40,7 @@ export default class SocketManager extends EventEmitter {
             const socket = this.clients[user_id];
 
             if (!socket) {
-                return reject(`No socket found for user: ${user_id}`);
+                return reject(new Error(`No socket found for user: ${user_id}`));
             }
 
             resolve(socket);
@@ -83,7 +83,7 @@ export default class SocketManager extends EventEmitter {
      */
     logoutOutSession(user_id) {
         return new Promise((resolve, reject) => {
-            this.get(user_id)
+            return this.get(user_id)
                 .then((socket) => {
                     const user = {...socket.user};
                     socket.user = null;
@@ -226,13 +226,13 @@ export default class SocketManager extends EventEmitter {
     userJoinRoom(user_id, roomId) {
         const action = this.get(user_id);
 
-        action
+        return action
             .then((socket) => {
                 socket.join(roomId);
             })
-            .catch(() => {});
-
-        return action;
+            .catch((err) => {
+                this.Game.logger.error(err.message);
+            });
     }
 
     /**
@@ -243,12 +243,12 @@ export default class SocketManager extends EventEmitter {
     userLeaveRoom(user_id, roomId) {
         const action = this.get(user_id);
 
-        action
+        return action
             .then((socket) => {
                 socket.leave(roomId);
             })
-            .catch(() => {});
-
-        return action;
+            .catch((err) => {
+                this.Game.logger.error(err.message);
+            });
     }
 }

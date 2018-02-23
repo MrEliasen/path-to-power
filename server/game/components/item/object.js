@@ -125,15 +125,15 @@ export default class Item {
     /**
      * Use the item, if the item allows
      */
-    use(character) {
+    async use(character) {
         // check if the item has an effect, if not, its not useable
         if (!this.stats.useEffect) {
             return;
         }
 
         // apply the item use effect
-        this.Game.effectManager.apply(character, this.stats.useEffect.id, this.stats.useEffect.modifiers, this)
-            .then((effect) => {
+        await this.Game.effectManager.apply(character, this.stats.useEffect.id, this.stats.useEffect.modifiers, this)
+            .then(async (effect) => {
                 // check if the use effect, reduces item durability
                 if (this.stats.useEffect.ignoreDurability) {
                     return;
@@ -144,14 +144,14 @@ export default class Item {
 
                 // if the item has no more uses, remove it.
                 if (this.stats.durability <= 0) {
-                    this.Game.itemManager.remove(character, this);
+                    await this.Game.itemManager.remove(character, this);
                 }
 
                 // update the users inventory on the client side.
-                this.Game.characterManager.updateClient(character.user_id, 'inventory');
+                await this.Game.characterManager.updateClient(character.user_id, 'inventory');
             })
             .catch((err) => {
-                return;
+                this.Game.logger.error(err.message);
             });
     }
 

@@ -23,7 +23,7 @@ function getDirectionName(move) {
  * @param  {Object} cmdObject           The command object template
  * @param  {Game}   Game                The main Game object
  */
-function cmdFlee(socket, character, command, params, cmdObject, Game) {
+async function cmdFlee(socket, character, command, params, cmdObject, Game) {
     let direction = params[0] || null;
     let moveAction = {grid: '', direction: 0};
     const oldLocation = {...character.location};
@@ -66,8 +66,8 @@ function cmdFlee(socket, character, command, params, cmdObject, Game) {
     newLocation[moveAction.grid] = newLocation[moveAction.grid] + moveAction.direction;
 
     // get the map of the character location
-    Game.mapManager.get(character.location.map)
-        .then((gameMap) => {
+    await Game.mapManager.get(character.location.map)
+        .then(async (gameMap) => {
             // check if the move action is valid
             if (!gameMap.isValidPostion(newLocation.x, newLocation.y)) {
                 // if not, flip the direction
@@ -98,9 +98,11 @@ function cmdFlee(socket, character, command, params, cmdObject, Game) {
 
             // remove gridlock from the character's target
             if (character.target) {
-                character.releaseTarget()
+                await character.releaseTarget()
                     .then(() => {})
-                    .error(Game.logger.error);
+                    .catch((err) => {
+                        Game.logger.error(err.message);
+                    });
             }
 
             // reset the gridlock
@@ -147,10 +149,10 @@ function cmdFlee(socket, character, command, params, cmdObject, Game) {
             socket.join(character.getLocationId());
 
             // update client/socket character and location information
-            Game.characterManager.updateClient(character.user_id);
+            await Game.characterManager.updateClient(character.user_id);
 
             // send the new grid details to the client
-            Game.mapManager.updateClient(character.user_id);
+            await Game.mapManager.updateClient(character.user_id);
         })
         .catch(() => {});
 }

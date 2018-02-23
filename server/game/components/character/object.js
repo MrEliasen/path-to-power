@@ -181,13 +181,15 @@ export default class Character {
     setTarget(target) {
         // release the gridlock of the current target, if set
         return this.releaseTarget()
-            .then(() => {
+            .then(async () => {
                 // set the new target
                 this.target = target;
                 // and gridlock them
-                this.target.gridLock(this);
+                await this.target.gridLock(this);
             })
-            .catch(() => {});
+            .catch((err) => {
+                this.Game.logger.error(err.message);
+            });
     }
 
     /**

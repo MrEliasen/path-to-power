@@ -28,7 +28,7 @@ export default class ItemManager {
      * @return {Promise}
      */
     init() {
-        return new Promise((resolve, rejecte) => {
+        return new Promise(async (resolve, rejecte) => {
             ItemList.map((itemData) => {
                 this.templates[itemData.id] = new Item(null, itemData);
             });
@@ -37,13 +37,12 @@ export default class ItemManager {
             this.Game.commandManager.registerManager(ItemCommands);
 
             // set the initial item prices.
-            this.updatePrices()
+            await this.updatePrices()
                 .then(() =>{
                     resolve(ItemList.length);
                 })
                 .catch((err) => {
                     this.Game.logger.error(err);
-                    //process.exit();
                 });
         });
     }
@@ -133,7 +132,7 @@ export default class ItemManager {
             let foundItem;
 
             if (!locationItems.length) {
-                return reject();
+                return reject(new Error('No items at the location'));
             }
 
             // find the item at the location, the user wants to pickup
@@ -150,7 +149,7 @@ export default class ItemManager {
 
                 // if still not found, reject
                 if (foundItemIndex === -1) {
-                    return reject();
+                    return reject(new Error('Item not found'));
                 }
 
                 foundItem = locationItems[foundItemIndex];
@@ -308,8 +307,8 @@ export default class ItemManager {
         return new Promise((resolve, reject) => {
             ItemModel.find({user_id: character.user_id}, {_id: 1, item_id: 1, modifiers: 1, equipped_slot: 1}, (err, items) => {
                 if (err) {
-                    this.Game.logger.error(`Error loading inventory for user: ${user_id}`, err);
-                    return reject(err);
+                    this.Game.logger.error(err.message);
+                    return reject(new Error(err.message));
                 }
 
                 const inventory = items.map((item) => {
@@ -330,7 +329,7 @@ export default class ItemManager {
      * @return {Promise}
      */
     saveInventory(character) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const numOfItems = character.inventory.length;
             let succeeded = 0;
             let failed = 0;
@@ -341,8 +340,8 @@ export default class ItemManager {
                 return resolve();
             }
 
-            character.inventory.map((item) => {
-                this.dbSave(character.user_id, item)
+            await character.inventory.map(async (item) => {
+                await this.dbSave(character.user_id, item)
                     .then((itemDbObject) => {
                         succeeded++;
 
@@ -406,7 +405,7 @@ export default class ItemManager {
 
             newItem.save((error) => {
                 if (error) {
-                    return reject(error);
+                    return reject(new Error(error.message));
                 }
 
                 item._id = newItem._id;
@@ -422,16 +421,16 @@ export default class ItemManager {
      * @return {[type]}         [description]
      */
     dbSave(user_id, item) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (!user_id) {
-                return reject('Missing user_id');
+                return reject(new Error('Missing user_id'));
             }
 
             // retrive item from database if it has a "_id", so we can update it.
-            this.dbLoad(item)
-                .then((loadedItem) => {
+            await this.dbLoad(item)
+                .then(async (loadedItem) => {
                     if (!loadedItem) {
-                        return this.dbCreate(user_id, item);
+                        return await this.dbCreate(user_id, item);
                     }
 
                     loadedItem.modifiers = item.getModifiers();
@@ -439,7 +438,7 @@ export default class ItemManager {
 
                     loadedItem.save((error) => {
                         if (error) {
-                            return reject(error);
+                            return reject(new Error(error.message));
                         }
 
                         resolve(loadedItem);
@@ -461,11 +460,11 @@ export default class ItemManager {
 
             ItemModel.findOne({_id: item._id.toString()}, (error, item) => {
                 if (error) {
-                    return reject(error);
+                    return reject(new Error(error.message));
                 }
 
                 if (!item) {
-                    reject();
+                    reject(new Error('Item not found'));
                 }
 
                 resolve(item);
@@ -500,7 +499,7 @@ export default class ItemManager {
             const template = this.getTemplate(itemId);
 
             if (!template) {
-                return reject();
+                return reject(new Error('Template not found'));
             }
 
             resolve(template.stats.price);

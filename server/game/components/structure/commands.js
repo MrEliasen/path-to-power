@@ -11,8 +11,8 @@ import {LEFT_GRID} from '../map/types';
  */
 function cmdHeal(socket, character, command, params, cmdObject, Game) {
     // get the structures list at the character location
-    Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
-        .then((structures) => {
+    return Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
+        .then(async (structures) => {
             // if we get multiple structures, but only one parameter, the client didnt specify
             // the structure to use the command with.
             if (structures.length > 1 && params.length <= 1) {
@@ -64,10 +64,11 @@ function cmdHeal(socket, character, command, params, cmdObject, Game) {
             character.stats.health = character.stats.health + heal_amount;
 
             // update the client
-            Game.characterManager.updateClient(character.user_id, 'stats');
+            await Game.characterManager.updateClient(character.user_id, 'stats');
             Game.eventToSocket(socket, 'success', `You healed ${heal_amount}, costing you ${price}`);
         })
         .catch((err) => {
+            Game.logger.error(err.message);
             return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
         });
 }
@@ -83,7 +84,7 @@ function cmdHeal(socket, character, command, params, cmdObject, Game) {
  */
 function cmdTravel(socket, character, command, params, cmdObject, Game) {
     // get the structures list at the character location
-    Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
+    return Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
         .then((structures) => {
             // if we get multiple structures, but only one parameter, the client didnt specify
             // the structure to use the command with.
@@ -116,8 +117,8 @@ function cmdTravel(socket, character, command, params, cmdObject, Game) {
             }
 
             // remove aim from current target, if set
-            character.releaseTarget()
-                .then(() => {
+            return character.releaseTarget()
+                .then(async () => {
                     // remove money
                     character.updateCash(travel_details.cost * -1);
 
@@ -132,9 +133,6 @@ function cmdTravel(socket, character, command, params, cmdObject, Game) {
                         type: LEFT_GRID,
                         payload: character.user_id,
                     });
-
-                    // save the old location
-                    const oldLocation = {...character.location};
 
                     // get the airport location on the destination map
                     const newLocation = {
@@ -159,19 +157,20 @@ function cmdTravel(socket, character, command, params, cmdObject, Game) {
                     socket.join(character.getLocationId());
 
                     // update client/socket character and location information
-                    Game.characterManager.updateClient(character.user_id);
+                    await Game.characterManager.updateClient(character.user_id);
 
                     // send the new grid details to the client
-                    Game.mapManager.updateClient(character.user_id);
+                    await Game.mapManager.updateClient(character.user_id);
 
                     // let the character know they traveled
                     Game.eventToSocket(socket, 'info', `You land at your new destination, at the price of ${travel_details.cost}.`);
                 })
                 .catch((err) => {
-                    Game.logger.info(err);
+                    Game.logger.info(err.message);
                 });
         })
         .catch((err) => {
+            Game.logger.error(err.message);
             return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
         });
 }
@@ -187,11 +186,11 @@ function cmdTravel(socket, character, command, params, cmdObject, Game) {
  */
 function cmdWithdraw(socket, character, command, params, cmdObject, Game) {
     // get the structures list at the character location
-    Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
+    return Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
         .then((structures) => {
             // Fetch the character first
-            Game.characterManager.get(socket.user.user_id)
-                .then((character) => {
+            return Game.characterManager.get(socket.user.user_id)
+                .then(async (character) => {
                     let amount = parseInt(params[0], 10);
 
                     // make sure the amount is valid
@@ -213,12 +212,15 @@ function cmdWithdraw(socket, character, command, params, cmdObject, Game) {
                     character.updateCash(amount);
 
                     // update the client's character object
-                    Game.characterManager.updateClient(character.user_id, 'stats');
+                    await Game.characterManager.updateClient(character.user_id, 'stats');
                     Game.eventToSocket(socket, 'success', `You withdrew ${amount} from your bank account. You have ${character.stats.bank} left in your account.`);
                 })
-                .catch(() => {});
+                .catch((err) => {
+                    Game.logger.error(err.message);
+                });
         })
         .catch((err) => {
+            Game.logger.error(err.message);
             return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
         });
 }
@@ -234,11 +236,11 @@ function cmdWithdraw(socket, character, command, params, cmdObject, Game) {
  */
 function cmdDeposit(socket, character, command, params, cmdObject, Game) {
     // get the structures list at the character location
-    Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
+    return Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
         .then((structures) => {
             // Fetch the character first
-            Game.characterManager.get(socket.user.user_id)
-                .then((character) => {
+            return Game.characterManager.get(socket.user.user_id)
+                .then(async (character) => {
                     let amount = parseInt(params[0], 10);
 
                     // make sure the amount is valid
@@ -260,13 +262,16 @@ function cmdDeposit(socket, character, command, params, cmdObject, Game) {
                     character.updateBank(amount);
 
                     // update the client's character object
-                    Game.characterManager.updateClient(character.user_id, 'stats');
+                    await Game.characterManager.updateClient(character.user_id, 'stats');
 
                     Game.eventToSocket(socket, 'success', `You deposit ${amount} into your bank account. Your account is now at ${character.stats.bank}.`);
                 })
-                .catch(() => {});
+                .catch((err) => {
+                    Game.logger.error(err.message);
+                });
         })
         .catch((err) => {
+            Game.logger.error(err.message);
             return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
         });
 }
@@ -282,11 +287,11 @@ function cmdDeposit(socket, character, command, params, cmdObject, Game) {
  */
 function cmdDrink(socket, character, command, params, cmdObject, Game) {
     // Fetch the character first
-    Game.characterManager.get(socket.user.user_id)
+    return Game.characterManager.get(socket.user.user_id)
         .then((character) => {
             // get the structures list at the character location
-            Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
-                .then((structures) => {
+            return Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
+                .then(async (structures) => {
                     // if we get multiple structures, but only one parameter, the client didnt specify
                     // the structure to use the command with.
                     if (structures.length > 1 && params.length <= 1) {
@@ -332,15 +337,16 @@ function cmdDrink(socket, character, command, params, cmdObject, Game) {
                     character.updateExp(exp);
 
                     // update the client
-                    Game.characterManager.updateClient(character.user_id, 'stats');
+                    await Game.characterManager.updateClient(character.user_id, 'stats');
                     Game.eventToSocket(socket, 'success', `You drink ${drinks} drinks, costing you ${price} and ${health} health. (+${exp} rep)`);
                 })
                 .catch((err) => {
+                    Game.logger.error(err.message);
                     return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
                 });
         })
         .catch((err) => {
-            Game.logger.debug(err);
+            Game.logger.error(err.message);
         });
 }
 

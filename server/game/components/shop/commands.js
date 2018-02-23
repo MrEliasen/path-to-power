@@ -9,11 +9,11 @@ import {SHOP_LOAD} from '../../../shared/types';
  * @param  {Object} cmdObject           The command object template
  * @param  {Game}   Game                The main Game object
  */
-function cmdShop(socket, character, command, params, cmdObject, Game) {
+async function cmdShop(socket, character, command, params, cmdObject, Game) {
     const shopName = params[0] || null;
 
     // get the structures list at the character location
-    Game.structureManager.getWithShop(character.location.map, character.location.x, character.location.y)
+    await Game.structureManager.getWithShop(character.location.map, character.location.x, character.location.y)
         .then((shops) => {
             let shop;
 
@@ -39,7 +39,8 @@ function cmdShop(socket, character, command, params, cmdObject, Game) {
                 payload: shop.toObject(),
             });
         })
-        .catch(() => {
+        .catch((err) => {
+            Game.logger.error(err.message);
             // if no shops are found at the location
             return Game.eventToSocket(socket, 'error', 'There are no shops in the area.');
         });

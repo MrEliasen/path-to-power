@@ -51,21 +51,25 @@ export default class ShopManager {
 
         switch (action.type) {
             case SHOP_BUY:
-                this.get(action.payload.shop)
+                return this.get(action.payload.shop)
                     .then((shop) => shop.buyItem(socket.user.user_id, action.payload.index, action.payload.item))
-                    .catch(() => {});
+                    .catch((err) => {
+                        this.Game.logger.error(err.message);
+                    });
                 break;
 
             case SHOP_SELL:
-                this.get(action.payload.shop)
+                return this.get(action.payload.shop)
                     .then((shop) => shop.sellItem(socket.user.user_id, action.payload.item))
-                    .catch(() => {});
+                    .catch((err) => {
+                        this.Game.logger.error(err.message);
+                    });
                 break;
 
             case SHOP_GET_PRICE:
-                this.get(action.payload.shop)
+                return this.get(action.payload.shop)
                     .then((shop) => {
-                        shop.getItemPrice(action.payload.itemId, action.payload.priceType)
+                        return shop.getItemPrice(action.payload.itemId, action.payload.priceType)
                             .then((price) => {
                                 this.Game.socketManager.dispatchToSocket(socket, {
                                     type: SHOP_ITEM_PRICE,
@@ -75,11 +79,13 @@ export default class ShopManager {
                                     },
                                 });
                             })
-                            .catch(() => {
-
+                            .catch((err) => {
+                                this.Game.logger.error(err.message);
                             });
                     })
-                    .catch(() => {});
+                    .catch((err) => {
+                        this.Game.logger.error(err.message);
+                    });
                 break;
         }
     }
@@ -94,7 +100,7 @@ export default class ShopManager {
             const shop = this.shops.find((obj) => obj.fingerprint === fingerprint);
 
             if (!shop) {
-                return reject(`No shop with fingerprint ${fingerprint} found.`);
+                return reject(new Error(`No shop with fingerprint ${fingerprint} found.`));
             }
 
             resolve(shop);
@@ -106,7 +112,7 @@ export default class ShopManager {
      * @param {String} shopId Shop ID of the shop to create.
      */
     add(shopId) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             //this.Game.logger.info('ShopManager::add', {shopId})
 
             const ShopData = ShopList.find((obj) => obj.id === shopId);
@@ -130,7 +136,7 @@ export default class ShopManager {
         return new Promise((resolve, reject) => {
             // update the pricing on items, with the priceRange array defined.
             // We update the templates as they will be used for the sell and buy prices
-            this.Game.itemManager.updatePrices()
+            return this.Game.itemManager.updatePrices()
                 .then(() => {
                     // resupply all the shops
                     this.shops.forEach((shop) => {
@@ -140,8 +146,8 @@ export default class ShopManager {
                     resolve();
                 })
                 .catch((err) =>{
-                    this.Game.logger.error(err);
-                    reject();
+                    this.Game.logger.error(err.message);
+                    reject(err);
                 });
         });
     }
