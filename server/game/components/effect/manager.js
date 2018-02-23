@@ -22,7 +22,7 @@ export default class EffectManager {
      * @return {Mixed}                      Anything returned from the effect
      */
     apply(character, effectId, effectModifiers = {}, item = null) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const effect = Effects[effectId];
 
             if (!effect) {
@@ -30,20 +30,14 @@ export default class EffectManager {
                 return reject();
             }
 
-            const effectOutput = effect(character, effectModifiers || {}, item, this.Game);
-
-            // if the effect does not return a promise, just return the output as is
-            if (typeof effectOutput.then !== 'function') {
-                return resolve(effectOutput);
-            }
-
-            // if its a promise, wait for the resolve/reject
-            effectOutput.then((output) => {
-                resolve(output);
-            })
-            .catch(() => {
-                reject();
-            });
+            await effect(character, effectModifiers || {}, item, this.Game)
+                .then((output) => {
+                    resolve(output);
+                })
+                .catch((err) => {
+                    this.Game.logger.error(err.message);
+                    reject(err);
+                });
         });
     }
 }

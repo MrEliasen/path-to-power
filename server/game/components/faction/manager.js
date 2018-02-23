@@ -32,7 +32,8 @@ export default class FactionManager {
             // load our factions
             FactionModel.find({}, (err, factions) => {
                 if (err) {
-                    return reject(this.Game.logger.error(err));
+                    this.Game.logger.error(err.message);
+                    return reject(new Error(err.message));
                 }
 
                 let loadedFactions = 0;
@@ -57,7 +58,8 @@ export default class FactionManager {
         return new Promise((resolve, reject) => {
             CharacterModel.update({_id: user_id}, {$set: {faction_id}}, (err, updated) => {
                 if (err) {
-                    return reject(err);
+                    this.Game.logger.error(err.message);
+                    return reject(new Error(err.message));
                 }
 
                 resolve({user_id, faction_id});
@@ -74,7 +76,8 @@ export default class FactionManager {
         return new Promise((resolve, reject) => {
             CharacterModel.update({_id: user_id}, {$set: {faction_id: ''}}, (err, updated) => {
                 if (err) {
-                    return reject(err);
+                    this.Game.logger.error(err.message);
+                    return reject(new Error(err.message));
                 }
 
                 resolve({user_id});
@@ -104,13 +107,13 @@ export default class FactionManager {
     get(factionId) {
         return new Promise((resolve, reject) => {
             if (!factionId) {
-                return reject();
+                return reject(new Error('No faction ID specified'));
             }
 
             const faction = this.factions.find((obj) => obj.faction_id === factionId);
 
             if (!faction) {
-                return reject();
+                return reject(new Error('Faction not found'));
             }
 
             resolve(faction);
@@ -127,14 +130,14 @@ export default class FactionManager {
             factionName = factionName.toLowerCase();
 
             if (!factionName) {
-                return reject();
+                return reject(new Error('No faction name specified'));
             }
 
             // first check if there is a direct match between the name and a player
             let faction = findObjectInArray(this.factions, 'name_lowercase', factionName);
 
             if (!faction) {
-                return reject();
+                return reject(new Error('Faction not found'));
             }
 
             resolve(faction);
@@ -169,12 +172,12 @@ export default class FactionManager {
         return new Promise((resolve, reject) => {
             FactionModel.findOne({faction_id: faction.faction_id}, (err, dbFaction) => {
                 if (err) {
-                    this.Game.logger.error(err);
-                    return reject('Something went wrong.');
+                    this.Game.logger.error(err.message);
+                    return reject(new Error(err.message));
                 }
 
                 if (!dbFaction) {
-                    return reject('Something went wrong.');
+                    return reject(new Error('Faction was not saved, as it was not found in the databse'));
                 }
 
                 dbFaction.name = faction.name;
@@ -183,11 +186,11 @@ export default class FactionManager {
 
                 dbFaction.save((err) => {
                     if (err) {
-                        this.Game.logger.error(err);
-                        return reject('Something went wrong.');
+                        this.Game.logger.error(err.message);
+                        return reject(new Error(err.message));
                     }
 
-                    this.Game.logger.debug(`Faction ${faction._id} saved.`);
+                    this.Game.logger.info(`Faction ${faction._id} saved.`);
                     resolve();
                 });
             });
@@ -202,59 +205,75 @@ export default class FactionManager {
      * @return {Promise}
      */
     create(user_id, factionName, factionTag) {
-        user_id = user_id.toString();
+        return new Promise(async (resolve, reject) => {
+            user_id = user_id.toString();
 
-        return new Promise((resolve, reject) => {
-            this.Game.characterManager.get(user_id).then((character) => {
-                FactionModel.find({
-                    $or: [
-                        {name_lowercase: factionName.toLowerCase()},
-                        {tag_lowercase: factionTag.toLowerCase()},
-                        {leader_id: user_id},
-                    ],
-                }, (err, factions) => {
-                    if (err) {
-                        this.Game.logger.error(err);
-                        return reject();
-                    }
-
-                    // faction(s) with same name, tag or leader was found
-                    if (factions.length) {
-                        return reject(factions);
-                    }
-
-                    // no duplicates found, create new faction
-                    const newFaction = this.add({
-                        faction_id: uuid(),
-                        name: factionName,
-                        tag: factionTag,
-                        leader_id: user_id.toString(),
-                    });
-
-                    if (!newFaction) {
-                        this.Game.logger.error('Error creating faction object');
-                        return reject();
-                    }
-
-                    const dbFaction = new FactionModel({
-                        ...newFaction.toObject(),
-                    });
-
-                    dbFaction.save(async (err) => {
+            await this.Game.characterManager.get(user_id)
+                .then((character) => {
+                    FactionModel.find({
+                        $or: [
+                            {name_lowercase: factionName.toLowerCase()},
+                            {tag_lowercase: factionTag.toLowerCase()},
+                            {leader_id: user_id},
+                        ],
+                    }, (err, factions) => {
                         if (err) {
-                            this.Game.logger.error('Error saving new faction in DB', err);
-                            return this.Game.logger.error(err);
+                            this.Game.logger.error(err.message);
+                            return reject(new Error(err.message));
                         }
-                        // Add the faction object to the character
-                        await newFaction.addMember(character);
-                        // let them know it succeeded
-                        this.Game.logger.debug(`New faction ${newFaction.faction_id} created.`);
-                        // resolve back to caller
-                        resolve(newFaction);
+
+                        // faction(s) with same name, tag or leader was found
+                        if (factions.length) {
+                            // check if they are already a leader of a faction
+                            if (factions.filter((obj) => obj.leader_id === user_id).length) {
+                                return Game.eventToUser(user_id, 'error', 'You cannot be a leader of more than 1 faction at the same time.');
+                            }
+
+                            // check if the faction name is taken
+                            if (factions.filter((obj) => obj.name_lowercase === factionName.toLowerCase()).length) {
+                                return Game.eventToUser(user_id, 'error', 'The faction name is already taken.');
+                            }
+
+                            // check if the faction tag is taken
+                            if (factions.filter((obj) => obj.tag_lowercase === factionTag.toLowerCase()).length) {
+                                return Game.eventToUser(user_id, 'error', 'The faction tag is already taken.');
+                            }
+
+                            return reject(new Error('duplicate'));
+                        }
+
+                        // no duplicates found, create new faction
+                        const newFaction = this.add({
+                            faction_id: uuid(),
+                            name: factionName,
+                            tag: factionTag,
+                            leader_id: user_id.toString(),
+                        });
+
+                        if (!newFaction) {
+                            this.Game.logger.error('Error creating faction object');
+                            return reject(new Error('Error creating faction object'));
+                        }
+
+                        const dbFaction = new FactionModel({
+                            ...newFaction.toObject(),
+                        });
+
+                        dbFaction.save(async (err) => {
+                            if (err) {
+                                this.Game.logger.error(err.message);
+                                return reject(new Error(err.message));
+                            }
+                            // Add the faction object to the character
+                            await newFaction.addMember(character);
+                            // let them know it succeeded
+                            this.Game.logger.debug(`New faction ${newFaction.faction_id} created.`);
+                            // resolve back to caller
+                            resolve(newFaction);
+                        });
                     });
-                });
-            })
-            .catch(() => {});
+                })
+                .catch(() => {});
         });
     }
 
@@ -264,9 +283,9 @@ export default class FactionManager {
      * @return {Promise}
      */
     delete(factionId) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             // get the faction object
-            this.get(factionId)
+            await this.get(factionId)
                 .then(async (faction) => {
                     // remove all members
                     await faction.disband();
@@ -277,14 +296,14 @@ export default class FactionManager {
                     // remove from databse
                     FactionModel.remove({faction_id: factionId}, (err, deleted) => {
                         if (err) {
-                            this.Game.logger.error(err);
-                            reject();
-                            return this.Game.logger.error(err);
+                            this.Game.logger.error(err.message);
+                            return reject(new Error(err.message));
                         }
 
                         CharacterModel.update({faction_id: factionId}, {$set: {faction_id: ''}}, {multi: true}, (error, raw) => {
                             if (err) {
-                                this.Game.logger.error(err);
+                                this.Game.logger.error(err.message);
+                                return reject(new Error(err.message));
                             }
 
                             resolve(factionId);
@@ -292,7 +311,7 @@ export default class FactionManager {
                     });
                 })
                 .catch((err) => {
-                    this.Game.logger.error(err);
+                    this.Game.logger.error(err.message);
                     reject(err);
                 });
         });

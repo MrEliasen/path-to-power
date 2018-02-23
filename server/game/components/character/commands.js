@@ -28,7 +28,7 @@ function checkAttackCooldown(character, Game, callback) {
  * @param  {Object} cmdObject           The command object template
  * @param  {Game} Game                  The main Game object
  */
-function cmdAim(socket, character, command, params, cmdObject, Game) {
+async function cmdAim(socket, character, command, params, cmdObject, Game) {
     const target = params[0];
 
     // check if the character has an existing cooldown for this action, if they are trying to hide
@@ -42,7 +42,7 @@ function cmdAim(socket, character, command, params, cmdObject, Game) {
     const newCooldown = Game.cooldownManager.add(character, 'aim');
 
     // set the new target, releasing the old target's gridlock, and gridlocking the new target.
-    character.setTarget(target);
+    await character.setTarget(target);
 
     // let the player know they are aimed at
     Game.eventToUser(target.user_id, 'warning', `${character.name} has taken aim at you. The only way get out of this, is to kill ${character.name} or /flee <n|s|w|e>`);
@@ -63,7 +63,7 @@ function cmdAim(socket, character, command, params, cmdObject, Game) {
  * @param  {Object} cmdObject           The command object template
  * @param  {Game} Game                  The main Game object
  */
-function cmdGive(socket, character, command, params, cmdObject, Game) {
+async function cmdGive(socket, character, command, params, cmdObject, Game) {
     const receiver = params[0];
     const amount = params[1];
 
@@ -81,8 +81,8 @@ function cmdGive(socket, character, command, params, cmdObject, Game) {
     Game.eventToUser(receiver.user_id, 'info', `${character.name} just gave you ${amount}!`);
 
     // update the character stats of the two players
-    Game.characterManager.updateClient(character.user_id, 'stats');
-    Game.characterManager.updateClient(receiver.user_id, 'stats');
+    await Game.characterManager.updateClient(character.user_id, 'stats');
+    await Game.characterManager.updateClient(receiver.user_id, 'stats');
 }
 
 /**
@@ -108,7 +108,7 @@ function cmdPunch(socket, character, command, params, cmdObject, Game) {
     }
 
     // check if there is a cooldown
-    checkAttackCooldown(character, Game, () => {
+    checkAttackCooldown(character, Game, async () => {
         // check if the attack will hit
         if (!character.attackHit()) {
             // send event to the attacker
@@ -124,7 +124,7 @@ function cmdPunch(socket, character, command, params, cmdObject, Game) {
 
         // if the target died
         if (!attack.healthLeft) {
-            return target.kill(character)
+            return await target.kill(character)
                     .then((oldLocationId) => {
                         // send event to the attacker
                         Game.eventToSocket(socket, 'info', `You land the killing blow on ${target.name}. They fall to the ground, dropping everything they carried.`);
@@ -133,7 +133,9 @@ function cmdPunch(socket, character, command, params, cmdObject, Game) {
                         // send event to the bystanders
                         Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} his their fists. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
                     })
-                    .catch(() => {});
+                    .catch((error) => {
+                        Game.logger.error(error.message);
+                    });
         }
 
         // if the target is an NPC, update their health for all clients in the grid
@@ -142,7 +144,7 @@ function cmdPunch(socket, character, command, params, cmdObject, Game) {
         } else {
             // otherwise
             // update the target client's character inforamtion
-            Game.characterManager.updateClient(target.user_id, 'stats');
+            await Game.characterManager.updateClient(target.user_id, 'stats');
             // send event to the target
             Game.eventToUser(target.user_id, 'info', `${character.name} punch you, dealing ${attack.damageDealt} damage.`);
         }
@@ -163,7 +165,7 @@ function cmdPunch(socket, character, command, params, cmdObject, Game) {
  * @param  {Object} cmdObject           The command object template
  * @param  {Game} Game                  The main Game object
  */
-function cmdRelease(socket, character, command, params, cmdObject, Game) {
+async function cmdRelease(socket, character, command, params, cmdObject, Game) {
     // if they do not have a target, simply ignore the command
     if (!character.target) {
         return Game.eventToSocket(socket, 'info', 'You do not have a target.');
@@ -175,14 +177,16 @@ function cmdRelease(socket, character, command, params, cmdObject, Game) {
     };
 
     // release the gridlock from the target
-    character.releaseTarget()
+    await character.releaseTarget()
         .then(() => {
             // let the client know they removed their target
             Game.eventToSocket(socket, 'info', `You no longer have ${target.name} as your target.`);
             // get the target know they are no longer aimed at
             Game.eventToUser(target.user_id, 'info', `${character.name} releases you from their aim.`);
         })
-        .catch(() => {});
+        .catch((err) => {
+            Game.logger.error(err.message);
+        });
 }
 
 /**
@@ -218,7 +222,7 @@ function cmdShoot(socket, character, command, params, cmdObject, Game) {
     }
 
     // check if there is a cooldown
-    checkAttackCooldown(character, Game, () => {
+    checkAttackCooldown(character, Game, async () => {
         const weapon = character.getEquippedSync('ranged').name;
 
         // check if the attack will hit
@@ -237,7 +241,7 @@ function cmdShoot(socket, character, command, params, cmdObject, Game) {
 
         // if the target died
         if (!attack.healthLeft) {
-            return target.kill(character)
+            return await target.kill(character)
                 .then((oldLocationId) => {
                     // send event to the attacker
                     Game.eventToSocket(socket, 'info', `You hit ${target.name} with your ${weapon}, killing them. They fall to the ground, dropping everything they carried.`);
@@ -246,7 +250,9 @@ function cmdShoot(socket, character, command, params, cmdObject, Game) {
                     // send event to the bystanders
                     Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} with a ${weapon}. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
                 })
-                .catch(() => {});
+                .catch((err) => {
+                    Game.logger.error(err.message);
+                });
         }
 
         // if the target is an NPC, update their health on the client side
@@ -254,7 +260,7 @@ function cmdShoot(socket, character, command, params, cmdObject, Game) {
             Game.npcManager.updateGrid(character.location, character.getLocationId());
         } else {
             // update the target client's character inforamtion
-            Game.characterManager.updateClient(target.user_id, 'stats');
+            await Game.characterManager.updateClient(target.user_id, 'stats');
             // send event to the target
             Game.eventToUser(target.user_id, 'info', `${character.name} shoots you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
         }
@@ -294,7 +300,7 @@ function cmdStrike(socket, character, command, params, cmdObject, Game) {
     }
 
     // check if there is a cooldown
-    checkAttackCooldown(character, Game, () => {
+    checkAttackCooldown(character, Game, async () => {
         const weapon = character.getEquippedSync('melee').name;
 
         // check if the attack will hit
@@ -308,13 +314,13 @@ function cmdStrike(socket, character, command, params, cmdObject, Game) {
         }
 
         // deal damage to the target
-        character.getWeaponDamage('melee')
-            .then((damage) => {
+        await character.getWeaponDamage('melee')
+            .then(async (damage) => {
                 const attack = target.dealDamage(damage, true);
 
                 // if the target died
                 if (!attack.healthLeft) {
-                    return target.kill(character)
+                    return await target.kill(character)
                         .then((oldLocationId) => {
                             // send event to the attacker
                             Game.eventToSocket(socket, 'info', `You land the killing blow on ${target.name}, with your ${weapon}. They fall to the ground, dropping everything they carried.`);
@@ -323,7 +329,9 @@ function cmdStrike(socket, character, command, params, cmdObject, Game) {
                             // send event to the bystanders
                             Game.eventToRoom(oldLocationId, 'info', `You see ${character.name} kill ${target.name} with a ${weapon}. ${target.name} fall to the ground, dropping everything they carried.`, [character.user_id]);
                         })
-                        .catch(() => {});
+                        .catch((err) => {
+                            Game.logger.error(err.message);
+                        });
                 }
 
                 // if the target is an NPC, update their health on the client side
@@ -331,7 +339,7 @@ function cmdStrike(socket, character, command, params, cmdObject, Game) {
                     Game.npcManager.updateGrid(character.location, character.getLocationId());
                 } else {
                     // update the target client's character inforamtion
-                    Game.characterManager.updateClient(target.user_id, 'stats');
+                    await Game.characterManager.updateClient(target.user_id, 'stats');
                     // send event to the target
                     Game.eventToUser(target.user_id, 'info', `${character.name} strikes you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
                 }
@@ -341,8 +349,8 @@ function cmdStrike(socket, character, command, params, cmdObject, Game) {
                 // send event to the bystanders
                 Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} strike ${target.name} with a ${weapon}.`, [character.user_id, target.user_id]);
             })
-            .catch(() => {
-
+            .catch((err) => {
+                Game.logger.error(err.message);
             });
     });
 }

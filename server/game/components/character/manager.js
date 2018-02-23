@@ -78,7 +78,7 @@ export default class CharacterManager {
      * @param  {Mixed} property (optional) if only a part of the character needs updating
      */
     updateClient(user_id, property = null) {
-        this.get(user_id).then((character) => {
+        return this.get(user_id).then((character) => {
             const characterData = character.exportToClient();
 
             this.Game.socketManager.dispatchToUser(user_id, {
@@ -86,8 +86,8 @@ export default class CharacterManager {
                 payload: property ? {[property]: characterData[property]} : characterData,
             });
         })
-        .catch(() => {
-
+        .catch((err) => {
+            this.Game.logger.error(err);
         });
     }
 
@@ -101,7 +101,7 @@ export default class CharacterManager {
             const character = this.getByNameSync(characterName);
 
             if (!character) {
-                return reject();
+                return reject(new Error(`No character found by name ${characterNmae}`));
             }
 
             resolve(character);
@@ -131,7 +131,7 @@ export default class CharacterManager {
             const character = this.getSync(user_id);
 
             if (!character) {
-                return reject(`Character ${user_id} was not found. It was likely never loaded.`);
+                return reject(new Error(`No character found by ID ${user_id}`));
             }
 
             resolve(character);
@@ -158,7 +158,7 @@ export default class CharacterManager {
      */
     dispatchUpdatePlayerList(user_id) {
         // get the player
-        this.get(user_id)
+        return this.get(user_id)
             .then((character) => {
                 // update the clients online player list
                 this.Game.socketManager.dispatchToServer({
@@ -217,7 +217,9 @@ export default class CharacterManager {
         await this.Game.skillManager.load(character);
 
         // check if they are in a faction, and load the faction if so
-        const faction = await this.Game.factionManager.get(character.faction_id).catch(() => {});
+        const faction = await this.Game.factionManager.get(character.faction_id).catch((err) => {
+            this.Game.logger.error(err.message);
+        });
 
         // if they are in a faction, add them to the online list in the faction, and
         // add the faction object to the character
@@ -227,11 +229,9 @@ export default class CharacterManager {
 
         // add the character object to the managed list of characters
         this.characters.push(character);
-        this.dispatchUpdatePlayerList(character.user_id);
+        await this.dispatchUpdatePlayerList(character.user_id);
 
-        this.Game.socketManager.get(character.user_id).then((socket) => {
-            // track the character location
-            this.changeLocation(character, character.location);
+        await this.Game.socketManager.get(character.user_id).then((socket) => {
             // dispatch join event to grid
             this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} emerges from a nearby building`, [character.user_id]);
             // update the grid's player list
@@ -242,7 +242,9 @@ export default class CharacterManager {
             // join the grid room
             socket.join(character.getLocationId());
         })
-        .catch(() => {});
+        .catch((err) => {
+            this.Game.logger.error(err.message);
+        });
     }
 
     /**
@@ -250,29 +252,30 @@ export default class CharacterManager {
      * @param  {String} user_id User ID
      */
     remove(user_id) {
-        return new Promise((resolve, reject) => {
-            this.get(user_id)
-                .then((character) => {
-                    // dispatch join event to grid
-                    this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} disappears into a nearby building`, [character.user_id]);
-                    // remove player from the grid list of players
-                    this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                        type: LEFT_GRID,
-                        payload: character.user_id,
-                    });
+        return new Promise(async (resolve, reject) => {
+            const character = await this.get(user_id).catch((err) => {
+                this.Game.logger.error(err.message);
+            });
 
-                    if (character.faction) {
-                        character.faction.unlinkCharacter(character);
-                    }
+            if (!character) {
+                resolve(null);
+            }
 
-                    this.characters = this.characters.filter((obj) => obj.user_id !== user_id);
-                    this.dispatchRemoveFromPlayerList(user_id);
-                    resolve();
-                })
-                .catch((err) => {
-                    this.Game.logger.error(err);
-                    resolve();
-                });
+            // dispatch join event to grid
+            this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} disappears into a nearby building`, [character.user_id]);
+            // remove player from the grid list of players
+            this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
+                type: LEFT_GRID,
+                payload: character.user_id,
+            });
+
+            if (character.faction) {
+                character.faction.unlinkCharacter(character);
+            }
+
+            this.characters = this.characters.filter((obj) => obj.user_id !== user_id);
+            this.dispatchRemoveFromPlayerList(user_id);
+            resolve();
         });
     }
 
@@ -297,7 +300,7 @@ export default class CharacterManager {
 
             await this.manage(newCharacter);
 
-            this.Game.itemManager.loadCharacterInventory(newCharacter)
+            await this.Game.itemManager.loadCharacterInventory(newCharacter)
                 .then((items) => {
                     if (items) {
                         newCharacter.setInventory(items);
@@ -309,7 +312,9 @@ export default class CharacterManager {
                     }
                     callback(null, newCharacter);
                 })
-                .catch((error) => this.Game.logger.error(error));
+                .catch((error) => {
+                    this.Game.logger.error(error.message);
+                });
         });
     }
 
@@ -408,6 +413,7 @@ export default class CharacterManager {
                 }
 
                 this.Game.logger.error('CharacterManager::dbCreate', err);
+
                 return callback({
                     type: 'error',
                     message: 'Internal server error.',
@@ -423,12 +429,12 @@ export default class CharacterManager {
      * @return {Promise}
      */
     saveAll() {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const total = this.characters.length;
             let saves = 0;
 
-            this.characters.forEach((character) => {
-                this.save(character.user_id)
+            await this.characters.forEach(async (character) => {
+                await this.save(character.user_id)
                     .then(() => {
                         saves++;
 
@@ -453,26 +459,31 @@ export default class CharacterManager {
      * @return {Promise}
      */
     save(user_id) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (!user_id) {
-                return reject();
+                return reject(new Error(`Unable to save character. None found for user: ${user_id}`));
             }
 
-            this.get(user_id).then((character) => {
-                this.Game.logger.debug(`Saving character ${user_id}`);
+            await this.get(user_id)
+                .then((character) => {
+                    this.Game.logger.debug(`Saving character ${user_id}`);
 
-                // Save the character information (stats/location/etc)
-                const saveCharacter = this.dbSave(character);
-                const saveInventory = this.Game.itemManager.saveInventory(character);
-                Promise.all([saveCharacter, saveInventory])
-                    .then((values) => {
-                        this.Game.logger.debug(`Saved ${user_id}`, values);
-                        resolve();
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    });
-            });
+                    // Save the character information (stats/location/etc)
+                    const saveCharacter = this.dbSave(character);
+                    const saveInventory = this.Game.itemManager.saveInventory(character);
+
+                    Promise.all([saveCharacter, saveInventory])
+                        .then((values) => {
+                            this.Game.logger.debug(`Saved ${user_id}`, values);
+                            resolve();
+                        })
+                        .catch((err) => {
+                            this.Game.logger.error(err.message);
+                        });
+                })
+                .catch((err) => {
+                    this.Game.logger.error(err.message);
+                });
         });
     }
 
@@ -486,7 +497,7 @@ export default class CharacterManager {
             CharacterModel.findOne({user_id: character.user_id}, (err, dbCharacter) => {
                 if (err) {
                     this.Game.logger.error('CharacterManager::dbSave', err);
-                    return reject(err);
+                    return reject(new Error(err.message));
                 }
 
                 // update the character db object, and save the changes
@@ -500,7 +511,7 @@ export default class CharacterManager {
                 dbCharacter.save((err) => {
                     if (err) {
                         this.Game.logger.error('CharacterManager::dbSave', err);
-                        return reject(err);
+                        return reject(new Error(err.message));
                     }
 
                     resolve(dbCharacter);
@@ -519,11 +530,11 @@ export default class CharacterManager {
             CharacterModel.findOne({name_lowercase: targetName.toLowerCase()}, (err, character) => {
                 if (err) {
                     this.Game.logger.error('CharacterManager::dbGetByName', err);
-                    return reject('Internal server error.');
+                    return reject(new Error(err.message));
                 }
 
                 if (!character) {
-                    return reject(null);
+                    return reject(new Error(`No character found for user: ${targetName}`));
                 }
 
                 resolve(character.toObject());
@@ -641,17 +652,6 @@ export default class CharacterManager {
     }
 
     /**
-     * Updated the tracked characters location
-     * @param  {Character Obj} character   The character reference
-     * @param  {Object} oldLocation {map, x, y}
-     * @param  {Object} newLocation {map, x ,y}
-     */
-    changeLocation(character, newLocation = {}, oldLocation = {}) {
-        //this.removeFromGrid(oldLocation, character);
-        //this.addToGrid(newLocation, character);
-    }
-
-    /**
      * Moves a character to the specific location, emitting related events on the way to and from
      * @param  {Socket.IO Socket} socket    The socket of the character moving
      * @param  {Object} moveAction {grid: 'y|x', direction: 1|-1}
@@ -659,7 +659,7 @@ export default class CharacterManager {
      */
     move(socket, moveAction) {
         // get the socket character
-        this.get(socket.user.user_id).then((character) => {
+        return this.get(socket.user.user_id).then(async (character) => {
             let newLocation = {...character.location};
             let directionOut;
             let directionIn;
@@ -691,8 +691,8 @@ export default class CharacterManager {
             newLocation[moveAction.grid] = newLocation[moveAction.grid] + moveAction.direction;
 
             // make sure the move is valid
-            this.Game.mapManager.isValidLocation(newLocation.map, newLocation.x, newLocation.y)
-                .then((newLocation) => {
+            await this.Game.mapManager.isValidLocation(newLocation.map, newLocation.x, newLocation.y)
+                .then(async (newLocation) => {
                     // determin the direction names for the JOIN/LEAVE events
                     switch (moveAction.grid) {
                         case 'y':
@@ -716,7 +716,7 @@ export default class CharacterManager {
                     }
 
                     // remove aim from current target, if set
-                    character.releaseTarget().then(() => {
+                    await character.releaseTarget().then(async () => {
                         // leave the old grid room
                         socket.leave(character.getLocationId());
 
@@ -728,14 +728,8 @@ export default class CharacterManager {
                             payload: character.user_id,
                         });
 
-                        // save the old location
-                        const oldLocation = {...character.location};
-
                         // update character location
                         character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
-
-                        // change location on the map
-                        this.changeLocation(character, newLocation, oldLocation);
 
                         // dispatch join message to new grid
                         this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} strolls in from the ${directionIn}`, [character.user_id]);
@@ -749,22 +743,22 @@ export default class CharacterManager {
                         socket.join(character.getLocationId());
 
                         // update client/socket character and location information
-                        this.updateClient(character.user_id);
+                        await this.updateClient(character.user_id);
 
                         // send the new grid details to the client
-                        this.Game.mapManager.updateClient(character.user_id);
+                        await this.Game.mapManager.updateClient(character.user_id);
 
                         // start the cooldown timer
                         newCooldown.start();
                     })
                     .catch(Game.logger.error);
                 })
-                .catch(() => {
-                    this.Game.logger.debug(`Invalid move by character ${socket.user.user_id}`, newLocation);
+                .catch((err) => {
+                    this.Game.logger.error(err.message);
                 });
         })
         .catch((err) => {
-            this.Game.logger.error(err);
+            this.Game.logger.error(err.message);
         });
     }
 
@@ -775,13 +769,13 @@ export default class CharacterManager {
      * @return {Promise}
      */
     kill(user_id, killer) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             // fetch the character who got killed
-            this.get(user_id).then((character) => {
+            await this.get(user_id).then(async (character) => {
                 // get the map so we know where to respawn the player
-                this.Game.mapManager.get(character.location.map).then((gameMap) => {
+                await this.Game.mapManager.get(character.location.map).then(async (gameMap) => {
                     // kill the character
-                    character.die().then(async (droppedLoot) => {
+                    await character.die().then(async (droppedLoot) => {
                         // save the old location before it is overwritten by the die() method on the character
                         const oldLocationId = character.getLocationId();
                         // save the old location
@@ -803,9 +797,6 @@ export default class CharacterManager {
 
                         // update character location
                         character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
-
-                        // change location on the map
-                        this.changeLocation(character, newLocation, oldLocation);
 
                         // drop all items on the ground
                         droppedLoot.items.forEach((item) => {
@@ -847,18 +838,27 @@ export default class CharacterManager {
                         await this.Game.socketManager.userJoinRoom(character.user_id, character.getLocationId());
 
                         // update client/socket character and location information
-                        this.updateClient(character.user_id);
+                        await this.updateClient(character.user_id);
 
                         // send the new grid details to the client
-                        this.Game.mapManager.updateClient(character.user_id);
+                        await this.Game.mapManager.updateClient(character.user_id);
 
                         resolve(oldLocationId);
                     })
-                    .catch(reject);
+                    .catch((err) => {
+                        this.Game.logger.error(err.message);
+                        reject(new Error(`Failed to run KILL on target ${user_id}`));
+                    });
                 })
-                .catch(reject);
+                .catch((err) => {
+                    this.Game.logger.error(err.message);
+                    reject(new Error(`Failed to run KILL on target ${user_id}`));
+                });
             })
-            .catch(reject);
+            .catch((err) => {
+                this.Game.logger.error(err.message);
+                reject(new Error(`Failed to run KILL on target ${user_id}`));
+            });
         });
     }
 }

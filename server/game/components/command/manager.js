@@ -85,7 +85,7 @@ export default class CommandManager {
      * @param  {Socket.IO Socket} socket Client who dispatched the action
      * @param  {Object}           action The redux action
      */
-    onDispatch(socket, action) {
+    async onDispatch(socket, action) {
         if (action.type !== GAME_COMMAND) {
             return;
         }
@@ -109,13 +109,19 @@ export default class CommandManager {
 
         const character = this.Game.characterManager.getSync(socket.user.user_id);
 
-        this.validate(character, params, this.commands[command].params)
-            .then((validParams) => {
-                this.commands[command].method(
+        await this.validate(character, params, this.commands[command].params)
+            .then((params) => {
+                // If the params is a string and not an array, something went wrong
+                if (typeof params === 'string') {
+                    this.Game.eventToSocket(socket, 'error', params);
+                    return this.Game.eventToSocket(socket, 'multiline', this.getInfo(command));
+                }
+
+                return this.commands[command].method(
                     socket,
                     character,
                     command,
-                    validParams,
+                    params,
                     {
                         modifiers: this.commands[command].modifiers ? deepCopyObject(this.commands[command].modifiers) : null,
                         description: this.commands[command].description,
@@ -124,13 +130,8 @@ export default class CommandManager {
                 );
             })
             .catch((error) => {
-                if (typeof error !== 'string') {
-                    this.Game.eventToSocket(socket, 'error', 'Something went wrong while trying to execute your command.');
-                    return this.Game.logger.error(error);
-                }
-
-                this.Game.eventToSocket(socket, 'error', error);
-                return this.Game.eventToSocket(socket, 'multiline', this.getInfo(command));
+                this.Game.eventToSocket(socket, 'error', 'Something went wrong while trying to execute your command.');
+                return this.Game.logger.error(error.message);
             });
     }
 
@@ -225,29 +226,8 @@ export default class CommandManager {
 
         // get the full list of potential targets
         let matchingTargets = characters.concat(NPCs);
-        let target;
 
-        // If there are more than 1 match, see if there is anyone matching the name exactly
-        /*if (matchingTargets.length > 1) {
-            target = matchingTargets.find((user) => {
-                // must be a player
-                if (!user.type) {
-                    return user.name_lowercase === findName;
-                } else {
-                    return `${npc.name} the ${npc.type}`.toLowerCase() === findName;
-                }
-            });
-
-            // if there are noone matching the name exactly, tell them to spell out the full name
-            if (!target) {
-                return 'You must be more specific with who you want to target.';
-            }
-        } else {*/
-            // otherwise select the first and only one in the list
-            target = matchingTargets[0];
-        //}
-
-        return target;
+        return matchingTargets[0];
     }
 
     /**
@@ -348,7 +328,7 @@ export default class CommandManager {
                         switch (rule[0]) {
                             case 'required':
                                 if (typeof msgParam === 'undefined' || !msgParam) {
-                                    return reject(`Missing parameter: ${param.name}`);
+                                    return resolve(`Missing parameter: ${param.name}`);
                                 }
                                 break;
 
@@ -356,7 +336,7 @@ export default class CommandManager {
                                 value = parseInt(msgParam, 10);
 
                                 if (isNaN(value) || parseFloat(msgParam, 10) % 1 !== 0) {
-                                    return reject(`${param.name} must be a integer.`);
+                                    return resolve(`${param.name} must be a integer.`);
                                 }
                                 break;
 
@@ -364,37 +344,37 @@ export default class CommandManager {
                                 value = parseFloat(msgParam, 10);
 
                                 if (isNaN(value)) {
-                                    return reject(`${param.name} must be a float.`);
+                                    return resolve(`${param.name} must be a float.`);
                                 }
                                 break;
 
                             case 'min':
                                 if (isNaN(msgParam) || msgParam < parseFloat(rule[1], 10)) {
-                                    return reject(`${param.name} cannot be less than ${rule[1]}.`);
+                                    return resolve(`${param.name} cannot be less than ${rule[1]}.`);
                                 }
                                 break;
 
                             case 'max':
                                 if (isNaN(msgParam) || msgParam > parseFloat(rule[1], 10)) {
-                                    return reject(`${param.name} cannot be greater than ${rule[1]}.`);
+                                    return resolve(`${param.name} cannot be greater than ${rule[1]}.`);
                                 }
                                 break;
 
                             case 'minlen':
                                 if (msgParam.length < parseInt(rule[1], 10)) {
-                                    return reject(`${param.name} must be at least ${rule[1]} characters long.`);
+                                    return resolve(`${param.name} must be at least ${rule[1]} characters long.`);
                                 }
                                 break;
 
                             case 'maxlen':
                                 if (msgParam.length > parseInt(rule[1], 10)) {
-                                    return reject(`${param.name} cannot be longer than ${rule[1]} characters.`);
+                                    return resolve(`${param.name} cannot be longer than ${rule[1]} characters.`);
                                 }
                                 break;
 
                             case 'alphanum':
                                 if (msgParam !== escapeStringRegex(msgParam.toString()).replace(/[^a-z0-9]/gi, '')) {
-                                    return reject(`${param.name} may only consist of alphanumeric characters (a-z, 0-9).`);
+                                    return resolve(`${param.name} may only consist of alphanumeric characters (a-z, 0-9).`);
                                 }
                                 break;
 
@@ -405,26 +385,26 @@ export default class CommandManager {
                                 ];
 
                                 if (!directions.includes(msgParam.toLowerCase())) {
-                                    return reject(`${param.name} does not appear to be a valid direction.`);
+                                    return resolve(`${param.name} does not appear to be a valid direction.`);
                                 }
                                 break;
 
                             case 'faction':
                                 value = await this.Game.factionManager.getByName(msgParam).catch(() => {
-                                    return reject(`The ${param.name} is not a valid faction.`);
+                                    return resolve(`The ${param.name} is not a valid faction.`);
                                 });
                                 break;
 
                             case 'gamemap':
                                 value = await this.Game.mapManager.getByName(msgParam).catch(() => {
-                                    return reject(`The ${param.name} is not a valid location.`);
+                                    return resolve(`The ${param.name} is not a valid location.`);
                                 });
                                 break;
 
                             case 'shop':
                                 value = await this.Game.structureManager.getWithShop(player.location.map, player.location.x, player.location.y)
                                     .catch(() => {
-                                        return reject(`The ${param.name} is not a valid shop, at your current location.`);
+                                        return resolve(`The ${param.name} is not a valid shop, at your current location.`);
                                     });
                                 break;
 
@@ -446,7 +426,7 @@ export default class CommandManager {
 
                                 // no item found by name or ID
                                 if (!value) {
-                                    return reject(`The ${param.name} is not a valid item.`);
+                                    return resolve(`The ${param.name} is not a valid item.`);
                                 }
                                 break;
 
@@ -459,7 +439,7 @@ export default class CommandManager {
                                     value = this.Game.characterManager.getByNameSync(msgParam);
 
                                     if (!value) {
-                                        return reject(`There is no ${param.name} online by that name.`);
+                                        return resolve(`There is no ${param.name} online by that name.`);
                                     }
                                     break;
                                 }
@@ -485,7 +465,7 @@ export default class CommandManager {
                                 );
 
                                 if (typeof value === 'string') {
-                                    return reject(value);
+                                    return resolve(value);
                                 }
                                 break;
                         };

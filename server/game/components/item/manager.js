@@ -207,7 +207,7 @@ export default class ItemManager {
      * @param  {Item Obj}  item      item to remove
      * @return {Promise}
      */
-    remove(character, item) {
+    async remove(character, item) {
         const itemClone = {...item};
         item.destroy();
 
@@ -219,8 +219,11 @@ export default class ItemManager {
 
         // if the item is in the DB, delete it.
         if (itemClone._id) {
-            this.dbLoad(itemClone).then((dbItem) => {
+            await this.dbLoad(itemClone).then((dbItem) => {
                 dbItem.remove();
+            })
+            .catch((err) => {
+                this.Game.logger.error(new Error(err.message));
             });
         }
     }

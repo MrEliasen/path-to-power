@@ -146,9 +146,6 @@ function cmdTravel(socket, character, command, params, cmdObject, Game) {
                     // update character location
                     character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
 
-                    // change location on the map
-                    Game.characterManager.changeLocation(character, newLocation, oldLocation);
-
                     // dispatch join message to new grid
                     Game.eventToRoom(character.getLocationId(), 'info', `${character.name} emerge from a plane which just landed`, [character.user_id]);
 

@@ -69,7 +69,7 @@ export default class MapManager {
      */
     updateClient(user_id) {
         // Get the character object
-        this.Game.characterManager.get(user_id)
+        return this.Game.characterManager.get(user_id)
             .then((character) => {
                 const location = [
                     character.location.map,
@@ -90,7 +90,7 @@ export default class MapManager {
                 });
             })
             .catch((err) => {
-                this.Game.logger.error(err);
+                this.Game.logger.error(err.message);
             });
     }
 

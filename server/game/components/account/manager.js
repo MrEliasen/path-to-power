@@ -84,7 +84,7 @@ export default class AccountManager {
             // add the socket to the list of active clients
             this.Game.socketManager.add(socket);
 
-            this.loadAccount(socket);
+            await this.loadAccount(socket);
         });
     }
 
@@ -94,46 +94,47 @@ export default class AccountManager {
      */
     loadAccount(socket) {
         // attempt to load the character from the database
-        this.Game.characterManager.load(socket.user, async (error, character) => {
-            if (error) {
-                return this.Game.socketManager.dispatchToSocket(socket, {
-                    type: ACCOUNT_AUTHENTICATE_ERROR,
-                    payload: error,
-                });
-            }
+        return this.Game.characterManager
+            .load(socket.user, async (error, character) => {
+                if (error) {
+                    return this.Game.socketManager.dispatchToSocket(socket, {
+                        type: ACCOUNT_AUTHENTICATE_ERROR,
+                        payload: error,
+                    });
+                }
 
-            // game data we will send to the client, with the autentication success
-            const gameData = this.getGameData();
+                // game data we will send to the client, with the autentication success
+                const gameData = this.getGameData();
 
-            // If they do not have a character yet, send them to the character creation screen
-            if (!character) {
-                return this.Game.socketManager.dispatchToSocket(socket, {
-                    type: ACCOUNT_AUTHENTICATE_NEW,
-                    payload: {
-                        routeTo: '/character',
-                        gameData: {
-                            maps: gameData.maps,
+                // If they do not have a character yet, send them to the character creation screen
+                if (!character) {
+                    return this.Game.socketManager.dispatchToSocket(socket, {
+                        type: ACCOUNT_AUTHENTICATE_NEW,
+                        payload: {
+                            routeTo: '/character',
+                            gameData: {
+                                maps: gameData.maps,
+                            },
                         },
+                    });
+                }
+
+                // Update the client
+                await this.Game.mapManager.updateClient(character.user_id);
+
+                // get the list of online players (after we loaded the character to make sure it is included)
+                gameData.players = this.Game.characterManager.getOnline();
+
+                this.Game.socketManager.dispatchToSocket(socket, {
+                    type: ACCOUNT_AUTHENTICATE_SUCCESS,
+                    payload: {
+                        character: character.exportToClient(),
+                        gameData,
                     },
                 });
-            }
 
-            // Update the client
-            this.Game.mapManager.updateClient(character.user_id);
-
-            // get the list of online players (after we loaded the character to make sure it is included)
-            gameData.players = this.Game.characterManager.getOnline();
-
-            this.Game.socketManager.dispatchToSocket(socket, {
-                type: ACCOUNT_AUTHENTICATE_SUCCESS,
-                payload: {
-                    character: character.exportToClient(),
-                    gameData,
-                },
+                this.Game.sendMotdToSocket(socket);
             });
-
-            this.Game.sendMotdToSocket(socket);
-        });
     }
 
     /**
@@ -178,11 +179,11 @@ export default class AccountManager {
 
         // make sure we have all the details we need to create the character
         // check we have the starting location
-        this.Game.mapManager.get(action.payload.location)
+        return this.Game.mapManager.get(action.payload.location)
             .then((gameMap) => {
                 // create a new character
-                this.Game.characterManager.create(socket.user, gameMap.id, (error, newCharacter) => {
-                     if (error) {
+                return this.Game.characterManager.create(socket.user, gameMap.id, async (error, newCharacter) => {
+                    if (error) {
                         return this.Game.socketManager.dispatchToSocket(socket, {
                             type: ACCOUNT_AUTHENTICATE_ERROR,
                             payload: {
@@ -192,9 +193,9 @@ export default class AccountManager {
                     }
 
                     // Update the client
-                    this.Game.mapManager.updateClient(newCharacter.user_id);
+                    await this.Game.mapManager.updateClient(newCharacter.user_id);
 
-                    return this.Game.socketManager.dispatchToSocket(socket, {
+                    this.Game.socketManager.dispatchToSocket(socket, {
                         type: ACCOUNT_AUTHENTICATE_SUCCESS,
                         payload: {
                             character: newCharacter.exportToClient(),
@@ -206,7 +207,7 @@ export default class AccountManager {
                     });
                 });
             })
-            .catch(() => {
+            .catch((e) => {
                 return this.Game.socketManager.dispatchToSocket(socket, {
                     type: ACCOUNT_AUTHENTICATE_ERROR,
                     payload: {
@@ -229,7 +230,7 @@ export default class AccountManager {
             display_name,
         });
 
-        user.save((err) => {
+        return user.save((err) => {
             if (err) {
                 this.Game.logger.error('AccountManager::dbSignup', err);
                 return callback({
@@ -248,7 +249,7 @@ export default class AccountManager {
      * @param  {Function} callback Returns 2 params, error and account
      */
     dbLogin(action, callback) {
-        request.get('https://api.twitch.tv/helix/users')
+        return request.get('https://api.twitch.tv/helix/users')
         .send()
         .set('Authorization', `Bearer ${action.payload.twitch_token}`)
         .set('Client-ID', this.Game.config.twitch.clientId)

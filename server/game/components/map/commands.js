@@ -135,9 +135,6 @@ function cmdFlee(socket, character, command, params, cmdObject, Game) {
             // update character location
             character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
 
-            // change location on the map
-            Game.characterManager.changeLocation(character, newLocation, oldLocation);
-
             // dispatch join message to new grid
             Game.eventToRoom(character.getLocationId(), 'info', `${character.name} scrambles in from the ${getDirectionName(moveAction)}`, [character.user_id]);
             // add player from the grid list of players
