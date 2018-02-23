@@ -13,16 +13,13 @@ class StatsMenu extends React.Component {
         const styles = {
             info: {
                 fontSize: '14px',
-                padding: '7px 16px',
+                padding: '2px 16px',
                 margin: '0px',
             },
         };
 
         return (
-            <div
-            >
-                <div>Character Stats</div>
-                <div className="divider"/>
+            <div>
                 <div>Stats</div>
                 <p style={styles.info}><strong>Health:</strong> {this.props.character.stats.health}/{this.props.character.stats.health_max}</p>
                 <p style={styles.info}><strong>Cash:</strong> {this.props.character.stats.money}</p>

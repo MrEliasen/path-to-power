@@ -39,6 +39,7 @@ class BottomMenu extends React.Component {
     render() {
         return (
             <div>
+                Old menu:
                 <ul>
                     <li onClick={() => this.sendCommand('/punch')}>Punch</li>
                     <li onClick={() => this.sendCommand('/strike')}>Strike</li>

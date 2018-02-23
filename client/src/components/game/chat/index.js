@@ -49,7 +49,11 @@ class Chat extends React.Component {
         return (
             <ul className="c-chat">
                 {
-                    this.props.chat &&
+                    ! this.props.chat.length &&
+                    <li>No messages :(</li>
+                }
+                {
+                    this.props.chat.length > 0 &&
                     this.props.chat.map((message, index) => this.renderChatMessage(message, index))
                 }
             </ul>

@@ -53,16 +53,12 @@ class PlayersMenu extends React.Component {
 
     render() {
         return (
-            <div
-            >
-                <div>Online Players</div>
-                <div className="divider"/>
-                <div>Players Online</div>
+            <div>
                 {
                     this.props.players &&
                     this.props.players.map((player) =>
                         <React.Fragment key={player.user_id}>
-                            <div>{<img src={player.profile_image} />}{player.name}<br />{(player.faction ? `Faction: ${player.faction.name}` : '')}</div>
+                            <div>{<img style={{display: 'none'}} src={player.profile_image} />}{player.name}<br />{(player.faction ? `Faction: ${player.faction.name}` : '')}</div>
                             <div className="divider" />
                         </React.Fragment>
                     )

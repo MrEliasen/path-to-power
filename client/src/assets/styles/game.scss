@@ -1,0 +1,131 @@
+#game {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+
+    p {
+        @include mudfont;
+        margin: 0px;
+    }
+
+    ul {
+        margin: 0px;
+        padding: 0px;
+        list-style: none;
+
+        li {
+            margin-top: 5px;
+            @include mudfont;
+        }
+    }
+
+    .left, .right {
+        flex: 0 0 240px;
+    }
+
+    .middle {
+        flex: auto;
+        padding: 0 30px;
+
+        .panel-body {
+            overflow: auto;
+        }
+
+        .panel-chat {
+            height: 20vh;
+        }
+
+        .panel-events {
+            height: 40vh;
+        }
+
+    }
+
+    .panel {
+
+        .panel-body {
+            min-height: 120px;
+            @include mudfont;
+            padding: 10px 15px;
+        }
+    }
+
+    /* These need refactoring - copied from old layout */
+    .c-event-divider {
+        width: 100%;
+        display: black;
+        height: 1px;
+        border-bottom: 1px dashed #000;
+        margin: 4px 0px 6px;
+    }
+
+    .c-inventory-list>div:nth-child(even) {
+        background-color: #f3f3f3;
+    }
+
+    .c-item-actions {
+        margin-top: 16px;
+        padding: 0px 15px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        align-content: flex-start;
+    }
+
+    .c-item-actions > div {
+        width: 50%;
+    }
+
+    .c-shop-items {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: flex-start;
+        align-content: stretch;
+    }
+
+    .c-shop-items > div {
+        height: 100%;
+        position: relative;
+        height: 375px;
+        overflow-y: auto;
+
+        &.__item-list {
+            @include mudfont;
+            width: 275px;
+
+            .--selected {
+                background: rgba(0, 0, 0, 0.16) !important;
+            }
+        }
+
+        &.__item-details {
+            @include mudfont;
+
+            width: calc(100% - 300px);
+            padding: 10px 15px;
+            height: 355px;
+        }
+
+        .__action-shop {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+        }
+
+        .__close-shop {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+        }
+
+        .__shop-warning {
+            position: absolute;
+            bottom: 75px;
+            width: 100%;
+            left: 0;
+            text-align: center;
+        }
+    }
+}

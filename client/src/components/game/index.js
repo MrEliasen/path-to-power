@@ -50,7 +50,7 @@ class Game extends React.Component {
 
     componentDidUpdate(prevProps) {
         if (this.state.autoscroll) {
-            document.querySelector('.log').scrollTop = document.querySelector('.log').scrollHeight;
+            document.querySelector('.panel-chat').scrollTop = document.querySelector('.panel-chat').scrollHeight;
         }
     }
 
@@ -154,15 +154,6 @@ class Game extends React.Component {
     render() {
         return (
             <React.Fragment>
-                {
-                    this.props.game.news &&
-                    <h3 style={this.props.game.news.colour}>{this.props.game.news.message}</h3>
-                }
-                <div style={{textAlign: 'center'}}>
-                    {this.props.connection.lastEvent}<br />
-                    {!this.props.connection.isConnected}
-                    <div mode="indeterminate" />
-                </div>
                 <div id="game">
                     <div className="left">
                         <div className="panel">
@@ -172,17 +163,40 @@ class Game extends React.Component {
                             </div>
                         </div>
                         <div className="panel">
+                            <div className="panel-title">Location</div>
+                            <div className="panel-body">
+                                [Minimap]<br />
+                                <Location />
+                            </div>
+                        </div>
+                        <div className="panel">
                             <div className="panel-title">Equipment</div>
                             <div className="panel-body">
                                 <InventoryMenu sendCommand={this.sendCommand} sendAction={this.sendAction} />
                             </div>
                         </div>
+                        <div className="panel">
+                            <div className="panel-title">Players Online</div>
+                            <div className="panel-body">
+                                <PlayersMenu sendCommand={this.sendCommand} setCommand={this.setCommand} />
+                            </div>
+                        </div>
+                        {
+                            this.props.character &&
+                            <BottomMenu className="c-bottom-menu" socket={this.props.socket} />
+                        }
                     </div>
                     <div className="middle">
                         <div className="panel">
-                            <div className="panel-body log">
-                                <Events />
+                            <div className="panel-title">Chat</div>
+                            <div className="panel-body panel-chat">
                                 <Chat />
+                            </div>
+                        </div>
+                        <div className="panel">
+                            <div className="panel-title">Events</div>
+                            <div className="panel-body panel-events">
+                                <Events />
                             </div>
                         </div>
                         <input
@@ -201,26 +215,15 @@ class Game extends React.Component {
                             type="input"
                             name="input"
                         />
-                    </div>
-                    <div className="right">
-                        <div className="panel">
-                            <div className="panel-title">Minimap</div>
-                            <div className="panel-body">
-                                Damn...
-                            </div>
-                        </div>
-                        <div className="panel">
-                            <div className="panel-title">Location</div>
-                            <div className="panel-body">
-                                <Location />
-                                <PlayersMenu sendCommand={this.sendCommand} setCommand={this.setCommand} />
-                            </div>
-                        </div>
-                        Old menu:
                         {
-                            this.props.character &&
-                            <BottomMenu className="c-bottom-menu" socket={this.props.socket} />
+                            this.props.game.news &&
+                            <h3 style={this.props.game.news.colour}>{this.props.game.news.message}</h3>
                         }
+                        <div style={{textAlign: 'center'}}>
+                            {this.props.connection.lastEvent}<br />
+                            {!this.props.connection.isConnected}
+                            <div mode="indeterminate" />
+                        </div>
                     </div>
                 </div>
                 <Shop sendAction={this.sendAction} />
