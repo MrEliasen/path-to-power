@@ -7,8 +7,14 @@ import {BrowserRouter} from 'react-router-dom';
 import reducers from './reducers';
 import App from './components/app';
 
-// UI
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+// FontAwesome Setup
+import FontAwesome from '@fortawesome/fontawesome';
+import FontAwesomeBrands from '@fortawesome/fontawesome-free-brands';
+import FontAwesomeIcons from '@fortawesome/fontawesome-free-solid';
+FontAwesome.library.add(FontAwesomeBrands, FontAwesomeIcons);
+
+// Styles
+import './assets/styles/all.scss';
 
 let store;
 
@@ -30,9 +36,7 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
 ReactDOM.render(
     <Provider store={store}>
         <BrowserRouter>
-            <MuiThemeProvider>
                 <App/>
-            </MuiThemeProvider>
         </BrowserRouter>
     </Provider>,
     document.querySelector('#root')

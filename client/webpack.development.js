@@ -17,7 +17,7 @@ module.exports = {
   target: 'web',
   devServer: {
       historyApiFallback: true,
-      contentBase: './'
+      contentBase: './',
   },
 
   output: {

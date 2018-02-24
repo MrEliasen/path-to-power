@@ -1,25 +1,7 @@
-html,
-body {
-    height: 100%;
-    background: #424242;
+#main {
+    padding: 30px 15px;
 
-    #root {
-        height: 100%;
+    .svg-inline--fa {
+        margin: 0 5px;
     }
 }
-
-.e-padding {
-    padding: 10px 15px;
-    overflow-y: auto;
-}
-
-.e-fullHeight {
-    height: 100%;
-}
-
-.e-clickable {
-    cursor: pointer;
-}
-
-@import 'mixins';
-@import 'components/components';

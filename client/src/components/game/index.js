@@ -3,25 +3,22 @@ import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
-import Events from '../events';
-import Location from '../location';
-import Shop from '../shop';
+import Events from './events';
+import Location from './location';
+import Shop from './shop';
+import BottomMenu from './bottom-menu';
 
-import {clearEvents, newEvent} from '../events/actions';
+import {clearEvents, newEvent} from './events/actions';
 import {newCommand} from './actions';
-import {moveCharacter} from '../character/actions';
+import {moveCharacter} from './character/actions';
+
+import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 // Components
-import InventoryMenu from '../inventory-menu';
-import PlayersMenu from '../players-menu';
-import StatsMenu from '../stats-menu';
-import Chat from '../chat';
-
-// UI
-import Paper from 'material-ui/Paper';
-import Dialog from 'material-ui/Dialog';
-import LinearProgress from 'material-ui/LinearProgress';
-import AutoComplete from 'material-ui/AutoComplete';
+import InventoryMenu from './inventory-menu';
+import PlayersMenu from './players-menu';
+import StatsMenu from './stats-menu';
+import Chat from './chat';
 
 class Game extends React.Component {
     constructor(props) {
@@ -55,7 +52,7 @@ class Game extends React.Component {
 
     componentDidUpdate(prevProps) {
         if (this.state.autoscroll) {
-            document.getElementsByClassName('c-game__chat')[0].scrollTop = document.getElementsByClassName('c-game__chat')[0].scrollHeight;
+            document.querySelector('.panel-chat').scrollTop = document.querySelector('.panel-chat').scrollHeight;
         }
     }
 
@@ -75,7 +72,7 @@ class Game extends React.Component {
             case '/':
                 // set focus if they are not typing into an input field
                 if (!document.activeElement.value) {
-                    document.querySelector('.c-game_command input').focus();
+                    document.querySelector('#input-command').focus();
                 }
                 break;
         }
@@ -151,84 +148,98 @@ class Game extends React.Component {
     setCommand(command) {
         this.setState({command});
         setTimeout(() => {
-            document.querySelector('.c-game_command input').focus();
-            document.querySelector('.c-game_command input').setSelectionRange(command.length, command.length);
+            document.querySelector('#input-command').focus();
+            document.querySelector('#input-command').setSelectionRange(command.length, command.length);
         }, 250);
     }
 
     render() {
         return (
-            <div className="c-game">
-                <Paper zDepth={1} rounded={true} className="c-game__location e-padding">
-                    <Location />
-                </Paper>
-                <div className="c-game__communication">
-                    <Paper zDepth={1} rounded={true} className="c-game__news e-padding">
+            <React.Fragment>
+                <div id="game">
+                    <div className="left">
+                        <div className="panel">
+                            <div className="panel-title">Character</div>
+                            <div className="panel-body">
+                                <StatsMenu />
+                            </div>
+                        </div>
+                        <div className="panel">
+                            <div className="panel-title">Location</div>
+                            <div className="panel-body">
+                                [Minimap]<br />
+                                <Location />
+                            </div>
+                        </div>
+                        <div className="panel">
+                            <div className="panel-title">Equipment</div>
+                            <div className="panel-body">
+                                <InventoryMenu sendCommand={this.sendCommand} sendAction={this.sendAction} />
+                            </div>
+                        </div>
+                        <div className="panel">
+                            <div className="panel-title">Players Online</div>
+                            <div className="panel-body">
+                                <PlayersMenu sendCommand={this.sendCommand} setCommand={this.setCommand} />
+                            </div>
+                        </div>
+                        {
+                            this.props.character &&
+                            <BottomMenu className="c-bottom-menu" socket={this.props.socket} />
+                        }
+                    </div>
+                    <div className="middle">
+                        <div className="panel">
+                            <ul className="toolbar">
+                                <li><span><FontAwesomeIcon icon="dollar-sign" /> ?</span></li>
+                                <li><a href="#"><FontAwesomeIcon icon="map-marker-alt" /> Map</a></li>
+                                <li><a href="#"><FontAwesomeIcon icon="shield-alt" /> Inventory: ?/?</a></li>
+                                <li><a href="#"><FontAwesomeIcon icon="shopping-cart" /> Shop</a></li>
+                                <li><a href="#"><FontAwesomeIcon icon="tasks" /> Quests: ?</a></li>
+                                <li><a href="#"><FontAwesomeIcon icon="user-secret" /> Players: ?</a></li>
+                            </ul>
+                        </div>
+                        <div className="panel">
+                            <div className="panel-title">Chat</div>
+                            <div className="panel-body panel-messages panel-chat">
+                                <Chat />
+                            </div>
+                        </div>
+                        <div className="panel">
+                            <div className="panel-title">Events</div>
+                            <div className="panel-body panel-messages panel-events">
+                                <Events />
+                            </div>
+                        </div>
+                        <input
+                            id="input-command"
+                            onKeyPress={(e) => {
+                                if (e.key && e.key == 'Enter') {
+                                    this.sendCommand();
+                                }
+                            }}
+                            onChange={(e) => {
+                                this.setState({command: e.target.value});
+                            }}
+                            value={this.state.command}
+                            placeholder="Type your commands here, and hit Enter."
+                            className="input"
+                            type="input"
+                            name="input"
+                        />
                         {
                             this.props.game.news &&
                             <h3 style={this.props.game.news.colour}>{this.props.game.news.message}</h3>
                         }
-                    </Paper>
-                    <Paper zDepth={1} rounded={true} className="c-game__chat e-padding">
-                        <Chat />
-                    </Paper>
+                        <div style={{textAlign: 'center'}}>
+                            {this.props.connection.lastEvent}<br />
+                            {!this.props.connection.isConnected}
+                            <div mode="indeterminate" />
+                        </div>
+                    </div>
                 </div>
-                <Events />
-                <div className="c-game_command">
-                    <AutoComplete
-                        ref={(e) => this.$autocomplete = e}
-                        id="input-command"
-                        fullWidth={true}
-                        searchText={this.state.command}
-                        onUpdateInput={(command) => {
-                            this.setState({command: command});
-                            setTimeout(() => {
-                                document.querySelector('.c-game_command input').focus();
-                            }, 100);
-                        }}
-                        onKeyPress={(e) => {
-                            if (e.key && e.key == 'Enter') {
-                                this.sendCommand();
-                            }
-                        }}
-                        onNewRequest={() => {
-                            document.querySelector('.c-game_command input').focus();
-                        }}
-                        floatingLabelText="Type your commands here, and hit Enter."
-                        floatingLabelStyle={{color: '#FF9800'}}
-                        floatingLabelFocusStyle={{color: '#2196F3'}}
-                        inputStyle={{color: '#fff'}}
-                        filter={(searchText, key) => searchText.length > 1 && key.indexOf(searchText) !== -1}
-                        dataSource={Object.keys(this.props.game.commands).concat(['/commandlist', '/commands', '/clear'])}
-                        anchorOrigin={{vertical: 'top', horizontal: 'left'}}
-                        targetOrigin={{vertical: 'bottom', horizontal: 'left'}}
-                        listStyle={{
-                            background: '#40C4FF',
-                        }}
-                        menuStyle={{
-                            maxHeight: '150px',
-                            overflowY: 'auto',
-                        }}
-                        menuProps={{
-                            id: 'c-autocomplete__menu',
-                        }}
-                    />
-                </div>
-
-                <InventoryMenu sendCommand={this.sendCommand} sendAction={this.sendAction} />
-                <PlayersMenu sendCommand={this.sendCommand} setCommand={this.setCommand} />
-                <StatsMenu />
                 <Shop sendAction={this.sendAction} />
-
-                <Dialog
-                    title={this.props.connection.lastEvent}
-                    open={!this.props.connection.isConnected}
-                    modal={true}
-                    titleStyle={{textAlign: 'center'}}
-                >
-                    <LinearProgress mode="indeterminate" />
-                </Dialog>
-            </div>
+            </React.Fragment>
         );
     }
 }

@@ -1,25 +1,23 @@
 import React from 'react';
 import {bindActionCreators} from 'redux';
-import {withRouter} from 'react-router-dom';
+import {withRouter, Route, Switch} from 'react-router-dom';
 import {connect} from 'react-redux';
-import {Route} from 'react-router-dom';
+import Yaml from 'js-yaml';
 
 // Pages
-import Game from '../game';
-import Auth from '../auth';
-import Home from '../home';
-import Character from '../character';
+import Page from '../page';
+import PageNotFound from '../page/404';
+
+import AuthContainer from '../auth';
+import GameContainer from '../game';
+import Character from '../game/character';
 
 // Components
-import Header from '../header';
-import BottomMenu from '../bottom-menu';
+import Header from './header';
 
 // Twitch old ass lib
 // TODO: Code own implementation
 import '../../assets/twitch';
-
-// extra styles
-import '../../assets/styles/app.scss';
 
 // client config
 import config from '../../config';
@@ -31,6 +29,14 @@ import {setConnectionStatus, setSocket, dispatchServerAction} from './actions';
 class App extends React.Component {
     constructor(props) {
         super(props);
+
+        this.state = {
+            pages: [],
+        };
+    }
+
+    componentWillMount() {
+        this.getPages();
     }
 
     componentWillUnmount() {
@@ -96,22 +102,70 @@ class App extends React.Component {
         }
     }
 
+    parsePageMeta(str) {
+        if (str.slice(0, 3) !== '---') return;
+
+        const matcher = /\n(\.{3}|-{3})/g;
+        const metaEnd = matcher.exec(str);
+
+        return metaEnd && [str.slice(0, metaEnd.index), str.slice(matcher.lastIndex)];
+    }
+
+    getPages() {
+        const pages = [];
+        const webpackRequireContext = require.context(
+            '!raw-loader!../../pages',
+            false,
+            /\.md$/,
+        );
+
+        webpackRequireContext.keys().forEach((fileName) => {
+            const file = webpackRequireContext(fileName);
+            const page = {
+                raw: file,
+                meta: null,
+                markdown: '',
+            };
+
+            if (! page.raw) return;
+
+            const split = this.parsePageMeta(page.raw);
+            if (split) {
+                page.meta = Yaml.safeLoad(split[0]);
+                page.markdown = split[1];
+            }
+
+            pages.push(page);
+        });
+
+        pages.sort((pageA, pageB) => {
+            return (pageA.meta.path > pageB.meta.path) ? 1 : 0;
+        });
+
+        this.setState({pages});
+    }
+
     render() {
         return (
             <React.Fragment>
-                <Header />
-                <div className="c-main">
-                    <React.Fragment>
-                        <Route exact path="/" component={Home} />
-                        <Route path="/auth" component={Auth} />
-                        <Route path="/game" component={Game} />
-                        <Route path="/character" component={Character} />
-                    </React.Fragment>
-                </div>
-                {
-                    this.props.character &&
-                    <BottomMenu className="c-bottom-menu" socket={this.socket} />
-                }
+                <Header pages={this.state.pages} />
+                <main id="main">
+                    <div className="container">
+                        <Switch>
+                            {
+                                this.state.pages.map((page, index) => {
+                                    return <Route exact path={'/' + page.meta.path} key={index} component={() => {
+                                        return <Page page={page}/>;
+                                    }} />;
+                                })
+                            }
+                            <Route path="/auth" component={AuthContainer} />
+                            <Route path="/game" component={GameContainer} />
+                            <Route path="/character" component={Character} />
+                            <Route component={PageNotFound} />
+                        </Switch>
+                    </div>
+                </main>
             </React.Fragment>
         );
     }
