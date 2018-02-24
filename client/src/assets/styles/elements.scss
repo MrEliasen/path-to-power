@@ -57,10 +57,12 @@ button, .button {
     text-align: center;
     margin: 0;
     border: 0;
+    transition: all 100ms linear;
 
     &:hover {
         opacity: .9;
         color: #fff;
+        transform: translateY(-2px);
     }
 }
 
