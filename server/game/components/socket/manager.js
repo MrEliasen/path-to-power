@@ -36,15 +36,13 @@ export default class SocketManager extends EventEmitter {
      * @return {Promise}
      */
     get(user_id) {
-        return new Promise((resolve, reject) => {
-            const socket = this.clients[user_id];
+        const socket = this.clients[user_id];
 
-            if (!socket) {
-                return reject(new Error(`No socket found for user: ${user_id}`));
-            }
+        if (!socket) {
+            throw new Error(`No socket found for user: ${user_id}`);
+        }
 
-            resolve(socket);
-        });
+        return socket;
     }
 
     /**
@@ -68,10 +66,12 @@ export default class SocketManager extends EventEmitter {
         socket.on('dispatch', (action) => {
             this.onClientDispatch(socket, action);
         });
+
         socket.on('logout', (action) => {
             this.onDisconnect({...socket.user});
             socket.user = null;
         });
+
         socket.on('disconnect', () => {
             this.onDisconnect(socket.user);
         });
@@ -83,24 +83,22 @@ export default class SocketManager extends EventEmitter {
      * @return {promise}
      */
     logoutOutSession(user_id) {
-        return new Promise((resolve, reject) => {
-            return this.get(user_id)
-                .then((socket) => {
-                    const user = {...socket.user};
-                    socket.user = null;
-                    this.onDisconnect(user, true);
+        const socket = this.get(user_id);
 
-                    this.dispatchToSocket(socket, {
-                        type: REMOTE_LOGOUT,
-                        payload: {
-                            routeTo: '/',
-                        },
-                    });
-                    resolve();
-                })
-                .catch((err) => {
-                    resolve();
-                });
+        if (!socket) {
+            throw new Error('No socket found.');
+        }
+
+        const user = {...socket.user};
+
+        socket.user = null;
+        this.onDisconnect(user, true);
+
+        this.dispatchToSocket(socket, {
+            type: REMOTE_LOGOUT,
+            payload: {
+                routeTo: '/',
+            },
         });
     }
 
@@ -205,7 +203,7 @@ export default class SocketManager extends EventEmitter {
      */
     dispatchToRoom(roomId, action) {
         if (!roomId) {
-            return this.Game.logger.error('Missing roomId from dispatchToRoom?:', roomId, ' for action:', action);
+            throw new Error('Missing roomID in SocketManager::dispatchToRoom');
         }
 
         this.io.sockets.in(roomId).emit('dispatch', action);
@@ -225,15 +223,8 @@ export default class SocketManager extends EventEmitter {
      * @param  {String} roomId  Room ID to join
      */
     userJoinRoom(user_id, roomId) {
-        const action = this.get(user_id);
-
-        return action
-            .then((socket) => {
-                socket.join(roomId);
-            })
-            .catch((err) => {
-                this.Game.logger.error(err.message);
-            });
+        const socket = this.get(user_id);
+        socket.join(roomId);
     }
 
     /**
@@ -242,14 +233,7 @@ export default class SocketManager extends EventEmitter {
      * @param  {String} roomId  Room ID to leaves
      */
     userLeaveRoom(user_id, roomId) {
-        const action = this.get(user_id);
-
-        return action
-            .then((socket) => {
-                socket.leave(roomId);
-            })
-            .catch((err) => {
-                this.Game.logger.error(err.message);
-            });
+        const socket = this.get(user_id);
+        socket.leave(roomId);
     }
 }

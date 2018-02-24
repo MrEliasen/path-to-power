@@ -197,15 +197,12 @@ export default class Character {
      * @return {[type]} [description]
      */
     releaseTarget() {
-        return new Promise((resolve, reject) => {
-            // release the gridlock of the current target, if set
-            if (this.target) {
-                this.target.gridRelease(this.user_id);
-            }
+        // release the gridlock of the current target, if set
+        if (this.target) {
+            this.target.gridRelease(this.user_id);
+        }
 
-            this.target = null;
-            resolve();
-        });
+        this.target = null;
     }
 
     /**
@@ -253,32 +250,33 @@ export default class Character {
      * @return {object} Plain object with the items, and cash dropped
      */
     die() {
-        return new Promise(async (resolve, reject) => {
-            // release the target from the gridlock/aim
-            await this.releaseTarget()
-                .then(() => {
-                     // drop all items and cash
-                    const items = this.inventory.splice(0, this.inventory.length);
-                    const cash = this.stats.money;
-                    const targetedBy = this.targetedBy;
+        // release the target from the gridlock/aim
+        this.releaseTarget();
 
-                    // reset the character inventory, money, gridlock etc.
-                    this.stats.money = 0;
-                    this.targetedBy = [];
-                    this.stats.health = this.stats.health_max;
+         // drop all items and cash
+        const items = this.inventory.splice(0, this.inventory.length);
+        const cash = this.stats.money;
+        const targetedBy = this.targetedBy;
 
-                    const expLost = 0;
-                    // if its a player, reduce their exp
-                    if (this.user_id) {
-                        this.stats.exp * 0.035;
-                        this.updateExp(expLost * -1);
-                    }
+        // reset the character inventory, money, gridlock etc.
+        this.stats.money = 0;
+        this.targetedBy = [];
+        this.stats.health = this.stats.health_max;
 
-                    // return what is dropped by the character
-                    resolve({items, cash, exp: expLost, targetedBy});
-                })
-                .catch(reject);
-        });
+        const expLost = 0;
+        // if its a player, reduce their exp
+        if (this.user_id) {
+            this.stats.exp * 0.035;
+            this.updateExp(expLost * -1);
+        }
+
+        // return what is dropped by the character
+        return {
+            items,
+            cash,
+            exp: expLost,
+            targetedBy
+        };
     }
 
     /**

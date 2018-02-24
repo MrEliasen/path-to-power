@@ -89,7 +89,7 @@ class Game {
             console.log(arguments);
         };
 
-        // if we are not in a production environment, add console logging as well
+       /* // if we are not in a production environment, add console logging as well
         if (process.env.NODE_ENV === 'development') {
             this.logger.add(new winston.transports.Console({
                 format: winston.format.simple(),
@@ -97,7 +97,7 @@ class Game {
 
             // enable long stack traces to promises, while in dev
             Promise.longStackTraces();
-        }
+        }*/
 
         this.logger.info('Logger initiated.');
     }
@@ -173,6 +173,25 @@ class Game {
                     .catch((err) => {
                         this.logger.error(err.message);
                     });
+        }
+    }
+
+    /**
+     * Handles error catches, logging the error and (if defined) notifying the user.
+     * @param  {Obj}   err  The error object
+     * @param  {Mixed} user Socket.io Socket or user_id
+     */
+    onError(err, user) {
+        this.logger.error(err.message, err);
+
+        if (!user) {
+            return;
+        }
+
+        if (typeof user === 'string') {
+            this.eventToUser(user, 'error', 'Something went wrong. The error was logged. Please try again in a moment.');
+        } else {
+            this.eventToSocket(user, 'error', 'Something went wrong. The error was logged. Please try again in a moment.');
         }
     }
 

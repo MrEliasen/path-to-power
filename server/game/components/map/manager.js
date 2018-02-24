@@ -67,31 +67,31 @@ export default class MapManager {
      * Updates the client map location information
      * @param  {String} user_id  User Id of client to update
      */
-    async updateClient(user_id) {
+    updateClient(user_id) {
         // Get the character object
-        await this.Game.characterManager.get(user_id)
-            .then((character) => {
-                const location = [
-                    character.location.map,
-                    character.location.x,
-                    character.location.y,
-                ];
+        const character = this.Game.characterManager.get(user_id);
 
-                // dispatch to client
-                this.Game.socketManager.dispatchToUser(user_id, {
-                    type: JOIN_GRID,
-                    payload: {
-                        description: this.generateDescription(),
-                        players: this.Game.characterManager.getLocationList(...location, character.user_id, true),
-                        npcs: this.Game.npcManager.getLocationList(...location, true),
-                        items: this.Game.itemManager.getLocationList(...location, true),
-                        structures: this.Game.structureManager.getGrid(...location, true),
-                    },
-                });
-            })
-            .catch((err) => {
-                this.Game.logger.error(err.message);
-            });
+        if (!character) {
+            return;
+        }
+
+        const location = [
+            character.location.map,
+            character.location.x,
+            character.location.y,
+        ];
+
+        // dispatch to client
+        this.Game.socketManager.dispatchToUser(user_id, {
+            type: JOIN_GRID,
+            payload: {
+                description: this.generateDescription(),
+                players: this.Game.characterManager.getLocationList(...location, character.user_id, true),
+                npcs: this.Game.npcManager.getLocationList(...location, true),
+                items: this.Game.itemManager.getLocationList(...location, true),
+                structures: this.Game.structureManager.getGrid(...location, true),
+            },
+        });
     }
 
     /**
@@ -186,22 +186,17 @@ export default class MapManager {
      * @return {Promise}
      */
     isValidLocation(map_id, x, y) {
-        return new Promise((resolve, reject) => {
-            this.get(map_id).then((gameMap) => {
-                if (!gameMap.isValidPostion(x, y)) {
-                    return reject();
-                }
+        const gameMap = this.get(map_id);
 
-                resolve({
-                    map: gameMap.id,
-                    x: parseInt(x, 10),
-                    y: parseInt(y, 10),
-                });
-            })
-            .catch((err) => {
-                this.Game.logger.error(err.message);
-            });
-        });
+        if (!gameMap.isValidPostion(x, y)) {
+            return null;
+        }
+
+        return {
+            map: gameMap.id,
+            x: parseInt(x, 10),
+            y: parseInt(y, 10),
+        };
     }
 
     /**

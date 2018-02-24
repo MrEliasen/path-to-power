@@ -21,18 +21,14 @@ export default class AbilityManager {
      * @return {Promise}
      */
     load(character) {
-        return new Promise((resolve, reject) => {
-            // save the abilities list
-            const abilities = {...character.abilities};
+        // save the abilities list
+        const abilities = {...character.abilities};
 
-            // create a new array hold the abilities
-            character.abilities = [];
+        // create a new array hold the abilities
+        character.abilities = [];
 
-            // set each of the abilities to the character
-            character.abilities.push(new Abilities.Acc(20, abilities.acc, character.train));
-
-            resolve();
-        });
+        // set each of the abilities to the character
+        character.abilities.push(new Abilities.Acc(20, abilities.acc, character.train));
     }
 
     /**

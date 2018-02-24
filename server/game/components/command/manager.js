@@ -107,7 +107,7 @@ export default class CommandManager {
             return this.Game.eventToSocket(socket, 'error', `Command ${command} is not a valid command.`);
         }
 
-        const character = this.Game.characterManager.getSync(socket.user.user_id);
+        const character = await this.Game.characterManager.get(socket.user.user_id);
 
         await this.validate(character, params, this.commands[command].params)
             .then((params) => {
@@ -436,7 +436,7 @@ export default class CommandManager {
                                 // if there is no rule modifiers, assume no location restrictions
                                 // and player (since actions towards NPCs are inherently restricted to grid)
                                 if (!rule[1]) {
-                                    value = this.Game.characterManager.getByNameSync(msgParam);
+                                    value = await this.Game.characterManager.getByName(msgParam);
 
                                     if (!value) {
                                         return resolve(`There is no ${param.name} online by that name.`);

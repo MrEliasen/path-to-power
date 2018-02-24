@@ -41,13 +41,9 @@ export default class CharacterManager {
 
     /**
      * Register all the character commands
-     * @return {Promise}
      */
     init() {
-        return new Promise((resolve, reject) => {
-            this.Game.commandManager.registerManager(characterCommands);
-            resolve();
-        });
+        return this.Game.commandManager.registerManager(characterCommands);
     }
 
     /**
@@ -58,18 +54,42 @@ export default class CharacterManager {
     onDispatch(socket, action) {
         switch (action.type) {
             case UNEQUIP_ITEM:
-                return this.get(socket.user.user_id).then((character) => {
-                    character.unEquip(action.payload);
-                });
+                return this.onUnEquip(socket, action);
             case EQUIP_ITEM:
-                return this.get(socket.user.user_id).then((character) => {
-                    character.equip(action.payload);
-                });
+                return this.onEquip(socket, action);
             case MOVE_CHARACTER:
-                return this.move(socket, action.payload);
+                return this.move(socket, action);
         }
 
         return null;
+    }
+
+    /**
+     * Handles item unequip requests from the client.
+     * @param  {Socket.io Socket} socket The socket the action was dispatched from
+     * @param  {Object}           action Redux action object
+     */
+    onUnEquip(socket, action) {
+        try {
+            const character = this.get(socket.user.user_id);
+            character.unEquip(action.payload);
+        } catch (err) {
+            this.Game.onError(err, socket);
+        }
+    }
+
+    /**
+     * Handles item equip requests from the client.
+     * @param  {Socket.io Socket} socket The socket the action was dispatched from
+     * @param  {Object}           action Redux action object
+     */
+    onEquip(socket, action) {
+        try {
+            const character = this.get(socket.user.user_id);
+            character.equip(action.payload);
+        } catch (err) {
+            this.Game.onError(err, socket);
+        }
     }
 
     /**
@@ -78,16 +98,17 @@ export default class CharacterManager {
      * @param  {Mixed} property (optional) if only a part of the character needs updating
      */
     updateClient(user_id, property = null) {
-        return this.get(user_id).then((character) => {
-            const characterData = character.exportToClient();
+        const character = this.get(user_id);
 
-            this.Game.socketManager.dispatchToUser(user_id, {
-                type: UPDATE_CHARACTER,
-                payload: property ? {[property]: characterData[property]} : characterData,
-            });
-        })
-        .catch((err) => {
-            this.Game.logger.error(err.message);
+        if (!character) {
+            return;
+        }
+
+        const characterData = character.exportToClient();
+
+        this.Game.socketManager.dispatchToUser(user_id, {
+            type: UPDATE_CHARACTER,
+            payload: property ? {[property]: characterData[property]} : characterData,
         });
     }
 
@@ -97,28 +118,8 @@ export default class CharacterManager {
      * @return {Character Obj}
      */
     getByName(characterName) {
-        return new Promise((resolve, reject) =>{
-            const character = this.getByNameSync(characterName);
-
-            if (!character) {
-                return reject(new Error(`No character found by name ${characterNmae}`));
-            }
-
-            resolve(character);
-        });
-    }
-
-    /**
-     * Synchronously get the character object by character name, if exists.
-     * @param  {String} characterName Character name to search for
-     * @return {Mixed}                Character object or null.
-     */
-    getByNameSync(characterName) {
-        characterName = characterName.toLowerCase();
         // first check if there is a direct match between the name and a player
-        let character = findObjectInArray(this.characters, 'name_lowercase', characterName);
-
-        return character || null;
+        return findObjectInArray(this.characters, 'name_lowercase', characterName.toLowerCase());
     }
 
     /**
@@ -127,23 +128,6 @@ export default class CharacterManager {
      * @return {Promise}
      */
     get(user_id) {
-        return new Promise((resolve, reject) => {
-            const character = this.getSync(user_id);
-
-            if (!character) {
-                return reject(new Error(`No character found by ID ${user_id}`));
-            }
-
-            resolve(character);
-        });
-    }
-
-    /**
-     * Synchronously get the character object by user ID, if exists.
-     * @param  {String} user_id User ID of character to find
-     * @return {Mixed}          The character object or null
-     */
-    getSync(user_id) {
         if (!user_id) {
             return null;
         }
@@ -157,24 +141,26 @@ export default class CharacterManager {
      * @param  {String} name    Name of the character
      */
     dispatchUpdatePlayerList(user_id) {
-        // get the player
-        return this.get(user_id)
-            .then((character) => {
-                // update the clients online player list
-                this.Game.socketManager.dispatchToServer({
-                    type: ADD_ONLINE_PLAYER,
-                    payload: {
-                        user_id: character.user_id,
-                        name: character.name,
-                        profile_image: character.profile_image,
-                        faction: character.faction ? {
-                            tag: character.faction.tag,
-                            name: character.faction.name,
-                            faction_id: character.faction.faction_id,
-                        } : null,
-                    },
-                });
-            });
+        const character = this.get(user_id);
+
+        if (!character) {
+            return;
+        }
+
+        // update the clients online player list
+        this.Game.socketManager.dispatchToServer({
+            type: ADD_ONLINE_PLAYER,
+            payload: {
+                user_id: character.user_id,
+                name: character.name,
+                profile_image: character.profile_image,
+                faction: character.faction ? {
+                    tag: character.faction.tag,
+                    name: character.faction.name,
+                    faction_id: character.faction.faction_id,
+                } : null,
+            },
+        });
     }
 
     /**
@@ -195,7 +181,7 @@ export default class CharacterManager {
      * Adds a character class object to the managed list
      * @param  {Character Obj} character The character object to manage
      */
-    async manage(character) {
+    manage(character) {
         // removes disconnect timer, if one is sec (eg if refreshing the page)
         const wasLoggedIn = this.Game.socketManager.clearTimer(character.user_id);
         const existingCharacter = this.characters.find((obj) => obj.user_id === character.user_id);
@@ -203,23 +189,21 @@ export default class CharacterManager {
         if (wasLoggedIn && existingCharacter) {
             // re-add targetedBy, if the player has any
             // NOTE: reapply any temporary effects here to avoid relogging to clear them
-            existingCharacter.targetedBy.forEach(async (user) => {
-                await character.gridLock(user);
+            existingCharacter.targetedBy.forEach((user) => {
+                character.gridLock(user);
             });
 
-            await this.remove(character.user_id);
+            this.remove(character.user_id);
         }
 
         // load the character abilities
-        await this.Game.abilityManager.load(character);
+        this.Game.abilityManager.load(character);
 
         // load the character skills
-        await this.Game.skillManager.load(character);
+        this.Game.skillManager.load(character);
 
         // check if they are in a faction, and load the faction if so
-        const faction = await this.Game.factionManager.get(character.faction_id).catch((err) => {
-            this.Game.logger.error(err.message);
-        });
+        const faction = this.Game.factionManager.get(character.faction_id);
 
         // if they are in a faction, add them to the online list in the faction, and
         // add the faction object to the character
@@ -229,22 +213,24 @@ export default class CharacterManager {
 
         // add the character object to the managed list of characters
         this.characters.push(character);
-        await this.dispatchUpdatePlayerList(character.user_id);
+        this.dispatchUpdatePlayerList(character.user_id);
 
-        await this.Game.socketManager.get(character.user_id).then((socket) => {
-            // dispatch join event to grid
-            this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} emerges from a nearby building`, [character.user_id]);
-            // update the grid's player list
-            this.Game.socketManager.dispatchToRoom(
-                character.getLocationId(),
-                this.Game.characterManager.joinedGrid(character)
-            );
+        const socket = this.Game.socketManager.get(character.user_id);
+
+        // dispatch join event to grid
+        this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} emerges from a nearby building`, [character.user_id]);
+        // update the grid's player list
+        this.Game.socketManager.dispatchToRoom(
+            character.getLocationId(),
+            this.Game.characterManager.joinedGrid(character)
+        );
+
+        try {
             // join the grid room
             socket.join(character.getLocationId());
-        })
-        .catch((err) => {
-            this.Game.logger.error(err.message);
-        });
+        } catch (err) {
+            this.Game.onError(err, socket);
+        }
     }
 
     /**
@@ -252,31 +238,27 @@ export default class CharacterManager {
      * @param  {String} user_id User ID
      */
     remove(user_id) {
-        return new Promise(async (resolve, reject) => {
-            const character = await this.get(user_id).catch((err) => {
-                this.Game.logger.error(err.message);
-            });
+        const character = this.get(user_id);
 
-            if (!character) {
-                resolve(null);
-            }
+        if (!character) {
+            return;
+        }
 
-            // dispatch join event to grid
-            this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} disappears into a nearby building`, [character.user_id]);
-            // remove player from the grid list of players
-            this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                type: LEFT_GRID,
-                payload: character.user_id,
-            });
+        // dispatch join event to grid
+        this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} disappears into a nearby building`, [character.user_id]);
 
-            if (character.faction) {
-                character.faction.unlinkCharacter(character);
-            }
-
-            this.characters = this.characters.filter((obj) => obj.user_id !== user_id);
-            this.dispatchRemoveFromPlayerList(user_id);
-            resolve();
+        // remove player from the grid list of players
+        this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
+            type: LEFT_GRID,
+            payload: character.user_id,
         });
+
+        if (character.faction) {
+            character.faction.unlinkCharacter(character);
+        }
+
+        this.characters = this.characters.filter((obj) => obj.user_id !== user_id);
+        this.dispatchRemoveFromPlayerList(user_id);
     }
 
     /**
@@ -286,7 +268,7 @@ export default class CharacterManager {
      * @return {Object}             Object with the character details.
      */
     load(userData, callback) {
-        this.dbLoad(userData.user_id, async (error, character) => {
+        this.dbLoad(userData.user_id, (error, character) => {
             if (error) {
                 return callback(error);
             }
@@ -298,23 +280,20 @@ export default class CharacterManager {
             const newCharacter = new Character(this.Game, character.toObject());
             newCharacter.profile_image = userData.profile_image;
 
-            await this.manage(newCharacter);
+            this.manage(newCharacter);
 
-            await this.Game.itemManager.loadCharacterInventory(newCharacter)
-                .then((items) => {
-                    if (items) {
-                        newCharacter.setInventory(items);
-                        items.map((item, index) => {
-                            if (item.equipped_slot) {
-                                newCharacter.equip(index);
-                            }
-                        });
-                    }
-                    callback(null, newCharacter);
-                })
-                .catch((error) => {
-                    this.Game.logger.error(error.message);
-                });
+            this.Game.itemManager.loadCharacterInventory(newCharacter, (items) => {
+                if (items) {
+                    newCharacter.setInventory(items);
+                    items.map((item, index) => {
+                        if (item.equipped_slot) {
+                            newCharacter.equip(index);
+                        }
+                    });
+                }
+
+                callback(null, newCharacter);
+            });
         });
     }
 
@@ -364,7 +343,7 @@ export default class CharacterManager {
      * @return {Object}            Object with the character details
      */
     create(userData, city, callback) {
-        this.dbCreate(userData.user_id, userData.display_name, city, async (error, character) => {
+        this.dbCreate(userData.user_id, userData.display_name, city, (error, character) => {
             if (error) {
                 return callback(error);
             }
@@ -372,7 +351,7 @@ export default class CharacterManager {
             const newCharacter = new Character(this.Game, character.toObject());
             newCharacter.profile_image = userData.profile_image;
 
-            await this.manage(newCharacter);
+            this.manage(newCharacter);
             callback(null, newCharacter);
         });
     }
@@ -429,11 +408,11 @@ export default class CharacterManager {
      * @return {Promise}
      */
     saveAll() {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             const total = this.characters.length;
             let saves = 0;
 
-            await this.characters.forEach(async (character) => {
+            this.characters.forEach((character) => {
                 await this.save(character.user_id)
                     .then(() => {
                         saves++;
@@ -459,31 +438,27 @@ export default class CharacterManager {
      * @return {Promise}
      */
     save(user_id) {
-        return new Promise(async (resolve, reject) => {
             if (!user_id) {
                 return reject(new Error(`Unable to save character. None found for user: ${user_id}`));
             }
 
-            await this.get(user_id)
-                .then((character) => {
-                    this.Game.logger.debug(`Saving character ${user_id}`);
+            const character = this.get(user_id);
 
-                    // Save the character information (stats/location/etc)
-                    const saveCharacter = this.dbSave(character);
-                    const saveInventory = this.Game.itemManager.saveInventory(character);
+            if (!character) {
+                return;
+            }
 
-                    Promise.all([saveCharacter, saveInventory])
-                        .then((values) => {
-                            this.Game.logger.debug(`Saved ${user_id}`, values);
-                            resolve();
-                        })
-                        .catch((err) => {
-                            this.Game.logger.error(err.message);
-                        });
-                })
-                .catch((err) => {
-                    this.Game.logger.error(err.message);
-                });
+            this.Game.logger.info(`Saving character ${user_id}`);
+
+            // Save the character information (stats/location/etc)
+            try {
+                await this.dbSave(character);
+                await this.Game.itemManager.saveInventory(character);
+            } catch (err) {
+                return this.Game.onError(err);
+            }
+
+            this.Game.logger.info(`Saved ${character.name} (${user_id})`);
         });
     }
 
@@ -496,8 +471,7 @@ export default class CharacterManager {
         return new Promise((resolve, reject) => {
             CharacterModel.findOne({user_id: character.user_id}, (err, dbCharacter) => {
                 if (err) {
-                    this.Game.logger.error('CharacterManager::dbSave', err);
-                    return reject(new Error(err.message));
+                    throw new Error(err.message);
                 }
 
                 // update the character db object, and save the changes
@@ -510,8 +484,7 @@ export default class CharacterManager {
 
                 dbCharacter.save((err) => {
                     if (err) {
-                        this.Game.logger.error('CharacterManager::dbSave', err);
-                        return reject(new Error(err.message));
+                        throw new Error(err.message);
                     }
 
                     resolve(dbCharacter);
@@ -578,6 +551,7 @@ export default class CharacterManager {
      * @param  {Bool}      createAction Whether to return an action from the action creator or not.
      * @return {Object}                 Redux action object
      */
+    // TODO: Refactor this to be a action dispatch instead.
     joinedGrid(character, action = true) {
         const details = {
             name: character.name,
@@ -659,107 +633,108 @@ export default class CharacterManager {
      */
     move(socket, moveAction) {
         // get the socket character
-        return this.get(socket.user.user_id).then(async (character) => {
-            let newLocation = {...character.location};
-            let directionOut;
-            let directionIn;
+        const character = this.get(socket.user.user_id);
 
-            // check if character is gridlocked/being targeted by other players
-            if (character.targetedBy.length) {
-                const list = character.targetedBy.map((obj) => {
-                    return obj.name;
-                }).join(', ');
+        if (!character) {
+            return this.Game.eventToSocket(socket, 'error', 'You do not appear to be logged in any more. Please login again.');
+        }
 
-                return this.Game.eventToSocket(socket, 'warning', `You can't move as the following players are aiming at you: ${list}`);
-            }
+        let newLocation = {...character.location};
+        let directionOut;
+        let directionIn;
 
-            // check if the player is hidden
-            if (character.hidden) {
-                return this.Game.eventToSocket(socket, 'warning', 'You can\'t move as long as you are hidden. type /unhide to come out of hiding.');
-            }
+        // check if character is gridlocked/being targeted by other players
+        if (character.targetedBy.length) {
+            const list = character.targetedBy.map((obj) => {
+                return obj.name;
+            }).join(', ');
 
-            const cooldownAction = 'move';
-            // check if the character has an existing cooldown from moving
-            if (this.Game.cooldownManager.ticksLeft(character, cooldownAction)) {
-                return;
-            }
+            return this.Game.eventToSocket(socket, 'warning', `You can't move as the following players are aiming at you: ${list}`);
+        }
 
-            // set the cooldown of the move action
-            const newCooldown = this.Game.cooldownManager.add(character, cooldownAction);
+        // check if the player is hidden
+        if (character.hidden) {
+            return this.Game.eventToSocket(socket, 'warning', 'You can\'t move as long as you are hidden. type /unhide to come out of hiding.');
+        }
 
-            // set the location we intend to move the character to
-            newLocation[moveAction.grid] = newLocation[moveAction.grid] + moveAction.direction;
+        const cooldownAction = 'move';
+        // check if the character has an existing cooldown from moving
+        if (this.Game.cooldownManager.ticksLeft(character, cooldownAction)) {
+            return;
+        }
 
+        // set the cooldown of the move action
+        const newCooldown = this.Game.cooldownManager.add(character, cooldownAction);
+
+        // set the location we intend to move the character to
+        newLocation[moveAction.grid] = newLocation[moveAction.grid] + moveAction.direction;
+
+        try {
             // make sure the move is valid
-            await this.Game.mapManager.isValidLocation(newLocation.map, newLocation.x, newLocation.y)
-                .then(async (newLocation) => {
-                    // determin the direction names for the JOIN/LEAVE events
-                    switch (moveAction.grid) {
-                        case 'y':
-                            if (moveAction.direction === 1) {
-                                directionOut = 'South';
-                                directionIn = 'North';
-                            } else {
-                                directionOut = 'North';
-                                directionIn = 'South';
-                            }
-                            break;
-                        case 'x':
-                            if (moveAction.direction === 1) {
-                                directionOut = 'East';
-                                directionIn = 'West';
-                            } else {
-                                directionOut = 'West';
-                                directionIn = 'East';
-                            }
-                            break;
+            const newLocation = this.Game.mapManager.isValidLocation(newLocation.map, newLocation.x, newLocation.y);
+
+            // determin the direction names for the JOIN/LEAVE events
+            switch (moveAction.grid) {
+                case 'y':
+                    if (moveAction.direction === 1) {
+                        directionOut = 'South';
+                        directionIn = 'North';
+                    } else {
+                        directionOut = 'North';
+                        directionIn = 'South';
                     }
+                    break;
+                case 'x':
+                    if (moveAction.direction === 1) {
+                        directionOut = 'East';
+                        directionIn = 'West';
+                    } else {
+                        directionOut = 'West';
+                        directionIn = 'East';
+                    }
+                    break;
+            }
 
-                    // remove aim from current target, if set
-                    await character.releaseTarget().then(async () => {
-                        // leave the old grid room
-                        socket.leave(character.getLocationId());
+            // remove aim from current target, if set
+            character.releaseTarget();
 
-                        // dispatch leave message to grid
-                        this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} leaves to the ${directionOut}`, [character.user_id]);
-                        // remove player from the grid list of players
-                        this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                            type: LEFT_GRID,
-                            payload: character.user_id,
-                        });
+            // leave the old grid room
+            socket.leave(character.getLocationId());
 
-                        // update character location
-                        character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
+            // dispatch leave message to grid
+            this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} leaves to the ${directionOut}`, [character.user_id]);
+            // remove player from the grid list of players
+            this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
+                type: LEFT_GRID,
+                payload: character.user_id,
+            });
 
-                        // dispatch join message to new grid
-                        this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} strolls in from the ${directionIn}`, [character.user_id]);
-                        // add player from the grid list of players
-                        this.Game.socketManager.dispatchToRoom(
-                            character.getLocationId(),
-                            this.Game.characterManager.joinedGrid(character)
-                        );
+            // update character location
+            character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
 
-                        // update the socket room
-                        socket.join(character.getLocationId());
+            // dispatch join message to new grid
+            this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} strolls in from the ${directionIn}`, [character.user_id]);
 
-                        // update client/socket character and location information
-                        await this.updateClient(character.user_id);
+            // add player from the grid list of players
+            this.Game.socketManager.dispatchToRoom(
+                character.getLocationId(),
+                this.Game.characterManager.joinedGrid(character)
+            );
 
-                        // send the new grid details to the client
-                        await this.Game.mapManager.updateClient(character.user_id);
+            // update the socket room
+            socket.join(character.getLocationId());
 
-                        // start the cooldown timer
-                        newCooldown.start();
-                    })
-                    .catch(Game.logger.error);
-                })
-                .catch((err) => {
-                    this.Game.logger.error(err.message);
-                });
-        })
-        .catch((err) => {
-            this.Game.logger.error(err.message);
-        });
+            // update client/socket character and location information
+            this.updateClient(character.user_id);
+
+            // send the new grid details to the client
+            this.Game.mapManager.updateClient(character.user_id);
+
+            // start the cooldown timer
+            newCooldown.start();
+        } catch (err) {
+            this.Game.onError(err, socket);
+        }
     }
 
     /**
@@ -769,96 +744,79 @@ export default class CharacterManager {
      * @return {Promise}
      */
     kill(user_id, killer) {
-        return new Promise(async (resolve, reject) => {
-            // fetch the character who got killed
-            await this.get(user_id).then(async (character) => {
-                // get the map so we know where to respawn the player
-                await this.Game.mapManager.get(character.location.map).then(async (gameMap) => {
-                    // kill the character
-                    await character.die().then(async (droppedLoot) => {
-                        // save the old location before it is overwritten by the die() method on the character
-                        const oldLocationId = character.getLocationId();
-                        // save the old location
-                        const oldLocation = {...character.location};
-                        // the respawn location
-                        const newLocation = {
-                            map: gameMap.id,
-                            ...gameMap.respawn,
-                        };
+        // fetch the character who got killed
+        const character = this.get(user_id);
+        // get the map so we know where to respawn the player
+        const gameMap = this.Game.mapManager.get(character.location.map)
+        // kill the character
+        const droppedLoot = character.die();
+        // save the old location before it is overwritten by the die() method on the character
+        const oldLocationId = character.getLocationId();
+        // save the old location
+        const oldLocation = {...character.location};
+        // the respawn location
+        const newLocation = {
+            map: gameMap.id,
+            ...gameMap.respawn,
+        };
 
-                        // leave the old grid room
-                        await this.Game.socketManager.userLeaveRoom(character.user_id, character.getLocationId());
+        // leave the old grid room
+        this.Game.socketManager.userLeaveRoom(character.user_id, character.getLocationId());
 
-                        // remove player from the grid list of players
-                        this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                            type: LEFT_GRID,
-                            payload: character.user_id,
-                        });
-
-                        // update character location
-                        character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
-
-                        // drop all items on the ground
-                        droppedLoot.items.forEach((item) => {
-                            this.Game.itemManager.drop(oldLocation.map, oldLocation.x, oldLocation.y, item);
-                        });
-
-                        // TODO: Test if this works! Need more players to test.
-                        const cashReward = Math.floor(droppedLoot.cash / droppedLoot.targetedBy.length);
-                        const expReward = Math.floor(droppedLoot.exp / droppedLoot.targetedBy.length);
-                        droppedLoot.targetedBy.forEach((char) => {
-                            // give them an equal amount of cash and exp, from the dropped loot
-                            char.updateCash(cashReward);
-
-                            // make sure its a player
-                            if (char.user_id) {
-                                char.updateExp(expReward);
-                                this.updateClient(char.user_id);
-                            }
-                        });
-
-                        // Let the killer know how much money they received, if its not an NPC
-                        if (killer.user_id) {
-                            this.Game.eventToUser(killer.user_id, 'info', `You find ${droppedLoot.cash} money on ${character.name} body.`);
-                        }
-
-                        // update the client's ground look at the location
-                        this.Game.socketManager.dispatchToRoom(oldLocationId, {
-                            type: UPDATE_GROUND_ITEMS,
-                            payload: this.Game.itemManager.getLocationList(oldLocation.map, oldLocation.x, oldLocation.y, true),
-                        });
-
-                        // add player from the grid list of players
-                        this.Game.socketManager.dispatchToRoom(
-                            character.getLocationId(),
-                            this.Game.characterManager.joinedGrid(character)
-                        );
-
-                        // update the socket room
-                        await this.Game.socketManager.userJoinRoom(character.user_id, character.getLocationId());
-
-                        // update client/socket character and location information
-                        await this.updateClient(character.user_id);
-
-                        // send the new grid details to the client
-                        await this.Game.mapManager.updateClient(character.user_id);
-
-                        resolve(oldLocationId);
-                    })
-                    .catch((err) => {
-                        this.Game.logger.error(err.message);
-                        reject(new Error(`Failed to run KILL on target ${user_id}`));
-                    });
-                })
-                .catch((err) => {
-                    this.Game.logger.error(err.message);
-                    reject(new Error(`Failed to run KILL on target ${user_id}`));
-                });
-            })
-            .catch((err) => {
-                this.Game.logger.error(err.message);
-                reject(new Error(`Failed to run KILL on target ${user_id}`));
-            });
+        // remove player from the grid list of players
+        this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
+            type: LEFT_GRID,
+            payload: character.user_id,
         });
+
+        // update character location
+        character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
+
+        // drop all items on the ground
+        droppedLoot.items.forEach((item) => {
+            this.Game.itemManager.drop(oldLocation.map, oldLocation.x, oldLocation.y, item);
+        });
+
+        // TODO: Test if this works! Need more players to test.
+        const cashReward = Math.floor(droppedLoot.cash / droppedLoot.targetedBy.length);
+        const expReward = Math.floor(droppedLoot.exp / droppedLoot.targetedBy.length);
+        droppedLoot.targetedBy.forEach((char) => {
+            // give them an equal amount of cash and exp, from the dropped loot
+            char.updateCash(cashReward);
+
+            // make sure its a player
+            if (char.user_id) {
+                char.updateExp(expReward);
+                this.updateClient(char.user_id);
+            }
+        });
+
+        // Let the killer know how much money they received, if its not an NPC
+        if (killer.user_id) {
+            this.Game.eventToUser(killer.user_id, 'info', `You find ${droppedLoot.cash} money on ${character.name} body.`);
+        }
+
+        // update the client's ground look at the location
+        this.Game.socketManager.dispatchToRoom(oldLocationId, {
+            type: UPDATE_GROUND_ITEMS,
+            payload: this.Game.itemManager.getLocationList(oldLocation.map, oldLocation.x, oldLocation.y, true),
+        });
+
+        // add player from the grid list of players
+        this.Game.socketManager.dispatchToRoom(
+            character.getLocationId(),
+            this.Game.characterManager.joinedGrid(character)
+        );
+
+        // update the socket room
+        this.Game.socketManager.userJoinRoom(character.user_id, character.getLocationId());
+
+        // update client/socket character and location information
+        this.updateClient(character.user_id);
+
+        // send the new grid details to the client
+        this.Game.mapManager.updateClient(character.user_id);
+
+        return oldLocationId;
     }
 }

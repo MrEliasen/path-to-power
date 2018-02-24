@@ -303,23 +303,20 @@ export default class ItemManager {
      * @param  {Character} character The player character
      * @return {Promise}
      */
-    loadCharacterInventory(character) {
-        return new Promise((resolve, reject) => {
-            ItemModel.find({user_id: character.user_id}, {_id: 1, item_id: 1, modifiers: 1, equipped_slot: 1}, (err, items) => {
-                if (err) {
-                    this.Game.logger.error(err.message);
-                    return reject(new Error(err.message));
-                }
+    loadCharacterInventory(character, callback) {
+        ItemModel.find({user_id: character.user_id}, {_id: 1, item_id: 1, modifiers: 1, equipped_slot: 1}, (err, items) => {
+            if (err) {
+                return callback(err.message);
+            }
 
-                const inventory = items.map((item) => {
-                    let newItem = this.add(item.item_id, item.modifiers, item._id);
-                    newItem.equipped_slot = item.equipped_slot;
+            const inventory = items.map((item) => {
+                let newItem = this.add(item.item_id, item.modifiers, item._id);
+                newItem.equipped_slot = item.equipped_slot;
 
-                    return newItem;
-                });
-
-                resolve(inventory);
+                return newItem;
             });
+
+            callback(null, inventory);
         });
     }
 
@@ -328,39 +325,17 @@ export default class ItemManager {
      * @param  {Character Obj} character Character whos inventory we want to save
      * @return {Promise}
      */
-    saveInventory(character) {
-        return new Promise(async (resolve, reject) => {
-            const numOfItems = character.inventory.length;
-            let succeeded = 0;
-            let failed = 0;
+    async saveInventory(character) {
+        // if the character has no items, resolve right away
+        if (character.inventory.length) {
+            await Promise.all(character.inventory.map(async (item) => await this.dbSave(character.user_id, item)));
+        }
 
-            // if the character has no items, resolve right away
-            if (!numOfItems) {
-                this.cleanupDbInventory(character);
-                return resolve();
-            }
-
-            await character.inventory.map(async (item) => {
-                await this.dbSave(character.user_id, item)
-                    .then((itemDbObject) => {
-                        succeeded++;
-
-                        if ((succeeded + failed) === numOfItems) {
-                            this.cleanupDbInventory(character);
-                            resolve(failed, succeeded);
-                        }
-                    })
-                    .catch((error) => {
-                        failed++;
-                        this.Game.logger.error('Error saving inventory item:', error);
-
-                        if ((succeeded + failed) === numOfItems) {
-                                this.cleanupDbInventory(character);
-                                resolve(failed, succeeded);
-                            }
-                    });
-            });
-        });
+        try {
+            await this.cleanupDbInventory(character);
+        } catch (err) {
+            this.Game.onError(err);
+        }
     }
 
     /**
@@ -368,22 +343,22 @@ export default class ItemManager {
      * @param  {Character} character The player to cleanup
      */
     cleanupDbInventory(character) {
-        const itemDbIds = [];
+        return new Promise((resolve) => {
+            const itemDbIds = [];
 
-        character.inventory.forEach((obj) => {
-            if (obj._id) {
-                return itemDbIds.push(obj._id.toString());
-            }
-        });
+            character.inventory.forEach((obj) => {
+                if (obj._id) {
+                    return itemDbIds.push(obj._id.toString());
+                }
+            });
 
-        ItemModel.deleteMany({user_id: character.user_id, _id: {$nin: itemDbIds}}, (err, deleted) => {
-            if (err) {
-                return this.Game.logger.error(err.message);
-            }
+            ItemModel.deleteMany({user_id: character.user_id, _id: {$nin: itemDbIds}}, (err, deleted) => {
+                if (err) {
+                    throw new Error(err.message);
+                }
 
-            if (deleted.deletedCount) {
-                this.Game.logger.info(`Deleted ${deleted.deletedCount} items, no longer owned by user ${character.user_id}`);
-            }
+                resolve(deleted.deletedCount);
+            });
         });
     }
 
