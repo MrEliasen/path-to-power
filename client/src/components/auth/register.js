@@ -15,9 +15,9 @@ class AuthRegister extends React.Component {
                 <div className="panel-body">
                     <p></p>
                     <form>
-                        <input className="input" type="email" name="email" value="" placeholder="Email" />
-                        <input className="input" type="password" name="password" value="" placeholder="Password" />
-                        <input className="input" type="password" name="password_repeat" value="" placeholder="Password repeat" />
+                        <input className="input" type="email" name="email" value="" placeholder="Email" autoComplete="email" />
+                        <input className="input" type="password" name="password" value="" placeholder="Password" autoComplete="new-password" />
+                        <input className="input" type="password" name="password_repeat" value="" placeholder="Password repeat" autoComplete="new-password" />
                         <button>Create account</button>
                     </form>
                     <hr />

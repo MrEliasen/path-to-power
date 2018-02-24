@@ -82,8 +82,8 @@ class AuthLogin extends React.Component {
                 <div className="panel-body">
                     {this.showStatus()}
                     <form>
-                        <input className="input" type="email" name="email" value="" placeholder="Email" />
-                        <input className="input" type="password" name="password" value="" placeholder="Password" />
+                        <input className="input" type="email" name="email" value="" placeholder="Email" autoComplete="email" />
+                        <input className="input" type="password" name="password" value="" placeholder="Password" autoComplete="current-password" />
                         <button>Login</button>
                     </form>
                     <hr />
