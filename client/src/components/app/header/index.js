@@ -126,10 +126,12 @@ class Header extends React.Component {
                     <div className="container">
                         <ul className="nav-pages">
                             <li><Link to="/" className="logo">Path To Power</Link></li>
-                            <li><NavLink exact to="/">Home</NavLink></li>
-                            <li><NavLink to="/info">Gameplay</NavLink></li>
-                            <li><NavLink to="/guides">Guides</NavLink></li>
-                            <li><NavLink to="/about">About</NavLink></li>
+                            {
+                                this.props.pages && this.props.pages.length > 0 &&
+                                this.props.pages.map((page, index) => {
+                                    return <li key={index}><NavLink exact to={'/' + page.meta.path}>{page.meta.title}</NavLink></li>;
+                                })
+                            }
                             <li><a href={this.state.issueUrl} target="_blank">Report a bug</a></li>
                         </ul>
                         <ul className="nav-auth">
