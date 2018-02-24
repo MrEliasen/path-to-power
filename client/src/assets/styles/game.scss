@@ -8,6 +8,8 @@
     }
 
     .panel-messages {
+        @include mudfont;
+
         ul {
             margin: 0px;
             padding: 0px;
@@ -15,7 +17,6 @@
 
             li {
                 margin-top: 5px;
-                @include mudfont;
             }
         }
     }
