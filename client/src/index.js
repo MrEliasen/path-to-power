@@ -7,6 +7,11 @@ import {BrowserRouter} from 'react-router-dom';
 import reducers from './reducers';
 import App from './components/app';
 
+// FontAwesome Setup
+import FontAwesome from '@fortawesome/fontawesome';
+import FontAwesomeBrands from '@fortawesome/fontawesome-free-brands';
+FontAwesome.library.add(FontAwesomeBrands);
+
 // Styles
 import './assets/styles/all.scss';
 

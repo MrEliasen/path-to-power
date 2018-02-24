@@ -1,6 +1,8 @@
 import React from 'react';
 import config from '../../config';
 
+import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+
 class AuthRegister extends React.Component {
     constructor(props) {
         super(props);
@@ -20,7 +22,9 @@ class AuthRegister extends React.Component {
                     </form>
                     <hr />
                     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, laboriosam!</p>
-                    <a className="button block" href={`https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=${config.twitch.clientId}&redirect_uri=${config.twitch.callbackUrl}&scope=${config.twitch.scope.join(',')}`}>Login with Twitch.tv</a>
+                    <a className="button block" style={{backgroundColor: '#6441a5'}} href={`https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=${config.twitch.clientId}&redirect_uri=${config.twitch.callbackUrl}&scope=${config.twitch.scope.join(',')}`}>
+                        <FontAwesomeIcon icon={['fab', 'twitch']} /> Login with Twitch.tv
+                    </a>
                 </div>
             </div>
         );

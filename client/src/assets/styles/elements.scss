@@ -70,3 +70,9 @@ input, .input, button, .button {
     margin-bottom: 10px;
     border-radius: 2px;
 }
+
+button svg, .button svg {
+    margin: 0 5px;
+    vertical-align: middle;
+    font-size: 120%;
+}
