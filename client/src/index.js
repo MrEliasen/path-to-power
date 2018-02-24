@@ -10,7 +10,8 @@ import App from './components/app';
 // FontAwesome Setup
 import FontAwesome from '@fortawesome/fontawesome';
 import FontAwesomeBrands from '@fortawesome/fontawesome-free-brands';
-FontAwesome.library.add(FontAwesomeBrands);
+import FontAwesomeIcons from '@fortawesome/fontawesome-free-solid';
+FontAwesome.library.add(FontAwesomeBrands, FontAwesomeIcons);
 
 // Styles
 import './assets/styles/all.scss';
