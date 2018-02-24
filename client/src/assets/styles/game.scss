@@ -40,6 +40,29 @@
             height: 40vh;
         }
 
+        .toolbar {
+            display: flex;
+            flex-direction: row;
+            margin: 0;
+            padding: 0;
+
+            li {
+                flex: auto;
+                display: inline-block;
+                margin: 0;
+                padding: 0;
+
+                > * {
+                    display: block;
+                    padding: 5px 15px;
+                    color: inherit;
+                    text-align: center;
+                }
+                a:hover {
+                    background-color: #eee;
+                }
+            }
+        }
     }
 
     .panel {

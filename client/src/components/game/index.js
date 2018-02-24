@@ -12,6 +12,8 @@ import {clearEvents, newEvent} from './events/actions';
 import {newCommand} from './actions';
 import {moveCharacter} from './character/actions';
 
+import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+
 // Components
 import InventoryMenu from './inventory-menu';
 import PlayersMenu from './players-menu';
@@ -187,6 +189,16 @@ class Game extends React.Component {
                         }
                     </div>
                     <div className="middle">
+                        <div className="panel">
+                            <ul className="toolbar">
+                                <li><span><FontAwesomeIcon icon="dollar-sign" /> ?</span></li>
+                                <li><a href="#"><FontAwesomeIcon icon="map-marker-alt" /> Map</a></li>
+                                <li><a href="#"><FontAwesomeIcon icon="shield-alt" /> Inventory: ?/?</a></li>
+                                <li><a href="#"><FontAwesomeIcon icon="shopping-cart" /> Shop</a></li>
+                                <li><a href="#"><FontAwesomeIcon icon="tasks" /> Quests: ?</a></li>
+                                <li><a href="#"><FontAwesomeIcon icon="user-secret" /> Players: ?</a></li>
+                            </ul>
+                        </div>
                         <div className="panel">
                             <div className="panel-title">Chat</div>
                             <div className="panel-body panel-messages panel-chat">
