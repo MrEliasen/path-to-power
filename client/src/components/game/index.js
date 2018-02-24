@@ -189,13 +189,13 @@ class Game extends React.Component {
                     <div className="middle">
                         <div className="panel">
                             <div className="panel-title">Chat</div>
-                            <div className="panel-body panel-chat">
+                            <div className="panel-body panel-messages panel-chat">
                                 <Chat />
                             </div>
                         </div>
                         <div className="panel">
                             <div className="panel-title">Events</div>
-                            <div className="panel-body panel-events">
+                            <div className="panel-body panel-messages panel-events">
                                 <Events />
                             </div>
                         </div>

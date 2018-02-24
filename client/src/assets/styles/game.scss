@@ -4,18 +4,19 @@
     width: 100%;
 
     p {
-        @include mudfont;
         margin: 0px;
     }
 
-    ul {
-        margin: 0px;
-        padding: 0px;
-        list-style: none;
+    .panel-messages {
+        ul {
+            margin: 0px;
+            padding: 0px;
+            list-style: none;
 
-        li {
-            margin-top: 5px;
-            @include mudfont;
+            li {
+                margin-top: 5px;
+                @include mudfont;
+            }
         }
     }
 
@@ -42,15 +43,13 @@
     }
 
     .panel {
-
         .panel-body {
             min-height: 120px;
-            @include mudfont;
             padding: 10px 15px;
         }
     }
 
-    /* These need refactoring - copied from old layout */
+    /* TODO: These need refactoring - copied from old layout */
     .c-event-divider {
         width: 100%;
         display: black;
