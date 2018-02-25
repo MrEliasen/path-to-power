@@ -28,23 +28,17 @@ export default class ItemManager {
      * @return {Promise}
      */
     init() {
-        return new Promise(async (resolve, rejecte) => {
-            ItemList.map((itemData) => {
-                this.templates[itemData.id] = new Item(null, itemData);
-            });
-
-            // register the commands
-            this.Game.commandManager.registerManager(ItemCommands);
-
-            // set the initial item prices.
-            await this.updatePrices()
-                .then(() =>{
-                    resolve(ItemList.length);
-                })
-                .catch((err) => {
-                    this.Game.logger.error(err);
-                });
+        ItemList.map((itemData) => {
+            this.templates[itemData.id] = new Item(null, itemData);
         });
+
+        // register the commands
+        this.Game.commandManager.registerManager(ItemCommands);
+
+        // set the initial item prices.
+        this.updatePrices();
+
+        return ItemList.length;
     }
 
     /**
@@ -125,54 +119,52 @@ export default class ItemManager {
      * @return {Item Obj}        Item object which was remove.
      */
     pickup(map_id, x, y, itemName, amount) {
-        return new Promise((resolve, reject) => {
-            // get the list of items at the location
-            const locationItems = this.getLocationList(map_id, x, y);
-            let foundItemIndex = -1;
-            let foundItem;
+        // get the list of items at the location
+        const locationItems = this.getLocationList(map_id, x, y);
+        let foundItemIndex = -1;
+        let foundItem;
 
-            if (!locationItems.length) {
-                return reject(new Error('No items at the location'));
+        if (!locationItems.length) {
+            return 'No items at the location';
+        }
+
+        // find the item at the location, the user wants to pickup
+        if (itemName) {
+            itemName = itemName.toLowerCase();
+
+            // check if there is a direct match for the item name
+            foundItemIndex = locationItems.findIndex((obj) => obj.name.toLowerCase() === itemName);
+
+            if (foundItemIndex === -1) {
+                // otherwise check if there is an item beginning with the name
+                foundItemIndex = locationItems.findIndex((obj) => obj.name.toLowerCase().indexOf(itemName) !== -1);
             }
 
-            // find the item at the location, the user wants to pickup
-            if (itemName) {
-                itemName = itemName.toLowerCase();
-
-                // check if there is a direct match for the item name
-                foundItemIndex = locationItems.findIndex((obj) => obj.name.toLowerCase() === itemName);
-
-                if (foundItemIndex === -1) {
-                    // otherwise check if there is an item beginning with the name
-                    foundItemIndex = locationItems.findIndex((obj) => obj.name.toLowerCase().indexOf(itemName) !== -1);
-                }
-
-                // if still not found, reject
-                if (foundItemIndex === -1) {
-                    return reject(new Error('Item not found'));
-                }
-
-                foundItem = locationItems[foundItemIndex];
-            } else {
-                foundItemIndex = 0;
-                foundItem = locationItems[foundItemIndex];
+            // if still not found, reject
+            if (foundItemIndex === -1) {
+                return 'Item not found';
             }
 
-            // If the item is a non-stackable item, we remove it and return it.
-            if (!foundItem.stats.stackable) {
-                return resolve(locationItems.splice(foundItemIndex, 1)[0]);
-            }
+            foundItem = locationItems[foundItemIndex];
+        } else {
+            foundItemIndex = 0;
+            foundItem = locationItems[foundItemIndex];
+        }
 
-            // if the amount of less or equal to what we need, just return the whole item
-            if (foundItem.stats.durability <= amount) {
-                return resolve(locationItems.splice(foundItemIndex, 1)[0]);
-            }
+        // If the item is a non-stackable item, we remove it and return it.
+        if (!foundItem.stats.stackable) {
+            return resolve(locationItems.splice(foundItemIndex, 1)[0]);
+        }
 
-            // reduce durability of the item on the ground
-            foundItem.stats.durability = foundItem.stats.durability - amount;
-            // return a new items, with the durability we need
-            return resolve(this.add(foundItem.id, {durability: amount}));
-        });
+        // if the amount of less or equal to what we need, just return the whole item
+        if (foundItem.stats.durability <= amount) {
+            return resolve(locationItems.splice(foundItemIndex, 1)[0]);
+        }
+
+        // reduce durability of the item on the ground
+        foundItem.stats.durability = foundItem.stats.durability - amount;
+        // return a new items, with the durability we need
+        return this.add(foundItem.id, {durability: amount});
     }
 
     /**
@@ -206,7 +198,7 @@ export default class ItemManager {
      * @param  {Item Obj}  item      item to remove
      * @return {Promise}
      */
-    async remove(character, item) {
+    remove(character, item) {
         const itemClone = {...item};
         item.destroy();
 
@@ -218,12 +210,12 @@ export default class ItemManager {
 
         // if the item is in the DB, delete it.
         if (itemClone._id) {
-            await this.dbLoad(itemClone).then((dbItem) => {
+            try {
+                const dbItem = this.dbLoad(itemClone);
                 dbItem.remove();
-            })
-            .catch((err) => {
-                this.Game.logger.error(new Error(err.message));
-            });
+            } catch (err) {
+                this.Game.onError(err);
+            }
         }
     }
 
@@ -281,21 +273,19 @@ export default class ItemManager {
      * @return {Promise}
      */
     loadNPCInventory(NPC) {
-        return new Promise((resolve, reject) => {
-            // If the npc does not have any inventory, just ignore this
-            if (!NPC.inventory || !NPC.inventory.length) {
-                return resolve([]);
-            }
+        // If the npc does not have any inventory, just ignore this
+        if (!NPC.inventory || !NPC.inventory.length) {
+            return [];
+        }
 
-            const inventory = NPC.inventory.map((item) => {
-                let newItem = this.add(item.item_id, item.modifiers, null);
-                newItem.equipped_slot = item.equipped_slot;
+        const inventory = NPC.inventory.map((item) => {
+            let newItem = this.add(item.item_id, item.modifiers, null);
+            newItem.equipped_slot = item.equipped_slot;
 
-                return newItem;
-            });
-
-            resolve(inventory);
+            return newItem;
         });
+
+        return inventory;
     }
 
     /**
@@ -452,15 +442,11 @@ export default class ItemManager {
      * @return {Promise}
      */
     updatePrices() {
-        return new Promise((resolve, reject) => {
-            // loop the templates, and set the new prices for any applicable items
-            // update the pricing on items, with the priceRange array defined.
-            // We update the templates as they will be used for the sell and buy prices
-            Object.keys(this.templates).forEach((itemId) => {
-                this.templates[itemId].shufflePrice();
-            });
-
-            resolve();
+        // loop the templates, and set the new prices for any applicable items
+        // update the pricing on items, with the priceRange array defined.
+        // We update the templates as they will be used for the sell and buy prices
+        Object.keys(this.templates).forEach((itemId) => {
+            this.templates[itemId].shufflePrice();
         });
     }
 
@@ -470,15 +456,13 @@ export default class ItemManager {
      * @return {Promise}
      */
     getItemPrice(itemId) {
-        return new Promise((resolve, reject) => {
-            const template = this.getTemplate(itemId);
+        const template = this.getTemplate(itemId);
 
-            if (!template) {
-                return reject(new Error('Template not found'));
-            }
+        if (!template) {
+            return null;
+        }
 
-            resolve(template.stats.price);
-        });
+        return template.stats.price;
     }
 
     /**

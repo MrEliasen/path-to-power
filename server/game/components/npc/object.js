@@ -85,14 +85,13 @@ export default class NPC extends Character {
         });
 
         this.timers = [];
-        return;
     }
 
     /**
      * Starts the NPC logic timers
      */
-    async initLogicTimers() {
-        await this.clearTimers();
+    initLogicTimers() {
+        this.clearTimers();
 
         Object.keys(this.logic.timers).forEach((timerKey) => {
             const method = this[timerKey];

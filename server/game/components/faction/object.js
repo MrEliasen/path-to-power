@@ -49,7 +49,7 @@ export default class Faction {
      * Adds the Character to the faction online list and bind the factio obj to the character
      * @param  {Character Obj} character The Character to "link"
      */
-    async linkCharacter(character) {
+    linkCharacter(character) {
         // add the faction to the character.
         character.faction = this;
 
@@ -59,13 +59,8 @@ export default class Faction {
         }
 
         // join the faction-only room
-        await this.Game.socketManager.get(character.user_id)
-            .then((socket) => {
-                socket.join(this.faction_id);
-            })
-            .catch((err) => {
-                this.Game.logger.error(err.message);
-            });
+        const socket = this.Game.socketManager.get(character.user_id);
+        socket.join(this.faction_id);
     }
 
     /**
@@ -85,29 +80,26 @@ export default class Faction {
      * Adds a character to the faction
      * @param {Character Obj} character Character to add to the faction
      */
-    addMember(character) {
-        return new Promise(async (resolve, reject) => {
-            // remove outstanding invites if found
-            if (this.invites.findIndex((user_id) => user_id === character.user_id) !== -1) {
-                this.invites.splice(this.invites.findIndex((user_id) => user_id === character.user_id), 1);
-            }
+    async addMember(character) {
+        // remove outstanding invites if found
+        if (this.invites.findIndex((user_id) => user_id === character.user_id) !== -1) {
+            this.invites.splice(this.invites.findIndex((user_id) => user_id === character.user_id), 1);
+        }
 
-            // check if the character already is in the faction
-            if (character.faction_id === this.faction_id) {
-                //this.linkCharacter(character);
-                return resolve(character.user_id);
-            }
+        // check if the character already is in the faction
+        if (character.faction_id === this.faction_id) {
+            //this.linkCharacter(character);
+            return character.user_id;
+        }
 
-            await this.Game.factionManager.characterAddTo(character.user_id, this.faction_id)
-                .then(async () => {
-                    await this.linkCharacter(character);
-                    resolve(character.user_id);
-                })
-                .catch((err) => {
-                    this.Game.logger.error(err.message);
-                    reject(err);
-                });
-        });
+        const result = await this.Game.factionManager.characterAddTo(character.user_id, this.faction_id);
+
+        if (!result) {
+            return null;
+        }
+
+        this.linkCharacter(character);
+        return character.user_id;
     }
 
     /**

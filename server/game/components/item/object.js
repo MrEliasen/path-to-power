@@ -125,34 +125,34 @@ export default class Item {
     /**
      * Use the item, if the item allows
      */
-    async use(character) {
+    use(character) {
         // check if the item has an effect, if not, its not useable
         if (!this.stats.useEffect) {
             return;
         }
 
         // apply the item use effect
-        await this.Game.effectManager.apply(character, this.stats.useEffect.id, this.stats.useEffect.modifiers, this)
-            .then(async (effect) => {
-                // check if the use effect, reduces item durability
-                if (this.stats.useEffect.ignoreDurability) {
-                    return;
-                }
+        const effects = this.Game.effectManager.apply(character, this.stats.useEffect.id, this.stats.useEffect.modifiers, this);
 
-                // reduce the durability of the item
-                this.removeDurability(1);
+        if (!effects) {
+            return;
+        }
 
-                // if the item has no more uses, remove it.
-                if (this.stats.durability <= 0) {
-                    await this.Game.itemManager.remove(character, this);
-                }
+        // check if the use effect, reduces item durability
+        if (this.stats.useEffect.ignoreDurability) {
+            return;
+        }
 
-                // update the users inventory on the client side.
-                await this.Game.characterManager.updateClient(character.user_id, 'inventory');
-            })
-            .catch((err) => {
-                this.Game.logger.error(err.message);
-            });
+        // reduce the durability of the item
+        this.removeDurability(1);
+
+        // if the item has no more uses, remove it.
+        if (this.stats.durability <= 0) {
+            this.Game.itemManager.remove(character, this);
+        }
+
+        // update the users inventory on the client side.
+        this.Game.characterManager.updateClient(character.user_id, 'inventory');
     }
 
     /**

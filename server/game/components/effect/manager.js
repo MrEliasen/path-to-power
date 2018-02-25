@@ -22,22 +22,13 @@ export default class EffectManager {
      * @return {Mixed}                      Anything returned from the effect
      */
     apply(character, effectId, effectModifiers = {}, item = null) {
-        return new Promise(async (resolve, reject) => {
-            const effect = Effects[effectId];
+        const effect = Effects[effectId];
 
-            if (!effect) {
-                this.Game.logger.error(`The effect ID ${effectId}, did not match any effects.`);
-                return reject(new Error(`The effect ID ${effectId}, did not match any effects.`));
-            }
+        if (!effect) {
+            this.Game.logger.error(`The effect ID ${effectId}, did not match any effects.`);
+            return null;
+        }
 
-            await effect(character, effectModifiers || {}, item, this.Game)
-                .then((output) => {
-                    resolve(output);
-                })
-                .catch((err) => {
-                    this.Game.logger.error(err.message);
-                    reject(err);
-                });
-        });
+        return effect(character, effectModifiers || {}, item, this.Game);
     }
 }

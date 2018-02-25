@@ -26,32 +26,30 @@ export default class MapManager {
      * @return {Promise}
      */
     init() {
-        return new Promise((resolve, rejecte) => {
-            // load map commands
-            this.Game.commandManager.registerManager(mapCommands);
+        // load map commands
+        this.Game.commandManager.registerManager(mapCommands);
 
-            // get the list of map files in our data maps directory
-            const maplist = fs.readdirSync(`${__dirname}/../../data/maps`);
-            let loadedmaps = 0;
+        // get the list of map files in our data maps directory
+        const maplist = fs.readdirSync(`${__dirname}/../../data/maps`);
+        let loadedmaps = 0;
 
-            // loop each of our mapfiles
-            maplist.map((mapname) => {
-                let mapData = require(`${__dirname}/../../data/maps/${mapname}`);
-                this.maps[mapData.id] = new GameMap(this.Game, mapData);
+        // loop each of our mapfiles
+        maplist.map((mapname) => {
+            let mapData = require(`${__dirname}/../../data/maps/${mapname}`);
+            this.maps[mapData.id] = new GameMap(this.Game, mapData);
 
-                // generate the map, and once done, increment the counter and resolve if all maps are done.
-                this.maps[mapData.id].generate()
-                    .then(() => {
-                        loadedmaps++;
+            // generate the map, and once done, increment the counter and resolve if all maps are done.
+            this.maps[mapData.id].generate()
+                .then(() => {
+                    loadedmaps++;
 
-                        if (loadedmaps === maplist.length) {
-                            resolve(maplist.length);
-                        }
-                    })
-                    .catch((err) => {
-                        this.Game.logger.error(err.message);
-                    });
-            });
+                    if (loadedmaps === maplist.length) {
+                        resolve(maplist.length);
+                    }
+                })
+                .catch((err) => {
+                    this.Game.logger.error(err.message);
+                });
         });
     }
 
@@ -100,15 +98,13 @@ export default class MapManager {
      * @return {Promise}
      */
     get(map_id) {
-        return new Promise((resolve, reject) => {
-            const gameMap = this.maps[map_id];
+        const gameMap = this.maps[map_id];
 
-            if (!gameMap) {
-                return reject(new Error(`Map with id ${map_id} was not found`));
-            }
+        if (!gameMap) {
+            return null;
+        }
 
-            resolve(gameMap);
-        });
+        return gameMap;
     }
 
     /**
@@ -117,23 +113,6 @@ export default class MapManager {
      * @return {Map}
      */
     getByName(mapName) {
-        return new Promise((resolve, reject) =>{
-            const gameMap = this.getByNameSync(mapName);
-
-            if (!gameMap) {
-                return reject(new Error('Game map not found'));
-            }
-
-            resolve(gameMap);
-        });
-    }
-
-    /**
-     * Synchronously get the Map object by name, if exists.
-     * @param  {String} mapName Map name to search for
-     * @return {Map}
-     */
-    getByNameSync(mapName) {
         mapName = mapName.toLowerCase();
         // first check if there is a direct match between the name and a map name
         let mapId = Object.keys(this.maps).find((mapId) => this.maps[mapId].name.toLowerCase() === mapName);
@@ -206,7 +185,7 @@ export default class MapManager {
      */
     getInfo(mapObject) {
         if (typeof mapObject === 'string') {
-            mapObject = this.getByNameSync(mapObject);
+            mapObject = this.getByName(mapObject);
 
             // if the command does not exist
             if (!mapObject) {

@@ -30,11 +30,7 @@ export default class CommandManager {
      * @return {Promise}
      */
     init() {
-        return new Promise((resolve, rejecte) => {
-            // load map commands
-            this.registerManager(commandCommands);
-            resolve();
-        });
+        return this.registerManager(commandCommands);
     }
 
     /**
@@ -85,7 +81,7 @@ export default class CommandManager {
      * @param  {Socket.IO Socket} socket Client who dispatched the action
      * @param  {Object}           action The redux action
      */
-    async onDispatch(socket, action) {
+    onDispatch(socket, action) {
         if (action.type !== GAME_COMMAND) {
             return;
         }
@@ -107,32 +103,35 @@ export default class CommandManager {
             return this.Game.eventToSocket(socket, 'error', `Command ${command} is not a valid command.`);
         }
 
-        const character = await this.Game.characterManager.get(socket.user.user_id);
+        const character = this.Game.characterManager.get(socket.user.user_id);
 
-        await this.validate(character, params, this.commands[command].params)
-            .then((params) => {
-                // If the params is a string and not an array, something went wrong
-                if (typeof params === 'string') {
-                    this.Game.eventToSocket(socket, 'error', params);
-                    return this.Game.eventToSocket(socket, 'multiline', this.getInfo(command));
-                }
+        if (!character) {
+            return;
+        }
 
-                return this.commands[command].method(
-                    socket,
-                    character,
-                    command,
-                    params,
-                    {
-                        modifiers: this.commands[command].modifiers ? deepCopyObject(this.commands[command].modifiers) : null,
-                        description: this.commands[command].description,
-                    },
-                    this.Game
-                );
-            })
-            .catch((error) => {
-                this.Game.eventToSocket(socket, 'error', 'Something went wrong while trying to execute your command.');
-                return this.Game.logger.error(error.message);
-            });
+        try {
+            const params = this.validate(character, params, this.commands[command].params);
+
+            // If the params is a string and not an array, something went wrong
+            if (typeof params === 'string') {
+                this.Game.eventToSocket(socket, 'error', params);
+                return this.Game.eventToSocket(socket, 'multiline', this.getInfo(command));
+            }
+
+            return this.commands[command].method(
+                socket,
+                character,
+                command,
+                params,
+                {
+                    modifiers: this.commands[command].modifiers ? deepCopyObject(this.commands[command].modifiers) : null,
+                    description: this.commands[command].description,
+                },
+                this.Game
+            );
+        } catch (err) {
+            this.Game.onError(err, socket);
+        }
     }
 
     /**
@@ -289,194 +288,197 @@ export default class CommandManager {
      * @return {Promise}
      */
     validate(player, msgParams, cmdParams) {
-        return new Promise(async (resolve, reject) => {
-            // check if there are any params defined for the command at all
-            if (!cmdParams) {
-                return resolve(msgParams);
-            }
+        // check if there are any params defined for the command at all
+        if (!cmdParams) {
+            return resolve(msgParams);
+        }
 
-            // prepare the params, so they match the number of expected params.
-            msgParams = msgParams.slice(0, cmdParams.length - 1).concat(msgParams.slice(cmdParams.length - 1).join(' '));
+        // prepare the params, so they match the number of expected params.
+        msgParams = msgParams.slice(0, cmdParams.length - 1).concat(msgParams.slice(cmdParams.length - 1).join(' '));
 
-            // run the params through each of the rules
-            for (let index = 0; index < cmdParams.length; index++) {
-                let param = cmdParams[index];
+        // run the params through each of the rules
+        for (let index = 0; index < cmdParams.length; index++) {
+            let param = cmdParams[index];
 
-                // remove encapsulation from the parameter
-                msgParams[index] = this.stripEncapsulation(msgParams[index]);
+            // remove encapsulation from the parameter
+            msgParams[index] = this.stripEncapsulation(msgParams[index]);
 
-                // only if the parameter has rules..
-                if (param.rules.length) {
-                    let rules = param.rules.toLowerCase().split('|');
+            // only if the parameter has rules..
+            if (param.rules.length) {
+                let rules = param.rules.toLowerCase().split('|');
 
-                    // check if the message param is not set and is optional
-                    // if so, we will ignore the rules.
-                    if (!msgParams[index] && !rules.includes('required')) {
-                        break;
-                    }
+                // check if the message param is not set and is optional
+                // if so, we will ignore the rules.
+                if (!msgParams[index] && !rules.includes('required')) {
+                    break;
+                }
 
-                    // will we run through and validate the message parameter the rule is for
-                    for (let i = 0; i < rules.length; i++) {
-                        let rule = rules[i];
-                        // get the corresponding message parameter
-                        let msgParam = msgParams[index];
-                        // holds the value we will overwrite the parameter with, if the test succeeds.
-                        let value = msgParam;
-                        //null placeholder for 2nd rule param, if not set
-                        rule = rule.split(':').concat([null]);
+                // will we run through and validate the message parameter the rule is for
+                for (let i = 0; i < rules.length; i++) {
+                    let rule = rules[i];
+                    // get the corresponding message parameter
+                    let msgParam = msgParams[index];
+                    // holds the value we will overwrite the parameter with, if the test succeeds.
+                    let value = msgParam;
+                    //null placeholder for 2nd rule param, if not set
+                    rule = rule.split(':').concat([null]);
 
-                        switch (rule[0]) {
-                            case 'required':
-                                if (typeof msgParam === 'undefined' || !msgParam) {
-                                    return resolve(`Missing parameter: ${param.name}`);
-                                }
-                                break;
+                    switch (rule[0]) {
+                        case 'required':
+                            if (typeof msgParam === 'undefined' || !msgParam) {
+                                return `Missing parameter: ${param.name}`;
+                            }
+                            break;
 
-                            case 'integer':
-                                value = parseInt(msgParam, 10);
+                        case 'integer':
+                            value = parseInt(msgParam, 10);
 
-                                if (isNaN(value) || parseFloat(msgParam, 10) % 1 !== 0) {
-                                    return resolve(`${param.name} must be a integer.`);
-                                }
-                                break;
+                            if (isNaN(value) || parseFloat(msgParam, 10) % 1 !== 0) {
+                                return `${param.name} must be a integer.`;
+                            }
+                            break;
 
-                            case 'float':
-                                value = parseFloat(msgParam, 10);
+                        case 'float':
+                            value = parseFloat(msgParam, 10);
 
-                                if (isNaN(value)) {
-                                    return resolve(`${param.name} must be a float.`);
-                                }
-                                break;
+                            if (isNaN(value)) {
+                                return `${param.name} must be a float.`;
+                            }
+                            break;
 
-                            case 'min':
-                                if (isNaN(msgParam) || msgParam < parseFloat(rule[1], 10)) {
-                                    return resolve(`${param.name} cannot be less than ${rule[1]}.`);
-                                }
-                                break;
+                        case 'min':
+                            if (isNaN(msgParam) || msgParam < parseFloat(rule[1], 10)) {
+                                return `${param.name} cannot be less than ${rule[1]}.`;
+                            }
+                            break;
 
-                            case 'max':
-                                if (isNaN(msgParam) || msgParam > parseFloat(rule[1], 10)) {
-                                    return resolve(`${param.name} cannot be greater than ${rule[1]}.`);
-                                }
-                                break;
+                        case 'max':
+                            if (isNaN(msgParam) || msgParam > parseFloat(rule[1], 10)) {
+                                return `${param.name} cannot be greater than ${rule[1]}.`;
+                            }
+                            break;
 
-                            case 'minlen':
-                                if (msgParam.length < parseInt(rule[1], 10)) {
-                                    return resolve(`${param.name} must be at least ${rule[1]} characters long.`);
-                                }
-                                break;
+                        case 'minlen':
+                            if (msgParam.length < parseInt(rule[1], 10)) {
+                                return `${param.name} must be at least ${rule[1]} characters long.`;
+                            }
+                            break;
 
-                            case 'maxlen':
-                                if (msgParam.length > parseInt(rule[1], 10)) {
-                                    return resolve(`${param.name} cannot be longer than ${rule[1]} characters.`);
-                                }
-                                break;
+                        case 'maxlen':
+                            if (msgParam.length > parseInt(rule[1], 10)) {
+                                return `${param.name} cannot be longer than ${rule[1]} characters.`;
+                            }
+                            break;
 
-                            case 'alphanum':
-                                if (msgParam !== escapeStringRegex(msgParam.toString()).replace(/[^a-z0-9]/gi, '')) {
-                                    return resolve(`${param.name} may only consist of alphanumeric characters (a-z, 0-9).`);
-                                }
-                                break;
+                        case 'alphanum':
+                            if (msgParam !== escapeStringRegex(msgParam.toString()).replace(/[^a-z0-9]/gi, '')) {
+                                return `${param.name} may only consist of alphanumeric characters (a-z, 0-9).`;
+                            }
+                            break;
 
-                            case 'direction':
-                                const directions = [
-                                    'north', 'east', 'south', 'west',
-                                    'n', 'e', 's', 'w',
-                                ];
+                        case 'direction':
+                            const directions = [
+                                'north', 'east', 'south', 'west',
+                                'n', 'e', 's', 'w',
+                            ];
 
-                                if (!directions.includes(msgParam.toLowerCase())) {
-                                    return resolve(`${param.name} does not appear to be a valid direction.`);
-                                }
-                                break;
+                            if (!directions.includes(msgParam.toLowerCase())) {
+                                return `${param.name} does not appear to be a valid direction.`;
+                            }
+                            break;
 
-                            case 'faction':
-                                value = await this.Game.factionManager.getByName(msgParam).catch(() => {
-                                    return resolve(`The ${param.name} is not a valid faction.`);
-                                });
-                                break;
+                        case 'faction':
+                            value = this.Game.factionManager.getByName(msgParam);
 
-                            case 'gamemap':
-                                value = await this.Game.mapManager.getByName(msgParam).catch(() => {
-                                    return resolve(`The ${param.name} is not a valid location.`);
-                                });
-                                break;
+                            if (!value) {
+                                return `The ${param.name} is not a valid faction.`;
+                            }
+                            break;
 
-                            case 'shop':
-                                value = await this.Game.structureManager.getWithShop(player.location.map, player.location.x, player.location.y)
-                                    .catch(() => {
-                                        return resolve(`The ${param.name} is not a valid shop, at your current location.`);
-                                    });
-                                break;
+                        case 'gamemap':
+                            value = this.Game.mapManager.getByName(msgParam);
 
-                            case 'item':
-                                if (!rule[1]) {
-                                    value = await this.Game.itemManager.getTemplateByName(msgParam.toLowerCase());
+                            if (!value) {
+                                return `The ${param.name} is not a valid location.`;
+                            }
+                            break;
 
-                                    // if no item was found by name, see if the msgParam was an itemId instead
-                                    if (!value) {
-                                        value = await this.Game.itemManager.getTemplate(msgParam);
-                                    }
-                                } else {
-                                    if (rule[1] === 'id') {
-                                        value = await this.Game.itemManager.getTemplate(msgParam);
-                                    } else if (rule[1] === 'name') {
-                                        value = await this.Game.itemManager.getTemplateByName(msgParam.toLowerCase());
-                                    }
-                                }
+                        case 'shop':
+                            value = this.Game.structureManager.getWithShop(player.location.map, player.location.x, player.location.y);
 
-                                // no item found by name or ID
+                            if (value) {
+                                return `The ${param.name} is not a valid shop, at your current location.`;
+                            }
+                            break;
+
+                        case 'item':
+                            if (!rule[1]) {
+                                value = this.Game.itemManager.getTemplateByName(msgParam.toLowerCase());
+
+                                // if no item was found by name, see if the msgParam was an itemId instead
                                 if (!value) {
-                                    return resolve(`The ${param.name} is not a valid item.`);
+                                    value = this.Game.itemManager.getTemplate(msgParam);
+                                }
+                            } else {
+                                if (rule[1] === 'id') {
+                                    value = this.Game.itemManager.getTemplate(msgParam);
+                                } else if (rule[1] === 'name') {
+                                    value = this.Game.itemManager.getTemplateByName(msgParam.toLowerCase());
+                                }
+                            }
+
+                            // no item found by name or ID
+                            if (!value) {
+                                return `The ${param.name} is not a valid item.`;
+                            }
+                            break;
+
+                        case 'player':
+                        case 'target':
+                        case 'npc':
+                            // if there is no rule modifiers, assume no location restrictions
+                            // and player (since actions towards NPCs are inherently restricted to grid)
+                            if (!rule[1]) {
+                                value = this.Game.characterManager.getByName(msgParam);
+
+                                if (!value) {
+                                    return `There is no ${param.name} online by that name.`;
                                 }
                                 break;
+                            }
 
-                            case 'player':
-                            case 'target':
-                            case 'npc':
-                                // if there is no rule modifiers, assume no location restrictions
-                                // and player (since actions towards NPCs are inherently restricted to grid)
-                                if (!rule[1]) {
-                                    value = await this.Game.characterManager.getByName(msgParam);
+                            // assume we will search in the grid by detault
+                            let location = {
+                                ...player.location,
+                            };
 
-                                    if (!value) {
-                                        return resolve(`There is no ${param.name} online by that name.`);
-                                    }
-                                    break;
-                                }
+                            // if rule modifier is set to map, null out the x an y so
+                            // we will search the map instead of grid
+                            if (rule[1] !== 'grid') {
+                                location.x = null;
+                                location.y = null;
+                            }
 
-                                // assume we will search in the grid by detault
-                                let location = {
-                                    ...player.location,
-                                };
+                            value = this.findAtLocation(
+                                msgParam,
+                                location,
+                                rule[0] === 'player',
+                                rule[0] === 'npc',
+                                player.user_id,
+                            );
 
-                                // if rule modifier is set to map, null out the x an y so
-                                // we will search the map instead of grid
-                                if (rule[1] !== 'grid') {
-                                    location.x = null;
-                                    location.y = null;
-                                }
+                            if (typeof value === 'string') {
+                                return value;
+                            }
+                            break;
+                    };
 
-                                value = this.findAtLocation(
-                                    msgParam,
-                                    location,
-                                    rule[0] === 'player',
-                                    rule[0] === 'npc',
-                                    player.user_id,
-                                );
-
-                                if (typeof value === 'string') {
-                                    return resolve(value);
-                                }
-                                break;
-                        };
-
-                        msgParams[index] = value;
-                    }
+                    msgParams[index] = value;
                 }
             }
+        }
 
-            resolve(msgParams);
-        });
+        return msgParams;
     }
 
     /**

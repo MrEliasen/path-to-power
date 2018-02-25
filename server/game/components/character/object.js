@@ -180,16 +180,11 @@ export default class Character {
      */
     setTarget(target) {
         // release the gridlock of the current target, if set
-        return this.releaseTarget()
-            .then(async () => {
-                // set the new target
-                this.target = target;
-                // and gridlock them
-                await this.target.gridLock(this);
-            })
-            .catch((err) => {
-                this.Game.logger.error(err.message);
-            });
+        this.releaseTarget();
+        // set the new target
+        this.target = target;
+        // and gridlock them
+        this.target.gridLock(this);
     }
 
     /**
@@ -275,7 +270,7 @@ export default class Character {
             items,
             cash,
             exp: expLost,
-            targetedBy
+            targetedBy,
         };
     }
 
@@ -284,34 +279,30 @@ export default class Character {
      * @return {Object}          the damage, -1 if the weapon cannot be fired.
      */
     fireRangedWeapon() {
-        return new Promise(async (resolve, reject) => {
-            await this.getWeaponDamage('ranged')
-                .then(async (damage) => {
-                    if (!this.hasAmmo()) {
-                        return resolve(-1);
-                    }
+        const damage = this.getWeaponDamage('ranged');
+        const ammo = this.getEquipped('ammo');
 
-                    if (this.ignoreQuantity) {
-                        return resolve(damage);
-                    }
+        if (damage === null) {
+            return null;
+        }
 
-                    const ammo = this.getEquippedSync('ammo');
+        if (!this.hasAmmo()) {
+            return null;
+        }
 
-                    // reduce ammo durability
-                    ammo.stats.durability = ammo.removeDurability(1);
+        if (this.ignoreQuantity) {
+            return damage;
+        }
 
-                    // remove ammo if durability is 0
-                    if (ammo.durability <= 0) {
-                        await this.Game.itemManager.remove(this, ammo);
-                    }
+        // reduce ammo durability
+        ammo.stats.durability = ammo.removeDurability(1);
 
-                    resolve(damage);
-                })
-                .catch((err) => {
-                    this.Game.logger.error(err.message);
-                    reject(new Error('no ranged weapon equipped'));
-                });
-        });
+        // remove ammo if durability is 0
+        if (ammo.durability <= 0) {
+            this.Game.itemManager.remove(this, ammo);
+        }
+
+        return damage;
     }
 
     /**
@@ -319,7 +310,7 @@ export default class Character {
      * @return {Boolean}
      */
     hasAmmo() {
-        const equippedAmmo = this.getEquippedSync('ammo');
+        const equippedAmmo = this.getEquipped('ammo');
 
         if (!equippedAmmo) {
             return false;
@@ -337,19 +328,17 @@ export default class Character {
      * @return {Promise}
      */
     getAmmoDamage() {
-        return new Promise(async (resolve) => {
-            if (!this.hasAmmo()) {
-                return resolve(-1);
-            }
+        if (!this.hasAmmo()) {
+            return null;
+        }
 
-            await this.getEquipped('ammo')
-                .then((item) => {
-                    resolve(item.stats.damage_bonus);
-                })
-                .catch((err) => {
-                    reject(new Error(err.message));
-                });
-        });
+        const item = this.getEquipped('ammo');
+
+        if (!item) {
+            return null;
+        }
+
+        return item.stats.damage_bonus;
     }
 
     /**
@@ -359,31 +348,18 @@ export default class Character {
      * @return {Promise}         Damage of the weapon
      */
     getWeaponDamage(slot) {
-        return new Promise(async (resolve, reject) => {
-            await this.getEquipped(slot)
-                .then(async (equippedItem) => {
-                    if (!equippedItem) {
-                        return reject(new Error(`No item equipped in slot ${slot}`));
-                    }
+        const equippedItem = this.getEquipped(slot);
+        let bonusDamage = 0;
 
-                    await this.getAmmoDamage()
-                        .then((ammoDamage) => {
-                            let bonusDamage = 0;
+        if (!equippedItem) {
+            return reject(new Error(`No item equipped in slot ${slot}`));
+        }
 
-                            if (slot === 'ranged') {
-                                bonusDamage = ammoDamage;
-                            }
+        if (slot === 'ranged') {
+            bonusDamage = this.getAmmoDamage();
+        }
 
-                            resolve(Math.floor(Math.random() * (equippedItem.stats.damage_max - equippedItem.stats.damage_min + 1)) + equippedItem.stats.damage_min + bonusDamage);
-                        })
-                        .catch((err) => {
-                            reject(new Error(err.message));
-                        });
-                })
-                .catch((err) => {
-                    reject(new Error(err.message));
-                });
-        });
+        return Math.floor(Math.random() * (equippedItem.stats.damage_max - equippedItem.stats.damage_min + 1)) + equippedItem.stats.damage_min + bonusDamage;
     }
 
     /**
@@ -392,28 +368,6 @@ export default class Character {
      * @return {Promise}
      */
     getEquipped(slot = null) {
-        return new Promise((resolve, reject) => {
-            // if no slot if specified, return all equipped items
-            if (!slot) {
-                return resolve(this.getEquippedSync());
-            }
-
-            const item = this.getEquippedSync(slot);
-
-            if (!item) {
-                return reject(new Error(`No item in slot: ${slot}`));
-            }
-
-            resolve(item);
-        });
-    }
-
-    /**
-     * Get the items which is equipped in the specified slot
-     * @param  {String}  slot The equipment slot
-     * @return {Mixed}        Item if found, null otherwise;
-     */
-    getEquippedSync(slot) {
         // if no slot if specified, return all equipped items
         if (!slot) {
             return this.inventory.filter((obj) => obj.equipped_slot);
@@ -431,19 +385,21 @@ export default class Character {
             return false;
         }
 
-        await this.getEquipped(slot)
-            .then(async (item) => {
-                item.equipped_slot = null;
-                await this.Game.characterManager.updateClient(this.user_id);
-            })
-            .catch(() => {});
+        const item = this.getEquipped(slot);
+
+        if (!item) {
+            return;
+        }
+
+        item.equipped_slot = null;
+        this.Game.characterManager.updateClient(this.user_id);
     }
 
     /**
      * Equips selected item from inventory, moving the other item (if any) to the inventory.
      * @param  {Number} inventoryIndex The inventory array index of the item to equip
      */
-    async equip(inventoryIndex) {
+    equip(inventoryIndex) {
         const item = this.inventory[inventoryIndex];
 
         if (!item) {
@@ -478,19 +434,15 @@ export default class Character {
                 return false;
         }
 
-        await this.getEquipped(slot)
-            .then(async (equippedItem) => {
-                delete equippedItem.equipped_slot;
+        let equippedItem = this.getEquipped(slot);
 
-                // equip the item
-                item.equipped_slot = slot;
-                await this.Game.characterManager.updateClient(this.user_id);
-            })
-            .catch(async () => {
-                // equip the item
-                item.equipped_slot = slot;
-                await this.Game.characterManager.updateClient(this.user_id);
-            });
+        if (equippedItem) {
+            delete equippedItem.equipped_slot;
+        }
+
+        // equip the item
+        item.equipped_slot = slot;
+        this.Game.characterManager.updateClient(this.user_id);
     }
 
     /**
