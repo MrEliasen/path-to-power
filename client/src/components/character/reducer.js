@@ -1,6 +1,6 @@
 import {UPDATE_CHARACTER} from './types';
 import {ACCOUNT_LOGOUT, ACCOUNT_AUTHENTICATE_SUCCESS} from '../auth/types';
-import {REMOTE_LOGOUT} from '../../../../server/shared/types';
+import {REMOTE_LOGOUT} from '../../shared/types';
 
 export default function(state = null, action) {
     switch (action.type) {
