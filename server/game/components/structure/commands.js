@@ -11,66 +11,70 @@ import {LEFT_GRID} from '../map/types';
  */
 function cmdHeal(socket, character, command, params, cmdObject, Game) {
     // get the structures list at the character location
-    return Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
-        .then(async (structures) => {
-            // if we get multiple structures, but only one parameter, the client didnt specify
-            // the structure to use the command with.
-            if (structures.length > 1 && params.length <= 1) {
-                return Game.eventToSocket(socket, 'error', 'Invalid structure. There are multiple structures with that command use: /heal <amount> <structure-name>');
-            }
+    const structures = Game.structureManager.getWithCommand(
+        character.location.map,
+        character.location.x,
+        character.location.y,
+        command
+    );
 
-            // set the first structure by default
-            let structure = structures[0];
+    if (!structures) {
+        return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
+    }
 
-            // overwrite if they specified a structure, and its name didn't match their criteria
-            if (params.length > 1 && structure.name.toLowerCase().indexOf(structures[1].toLowerCase()) !== 0) {
-                structure = structures.find((structureItem) => structureItem.name.toLowerCase().indexOf(params[1].toLowerCase()) === 0);
-            }
+    // if we get multiple structures, but only one parameter, the client didnt specify
+    // the structure to use the command with.
+    if (structures.length > 1 && params.length <= 1) {
+        return Game.eventToSocket(socket, 'error', 'Invalid structure. There are multiple structures with that command use: /heal <amount> <structure-name>');
+    }
 
-            //overwrite the command modifiers with the structure specific once.
-            Object.assign(cmdObject.modifiers, structure.commands[command]);
+    // set the first structure by default
+    let structure = structures[0];
 
-            // if there are 2 params, the client is likely specifying the structure they want to use the command with
-            // meaning the 2nd param would be the amount, and not the first.
-            let heal_ticks = parseInt(params[0], 10);
-            let heal_amount = heal_ticks * cmdObject.modifiers.heal_amount;
+    // overwrite if they specified a structure, and its name didn't match their criteria
+    if (params.length > 1 && structure.name.toLowerCase().indexOf(structures[1].toLowerCase()) !== 0) {
+        structure = structures.find((structureItem) => structureItem.name.toLowerCase().indexOf(params[1].toLowerCase()) === 0);
+    }
 
-            // Check if the heal_amount is valid
-            if (!heal_ticks || heal_ticks < 1) {
-                return Game.eventToSocket(socket, 'error', 'Invalid heal amount. Syntax: /heal <amount>');
-            }
+    //overwrite the command modifiers with the structure specific once.
+    Object.assign(cmdObject.modifiers, structure.commands[command]);
 
-            // Check if full health
-            if (character.stats.health === character.stats.health_max) {
-                return Game.eventToSocket(socket, 'warning', 'You are already at full health!');
-            }
+    // if there are 2 params, the client is likely specifying the structure they want to use the command with
+    // meaning the 2nd param would be the amount, and not the first.
+    let heal_ticks = parseInt(params[0], 10);
+    let heal_amount = heal_ticks * cmdObject.modifiers.heal_amount;
 
-            // Check if the heal would exceed 100%, if so, cap it.
-            if ((character.stats.health + heal_amount) > character.stats.health_max) {
-                heal_amount = (character.stats.health_max - character.stats.health);
-                heal_ticks = Math.ceil(heal_amount / cmdObject.modifiers.heal_amount);
-            }
+    // Check if the heal_amount is valid
+    if (!heal_ticks || heal_ticks < 1) {
+        return Game.eventToSocket(socket, 'error', 'Invalid heal amount. Syntax: /heal <amount>');
+    }
 
-            // continue below
-            const price = heal_ticks * cmdObject.modifiers.cost;
+    // Check if full health
+    if (character.stats.health === character.stats.health_max) {
+        return Game.eventToSocket(socket, 'warning', 'You are already at full health!');
+    }
 
-            // Check if they have the money
-            if (cmdObject.modifiers.cost && price > character.stats.money) {
-                return Game.eventToSocket(socket, 'error', 'You do not have enough money to heal that amount.');
-            }
+    // Check if the heal would exceed 100%, if so, cap it.
+    if ((character.stats.health + heal_amount) > character.stats.health_max) {
+        heal_amount = (character.stats.health_max - character.stats.health);
+        heal_ticks = Math.ceil(heal_amount / cmdObject.modifiers.heal_amount);
+    }
 
-            // remove money and add health
-            character.updateCash(price * -1);
-            character.stats.health = character.stats.health + heal_amount;
+    // continue below
+    const price = heal_ticks * cmdObject.modifiers.cost;
 
-            // update the client
-            await Game.characterManager.updateClient(character.user_id, 'stats');
-            Game.eventToSocket(socket, 'success', `You healed ${heal_amount}, costing you ${price}`);
-        })
-        .catch((err) => {
-            Game.logger.error(err.message);
-            return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
-        });
+    // Check if they have the money
+    if (cmdObject.modifiers.cost && price > character.stats.money) {
+        return Game.eventToSocket(socket, 'error', 'You do not have enough money to heal that amount.');
+    }
+
+    // remove money and add health
+    character.updateCash(price * -1);
+    character.stats.health = character.stats.health + heal_amount;
+
+    // update the client
+    Game.characterManager.updateClient(character.user_id, 'stats');
+    Game.eventToSocket(socket, 'success', `You healed ${heal_amount}, costing you ${price}`);
 }
 
 /**
@@ -84,95 +88,95 @@ function cmdHeal(socket, character, command, params, cmdObject, Game) {
  */
 function cmdTravel(socket, character, command, params, cmdObject, Game) {
     // get the structures list at the character location
-    return Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
-        .then((structures) => {
-            // if we get multiple structures, but only one parameter, the client didnt specify
-            // the structure to use the command with.
-            if (structures.length > 1 && params.length <= 1) {
-                return Game.eventToSocket(socket, 'error', 'Invalid structure. There are multiple structures with that command use: /travel <destination name> <structure name>');
-            }
+    const structures = Game.structureManager.getWithCommand(
+        character.location.map,
+        character.location.x,
+        character.location.y,
+        command
+    );
 
-            // set the first structure by default
-            let structure = structures[0];
+    if (!structures) {
+        return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
+    }
 
-            // overwrite if they specified a structure, and its name didn't match their criteria
-            if (params.length > 1 && structure.name.toLowerCase().indexOf(params[1].toLowerCase()) !== 0) {
-                structure = structures.find((structureItem) => structureItem.name.toLowerCase().indexOf(params[1].toLowerCase()) === 0);
-            }
+    // if we get multiple structures, but only one parameter, the client didnt specify
+    // the structure to use the command with.
+    if (structures.length > 1 && params.length <= 1) {
+        return Game.eventToSocket(socket, 'error', 'Invalid structure. There are multiple structures with that command use: /travel <destination name> <structure name>');
+    }
 
-            const modifiers = structure.commands[command];
-            let destination = params[0];
-            // check if the destination exists for the airport
-            if (!modifiers.destinations[destination.id]) {
-                return Game.eventToSocket(socket, 'error', 'Invalid destination.');
-            }
+    // set the first structure by default
+    let structure = structures[0];
 
-            // if there are 2 params, the client is likely specifying the structure they want to use the command with
-            // meaning the 2nd param would be the amount, and not the first.
-            let travel_details = modifiers.destinations[destination.id];
+    // overwrite if they specified a structure, and its name didn't match their criteria
+    if (params.length > 1 && structure.name.toLowerCase().indexOf(params[1].toLowerCase()) !== 0) {
+        structure = structures.find((structureItem) => structureItem.name.toLowerCase().indexOf(params[1].toLowerCase()) === 0);
+    }
 
-            // Check if they have the money
-            if (travel_details.cost > character.stats.money) {
-                return Game.eventToSocket(socket, 'error', 'You do not have enough money to travel there.');
-            }
+    const modifiers = structure.commands[command];
+    let destination = params[0];
+    // check if the destination exists for the airport
+    if (!modifiers.destinations[destination.id]) {
+        return Game.eventToSocket(socket, 'error', 'Invalid destination.');
+    }
 
-            // remove aim from current target, if set
-            return character.releaseTarget()
-                .then(async () => {
-                    // remove money
-                    character.updateCash(travel_details.cost * -1);
+    // if there are 2 params, the client is likely specifying the structure they want to use the command with
+    // meaning the 2nd param would be the amount, and not the first.
+    let travel_details = modifiers.destinations[destination.id];
 
-                    // leave the old grid room
-                    socket.leave(character.getLocationId());
+    // Check if they have the money
+    if (travel_details.cost > character.stats.money) {
+        return Game.eventToSocket(socket, 'error', 'You do not have enough money to travel there.');
+    }
 
-                    // dispatch leave message to grid
-                    Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} enter the ${structure.name}, traveling to an unknown destination.`);
+    // remove aim from current target, if set
+    character.releaseTarget();
 
-                    // remove player from the grid list of players
-                    Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                        type: LEFT_GRID,
-                        payload: character.user_id,
-                    });
+    // remove money
+    character.updateCash(travel_details.cost * -1);
 
-                    // get the airport location on the destination map
-                    const newLocation = {
-                        map: destination.id,
-                        x: travel_details.x,
-                        y: travel_details.y,
-                    };
+    // leave the old grid room
+    socket.leave(character.getLocationId());
 
-                    // update character location
-                    character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
+    // dispatch leave message to grid
+    Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} enter the ${structure.name}, traveling to an unknown destination.`);
 
-                    // dispatch join message to new grid
-                    Game.eventToRoom(character.getLocationId(), 'info', `${character.name} emerge from a plane which just landed`, [character.user_id]);
+    // remove player from the grid list of players
+    Game.socketManager.dispatchToRoom(character.getLocationId(), {
+        type: LEFT_GRID,
+        payload: character.user_id,
+    });
 
-                    // add player from the grid list of players
-                    Game.socketManager.dispatchToRoom(
-                        character.getLocationId(),
-                        Game.characterManager.joinedGrid(character)
-                    );
+    // get the airport location on the destination map
+    const newLocation = {
+        map: destination.id,
+        x: travel_details.x,
+        y: travel_details.y,
+    };
 
-                    // update the socket room
-                    socket.join(character.getLocationId());
+    // update character location
+    character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
 
-                    // update client/socket character and location information
-                    await Game.characterManager.updateClient(character.user_id);
+    // dispatch join message to new grid
+    Game.eventToRoom(character.getLocationId(), 'info', `${character.name} emerge from a plane which just landed`, [character.user_id]);
 
-                    // send the new grid details to the client
-                    await Game.mapManager.updateClient(character.user_id);
+    // add player from the grid list of players
+    Game.socketManager.dispatchToRoom(
+        character.getLocationId(),
+        Game.characterManager.joinedGrid(character)
+    );
 
-                    // let the character know they traveled
-                    Game.eventToSocket(socket, 'info', `You land at your new destination, at the price of ${travel_details.cost}.`);
-                })
-                .catch((err) => {
-                    Game.logger.info(err.message);
-                });
-        })
-        .catch((err) => {
-            Game.logger.error(err.message);
-            return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
-        });
+    // update the socket room
+    socket.join(character.getLocationId());
+
+    // update client/socket character and location information
+    Game.characterManager.updateClient(character.user_id);
+
+    // send the new grid details to the client
+    Game.mapManager.updateClient(character.user_id);
+
+    // let the character know they traveled
+    Game.eventToSocket(socket, 'info', `You land at your new destination, at the price of ${travel_details.cost}.`);
 }
 
 /**
@@ -186,43 +190,47 @@ function cmdTravel(socket, character, command, params, cmdObject, Game) {
  */
 function cmdWithdraw(socket, character, command, params, cmdObject, Game) {
     // get the structures list at the character location
-    return Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
-        .then((structures) => {
-            // Fetch the character first
-            return Game.characterManager.get(socket.user.user_id)
-                .then(async (character) => {
-                    let amount = parseInt(params[0], 10);
+    const structures = Game.structureManager.getWithCommand(
+        character.location.map,
+        character.location.x,
+        character.location.y,
+        command
+    );
 
-                    // make sure the amount is valid
-                    if (isNaN(amount)) {
-                        return Game.eventToSocket(socket, 'error', 'You must specify a valid amount to withdraw.');
-                    }
+    if (!structures) {
+        return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
+    }
 
-                    // make sure the amount is a positive number
-                    if (amount < 0) {
-                        return Game.eventToSocket(socket, 'error', 'You must specify a positive amount to withdraw.');
-                    }
+    // Fetch the character first
+    const character = Game.characterManager.get(socket.user.user_id);
 
-                    // make sure they have that much money in the bank
-                    if (character.stats.bank < amount) {
-                        return Game.eventToSocket(socket, 'error', `You do not have that much in your account. You have ${character.stats.bank}.`);
-                    }
+    if (!character) {
+        return;
+    }
 
-                    character.updateBank(amount * -1);
-                    character.updateCash(amount);
+    let amount = parseInt(params[0], 10);
 
-                    // update the client's character object
-                    await Game.characterManager.updateClient(character.user_id, 'stats');
-                    Game.eventToSocket(socket, 'success', `You withdrew ${amount} from your bank account. You have ${character.stats.bank} left in your account.`);
-                })
-                .catch((err) => {
-                    Game.logger.error(err.message);
-                });
-        })
-        .catch((err) => {
-            Game.logger.error(err.message);
-            return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
-        });
+    // make sure the amount is valid
+    if (isNaN(amount)) {
+        return Game.eventToSocket(socket, 'error', 'You must specify a valid amount to withdraw.');
+    }
+
+    // make sure the amount is a positive number
+    if (amount < 0) {
+        return Game.eventToSocket(socket, 'error', 'You must specify a positive amount to withdraw.');
+    }
+
+    // make sure they have that much money in the bank
+    if (character.stats.bank < amount) {
+        return Game.eventToSocket(socket, 'error', `You do not have that much in your account. You have ${character.stats.bank}.`);
+    }
+
+    character.updateBank(amount * -1);
+    character.updateCash(amount);
+
+    // update the client's character object
+    Game.characterManager.updateClient(character.user_id, 'stats');
+    Game.eventToSocket(socket, 'success', `You withdrew ${amount} from your bank account. You have ${character.stats.bank} left in your account.`);
 }
 
 /**
@@ -236,44 +244,47 @@ function cmdWithdraw(socket, character, command, params, cmdObject, Game) {
  */
 function cmdDeposit(socket, character, command, params, cmdObject, Game) {
     // get the structures list at the character location
-    return Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
-        .then((structures) => {
-            // Fetch the character first
-            return Game.characterManager.get(socket.user.user_id)
-                .then(async (character) => {
-                    let amount = parseInt(params[0], 10);
+    const structures = Game.structureManager.getWithCommand(
+        character.location.map,
+        character.location.x,
+        character.location.y,
+        command
+    );
 
-                    // make sure the amount is valid
-                    if (isNaN(amount)) {
-                        return Game.eventToSocket(socket, 'error', 'You must specify a valid amount to deposit.');
-                    }
+    if (!structures) {
+        return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
+    }
 
-                    // make sure the amount is a positive number
-                    if (amount < 0) {
-                        return Game.eventToSocket(socket, 'error', 'You must specify a positive amount to deposit.');
-                    }
+    // Fetch the character first
+    const character = Game.characterManager.get(socket.user.user_id);
 
-                    // make sure they have that much money in the bank
-                    if (character.stats.money < amount) {
-                        return Game.eventToSocket(socket, 'error', `You do not have that much cash on you. You currently have ${character.stats.money} cash on you.`);
-                    }
+    if (!character) {
+        return;
+    }
 
-                    character.updateCash(amount * -1);
-                    character.updateBank(amount);
+    let amount = parseInt(params[0], 10);
 
-                    // update the client's character object
-                    await Game.characterManager.updateClient(character.user_id, 'stats');
+    // make sure the amount is valid
+    if (isNaN(amount)) {
+        return Game.eventToSocket(socket, 'error', 'You must specify a valid amount to deposit.');
+    }
 
-                    Game.eventToSocket(socket, 'success', `You deposit ${amount} into your bank account. Your account is now at ${character.stats.bank}.`);
-                })
-                .catch((err) => {
-                    Game.logger.error(err.message);
-                });
-        })
-        .catch((err) => {
-            Game.logger.error(err.message);
-            return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
-        });
+    // make sure the amount is a positive number
+    if (amount < 0) {
+        return Game.eventToSocket(socket, 'error', 'You must specify a positive amount to deposit.');
+    }
+
+    // make sure they have that much money in the bank
+    if (character.stats.money < amount) {
+        return Game.eventToSocket(socket, 'error', `You do not have that much cash on you. You currently have ${character.stats.money} cash on you.`);
+    }
+
+    character.updateCash(amount * -1);
+    character.updateBank(amount);
+
+    // update the client's character object
+    Game.characterManager.updateClient(character.user_id, 'stats');
+    Game.eventToSocket(socket, 'success', `You deposit ${amount} into your bank account. Your account is now at ${character.stats.bank}.`);
 }
 
 /**
@@ -287,67 +298,71 @@ function cmdDeposit(socket, character, command, params, cmdObject, Game) {
  */
 function cmdDrink(socket, character, command, params, cmdObject, Game) {
     // Fetch the character first
-    return Game.characterManager.get(socket.user.user_id)
-        .then((character) => {
-            // get the structures list at the character location
-            return Game.structureManager.getWithCommand(character.location.map, character.location.x, character.location.y, command)
-                .then(async (structures) => {
-                    // if we get multiple structures, but only one parameter, the client didnt specify
-                    // the structure to use the command with.
-                    if (structures.length > 1 && params.length <= 1) {
-                        return Game.eventToSocket(socket, 'error', 'Invalid structure. There are multiple structures with that command use: /drink <amount> <structure-name>');
-                    }
+    const character = Game.characterManager.get(socket.user.user_id);
 
-                    // set the first structure by default
-                    let structure = structures[0];
+    if (!character) {
+        return;
+    }
 
-                    // overwrite if they specified a structure, and its name didn't match their criteria
-                    if (params.length > 1 && structure.name.toLowerCase().indexOf(structures[1].toLowerCase()) !== 0) {
-                        structure = structures.find((structureItem) => structureItem.name.toLowerCase().indexOf(params[1].toLowerCase()) === 0);
-                    }
+    // get the structures list at the character location
+    const structures = Game.structureManager.getWithCommand(
+        character.location.map,
+        character.location.x,
+        character.location.y,
+        command
+    );
 
-                    //overwrite the command modifiers with the structure specific once.
-                    Object.assign(cmdObject.modifiers, structure.commands[command]);
+    if (!structures) {
+        return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
+    }
 
-                    // if there are 2 params, the client is likely specifying the structure they want to use the command with
-                    // meaning the 2nd param would be the amount, and not the first.
-                    const drinks = parseInt(params[0], 10);
-                    const exp = drinks * cmdObject.modifiers.expReward;
-                    const health = drinks * cmdObject.modifiers.healthDamage;
-                    const price = drinks * cmdObject.modifiers.cost;
+    // if we get multiple structures, but only one parameter, the client didnt specify
+    // the structure to use the command with.
+    if (structures.length > 1 && params.length <= 1) {
+        return Game.eventToSocket(socket, 'error', 'Invalid structure. There are multiple structures with that command use: /drink <amount> <structure-name>');
+    }
 
-                    // Check if the heal_amount is valid
-                    if (!drinks || drinks < 1) {
-                        return Game.eventToSocket(socket, 'error', 'Invalid drink amount. Syntax: /drink <amount>');
-                    }
+    // set the first structure by default
+    let structure = structures[0];
 
-                    // Check if full health
-                    if (character.stats.health <= health) {
-                        return Game.eventToSocket(socket, 'warning', 'You shouldn\'t drink that much, you will die!');
-                    }
+    // overwrite if they specified a structure, and its name didn't match their criteria
+    if (params.length > 1 && structure.name.toLowerCase().indexOf(structures[1].toLowerCase()) !== 0) {
+        structure = structures.find((structureItem) => structureItem.name.toLowerCase().indexOf(params[1].toLowerCase()) === 0);
+    }
 
-                    // Check if they have the money
-                    if (cmdObject.modifiers.cost && price > character.stats.money) {
-                        return Game.eventToSocket(socket, 'error', 'You do not have enough money to drink that amount.');
-                    }
+    //overwrite the command modifiers with the structure specific once.
+    Object.assign(cmdObject.modifiers, structure.commands[command]);
 
-                    // remove money and add health
-                    character.updateCash(price * -1);
-                    character.updateHealth(health * -1);
-                    character.updateExp(exp);
+    // if there are 2 params, the client is likely specifying the structure they want to use the command with
+    // meaning the 2nd param would be the amount, and not the first.
+    const drinks = parseInt(params[0], 10);
+    const exp = drinks * cmdObject.modifiers.expReward;
+    const health = drinks * cmdObject.modifiers.healthDamage;
+    const price = drinks * cmdObject.modifiers.cost;
 
-                    // update the client
-                    await Game.characterManager.updateClient(character.user_id, 'stats');
-                    Game.eventToSocket(socket, 'success', `You drink ${drinks} drinks, costing you ${price} and ${health} health. (+${exp} rep)`);
-                })
-                .catch((err) => {
-                    Game.logger.error(err.message);
-                    return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
-                });
-        })
-        .catch((err) => {
-            Game.logger.error(err.message);
-        });
+    // Check if the heal_amount is valid
+    if (!drinks || drinks < 1) {
+        return Game.eventToSocket(socket, 'error', 'Invalid drink amount. Syntax: /drink <amount>');
+    }
+
+    // Check if full health
+    if (character.stats.health <= health) {
+        return Game.eventToSocket(socket, 'warning', 'You shouldn\'t drink that much, you will die!');
+    }
+
+    // Check if they have the money
+    if (cmdObject.modifiers.cost && price > character.stats.money) {
+        return Game.eventToSocket(socket, 'error', 'You do not have enough money to drink that amount.');
+    }
+
+    // remove money and add health
+    character.updateCash(price * -1);
+    character.updateHealth(health * -1);
+    character.updateExp(exp);
+
+    // update the client
+    Game.characterManager.updateClient(character.user_id, 'stats');
+    Game.eventToSocket(socket, 'success', `You drink ${drinks} drinks, costing you ${price} and ${health} health. (+${exp} rep)`);
 }
 
 module.exports = [

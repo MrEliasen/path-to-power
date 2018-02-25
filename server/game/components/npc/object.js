@@ -147,73 +147,69 @@ export default class NPC extends Character {
             return;
         }
 
-        await this.hasActiveTarget()
-            .catch(async (err) => {
-                if (err && err.message !== '') {
-                    this.Game.logger.error(err.message);
-                }
+        const target = this.hasActiveTarget();
 
-                const moveAction = {
-                    grid: (Math.floor(Math.random() * 2) ? 'y' : 'x'),
-                    direction: (Math.floor(Math.random() * 2) ? 1 : -1),
-                };
+        if (!target) {
+            return;
+        }
 
-                // set the location we intend to move the NPC to
-                let newLocation = {
-                    ...this.location,
-                    [moveAction.grid]: this.location[moveAction.grid] + moveAction.direction,
-                };
+        const moveAction = {
+            grid: (Math.floor(Math.random() * 2) ? 'y' : 'x'),
+            direction: (Math.floor(Math.random() * 2) ? 1 : -1),
+        };
 
-                await this.Game.mapManager.get(newLocation.map)
-                    .then((gameMap) => {
-                        // check if the move action is valid
-                        if (!gameMap.isValidPostion(newLocation.x, newLocation.y)) {
-                            // if not, flip the direction
-                            moveAction.direction = (moveAction.direction === 1 ? -1 : 1);
-                            // update the new location
-                            newLocation = {
-                                ...this.location,
-                                [moveAction.grid]: (this.location[moveAction.grid] + moveAction.direction),
-                            };
-                        }
+        // set the location we intend to move the NPC to
+        let newLocation = {
+            ...this.location,
+            [moveAction.grid]: this.location[moveAction.grid] + moveAction.direction,
+        };
 
-                        // If the new location is out of bounds, just ignore the movement action this time.
-                        if (!gameMap.isValidPostion(newLocation.x, newLocation.y)) {
-                            return;
-                        }
+        const gameMap = this.Game.mapManager.get(newLocation.map);
 
-                        // move the NPC
-                        this.Game.npcManager.move(this, newLocation, moveAction);
-                    })
-                    .catch((err) => {
-                        this.Game.logger.error(err.message);
-                    });
-            });
+        if (!gameMap) {
+            return;
+        }
+
+        // check if the move action is valid
+        if (!gameMap.isValidPostion(newLocation.x, newLocation.y)) {
+            // if not, flip the direction
+            moveAction.direction = (moveAction.direction === 1 ? -1 : 1);
+            // update the new location
+            newLocation = {
+                ...this.location,
+                [moveAction.grid]: (this.location[moveAction.grid] + moveAction.direction),
+            };
+        }
+
+        // If the new location is out of bounds, just ignore the movement action this time.
+        if (!gameMap.isValidPostion(newLocation.x, newLocation.y)) {
+            return;
+        }
+
+        // move the NPC
+        this.Game.npcManager.move(this, newLocation, moveAction);
     }
 
     /**
      * Sets the target of the character, or NPC, and gridlocks the target (while clearing gridlock on previous target)
      * @param {String} user_id The user_id of their new target
      */
-    async setTarget(user_id) {
+    setTarget(user_id) {
         // release the gridlock of the current target, if set
-        await this.releaseTarget()
-            .then(() => {
-                return this.Game.characterManager.get(user_id).then(async (target) => {
-                    // set the new target
-                    this.target = target;
-                    // and gridlock them
-                    await this.target.gridLock(this);
-                    // let the target know they are aimed at.
-                    this.Game.eventToUser(target.user_id, 'warning', `${this.name} the ${this.type} has taken aim at you. The only way get out of this, is to kill ${this.name} or /flee <n|s|w|e>`);
-                })
-                .catch((err) => {
-                    this.Game.logger.error(err.message);
-                });
-            })
-            .catch((err) => {
-                this.Game.logger.error(err.message);
-            });
+        this.releaseTarget();
+
+        const target = this.Game.characterManager.get(user_id);
+
+        if (!target) {
+            return;
+        }
+
+        // set the new target
+        this.target = target;
+        // and gridlock them
+        this.target.gridLock(this);
+        // let the target know they are aimed at.
+        this.Game.eventToUser(target.user_id, 'warning', `${this.name} the ${this.type} has taken aim at you. The only way get out of this, is to kill ${this.name} or /flee <n|s|w|e>`);
     }
 
     /**
@@ -221,57 +217,55 @@ export default class NPC extends Character {
      * @return {Boolean}
      */
     hasActiveTarget() {
-        return new Promise(async (resolve, reject) => {
-            let newTarget;
+        let newTarget;
 
-            // check if the NPC has an active target
-            if (this.target) {
-                if (this.target.location.map === this.location.map && this.target.location.x === this.location.x && this.target.location.y === this.location.y) {
-                    return resolve();
-                } else {
-                    // clear the target, as its no longer in the same spot.
-                    this.target = null;
-                }
+        // check if the NPC has an active target
+        if (this.target) {
+            if (this.target.location.map === this.location.map && this.target.location.x === this.location.x && this.target.location.y === this.location.y) {
+                return this.target;
+            } else {
+                // clear the target, as its no longer in the same spot.
+                this.target = null;
+            }
+        }
+
+        // if it has no target, check if we have any nearby who are hostile
+        if (!this.target) {
+            // check if its currently being aimed at, and prioritise those targets
+            if (this.targetedBy.length) {
+                newTarget = this.targetedBy[Math.max(0, Math.round((Math.random() * this.targetedBy.length) - 1))];
+                this.setTarget(newTarget.user_id);
+                return this.target;
             }
 
-            // if it has no target, check if we have any nearby who are hostile
-            if (!this.target) {
-                // check if its currently being aimed at, and prioritise those targets
-                if (this.targetedBy.length) {
-                    newTarget = this.targetedBy[Math.max(0, Math.round((Math.random() * this.targetedBy.length) - 1))];
-                    await this.setTarget(newTarget.user_id);
-                    return resolve();
-                }
+            // if there are no one currently aiming at them, check for hostiles
+            if (this.hostiles.length) {
+                const targets = this.hostiles.filter((obj) => {
+                    return obj.location.map === this.location.map && obj.location.x === this.location.x && obj.location.y === this.location.y;
+                });
 
-                // if there are no one currently aiming at them, check for hostiles
-                if (this.hostiles.length) {
-                    const targets = this.hostiles.filter((obj) => {
-                        return obj.location.map === this.location.map && obj.location.x === this.location.x && obj.location.y === this.location.y;
-                    });
-
-                    if (targets.length) {
-                        newTarget = targets[Math.max(0, Math.round((Math.random() * targets.length) - 1))];
-                        await this.setTarget(newTarget.user_id);
-                        return resolve();
-                    }
+                if (targets.length) {
+                    newTarget = targets[Math.max(0, Math.round((Math.random() * targets.length) - 1))];
+                    this.setTarget(newTarget.user_id);
+                    return this.target;
                 }
             }
+        }
 
-            this.target = null;
-            reject(new Error(''));
-        });
+        this.target = null;
+        return null;
     }
 
     /**
      * Adds the user id to the gridlock array
      * @param  {Character Obj} character  the character objest of the character gridlocking the character.
      */
-    async gridLock(character) {
-        await Character.prototype.gridLock.call(this, character);
+    gridLock(character) {
+        Character.prototype.gridLock.call(this, character);
         // Make the NPC hostile towards the player, for the duration of its life.
         this.hostiles.push(character);
         // make the NPC immediately aim at the player, if they are not already engaged in combat with another
-        await this.hasActiveTarget();
+        this.hasActiveTarget();
     }
 
     /**
@@ -286,37 +280,33 @@ export default class NPC extends Character {
      * @return {Promise}
      */
     die() {
-        return new Promise((resolve, reject) => {
-            // set NPC as dead, so it is not included in actions/commands etc.
-            this.dead = true;
+        // set NPC as dead, so it is not included in actions/commands etc.
+        this.dead = true;
+        const loot = Character.prototype.die.call(this);
 
-            return Character.prototype.die.call(this)
-                .then(async (loot) => {
-                    await this.clearTimers();
+        this.clearTimers();
 
-                    // if the NPC has a shop, drop the items they are selling
-                    if (this.shop && this.shop.sell.enabled) {
-                        this.shop.sell.list.forEach((item) => {
-                            loot.items.push(this.Game.itemManager.add(item.id));
-                        });
-                    }
+        // if the NPC has a shop, drop the items they are selling
+        if (this.shop && this.shop.sell.enabled) {
+            this.shop.sell.list.forEach((item) => {
+                loot.items.push(this.Game.itemManager.add(item.id));
+            });
+        }
 
-                    // Initiates the NPC's respawn timer
-                    this.timers.push({
-                        key: 'respawn',
-                        ref: setTimeout(() => {
-                            this.Game.npcManager.reset(this);
-                        }, this.logic.respawn * 1000),
-                    });
-
-                    loot.exp = this.stats.exp;
-
-                    resolve(loot);
-                })
-                .catch((err) => {
-                    reject(err);
-                });
+        // Initiates the NPC's respawn timer
+        this.timers.push({
+            key: 'respawn',
+            ref: setTimeout(() => {
+                this.Game.npcManager.reset(this);
+            }, this.logic.respawn * 1000),
         });
+
+        if (!loot) {
+            loot = {};
+        }
+
+        loot.exp = this.stats.exp;
+        return loot;
     }
 
     /**
@@ -324,34 +314,35 @@ export default class NPC extends Character {
      * @return {Promise}
      */
     attack() {
-        return this.hasActiveTarget().then(() => {
-            const ammo = this.getEquippedSync('ammo');
-            let weapon = this.getEquippedSync('ranged');
+        const target = this.hasActiveTarget();
 
-            // if they have a ranged weapon equipped and ammo, used it
-            if (weapon && ammo) {
-                return this.attackShoot();
-            }
+        if (!target) {
+            return;
+        }
 
-            weapon = this.getEquippedSync('melee');
+        const ammo = this.getEquipped('ammo');
+        let weapon = this.getEquipped('ranged');
 
-            // if they have a melee weapon equipped, used it
-            if (weapon) {
-                return this.attackStrike();
-            }
+        // if they have a ranged weapon equipped and ammo, used it
+        if (weapon && ammo) {
+            return this.attackShoot();
+        }
 
-            // otherwise, use fists
-            return this.attackPunch();
-        })
-        .catch((err) => {
-            this.Game.logger.error(err.message);
-        });
+        weapon = this.getEquipped('melee');
+
+        // if they have a melee weapon equipped, used it
+        if (weapon) {
+            return this.attackStrike();
+        }
+
+        // otherwise, use fists
+        return this.attackPunch();
     }
 
     /**
      * Attacks the current target with their fists
      */
-    async attackPunch() {
+    attackPunch() {
         // check if the attack will hit
         if (!this.attackHit()) {
             // send event to the target
@@ -365,20 +356,20 @@ export default class NPC extends Character {
 
         // if the target died
         if (!attack.healthLeft) {
-            return this.Game.characterManager.kill(this.target.user_id, this)
-                .then((oldLocationId) => {
-                    // send event to the target
-                    this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} punches you, dealing ${attack.damageDealt} damage, killing you.`);
-                    // send event to the bystanders
-                    this.Game.eventToRoom(oldLocationId, 'info', `You see ${this.name} the ${this.type} kill ${this.target.name} with their fists. ${this.target.name} fall to the ground, dropping everything they carried.`);
-                })
-                .catch((err) => {
-                    this.Game.logger.error(err.message);
-                });
+            const oldLocationId = this.Game.characterManager.kill(this.target.user_id, this);
+
+            if (!oldLocationId) {
+                return;
+            }
+
+            // send event to the target
+            this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} punches you, dealing ${attack.damageDealt} damage, killing you.`);
+            // send event to the bystanders
+            this.Game.eventToRoom(oldLocationId, 'info', `You see ${this.name} the ${this.type} kill ${this.target.name} with their fists. ${this.target.name} fall to the ground, dropping everything they carried.`);
         }
 
         // update the target client's character inforamtion
-        await this.Game.characterManager.updateClient(this.target.user_id, 'stats');
+        this.Game.characterManager.updateClient(this.target.user_id, 'stats');
         // send event to the target
         this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} punches you, dealing ${attack.damageDealt} damage.`);
         // send event to the bystanders
@@ -389,7 +380,7 @@ export default class NPC extends Character {
      * Attacks the current target with their ranged weapon
      */
     attackShoot() {
-        const weapon = this.getEquippedSync('ranged').name;
+        const weapon = this.getEquipped('ranged').name;
 
         // check if the attack will hit
         if (!this.attackHit()) {
@@ -400,41 +391,41 @@ export default class NPC extends Character {
         }
 
         // deal damage to the target
-        return this.fireRangedWeapon()
-            .then(async (damage) => {
-                const attack = this.target.dealDamage(damage, true);
+        const damage = this.fireRangedWeapon();
 
-                // if the target died
-                if (!attack.healthLeft) {
-                    return this.Game.characterManager.kill(this.target.user_id, this)
-                        .then((oldLocationId) => {
-                            // send event to the target
-                            this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} hits you with their ${weapon}, dealing ${attack.damageDealt} damage, killing you.`);
-                            // send event to the bystanders
-                            this.Game.eventToRoom(oldLocationId, 'info', `You see ${this.name} the ${this.type} kill ${this.target.name} with a ${weapon}. ${this.target.name} fall to the ground, dropping everything they carried.`);
-                        })
-                        .catch((err) => {
-                            this.Game.logger.error(err.message);
-                        });
-                }
+        if (damage === null) {
+            return;
+        }
 
-                // update the target client's character inforamtion
-                await this.Game.characterManager.updateClient(this.target.user_id, 'stats');
-                // send event to the target
-                this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} shoots you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
-                // send event to the bystanders
-                this.Game.eventToRoom(character.getLocationId(), 'info', `You see ${this.name} the ${this.type} shoot ${this.target.name} with a ${weapon}.`, [this.target.user_id]);
-            })
-            .catch((err) => {
-                this.Game.logger.error(err.message);
-            });
+        const attack = this.target.dealDamage(damage, true);
+
+        // if the target died
+        if (!attack.healthLeft) {
+            const oldLocationId = this.Game.characterManager.kill(this.target.user_id, this);
+
+            if (!oldLocationId) {
+                return;
+            }
+
+            // send event to the target
+            this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} hits you with their ${weapon}, dealing ${attack.damageDealt} damage, killing you.`);
+            // send event to the bystanders
+            this.Game.eventToRoom(oldLocationId, 'info', `You see ${this.name} the ${this.type} kill ${this.target.name} with a ${weapon}. ${this.target.name} fall to the ground, dropping everything they carried.`);
+        }
+
+        // update the target client's character inforamtion
+        this.Game.characterManager.updateClient(this.target.user_id, 'stats');
+        // send event to the target
+        this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} shoots you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
+        // send event to the bystanders
+        this.Game.eventToRoom(character.getLocationId(), 'info', `You see ${this.name} the ${this.type} shoot ${this.target.name} with a ${weapon}.`, [this.target.user_id]);
     }
 
     /**
      * Attacks the current target with their melee weapon
      */
     attackStrike() {
-        const weapon = this.getEquippedSync('melee').name;
+        const weapon = this.getEquipped('melee').name;
 
         // check if the attack will hit
         if (!this.attackHit()) {
@@ -444,34 +435,34 @@ export default class NPC extends Character {
             return this.Game.eventToRoom(this.getLocationId(), 'info', `You see ${this.name} the ${this.type} swing their ${weapon} at ${this.target.name}, but missing.`, [this.target.user_id]);
         }
 
-        return this.getWeaponDamage('melee')
-            .then(async (damage) => {
-                // deal damage to the target
-                const attack = this.target.dealDamage(damage, true);
+        const damage = this.getWeaponDamage('melee');
 
-                // if the target died
-                if (!attack.healthLeft) {
-                    return this.Game.characterManager.kill(this.target.user_id, this)
-                        .then((oldLocationId) => {
-                            // send event to the target
-                            this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} strikes you with their ${weapon}, dealing ${attack.damageDealt} damage, killing you.`);
-                            // send event to the bystanders
-                            this.Game.eventToRoom(oldLocationId, 'info', `You see ${this.name} the ${this.type} kill ${this.target.name} with a ${weapon}. ${this.target.name} fall to the ground, dropping everything they carried.`);
-                        })
-                        .catch((err) => {
-                            this.Game.logger.error(err.message);
-                        });
-                }
+        if (damage === null) {
+            return;
+        }
 
-                // update the target client's character inforamtion
-                await this.Game.characterManager.updateClient(this.target.user_id, 'stats');
-                // send event to the target
-                this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} strikes you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
-                // send event to the bystanders
-                this.Game.eventToRoom(this.getLocationId(), 'info', `You see ${this.name} the ${this.type} strike ${this.target.name} with a ${weapon}.`, [this.target.user_id]);
-            })
-            .catch((err) => {
-                this.Game.logger.error(err.message);
-            });
+        // deal damage to the target
+        const attack = this.target.dealDamage(damage, true);
+
+        // if the target died
+        if (!attack.healthLeft) {
+            const oldLocationId = this.Game.characterManager.kill(this.target.user_id, this);
+
+            if (!oldLocationId) {
+                return;
+            }
+
+            // send event to the target
+            this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} strikes you with their ${weapon}, dealing ${attack.damageDealt} damage, killing you.`);
+            // send event to the bystanders
+            this.Game.eventToRoom(oldLocationId, 'info', `You see ${this.name} the ${this.type} kill ${this.target.name} with a ${weapon}. ${this.target.name} fall to the ground, dropping everything they carried.`);
+        }
+
+        // update the target client's character inforamtion
+        this.Game.characterManager.updateClient(this.target.user_id, 'stats');
+        // send event to the target
+        this.Game.eventToUser(this.target.user_id, 'info', `${this.name} the ${this.type} strikes you with a ${weapon}, dealing ${attack.damageDealt} damage.`);
+        // send event to the bystanders
+        this.Game.eventToRoom(this.getLocationId(), 'info', `You see ${this.name} the ${this.type} strike ${this.target.name} with a ${weapon}.`, [this.target.user_id]);
     }
 }

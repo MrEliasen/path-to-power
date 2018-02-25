@@ -49,61 +49,52 @@ export default class AccountManager {
      * @param  {Socket.IO Object} socket The socket the request from made from
      * @param  {Object} action Redux action object
      */
-    authenticate(socket, action) {
-        this.Game.logger.debug('AccountManager::authenticate', {
-            ...action,
-            payload: {
-                ...action.payload,
-                twitch_token: '<redacted from log>',
-            },
-        });
-
+    async authenticate(socket, action) {
         if (!action.payload.twitch_token) {
             return;
         }
 
-        this.dbLogin(action, async (error, account) => {
-            if (error) {
-                return this.Game.socketManager.dispatchToSocket(socket, {
-                    type: ACCOUNT_AUTHENTICATE_ERROR,
-                    payload: error,
-                });
-            }
+        this.dbLogin(action)
+            .then(async (account) => {
+                if (!account) {
+                    return this.Game.socketManager.dispatchToSocket(socket, {
+                        type: ACCOUNT_AUTHENTICATE_ERROR,
+                        payload: error,
+                    });
+                }
 
-            const user_id = account.user_id.toString();
+                const user_id = account.user_id.toString();
 
-            try {
-                // logout any other session(s) if found
-                await this.Game.socketManager.logoutOutSession(user_id);
-            } catch (err) {
+                try {
+                    // logout any other session(s) if found
+                    await this.Game.socketManager.logoutOutSession(user_id);
+                } catch (err) {
+                    this.Game.onError(err, socket);
+                }
+
+                // add the authenticated use to the socket object
+                socket.user = {
+                    ...account,
+                    user_id: user_id,
+                };
+
+                // add the socket to the list of active clients
+                this.Game.socketManager.add(socket);
+                return this.loadAccount(socket);
+            })
+            .catch((err) => {
                 this.Game.onError(err, socket);
-            }
-
-            // add the authenticated use to the socket object
-            socket.user = {
-                ...account,
-                user_id: user_id,
-            };
-
-            // add the socket to the list of active clients
-            this.Game.socketManager.add(socket);
-            this.loadAccount(socket);
-        });
+            });
     }
 
     /**
      * Load account data for an authenticated socket/user.
      * @param  {Socket.io Socket} socket The authenticated socket
      */
-    loadAccount(socket) {
-        // attempt to load the character from the database
-        this.Game.characterManager.load(socket.user, (err, character) => {
-            if (error) {
-                return this.Game.socketManager.dispatchToSocket(socket, {
-                    type: ACCOUNT_AUTHENTICATE_ERROR,
-                    payload: error,
-                });
-            }
+    async loadAccount(socket) {
+        try {
+            // attempt to load the character from the database
+            const character = await this.Game.characterManager.load(socket.user);
 
             // game data we will send to the client, with the autentication success
             const gameData = this.getGameData();
@@ -136,7 +127,9 @@ export default class AccountManager {
             });
 
             this.Game.sendMotdToSocket(socket);
-        });
+        } catch (err) {
+            this.Game.onError(err, socket);
+        }
     }
 
     /**
@@ -194,16 +187,9 @@ export default class AccountManager {
             });
         }
 
-        // create a new character
-        this.Game.characterManager.create(socket.user, gameMap.id, (error, newCharacter) => {
-            if (error) {
-                return this.Game.socketManager.dispatchToSocket(socket, {
-                    type: ACCOUNT_AUTHENTICATE_ERROR,
-                    payload: {
-                        'message': 'Something went wrong while creating your character! Sorry, please try again in a moment.',
-                    },
-                });
-            }
+        try {
+            // create a new character
+            const newCharacter = this.Game.characterManager.create(socket.user, gameMap.id);
 
             // Update the client
             this.Game.mapManager.updateClient(newCharacter.user_id);
@@ -218,89 +204,72 @@ export default class AccountManager {
                     },
                 },
             });
-        });
+        } catch (err) {
+            // TODO: Test duplicate accounts
+            if (err.code === 11000) {
+                return this.Game.socketManager.dispatchToSocket(socket, {
+                    type: ACCOUNT_AUTHENTICATE_ERROR,
+                    payload: {
+                        message: 'That character name is already taken.',
+                    },
+                });
+            }
+
+            this.Game.onError(err, socket);
+        }
     }
 
     /**
      * Creates a new account for a given twitch user
      * @param  {String}   twitch_id    Twitch account ID
      * @param  {String}   display_name Twitch Username
-     * @param  {Function} callback
      * @return {ObjectId}              MongoDB objectID (_id) of user
      */
-    dbSignup(twitch_id, display_name, callback) {
+    async dbSignup(twitch_id, display_name) {
         const user = new AccountModel({
             twitch_id: twitch_id,
             display_name,
         });
 
-        user.save((err) => {
-            if (err) {
-                this.Game.logger.error('AccountManager::dbSignup', err);
-                return callback({
-                    type: 'error',
-                    message: 'Internal server error',
-                });
-            }
-
-            callback(null, user._id);
-        });
+        await user.saveAsync();
+        return user._id;
     }
 
     /**
      * Database Method, attempts to authenticate the user, by twitch token
      * @param  {Object}   action   Redux action object from the client
-     * @param  {Function} callback Returns 2 params, error and account
      */
-    dbLogin(action, callback) {
-        request.get('https://api.twitch.tv/helix/users')
-        .send()
-        .set('Authorization', `Bearer ${action.payload.twitch_token}`)
-        .set('Client-ID', this.Game.config.twitch.clientId)
-        .set('accept', 'json')
-        .end((twitchErr, twitchRes) => {
-            if (twitchErr) {
-                this.Game.logger.error('AccountManager::dbLogin (Request)', twitchErr);
-                return callback({
-                    type: 'error',
-                    message: 'Twitch communication error.',
-                });
-            }
-
-            const twitchData = JSON.parse(twitchRes.text).data[0];
-
-            AccountModel.findOne({twitch_id: escape(twitchData.id)}, {_id: 1}, (err, user) => {
-                if (err) {
-                    this.Game.logger.error('AccountManager::dbLogin (Account findOne)', err);
-                    return callback({
-                        type: 'error',
-                        message: 'Internal server error',
-                    });
+    dbLogin(action) {
+        return new Promise((resolve, reject) => {
+            request.get('https://api.twitch.tv/helix/users')
+            .send()
+            .set('Authorization', `Bearer ${action.payload.twitch_token}`)
+            .set('Client-ID', this.Game.config.twitch.clientId)
+            .set('accept', 'json')
+            .end(async (twitchErr, twitchRes) => {
+                if (twitchErr) {
+                    return reject('Twitch communication error.');
                 }
 
-                if (user) {
-                    return callback(null, {
+                try {
+                    const twitchData = JSON.parse(twitchRes.text).data[0];
+                    let user = await AccountModel.findOneAsync({twitch_id: escape(twitchData.id)}, {_id: 1});
+
+                    // if no account was found, create one.
+                    if (!user) {
+                        user = {
+                            user_id: await this.dbSignup(twitchData.id, twitchData.display_name),
+                        };
+                    }
+
+                    resolve({
                         user_id: user._id,
                         display_name: twitchData.display_name,
                         profile_image: twitchData.profile_image_url,
                     });
+                } catch (err) {
+                    reject(err.message);
                 }
-
-                this.dbSignup(twitchData.id, twitchData.display_name, (err, user_id) => {
-                    if (err) {
-                        this.Game.logger.error('AccountManager::dbLogin (Save)', err);
-                        return callback({
-                            type: 'error',
-                            message: 'Internal server error',
-                        });
-                    }
-
-                    callback(null, {
-                        user_id: user_id,
-                        display_name: twitchData.display_name,
-                        profile_image: twitchData.profile_image_url,
-                    });
-                });
             });
         });
     }

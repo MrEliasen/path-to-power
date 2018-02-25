@@ -21,7 +21,7 @@ export default class EffectManager {
      * @param  {Object}    effectModifiers  Additional modifiers to overwrite the defaults
      * @return {Mixed}                      Anything returned from the effect
      */
-    apply(character, effectId, effectModifiers = {}, item = null) {
+    async apply(character, effectId, effectModifiers = {}, item = null) {
         const effect = Effects[effectId];
 
         if (!effect) {
@@ -29,6 +29,12 @@ export default class EffectManager {
             return null;
         }
 
-        return effect(character, effectModifiers || {}, item, this.Game);
+        const output = await effect(character, effectModifiers || {}, item, this.Game);
+
+        if (typeof output === 'string') {
+            return this.Game.eventToUser(character.user_id, 'error', output);
+        }
+
+        return output;
     }
 }

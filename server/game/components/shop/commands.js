@@ -9,41 +9,37 @@ import {SHOP_LOAD} from '../../../shared/types';
  * @param  {Object} cmdObject           The command object template
  * @param  {Game}   Game                The main Game object
  */
-async function cmdShop(socket, character, command, params, cmdObject, Game) {
+function cmdShop(socket, character, command, params, cmdObject, Game) {
     const shopName = params[0] || null;
-
+    let shop;
     // get the structures list at the character location
-    await Game.structureManager.getWithShop(character.location.map, character.location.x, character.location.y)
-        .then((shops) => {
-            let shop;
+    const shops = Game.structureManager.getWithShop(character.location.map, character.location.x, character.location.y);
 
-            // if we get multiple structures, but only one parameter, the client didnt specify
-            // the shop to use the command with.
-            if (shops.length > 1 && params.length < 1) {
-                return Game.eventToSocket(socket, 'error', 'Missing shop name. There are multiple shops at this location use: /shop <shop name>');
-            }
+    if (!shops) {
+        return Game.eventToSocket(socket, 'error', 'There are no shops in the area.');
+    }
 
-            // overwrite if they specified a shop, and its name didn't match their criteria
-            if (params.length >= 1) {
-                shop = shops.find((obj) => obj.name.toLowerCase().indexOf(shopName.toLowerCase()) === 0);
-            } else {
-                shop = shops[0];
-            }
+    // if we get multiple structures, but only one parameter, the client didnt specify
+    // the shop to use the command with.
+    if (shops.length > 1 && params.length < 1) {
+        return Game.eventToSocket(socket, 'error', 'Missing shop name. There are multiple shops at this location use: /shop <shop name>');
+    }
 
-            if (!shop) {
-                return Game.eventToSocket(socket, 'error', 'No shop at this location, matching what you are after.');
-            }
+    // overwrite if they specified a shop, and its name didn't match their criteria
+    if (params.length >= 1) {
+        shop = shops.find((obj) => obj.name.toLowerCase().indexOf(shopName.toLowerCase()) === 0);
+    } else {
+        shop = shops[0];
+    }
 
-            Game.socketManager.dispatchToSocket(socket, {
-                type: SHOP_LOAD,
-                payload: shop.toObject(),
-            });
-        })
-        .catch((err) => {
-            Game.logger.error(err.message);
-            // if no shops are found at the location
-            return Game.eventToSocket(socket, 'error', 'There are no shops in the area.');
-        });
+    if (!shop) {
+        return Game.eventToSocket(socket, 'error', 'No shop at this location, matching what you are after.');
+    }
+
+    Game.socketManager.dispatchToSocket(socket, {
+        type: SHOP_LOAD,
+        payload: shop.toObject(),
+    });
 }
 
 /**

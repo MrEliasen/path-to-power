@@ -198,7 +198,7 @@ export default class ItemManager {
      * @param  {Item Obj}  item      item to remove
      * @return {Promise}
      */
-    remove(character, item) {
+    async remove(character, item) {
         const itemClone = {...item};
         item.destroy();
 
@@ -211,7 +211,7 @@ export default class ItemManager {
         // if the item is in the DB, delete it.
         if (itemClone._id) {
             try {
-                const dbItem = this.dbLoad(itemClone);
+                const dbItem = await this.dbLoad(itemClone);
                 dbItem.remove();
             } catch (err) {
                 this.Game.onError(err);
@@ -293,20 +293,14 @@ export default class ItemManager {
      * @param  {Character} character The player character
      * @return {Promise}
      */
-    loadCharacterInventory(character, callback) {
-        ItemModel.find({user_id: character.user_id}, {_id: 1, item_id: 1, modifiers: 1, equipped_slot: 1}, (err, items) => {
-            if (err) {
-                return callback(err.message);
-            }
+    async loadCharacterInventory(character) {
+        const items = await ItemModel.findAsync({user_id: character.user_id}, {_id: 1, item_id: 1, modifiers: 1, equipped_slot: 1});
 
-            const inventory = items.map((item) => {
-                let newItem = this.add(item.item_id, item.modifiers, item._id);
-                newItem.equipped_slot = item.equipped_slot;
+        return items.map((item) => {
+            let newItem = this.add(item.item_id, item.modifiers, item._id);
+            newItem.equipped_slot = item.equipped_slot;
 
-                return newItem;
-            });
-
-            callback(null, inventory);
+            return newItem;
         });
     }
 
@@ -318,7 +312,13 @@ export default class ItemManager {
     async saveInventory(character) {
         // if the character has no items, resolve right away
         if (character.inventory.length) {
-            await Promise.all(character.inventory.map(async (item) => await this.dbSave(character.user_id, item)));
+            await Promise.all(character.inventory.map(async (item) => {
+                try {
+                    return await this.dbSave(character.user_id, item);
+                } catch (err) {
+                    this.Game.onError(err);
+                }
+            }));
         }
 
         try {
@@ -333,23 +333,15 @@ export default class ItemManager {
      * @param  {Character} character The player to cleanup
      */
     cleanupDbInventory(character) {
-        return new Promise((resolve) => {
-            const itemDbIds = [];
+        const itemDbIds = [];
 
-            character.inventory.forEach((obj) => {
-                if (obj._id) {
-                    return itemDbIds.push(obj._id.toString());
-                }
-            });
-
-            ItemModel.deleteMany({user_id: character.user_id, _id: {$nin: itemDbIds}}, (err, deleted) => {
-                if (err) {
-                    throw new Error(err.message);
-                }
-
-                resolve(deleted.deletedCount);
-            });
+        character.inventory.forEach((obj) => {
+            if (obj._id) {
+                return itemDbIds.push(obj._id.toString());
+            }
         });
+
+        return ItemModel.deleteManyAsync({user_id: character.user_id, _id: {$nin: itemDbIds}});
     }
 
     /**
@@ -358,25 +350,20 @@ export default class ItemManager {
      * @param  {Item Object} item the Item object to save
      * @return {Mongoose Object}      The mongoose object of the newly saved item
      */
-    dbCreate(user_id, item) {
-        return new Promise((resolve, reject) => {
-            // create a new item model
-            const newItem = new ItemModel({
-                user_id,
-                item_id: item.id,
-                modifiers: item.getModifiers(),
-                equipped_slot: item.equipped_slot,
-            });
-
-            newItem.save((error) => {
-                if (error) {
-                    return reject(new Error(error.message));
-                }
-
-                item._id = newItem._id;
-                resolve(newItem);
-            });
+    async dbCreate(user_id, item) {
+        // create a new item model
+        const newItem = new ItemModel({
+            user_id,
+            item_id: item.id,
+            modifiers: item.getModifiers(),
+            equipped_slot: item.equipped_slot,
         });
+
+        await newItem.saveAsync();
+        // set the item's _id to the new DB entry.
+        item._id = newItem._id;
+
+        return newItem;
     }
 
     /**
@@ -385,31 +372,23 @@ export default class ItemManager {
      * @param  {Item Object} item
      * @return {[type]}         [description]
      */
-    dbSave(user_id, item) {
-        return new Promise(async (resolve, reject) => {
-            if (!user_id) {
-                return reject(new Error('Missing user_id'));
-            }
+    async dbSave(user_id, item) {
+        if (!user_id) {
+            return reject(new Error('Missing user_id'));
+        }
 
-            // retrive item from database if it has a "_id", so we can update it.
-            await this.dbLoad(item)
-                .then(async (loadedItem) => {
-                    if (!loadedItem) {
-                        return await this.dbCreate(user_id, item);
-                    }
+        // retrive item from database if it has a "_id", so we can update it.
+        const loadedItem = await this.dbLoad(item);
 
-                    loadedItem.modifiers = item.getModifiers();
-                    loadedItem.equipped_slot = item.equipped_slot;
+        if (!loadedItem) {
+            return await this.dbCreate(user_id, item);
+        }
 
-                    loadedItem.save((error) => {
-                        if (error) {
-                            return reject(new Error(error.message));
-                        }
+        loadedItem.modifiers = item.getModifiers();
+        loadedItem.equipped_slot = item.equipped_slot;
 
-                        resolve(loadedItem);
-                    });
-                });
-        });
+        await loadedItem.saveAsync();
+        return loadedItem;
     }
 
     /**
@@ -417,24 +396,18 @@ export default class ItemManager {
      * @param  {String} item_db_id The _id mongo has assigned to the item
      * @return {Object}
      */
-    dbLoad(item) {
-        return new Promise((resolve, reject) => {
-            if (!item._id) {
-                return resolve(null);
-            }
+    async dbLoad(item) {
+        if (!item._id) {
+            return null;
+        }
 
-            ItemModel.findOne({_id: item._id.toString()}, (error, item) => {
-                if (error) {
-                    return reject(new Error(error.message));
-                }
+        const dbItem = await ItemModel.findOneAsync({_id: item._id.toString()});
 
-                if (!item) {
-                    reject(new Error('Item not found'));
-                }
+        if (!dbItem) {
+            throw new Error('Item not found');
+        }
 
-                resolve(item);
-            });
-        });
+        return dbItem;
     }
 
     /**

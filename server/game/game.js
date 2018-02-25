@@ -153,27 +153,19 @@ class Game {
      * Timer call method
      * @param  {String} timerName The name of the timer
      */
-    onTimer(timerName) {
+    async onTimer(timerName) {
         this.logger.debug(`Running timer ${timerName}`);
 
         switch (timerName) {
             case 'autosave':
                 // NOTE: if you want to add anything to the auto save, do it here
-                return this.characterManager.saveAll()
-                    .catch((err) => {
-                        this.logger.error(err.message);
-                    });
+                return this.characterManager.saveAll();
 
             case 'newday':
                 // NOTE: if you want to add anything to the "new day" timer, do it here
-                return this.shopManager.resupplyAll()
-                    .then(() => {
-                        this.socketManager.dispatchToServer(addNews('The sun rises once again, and wave of new drugs flood the streets.'));
-                    })
-                    .catch((err) => {
-                        this.logger.error(err.message);
-                    });
-        }
+                await this.shopManager.resupplyAll();
+                this.socketManager.dispatchToServer(addNews('The sun rises once again, and wave of new drugs flood the streets.'));
+       }
     }
 
     /**
@@ -189,9 +181,9 @@ class Game {
         }
 
         if (typeof user === 'string') {
-            this.eventToUser(user, 'error', 'Something went wrong. The error was logged. Please try again in a moment.');
+            this.eventToUser(user, 'error', 'Something went wrong. Please try again in a moment.');
         } else {
-            this.eventToSocket(user, 'error', 'Something went wrong. The error was logged. Please try again in a moment.');
+            this.eventToSocket(user, 'error', 'Something went wrong. Please try again in a moment.');
         }
     }
 
@@ -278,14 +270,9 @@ class Game {
      * Will run when the server receives a SIGTERM signal/is told to shut down.
      * @param {function} callback Will execute when done.
      */
-    async shutdown(callback) {
+    shutdown() {
         this.Game.logger.info('Received shutdown signal, Running shutdown procedure');
-        await this.characterManager.saveAll()
-            .catch((err) => {
-                this.logger.error(err.message);
-            });
-
-        callback();
+        return this.characterManager.saveAll();
     }
 }
 

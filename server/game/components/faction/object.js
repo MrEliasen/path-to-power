@@ -107,44 +107,26 @@ export default class Faction {
      * @param  {Character Obj} character The character to remove from the faction
      * @return {Promise}
      */
-    removeMember(character) {
-        return new Promise(async (resolve, reject) => {
-            // make sure the character is in the faction
-            if (character.faction_id !== this.faction_id) {
-                return reject(new Error('Character is not in the same faction'));
-            }
+    async removeMember(character) {
+        // make sure the character is in the faction
+        if (character.faction_id !== this.faction_id) {
+            return 'Character is not in the same faction';
+        }
 
-            // remove the faction reference from the character
-            character.faction = null;
-            character.faction_id = '';
+        // remove the faction reference from the character
+        character.faction = null;
+        character.faction_id = '';
 
-            await this.Game.factionManager.dbCharacterRemove(character.user_id)
-                .then(async () => {
-                    // remove member from faction online list
-                    this.onlineMembers = this.onlineMembers.filter((obj) => obj.user_id !== character.user_id);
+        await this.Game.factionManager.dbCharacterRemove(character.user_id);
 
-                    // remove the character from the faction-only room
-                    await this.Game.socketManager.get(character.user_id)
-                        .then((socket) => {
-                            socket.leave(this.faction_id);
-                            resolve(character.user_id);
-                        })
-                        .catch((err) => {
-                            this.Game.logger.error(err.message);
-                            // if the character is not online, we just resolve without needing to
-                            // make the socket leave the chat room.
-                            resolve(character.user_id);
-                        });
-                })
-                .catch((err) => {
-                    this.Game.logger.error(err.message);
-                    reject(err);
-                });
-        })
-        .catch((err) => {
-            this.Game.logger.error(err.message);
-            reject(err);
-        });
+        // remove member from faction online list
+        this.onlineMembers = this.onlineMembers.filter((obj) => obj.user_id !== character.user_id);
+
+        // remove the character from the faction-only room
+        const socket = await this.Game.socketManager.get(character.user_id);
+
+        socket.leave(this.faction_id);
+        resolve(character.user_id);
     }
 
     /**
@@ -153,29 +135,20 @@ export default class Faction {
      * @return {Boolan} whether the leader change was successful
      */
     makeLeader(character) {
-        return new Promise(async (resolve, reject) => {
-            // make sure the character is in the faction
-            if (character.faction_id !== this.faction_id) {
-                return reject('The player is not in the same faction.');
-            }
+        // make sure the character is in the faction
+        if (character.faction_id !== this.faction_id) {
+            return reject('The player is not in the same faction.');
+        }
 
-            // make sure the character is in the faction
-            if (character.user_id === this.leader_id) {
-                return reject('You are already the leader of this faction.');
-            }
+        // make sure the character is in the faction
+        if (character.user_id === this.leader_id) {
+            return reject('You are already the leader of this faction.');
+        }
 
-            // set the leader to the new user ID
-            this.leader_id = character.user_id;
-            // save the changes to the faction
-            await this.Game.factionManager.save(this)
-                .then(() => {
-                    resolve();
-                })
-                .catch((err) => {
-                    this.Game.logger.error(err.message);
-                    reject(err);
-                });
-        });
+        // set the leader to the new user ID
+        this.leader_id = character.user_id;
+        // save the changes to the faction
+        return this.Game.factionManager.save(this);
     }
 
     /**
@@ -183,18 +156,14 @@ export default class Faction {
      * @return {Promise}
      */
     disband() {
-        return new Promise((resolve, reject) => {
-            this.remove = true;
+        this.remove = true;
 
-            this.onlineMembers.forEach((member) => {
-                member.faction = null;
-                // let the online member know the faction was disbanded
-                this.Game.eventToUser(member.user_id, 'warning', `Your faction ${this.name}, was disbanded.`);
-                // remove the faction tag from the name, in the online list
-                this.Game.characterManager.dispatchUpdatePlayerList(member.user_id);
-            });
-
-            resolve();
+        this.onlineMembers.forEach((member) => {
+            member.faction = null;
+            // let the online member know the faction was disbanded
+            this.Game.eventToUser(member.user_id, 'warning', `Your faction ${this.name}, was disbanded.`);
+            // remove the faction tag from the name, in the online list
+            this.Game.characterManager.dispatchUpdatePlayerList(member.user_id);
         });
     }
 

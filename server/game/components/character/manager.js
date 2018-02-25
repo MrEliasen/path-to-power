@@ -267,34 +267,30 @@ export default class CharacterManager {
      * @param  {Function} callback  Callback function
      * @return {Object}             Object with the character details.
      */
-    load(userData, callback) {
-        this.dbLoad(userData.user_id, (error, character) => {
-            if (error) {
-                return callback(error);
-            }
+    async load(userData) {
+        const character = await this.dbLoad(userData.user_id);
 
-            if (!character) {
-                return callback(null, null);
-            }
+        if (character === null) {
+            return null;
+        }
 
-            const newCharacter = new Character(this.Game, character.toObject());
-            newCharacter.profile_image = userData.profile_image;
+        const newCharacter = new Character(this.Game, character.toObject());
+        newCharacter.profile_image = userData.profile_image;
 
-            this.manage(newCharacter);
+        this.manage(newCharacter);
 
-            this.Game.itemManager.loadCharacterInventory(newCharacter, (items) => {
-                if (items) {
-                    newCharacter.setInventory(items);
-                    items.map((item, index) => {
-                        if (item.equipped_slot) {
-                            newCharacter.equip(index);
-                        }
-                    });
+        const items = await this.Game.itemManager.loadCharacterInventory(newCharacter);
+
+        if (items) {
+            newCharacter.setInventory(items);
+            items.map((item, index) => {
+                if (item.equipped_slot) {
+                    newCharacter.equip(index);
                 }
-
-                callback(null, newCharacter);
             });
-        });
+        }
+
+        return newCharacter;
     }
 
     /**
@@ -320,18 +316,8 @@ export default class CharacterManager {
      * @param  {String}   user_id  User ID who owns the character
      * @param  {Function} callback returns error and character object
      */
-    dbLoad(user_id, callback) {
-        CharacterModel.findOne({user_id: user_id}, (err, character) => {
-            if (err) {
-                this.Game.logger.error('CharacterManager::dbLoad', err);
-                return callback({
-                    type: 'error',
-                    message: 'Internal server error.',
-                });
-            }
-
-            return callback(null, character);
-        });
+    dbLoad(user_id) {
+        return CharacterModel.findOneAsync({user_id: user_id});
     }
 
     /**
@@ -342,18 +328,13 @@ export default class CharacterManager {
      * @param  {Function} callback Callback function
      * @return {Object}            Object with the character details
      */
-    create(userData, city, callback) {
-        this.dbCreate(userData.user_id, userData.display_name, city, (error, character) => {
-            if (error) {
-                return callback(error);
-            }
+    create(userData, city) {
+        const character = this.dbCreate(userData.user_id, userData.display_name, city);
+        const newCharacter = new Character(this.Game, character.toObject());
+        newCharacter.profile_image = userData.profile_image;
 
-            const newCharacter = new Character(this.Game, character.toObject());
-            newCharacter.profile_image = userData.profile_image;
-
-            this.manage(newCharacter);
-            callback(null, newCharacter);
-        });
+        this.manage(newCharacter);
+        return newCharacter;
     }
 
     /**
@@ -361,9 +342,8 @@ export default class CharacterManager {
      * @param  {String}   user_id        User Id of account
      * @param  {String}   character_name Twitch Name
      * @param  {String}   city           ID of city to start in
-     * @param  {Function} callback       Returns an error and character object
      */
-    dbCreate(user_id, character_name, city, callback) {
+    async dbCreate(user_id, character_name, city) {
         if (!city || city === '') {
             return callback({
                 type: 'warning',
@@ -382,54 +362,22 @@ export default class CharacterManager {
             stats: {...this.Game.config.game.defaultStats},
         });
 
-        newCharacter.save((err) => {
-            if (err) {
-                if (err.code === 11000) {
-                    return callback({
-                        type: 'warning',
-                        message: 'That character name is already taken.',
-                    });
-                }
-
-                this.Game.logger.error('CharacterManager::dbCreate', err);
-
-                return callback({
-                    type: 'error',
-                    message: 'Internal server error.',
-                });
-            }
-
-            callback(null, newCharacter);
-        });
+        await newCharacter.saveAsync();
+        return newCharacter;
     }
 
     /**
      * Save the progress and items of all managed characters
      * @return {Promise}
      */
-    saveAll() {
-        return new Promise((resolve, reject) => {
-            const total = this.characters.length;
-            let saves = 0;
-
-            this.characters.forEach((character) => {
-                await this.save(character.user_id)
-                    .then(() => {
-                        saves++;
-
-                        if (saves === total) {
-                            resolve();
-                        }
-                    })
-                    .catch(() => {
-                        saves++;
-
-                        if (saves === total) {
-                            resolve();
-                        }
-                    });
-            });
-        });
+    async saveAll() {
+        await Promise.all(this.characters.map(async (character) => {
+            try {
+                return await this.saveAsync(character.user_id);
+            } catch (err) {
+                this.Game.onError(err);
+            }
+        }));
     }
 
     /**
@@ -437,29 +385,24 @@ export default class CharacterManager {
      * @param  {String} user_id The user ID
      * @return {Promise}
      */
-    save(user_id) {
-            if (!user_id) {
-                return reject(new Error(`Unable to save character. None found for user: ${user_id}`));
-            }
+    async save(user_id) {
+        if (!user_id) {
+            throw new Error('No user_id supplied to the save() method');
+        }
 
-            const character = this.get(user_id);
+        const character = this.get(user_id);
 
-            if (!character) {
-                return;
-            }
+        if (!character) {
+            throw new Error(`No user found online, matching the user_id ${user_id}`);
+        }
 
-            this.Game.logger.info(`Saving character ${user_id}`);
+        this.Game.logger.info(`Saving character ${user_id}`);
 
-            // Save the character information (stats/location/etc)
-            try {
-                await this.dbSave(character);
-                await this.Game.itemManager.saveInventory(character);
-            } catch (err) {
-                return this.Game.onError(err);
-            }
+        // Save the character information (stats/location/etc)
+        await this.dbSave(character);
+        await this.Game.itemManager.saveInventory(character);
 
-            this.Game.logger.info(`Saved ${character.name} (${user_id})`);
-        });
+        this.Game.logger.info(`Saved ${character.name} (${user_id})`);
     }
 
     /**
@@ -467,30 +410,19 @@ export default class CharacterManager {
      * @param  {Character Obj} character The character to save
      * @return {Promise}
      */
-    dbSave(character) {
-        return new Promise((resolve, reject) => {
-            CharacterModel.findOne({user_id: character.user_id}, (err, dbCharacter) => {
-                if (err) {
-                    throw new Error(err.message);
-                }
+    async dbSave(character) {
+        const character = await CharacterModel.findOneAsync({user_id: character.user_id});
 
-                // update the character db object, and save the changes
-                // NOTE: add any information you want to save here.
-                dbCharacter.stats = {...character.stats};
-                dbCharacter.abilities = character.exportAbilities();
-                dbCharacter.skills = character.exportSkills();
-                dbCharacter.location = {...character.location};
-                dbCharacter.faction_id = character.faction ? character.faction.faction_id : '';
+        // update the character db object, and save the changes
+        // NOTE: add any information you want to save here.
+        dbCharacter.stats = {...character.stats};
+        dbCharacter.abilities = character.exportAbilities();
+        dbCharacter.skills = character.exportSkills();
+        dbCharacter.location = {...character.location};
+        dbCharacter.faction_id = character.faction ? character.faction.faction_id : '';
 
-                dbCharacter.save((err) => {
-                    if (err) {
-                        throw new Error(err.message);
-                    }
-
-                    resolve(dbCharacter);
-                });
-            });
-        });
+        await dbCharacter.saveAsync();
+        return dbCharacter;
     }
 
     /**
@@ -498,21 +430,9 @@ export default class CharacterManager {
      * @param  {Strng} characterName  Name to search for
      * @return {Object}               Plain object of character.
      */
-    dbGetByName(targetName) {
-        return new Promise((resolve, reject) => {
-            CharacterModel.findOne({name_lowercase: targetName.toLowerCase()}, (err, character) => {
-                if (err) {
-                    this.Game.logger.error('CharacterManager::dbGetByName', err);
-                    return reject(new Error(err.message));
-                }
-
-                if (!character) {
-                    return reject(new Error(`No character found for user: ${targetName}`));
-                }
-
-                resolve(character.toObject());
-            });
-        });
+    async dbGetByName(targetName) {
+        const character = await CharacterModel.findOneAsync({name_lowercase: targetName.toLowerCase()});
+        return character ? character.toObject() : null;
     }
 
     /**
