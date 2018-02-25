@@ -1,7 +1,7 @@
 import {STATS_MENU_TOGGLE} from './types';
 import {INVENTORY_MENU_TOGGLE} from '../inventory-menu/types';
 import {PLAYERS_MENU_TOGGLE} from '../players-menu/types';
-import {REMOTE_LOGOUT} from '../../../../../server/shared/types';
+import {REMOTE_LOGOUT} from '../../../shared/types';
 
 const defaultState = {
     open: false,

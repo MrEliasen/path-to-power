@@ -1,6 +1,6 @@
 import {ADD_ONLINE_PLAYER, REMOVE_ONLINE_PLAYER, CHAT_MESSAGE, NEWS_UPDATE} from './types';
 import {ACCOUNT_LOGOUT, ACCOUNT_AUTHENTICATE_SUCCESS, ACCOUNT_AUTHENTICATE_NEW} from '../auth/types';
-import {REMOTE_LOGOUT} from '../../../../server/shared/types';
+import {REMOTE_LOGOUT} from '../../shared/types';
 import {getRandomColour} from '../../helper';
 
 const defaultState = {

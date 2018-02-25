@@ -1,5 +1,5 @@
 import {NEW_EVENT, COMMAND_ERROR, CLEAR_EVENTS} from './types';
-import {REMOTE_LOGOUT} from '../../../../../server/shared/types';
+import {REMOTE_LOGOUT} from '../../../shared/types';
 
 export default function(state = [], action) {
     let events;
