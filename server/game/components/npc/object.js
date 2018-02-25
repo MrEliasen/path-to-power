@@ -282,7 +282,7 @@ export default class NPC extends Character {
     die() {
         // set NPC as dead, so it is not included in actions/commands etc.
         this.dead = true;
-        const loot = Character.prototype.die.call(this);
+        let loot = Character.prototype.die.call(this);
 
         this.clearTimers();
 

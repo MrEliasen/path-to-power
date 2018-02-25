@@ -10,7 +10,7 @@ import https from 'https';
 // 3rd party
 import express from 'express';
 import mongoose from 'mongoose';
-import Promise from 'bluebird'; 
+import Promise from 'bluebird';
 
 /************************************
  *            FILE CHECK            *

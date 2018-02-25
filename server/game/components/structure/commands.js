@@ -201,13 +201,6 @@ function cmdWithdraw(socket, character, command, params, cmdObject, Game) {
         return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
     }
 
-    // Fetch the character first
-    const character = Game.characterManager.get(socket.user.user_id);
-
-    if (!character) {
-        return;
-    }
-
     let amount = parseInt(params[0], 10);
 
     // make sure the amount is valid
@@ -255,13 +248,6 @@ function cmdDeposit(socket, character, command, params, cmdObject, Game) {
         return Game.eventToSocket(socket, 'error', 'There are no structures around which allows you to use that command.');
     }
 
-    // Fetch the character first
-    const character = Game.characterManager.get(socket.user.user_id);
-
-    if (!character) {
-        return;
-    }
-
     let amount = parseInt(params[0], 10);
 
     // make sure the amount is valid
@@ -297,13 +283,6 @@ function cmdDeposit(socket, character, command, params, cmdObject, Game) {
  * @param  {Game}   Game                The main Game object
  */
 function cmdDrink(socket, character, command, params, cmdObject, Game) {
-    // Fetch the character first
-    const character = Game.characterManager.get(socket.user.user_id);
-
-    if (!character) {
-        return;
-    }
-
     // get the structures list at the character location
     const structures = Game.structureManager.getWithCommand(
         character.location.map,

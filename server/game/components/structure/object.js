@@ -27,19 +27,11 @@ export default class Structure {
             return;
         }
 
-        const total = this.shops.length;
-        let loaded = 0;
         const shopsList = [...this.shops];
         this.shops = [];
 
         shopsList.forEach((shopId) => {
             this.shops.push(this.Game.shopManager.add(shopId));
-
-            loaded++;
-
-            if (loaded >= total) {
-                resolve(loaded);
-            }
         });
     }
 }

@@ -26,6 +26,7 @@ export default class StructureManager {
     init() {
         // load map commands
         this.Game.commandManager.registerManager(structureCommands);
+        console.log('STRUCTURES MANAGER LOADED');
     }
 
     /**

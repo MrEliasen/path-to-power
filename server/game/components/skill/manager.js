@@ -22,6 +22,7 @@ export default class SkillManager {
      */
     init() {
         this.Game.commandManager.registerManager(skillCommands);
+        console.log('SKILL MANAGER LOADED');
     }
 
     /**

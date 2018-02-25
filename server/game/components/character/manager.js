@@ -43,7 +43,8 @@ export default class CharacterManager {
      * Register all the character commands
      */
     init() {
-        return this.Game.commandManager.registerManager(characterCommands);
+        this.Game.commandManager.registerManager(characterCommands);
+        console.log('CHARACTERS MANAGER LOADED');
     }
 
     /**
@@ -373,7 +374,7 @@ export default class CharacterManager {
     async saveAll() {
         await Promise.all(this.characters.map(async (character) => {
             try {
-                return await this.saveAsync(character.user_id);
+                return await this.save(character.user_id);
             } catch (err) {
                 this.Game.onError(err);
             }
@@ -411,7 +412,7 @@ export default class CharacterManager {
      * @return {Promise}
      */
     async dbSave(character) {
-        const character = await CharacterModel.findOneAsync({user_id: character.user_id});
+        const dbCharacter = await CharacterModel.findOneAsync({user_id: character.user_id});
 
         // update the character db object, and save the changes
         // NOTE: add any information you want to save here.
@@ -551,7 +552,8 @@ export default class CharacterManager {
      * @param  {Object} moveAction {grid: 'y|x', direction: 1|-1}
      * @return {Promise}
      */
-    move(socket, moveAction) {
+    move(socket, action) {
+        const moveAction = action.payload;
         // get the socket character
         const character = this.get(socket.user.user_id);
 
@@ -559,7 +561,7 @@ export default class CharacterManager {
             return this.Game.eventToSocket(socket, 'error', 'You do not appear to be logged in any more. Please login again.');
         }
 
-        let newLocation = {...character.location};
+        let actionNewLocation = {...character.location};
         let directionOut;
         let directionIn;
 
@@ -587,11 +589,15 @@ export default class CharacterManager {
         const newCooldown = this.Game.cooldownManager.add(character, cooldownAction);
 
         // set the location we intend to move the character to
-        newLocation[moveAction.grid] = newLocation[moveAction.grid] + moveAction.direction;
+        actionNewLocation[moveAction.grid] = actionNewLocation[moveAction.grid] + moveAction.direction;
 
         try {
             // make sure the move is valid
-            const newLocation = this.Game.mapManager.isValidLocation(newLocation.map, newLocation.x, newLocation.y);
+            const newLocation = this.Game.mapManager.isValidLocation(actionNewLocation.map, actionNewLocation.x, actionNewLocation.y);
+
+            if (!newLocation) {
+                return;
+            }
 
             // determin the direction names for the JOIN/LEAVE events
             switch (moveAction.grid) {

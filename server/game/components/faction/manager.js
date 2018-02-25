@@ -24,12 +24,12 @@ export default class FactionManager {
      * Load all factions, and register commands
      * @return {Promise}
      */
-    init() {
+    async init() {
         // register all the
         this.Game.commandManager.registerManager(factionCommands);
 
         // load our factions
-        const factions = FactionModel.findAsync({});
+        const factions = await FactionModel.findAsync({});
 
         if (!factions) {
             return;
@@ -40,6 +40,8 @@ export default class FactionManager {
             this.add(faction.toObject());
             loadedFactions++;
         });
+
+        console.log('FACTION MANAGER LOADED');
     }
 
     /**

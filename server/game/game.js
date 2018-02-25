@@ -1,7 +1,6 @@
-// our logger
-import winston from 'winston';
 import Promise from 'bluebird';
 import child_process from 'child_process';
+import Logger from './logger';
 
 // component manager
 import AccountManager from './components/account/manager';
@@ -68,36 +67,25 @@ class Game {
      * Creates our logger we will be using throughout
      */
     setupLogger() {
-        this.logger = winston.createLogger({
-            level: (process.env.NODE_ENV !== 'production' ? 'info' : 'warning'),
-            format: winston.format.json(),
-            transports: [
-                new winston.transports.File({
-                    filename: 'error.log',
-                    level: 'error',
-                    timestamp: true,
-                }),
-                new winston.transports.File({
-                    filename: 'info.log',
-                    level: 'info',
-                    timestamp: true,
-                }),
-            ],
+        this.logger = new Logger({
+            toConsole: process.env.NODE_ENV === 'development',
+            level: (process.env.NODE_ENV === 'development' ? 'info' : 'error'),
+            info: {
+                file: './info.log',
+            },
+            error: {
+                file: './error.log',
+            },
+            debug: {
+                file: './debug.log',
+            },
         });
 
-        this.logger.error = () => {
-            console.log(arguments);
-        };
-
-       /* // if we are not in a production environment, add console logging as well
+        // if we are not in a production environment, add console logging as well
         if (process.env.NODE_ENV === 'development') {
-            this.logger.add(new winston.transports.Console({
-                format: winston.format.simple(),
-            }));
-
             // enable long stack traces to promises, while in dev
             Promise.longStackTraces();
-        }*/
+        }
 
         this.logger.info('Logger initiated.');
     }
@@ -110,37 +98,14 @@ class Game {
         // TODO: Before 0.1.0 is released - implement husky package and auto bump version on push.
         this.version = child_process.execSync('git rev-parse --short=7 HEAD').toString().trim();
 
-        await this.itemManager.init().then((count) => {
-            console.log(`ITEM MANAGER LOADED ${count} ITEMS TEMPLATES`);
-        });
-
-        await this.mapManager.init().then((count) => {
-            console.log(`MAP MANAGER LOADED ${count} MAPS`);
-        });
-
-        await this.factionManager.init().then((count) => {
-            console.log(`FACTION MANAGER LOADED ${count} FACTIONS`);
-        });
-
-        await this.shopManager.init().then(() => {
-            console.log('SHOP MANAGER LOADED');
-        });
-
-        await this.structureManager.init().then(() => {
-            console.log('STRUCTURES MANAGER LOADED');
-        });
-
-        await this.commandManager.init().then(() => {
-            console.log('COMMAND MANAGER LOADED');
-        });
-
-        await this.characterManager.init().then(() => {
-            console.log('CHARACTERS MANAGER LOADED');
-        });
-
-        await this.skillManager.init().then(() => {
-            console.log('SKILL MANAGER LOADED');
-        });
+        await this.itemManager.init();
+        await this.mapManager.init();
+        await this.factionManager.init();
+        await this.shopManager.init();
+        await this.structureManager.init();
+        await this.commandManager.init();
+        await this.characterManager.init();
+        await this.skillManager.init();
 
         // setup autosave
         this.setupGameTimers();
@@ -174,7 +139,9 @@ class Game {
      * @param  {Mixed} user Socket.io Socket or user_id
      */
     onError(err, user) {
-        this.logger.error(err.message, err);
+        this.logger.error(err.message, {
+            stack: err.stack,
+        });
 
         if (!user) {
             return;

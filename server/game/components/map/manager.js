@@ -31,7 +31,6 @@ export default class MapManager {
 
         // get the list of map files in our data maps directory
         const maplist = fs.readdirSync(`${__dirname}/../../data/maps`);
-        let loadedmaps = 0;
 
         // loop each of our mapfiles
         maplist.map((mapname) => {
@@ -39,18 +38,10 @@ export default class MapManager {
             this.maps[mapData.id] = new GameMap(this.Game, mapData);
 
             // generate the map, and once done, increment the counter and resolve if all maps are done.
-            this.maps[mapData.id].generate()
-                .then(() => {
-                    loadedmaps++;
-
-                    if (loadedmaps === maplist.length) {
-                        resolve(maplist.length);
-                    }
-                })
-                .catch((err) => {
-                    this.Game.logger.error(err.message);
-                });
+            this.maps[mapData.id].generate();
         });
+
+        console.log('MAP MANAGER LOADED');
     }
 
     /**

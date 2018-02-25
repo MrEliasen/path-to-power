@@ -34,6 +34,7 @@ export default class ShopManager {
     init() {
         // load map commands
         this.Game.commandManager.registerManager(shopCommands);
+        console.log('SHOP MANAGER LOADED');
     }
 
     /**

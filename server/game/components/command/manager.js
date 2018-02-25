@@ -30,7 +30,8 @@ export default class CommandManager {
      * @return {Promise}
      */
     init() {
-        return this.registerManager(commandCommands);
+        this.registerManager(commandCommands);
+        console.log('COMMAND MANAGER LOADED');
     }
 
     /**

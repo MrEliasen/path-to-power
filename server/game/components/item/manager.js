@@ -37,8 +37,7 @@ export default class ItemManager {
 
         // set the initial item prices.
         this.updatePrices();
-
-        return ItemList.length;
+        console.log('ITEM MANAGER LOADED');
     }
 
     /**
