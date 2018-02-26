@@ -9,7 +9,7 @@ import {
     NPC_JOINED_GRID,
     NPC_LEFT_GRID,
 } from './types';
-import {REMOTE_LOGOUT} from '../../../../server/shared/types';
+import {REMOTE_LOGOUT} from '../../shared/types';
 
 const defaultState = {
     description: '',
