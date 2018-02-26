@@ -291,7 +291,7 @@ export default class CommandManager {
     validate(player, msgParams, cmdParams) {
         // check if there are any params defined for the command at all
         if (!cmdParams) {
-            return resolve(msgParams);
+            return [];
         }
 
         // prepare the params, so they match the number of expected params.

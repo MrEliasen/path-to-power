@@ -152,12 +152,12 @@ export default class ItemManager {
 
         // If the item is a non-stackable item, we remove it and return it.
         if (!foundItem.stats.stackable) {
-            return resolve(locationItems.splice(foundItemIndex, 1)[0]);
+            return locationItems.splice(foundItemIndex, 1)[0];
         }
 
         // if the amount of less or equal to what we need, just return the whole item
         if (foundItem.stats.durability <= amount) {
-            return resolve(locationItems.splice(foundItemIndex, 1)[0]);
+            return locationItems.splice(foundItemIndex, 1)[0];
         }
 
         // reduce durability of the item on the ground

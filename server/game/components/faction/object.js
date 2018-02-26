@@ -126,7 +126,7 @@ export default class Faction {
         const socket = await this.Game.socketManager.get(character.user_id);
 
         socket.leave(this.faction_id);
-        resolve(character.user_id);
+        return character.user_id;
     }
 
     /**
