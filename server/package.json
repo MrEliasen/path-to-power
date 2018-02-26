@@ -14,11 +14,11 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/MrEliasen/path-to-power-server.git"
+        "url": "git+https://github.com/MrEliasen/path-to-power.git"
     },
     "author": "MrEliasen (@markeliasen)",
     "bugs": {
-        "url": "https://github.com/MrEliasen/path-to-power-server/issues"
+        "url": "https://github.com/MrEliasen/path-to-power/issues"
     },
     "nodemonConfig": {
         "ignore": [
