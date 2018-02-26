@@ -1,6 +1,7 @@
 {
     "name": "path-to-power-server",
     "version": "0.1.0",
+    "license": "CC-BY-3.0",
     "description": "The server for a simple MUD inspired browser-based multiplayer game.",
     "scripts": {
         "start": "nodemon -L ./game --inspect --exec babel-node --presets env,stage-0",
@@ -13,11 +14,11 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/MrEliasen/path-to-power-server.git"
+        "url": "git+https://github.com/MrEliasen/path-to-power.git"
     },
     "author": "MrEliasen (@markeliasen)",
     "bugs": {
-        "url": "https://github.com/MrEliasen/path-to-power-server/issues"
+        "url": "https://github.com/MrEliasen/path-to-power/issues"
     },
     "nodemonConfig": {
         "ignore": [
