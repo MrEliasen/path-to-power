@@ -152,7 +152,7 @@ export default class AccountManager {
      * @param  {Socket.IO Object} socket The socket the request from made from
      * @param  {Object}           action Redux action object
      */
-    newCharacter(socket, action) {
+    async newCharacter(socket, action) {
         if (!action.payload.location) {
             return this.Game.socketManager.dispatchToSocket(socket, {
                 type: ACCOUNT_AUTHENTICATE_ERROR,
@@ -189,7 +189,7 @@ export default class AccountManager {
 
         try {
             // create a new character
-            const newCharacter = this.Game.characterManager.create(socket.user, gameMap.id);
+            const newCharacter = await this.Game.characterManager.create(socket.user, gameMap.id);
 
             // Update the client
             this.Game.mapManager.updateClient(newCharacter.user_id);
@@ -232,7 +232,7 @@ export default class AccountManager {
         });
 
         await user.saveAsync();
-        return user._id;
+        return user;
     }
 
     /**
@@ -257,9 +257,7 @@ export default class AccountManager {
 
                     // if no account was found, create one.
                     if (!user) {
-                        user = {
-                            user_id: await this.dbSignup(twitchData.id, twitchData.display_name),
-                        };
+                        user = await this.dbSignup(twitchData.id, twitchData.display_name);
                     }
 
                     resolve({

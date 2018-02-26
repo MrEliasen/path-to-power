@@ -139,7 +139,7 @@ export default class Item {
         }
 
         // check if the use effect, reduces item durability
-        if (this.stats.useEffect.ignoreDurability) {
+        if (this.stats.useEffect.modifiers.ignoreDurability) {
             return;
         }
 

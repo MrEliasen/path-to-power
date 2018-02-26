@@ -215,6 +215,16 @@ function cmdShoot(socket, character, command, params, cmdObject, Game) {
     // check if there is a cooldown
     checkAttackCooldown(character, Game, async () => {
         const weapon = character.getEquipped('ranged').name;
+        // Discharge the firearm, to consume a bullet, regardless if they hit or not
+        const damage = await character.fireRangedWeapon();
+
+        // sanity check, in case anything where to change post the above checks
+        if (damage === null) {
+            return Game.eventToSocket(socket, 'error', 'There was an issue firing your ranged weapon. You might not have any equipped, or any ammunition.');
+        }
+
+        // update the client inventory object
+        Game.characterManager.updateClient(character.user_id, 'inventory');
 
         // check if the attack will hit
         if (!character.attackHit()) {
@@ -226,8 +236,6 @@ function cmdShoot(socket, character, command, params, cmdObject, Game) {
             return Game.eventToRoom(character.getLocationId(), 'info', `You see ${target.name} shoots their ${weapon} in ${target.name}'s direction, but misses.`, [character.user_id, target.user_id]);
         }
 
-        // deal damage to the target
-        const damage = character.fireRangedWeapon();
         const attack = target.dealDamage(damage, true);
 
         // if the target died

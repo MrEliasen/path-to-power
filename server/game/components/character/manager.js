@@ -182,7 +182,7 @@ export default class CharacterManager {
      * Adds a character class object to the managed list
      * @param  {Character Obj} character The character object to manage
      */
-    manage(character) {
+    async manage(character) {
         // removes disconnect timer, if one is sec (eg if refreshing the page)
         const wasLoggedIn = this.Game.socketManager.clearTimer(character.user_id);
         const existingCharacter = this.characters.find((obj) => obj.user_id === character.user_id);
@@ -194,7 +194,7 @@ export default class CharacterManager {
                 character.gridLock(user);
             });
 
-            this.remove(character.user_id);
+            await this.remove(character.user_id);
         }
 
         // load the character abilities
@@ -238,11 +238,17 @@ export default class CharacterManager {
      * Remove a managed character from the list
      * @param  {String} user_id User ID
      */
-    remove(user_id) {
+    async remove(user_id) {
         const character = this.get(user_id);
 
         if (!character) {
             return;
+        }
+
+        try {
+            await this.save(character.user_id);
+        } catch (err) {
+            this.Game.onError(err);
         }
 
         // dispatch join event to grid
@@ -278,7 +284,7 @@ export default class CharacterManager {
         const newCharacter = new Character(this.Game, character.toObject());
         newCharacter.profile_image = userData.profile_image;
 
-        this.manage(newCharacter);
+        await this.manage(newCharacter);
 
         const items = await this.Game.itemManager.loadCharacterInventory(newCharacter);
 
@@ -329,12 +335,12 @@ export default class CharacterManager {
      * @param  {Function} callback Callback function
      * @return {Object}            Object with the character details
      */
-    create(userData, city) {
-        const character = this.dbCreate(userData.user_id, userData.display_name, city);
+    async create(userData, city) {
+        const character = await this.dbCreate(userData.user_id, userData.display_name, city);
         const newCharacter = new Character(this.Game, character.toObject());
         newCharacter.profile_image = userData.profile_image;
 
-        this.manage(newCharacter);
+        await this.manage(newCharacter);
         return newCharacter;
     }
 
@@ -345,15 +351,6 @@ export default class CharacterManager {
      * @param  {String}   city           ID of city to start in
      */
     async dbCreate(user_id, character_name, city) {
-        if (!city || city === '') {
-            return callback({
-                type: 'warning',
-                message: 'You must choose a city.',
-            });
-        }
-
-        // IDEA: create maps based on country, as players join. Have start in their own country!
-
         const newCharacter = new CharacterModel({
             user_id: user_id,
             name: character_name,
@@ -472,8 +469,8 @@ export default class CharacterManager {
      * @param  {Bool}      createAction Whether to return an action from the action creator or not.
      * @return {Object}                 Redux action object
      */
-    // TODO: Refactor this to be a action dispatch instead.
     joinedGrid(character, action = true) {
+        // TODO: Refactor this to be a action dispatch instead.
         const details = {
             name: character.name,
             user_id: character.user_id,
@@ -673,7 +670,7 @@ export default class CharacterManager {
         // fetch the character who got killed
         const character = this.get(user_id);
         // get the map so we know where to respawn the player
-        const gameMap = this.Game.mapManager.get(character.location.map)
+        const gameMap = this.Game.mapManager.get(character.location.map);
         // kill the character
         const droppedLoot = character.die();
         // save the old location before it is overwritten by the die() method on the character

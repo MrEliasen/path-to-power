@@ -379,7 +379,7 @@ export default class NPC extends Character {
     /**
      * Attacks the current target with their ranged weapon
      */
-    attackShoot() {
+    async attackShoot() {
         const weapon = this.getEquipped('ranged').name;
 
         // check if the attack will hit
@@ -391,7 +391,7 @@ export default class NPC extends Character {
         }
 
         // deal damage to the target
-        const damage = this.fireRangedWeapon();
+        const damage = await this.fireRangedWeapon();
 
         if (damage === null) {
             return;

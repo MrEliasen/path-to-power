@@ -278,7 +278,7 @@ export default class Character {
      * Returns the damage of the equipped ranged weapon + ammo, and reduces durability of ammo.
      * @return {Object}          the damage, -1 if the weapon cannot be fired.
      */
-    fireRangedWeapon() {
+    async fireRangedWeapon() {
         const damage = this.getWeaponDamage('ranged');
         const ammo = this.getEquipped('ammo');
 
@@ -295,11 +295,11 @@ export default class Character {
         }
 
         // reduce ammo durability
-        ammo.stats.durability = ammo.removeDurability(1);
+        ammo.removeDurability(1);
 
         // remove ammo if durability is 0
-        if (ammo.durability <= 0) {
-            this.Game.itemManager.remove(this, ammo);
+        if (ammo.stats.durability <= 0) {
+            await this.Game.itemManager.remove(this, ammo);
         }
 
         return damage;
@@ -316,7 +316,7 @@ export default class Character {
             return false;
         }
 
-        if (equippedAmmo.durability <= 0) {
+        if (equippedAmmo.stats.durability <= 0) {
             return false;
         }
 

@@ -1,4 +1,3 @@
-import Promise from 'bluebird';
 import io from 'socket.io';
 import EventEmitter from 'events';
 import {ACCOUNT_AUTHENTICATE} from '../account/types';
@@ -83,10 +82,12 @@ export default class SocketManager extends EventEmitter {
      * @return {promise}
      */
     logoutOutSession(user_id) {
-        const socket = this.get(user_id);
+        let socket;
 
-        if (!socket) {
-            throw new Error('No socket found.');
+        try {
+            socket = this.get(user_id);
+        } catch (err) {
+            return;
         }
 
         const user = {...socket.user};
@@ -145,6 +146,14 @@ export default class SocketManager extends EventEmitter {
 
             if (forced) {
                 return this.emit('disconnect', user);
+            }
+
+            // save the character as it is right now,
+            // once the timer hits, it will save once more.
+            try {
+                this.Game.characterManager.save(user.user_id);
+            } catch (err) {
+                this.Game.onError(err);
             }
 
             this.timers[user.user_id] = setTimeout(() =>{

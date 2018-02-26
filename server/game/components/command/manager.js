@@ -97,7 +97,7 @@ export default class CommandManager {
             return;
         }
 
-        const params = this.parseParameters(payload);
+        let params = this.parseParameters(payload);
         const command = params.shift().toLowerCase();
 
         if (!this.commands[command]) {
@@ -111,11 +111,11 @@ export default class CommandManager {
         }
 
         try {
-            const params = this.validate(character, params, this.commands[command].params);
+            const parsedParams = this.validate(character, params, this.commands[command].params);
 
             // If the params is a string and not an array, something went wrong
-            if (typeof params === 'string') {
-                this.Game.eventToSocket(socket, 'error', params);
+            if (typeof parsedParams === 'string') {
+                this.Game.eventToSocket(socket, 'error', parsedParams);
                 return this.Game.eventToSocket(socket, 'multiline', this.getInfo(command));
             }
 
@@ -123,7 +123,7 @@ export default class CommandManager {
                 socket,
                 character,
                 command,
-                params,
+                parsedParams,
                 {
                     modifiers: this.commands[command].modifiers ? deepCopyObject(this.commands[command].modifiers) : null,
                     description: this.commands[command].description,
