@@ -190,7 +190,7 @@ function cmdFactionSay(socket, character, command, params, cmdObject, Game) {
         payload: {
             user_id: character.user_id,
             name: character.name,
-            message: message,
+            message: params[0],
             type: 'faction',
         },
     });

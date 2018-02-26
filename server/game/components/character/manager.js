@@ -582,20 +582,20 @@ export default class CharacterManager {
             return;
         }
 
-        // set the cooldown of the move action
-        const newCooldown = this.Game.cooldownManager.add(character, cooldownAction);
-
         // set the location we intend to move the character to
         actionNewLocation[moveAction.grid] = actionNewLocation[moveAction.grid] + moveAction.direction;
 
+        // make sure the move is valid
+        const newLocation = this.Game.mapManager.isValidLocation(actionNewLocation.map, actionNewLocation.x, actionNewLocation.y);
+
+        if (!newLocation) {
+            return;
+        }
+
+        // set the cooldown of the move action
+        const newCooldown = this.Game.cooldownManager.add(character, cooldownAction);
+
         try {
-            // make sure the move is valid
-            const newLocation = this.Game.mapManager.isValidLocation(actionNewLocation.map, actionNewLocation.x, actionNewLocation.y);
-
-            if (!newLocation) {
-                return;
-            }
-
             // determin the direction names for the JOIN/LEAVE events
             switch (moveAction.grid) {
                 case 'y':

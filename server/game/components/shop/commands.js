@@ -26,7 +26,7 @@ function cmdShop(socket, character, command, params, cmdObject, Game) {
     }
 
     // overwrite if they specified a shop, and its name didn't match their criteria
-    if (params.length >= 1) {
+    if (shopName !== null) {
         shop = shops.find((obj) => obj.name.toLowerCase().indexOf(shopName.toLowerCase()) === 0);
     } else {
         shop = shops[0];

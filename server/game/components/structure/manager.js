@@ -69,7 +69,11 @@ export default class StructureManager {
         let matches = [];
 
         if (structures.length) {
-            matches = structures.filter((structure) => structure.commands[command]);
+            matches = structures.filter((structure) => {
+                if (structure.commands) {
+                    return structure.commands[command];
+                }
+            });
         }
 
         // if we didn't find any matching buildings..

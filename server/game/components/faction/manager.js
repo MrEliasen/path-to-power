@@ -38,7 +38,6 @@ export default class FactionManager {
         // load each of the factions
         factions.forEach((faction) => {
             this.add(faction.toObject());
-            loadedFactions++;
         });
 
         console.log('FACTION MANAGER LOADED');
@@ -196,7 +195,8 @@ export default class FactionManager {
         await dbFaction.save();
 
         // Add the faction object to the character
-        newFaction.addMember(character);
+        await newFaction.addMember(character);
+
         // resolve back to caller
         return newFaction;
     }
