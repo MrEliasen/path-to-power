@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import child_process from 'child_process';
-import Logger from './logger';
+import Logger from './components/logger';
 
 // component manager
 import AccountManager from './components/account/manager';
@@ -68,17 +68,11 @@ class Game {
      */
     setupLogger() {
         this.logger = new Logger({
-            toConsole: process.env.NODE_ENV === 'development',
             level: (process.env.NODE_ENV === 'development' ? 'info' : 'error'),
-            info: {
-                file: './info.log',
-            },
-            error: {
-                file: './error.log',
-            },
-            debug: {
-                file: './debug.log',
-            },
+            debugFile: './game.debug.log',
+            infoFile: './game.info.log',
+            warnFile: './game.warn.log',
+            errorFile: './game.error.log',
         });
 
         // if we are not in a production environment, add console logging as well
@@ -139,9 +133,7 @@ class Game {
      * @param  {Mixed} user Socket.io Socket or user_id
      */
     onError(err, user) {
-        this.logger.error(err.message, {
-            stack: err.stack,
-        });
+        this.logger.error(err);
 
         if (!user) {
             return;
