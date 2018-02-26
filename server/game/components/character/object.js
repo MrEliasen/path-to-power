@@ -618,7 +618,7 @@ export default class Character {
         let durability = 0;
         let health = this.stats.health;
         let armorRuined = false;
-        const armorItem = this.getEquippedSync('armor');
+        const armorItem = this.getEquipped('armor');
 
         if (!ignoreArmor && armorItem) {
             durability = armorItem.durability;
