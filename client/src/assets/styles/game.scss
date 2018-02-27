@@ -7,7 +7,7 @@
         margin: 0px;
     }
 
-    .panel-messages {
+    .card-messages {
         @include mudfont;
 
         ul {
@@ -21,23 +21,17 @@
         }
     }
 
-    .left, .right {
-        flex: 0 0 240px;
-    }
-
     .middle {
-        flex: auto;
-        padding: 0 30px;
 
-        .panel-body {
+        .card-body {
             overflow: auto;
         }
 
-        .panel-chat {
+        .card-chat {
             height: 20vh;
         }
 
-        .panel-events {
+        .card-events {
             height: 40vh;
         }
 
@@ -66,8 +60,8 @@
         }
     }
 
-    .panel {
-        .panel-body {
+    .card {
+        .card-body {
             min-height: 120px;
             padding: 10px 15px;
         }

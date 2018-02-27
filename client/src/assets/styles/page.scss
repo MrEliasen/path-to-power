@@ -10,12 +10,12 @@
     background-size: cover;
     background-position: center;
 
-    .panel {
+    .card {
         width: 800px;
         max-width: 100%;
         opacity: .95;
-        background: $color-primary;
-        color: #fff;
+        background: $primary-dark;
+        color: $white;
         position: absolute;
         top: 50%;
         left: 50%;

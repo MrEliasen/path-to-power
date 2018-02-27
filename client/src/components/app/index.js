@@ -14,6 +14,7 @@ import Character from '../game/character';
 
 // Components
 import Header from './header';
+import {Container} from 'reactstrap';
 
 // Twitch old ass lib
 // TODO: Code own implementation
@@ -150,7 +151,7 @@ class App extends React.Component {
             <React.Fragment>
                 <Header pages={this.state.pages} />
                 <main id="main">
-                    <div className="container">
+                    <Container>
                         <Switch>
                             {
                                 this.state.pages.map((page, index) => {
@@ -164,7 +165,7 @@ class App extends React.Component {
                             <Route path="/character" component={Character} />
                             <Route component={PageNotFound} />
                         </Switch>
-                    </div>
+                    </Container>
                 </main>
             </React.Fragment>
         );

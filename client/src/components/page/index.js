@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
+import {Card, CardBody} from 'reactstrap';
 
 class Page extends React.Component {
     constructor(props) {
@@ -9,11 +10,11 @@ class Page extends React.Component {
     render() {
         return (
             <div id={'page' + (this.props.page.meta.path && '-' + this.props.page.meta.path.replace('/', '-'))}>
-                <div className="panel">
-                    <div className="panel-body">
+                <Card>
+                    <CardBody>
                         <ReactMarkdown source={this.props.page.markdown} />
-                    </div>
-                </div>
+                    </CardBody>
+                </Card>
             </div>
         );
     }

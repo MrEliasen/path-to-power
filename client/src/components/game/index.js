@@ -15,6 +15,7 @@ import {moveCharacter} from './character/actions';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 // Components
+import {Row, Col, Input, Card, CardHeader, CardBody} from 'reactstrap';
 import InventoryMenu from './inventory-menu';
 import PlayersMenu from './players-menu';
 import StatsMenu from './stats-menu';
@@ -52,7 +53,7 @@ class Game extends React.Component {
 
     componentDidUpdate(prevProps) {
         if (this.state.autoscroll) {
-            document.querySelector('.panel-chat').scrollTop = document.querySelector('.panel-chat').scrollHeight;
+            document.querySelector('.card-chat').scrollTop = document.querySelector('.card-chat').scrollHeight;
         }
     }
 
@@ -157,86 +158,88 @@ class Game extends React.Component {
         return (
             <React.Fragment>
                 <div id="game">
-                    <div className="left">
-                        <div className="panel">
-                            <div className="panel-title">Character</div>
-                            <div className="panel-body">
-                                <StatsMenu />
+                    <Row>
+                        <Col className="left">
+                            <Card>
+                                <CardHeader>Character</CardHeader>
+                                <CardBody>
+                                    <StatsMenu />
+                                </CardBody>
+                            </Card>
+                            <Card>
+                                <CardHeader>Location</CardHeader>
+                                <CardBody>
+                                    [Minimap]
+                                    <hr />
+                                    <Location />
+                                </CardBody>
+                            </Card>
+                            <Card>
+                                <CardHeader>Equipment</CardHeader>
+                                <CardBody>
+                                    <InventoryMenu sendCommand={this.sendCommand} sendAction={this.sendAction} />
+                                </CardBody>
+                            </Card>
+                            <Card>
+                                <CardHeader>Players Online</CardHeader>
+                                <CardBody>
+                                    <PlayersMenu sendCommand={this.sendCommand} setCommand={this.setCommand} />
+                                </CardBody>
+                            </Card>
+                            {
+                                this.props.character &&
+                                <BottomMenu className="c-bottom-menu" socket={this.props.socket} />
+                            }
+                        </Col>
+                        <Col sm="9" className="middle">
+                            <Card>
+                                <ul className="toolbar">
+                                    <li><span><FontAwesomeIcon icon="dollar-sign" /> ?</span></li>
+                                    <li><a href="#"><FontAwesomeIcon icon="map-marker-alt" /> Map</a></li>
+                                    <li><a href="#"><FontAwesomeIcon icon="shield-alt" /> Inventory: ?/?</a></li>
+                                    <li><a href="#"><FontAwesomeIcon icon="shopping-cart" /> Shop</a></li>
+                                    <li><a href="#"><FontAwesomeIcon icon="tasks" /> Quests: ?</a></li>
+                                    <li><a href="#"><FontAwesomeIcon icon="user-secret" /> Players: ?</a></li>
+                                </ul>
+                            </Card>
+                            <Card>
+                                <CardHeader>Chat</CardHeader>
+                                <CardBody className="card-messages card-chat">
+                                    <Chat />
+                                </CardBody>
+                            </Card>
+                            <Card>
+                                <CardHeader>Events</CardHeader>
+                                <CardBody className="card-messages card-events">
+                                    <Events />
+                                </CardBody>
+                            </Card>
+                            <Input
+                                id="input-command"
+                                onKeyPress={(e) => {
+                                    if (e.key && e.key == 'Enter') {
+                                        this.sendCommand();
+                                    }
+                                }}
+                                onChange={(e) => {
+                                    this.setState({command: e.target.value});
+                                }}
+                                value={this.state.command}
+                                placeholder="Type your commands here, and hit Enter."
+                                type="input"
+                                name="input"
+                            />
+                            {
+                                this.props.game.news &&
+                                <h3 style={this.props.game.news.colour}>{this.props.game.news.message}</h3>
+                            }
+                            <div style={{textAlign: 'center'}}>
+                                {this.props.connection.lastEvent}<br />
+                                {!this.props.connection.isConnected}
+                                <div mode="indeterminate" />
                             </div>
-                        </div>
-                        <div className="panel">
-                            <div className="panel-title">Location</div>
-                            <div className="panel-body">
-                                [Minimap]<br />
-                                <Location />
-                            </div>
-                        </div>
-                        <div className="panel">
-                            <div className="panel-title">Equipment</div>
-                            <div className="panel-body">
-                                <InventoryMenu sendCommand={this.sendCommand} sendAction={this.sendAction} />
-                            </div>
-                        </div>
-                        <div className="panel">
-                            <div className="panel-title">Players Online</div>
-                            <div className="panel-body">
-                                <PlayersMenu sendCommand={this.sendCommand} setCommand={this.setCommand} />
-                            </div>
-                        </div>
-                        {
-                            this.props.character &&
-                            <BottomMenu className="c-bottom-menu" socket={this.props.socket} />
-                        }
-                    </div>
-                    <div className="middle">
-                        <div className="panel">
-                            <ul className="toolbar">
-                                <li><span><FontAwesomeIcon icon="dollar-sign" /> ?</span></li>
-                                <li><a href="#"><FontAwesomeIcon icon="map-marker-alt" /> Map</a></li>
-                                <li><a href="#"><FontAwesomeIcon icon="shield-alt" /> Inventory: ?/?</a></li>
-                                <li><a href="#"><FontAwesomeIcon icon="shopping-cart" /> Shop</a></li>
-                                <li><a href="#"><FontAwesomeIcon icon="tasks" /> Quests: ?</a></li>
-                                <li><a href="#"><FontAwesomeIcon icon="user-secret" /> Players: ?</a></li>
-                            </ul>
-                        </div>
-                        <div className="panel">
-                            <div className="panel-title">Chat</div>
-                            <div className="panel-body panel-messages panel-chat">
-                                <Chat />
-                            </div>
-                        </div>
-                        <div className="panel">
-                            <div className="panel-title">Events</div>
-                            <div className="panel-body panel-messages panel-events">
-                                <Events />
-                            </div>
-                        </div>
-                        <input
-                            id="input-command"
-                            onKeyPress={(e) => {
-                                if (e.key && e.key == 'Enter') {
-                                    this.sendCommand();
-                                }
-                            }}
-                            onChange={(e) => {
-                                this.setState({command: e.target.value});
-                            }}
-                            value={this.state.command}
-                            placeholder="Type your commands here, and hit Enter."
-                            className="input"
-                            type="input"
-                            name="input"
-                        />
-                        {
-                            this.props.game.news &&
-                            <h3 style={this.props.game.news.colour}>{this.props.game.news.message}</h3>
-                        }
-                        <div style={{textAlign: 'center'}}>
-                            {this.props.connection.lastEvent}<br />
-                            {!this.props.connection.isConnected}
-                            <div mode="indeterminate" />
-                        </div>
-                    </div>
+                        </Col>
+                    </Row>
                 </div>
                 <Shop sendAction={this.sendAction} />
             </React.Fragment>

@@ -9,9 +9,9 @@ class AuthLogout extends React.Component {
 
     render() {
         return (
-            <div className="panel">
-                <div className="panel-title">You are now logged out :(</div>
-                <div className="panel-body">
+            <div className="card">
+                <div className="card-header">You are now logged out :(</div>
+                <div className="card-body">
                     <p>Sad to see you go. Please come back!</p>
                 </div>
             </div>

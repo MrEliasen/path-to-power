@@ -5,6 +5,7 @@ import {bindActionCreators} from 'redux';
 import config from '../../config';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import {Card, CardHeader, CardBody, Input, Button, FormGroup} from 'reactstrap';
 
 // Actions
 import {authLogin, newAuthError} from './actions';
@@ -77,22 +78,26 @@ class AuthLogin extends React.Component {
 
     render() {
         return (
-            <div className="panel">
-                <div className="panel-title">Let's do this!</div>
-                <div className="panel-body">
+            <Card>
+                <CardHeader>Let's do this!</CardHeader>
+                <CardBody className="text-center">
                     {this.showStatus()}
                     <form>
-                        <input className="input" type="email" name="email" value="" placeholder="Email" autoComplete="email" />
-                        <input className="input" type="password" name="password" value="" placeholder="Password" autoComplete="current-password" />
-                        <button>Login</button>
+                        <FormGroup>
+                            <Input type="email" name="email" value="" placeholder="Email" autoComplete="email" />
+                        </FormGroup>
+                        <FormGroup>
+                            <Input type="password" name="password" value="" placeholder="Password" autoComplete="current-password" />
+                        </FormGroup>
+                        <Button color="primary">Login</Button>
                     </form>
                     <hr />
                     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, laboriosam!</p>
-                    <a className="button block" style={{backgroundColor: '#6441a5'}} href={`https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=${config.twitch.clientId}&redirect_uri=${config.twitch.callbackUrl}&scope=${config.twitch.scope.join(',')}`}>
+                    <a className="btn btn-block btn-primary" style={{backgroundColor: '#6441a5'}} href={`https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=${config.twitch.clientId}&redirect_uri=${config.twitch.callbackUrl}&scope=${config.twitch.scope.join(',')}`}>
                         <FontAwesomeIcon icon={['fab', 'twitch']} /> Login with Twitch.tv
                     </a>
-                </div>
-            </div>
+                </CardBody>
+            </Card>
         );
     }
 };
