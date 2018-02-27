@@ -66,96 +66,93 @@ function cmdFlee(socket, character, command, params, cmdObject, Game) {
     newLocation[moveAction.grid] = newLocation[moveAction.grid] + moveAction.direction;
 
     // get the map of the character location
-    Game.mapManager.get(character.location.map)
-        .then((gameMap) => {
-            // check if the move action is valid
-            if (!gameMap.isValidPostion(newLocation.x, newLocation.y)) {
-                // if not, flip the direction
-                moveAction.direction = (moveAction.direction === 1 ? -1 : 1);
-                // update the new location
-                newLocation = {
-                    map: character.location.map,
-                    [moveAction.grid]: (character.location[moveAction.grid] + moveAction.direction),
-                };
+    const gameMap = Game.mapManager.get(character.location.map);
+
+    if (!gameMap) {
+        return Game.eventToUser(user, 'error', 'Something went wrong. Please try again in a moment.');
+    }
+
+    // check if the move action is valid
+    if (!gameMap.isValidPostion(newLocation.x, newLocation.y)) {
+        // if not, flip the direction
+        moveAction.direction = (moveAction.direction === 1 ? -1 : 1);
+        // update the new location
+        newLocation = {
+            map: character.location.map,
+            [moveAction.grid]: (character.location[moveAction.grid] + moveAction.direction),
+        };
+    }
+
+    let groundItems = [];
+    // drop items if they have any
+    if (character.inventory.length) {
+        // drop between 1-3 items
+        const itemsToDrop = Math.floor(Math.random() * 3) + 1;
+
+        for (let i = itemsToDrop; i >= 0; i--) {
+            let droppedItem = character.dropRandomItem();
+
+            if (droppedItem) {
+                Game.itemManager.drop(oldLocation.map, oldLocation.x, oldLocation.y, droppedItem);
             }
+        }
 
-            let groundItems = [];
-            // drop items if they have any
-            if (character.inventory.length) {
-                // drop between 1-3 items
-                const itemsToDrop = Math.floor(Math.random() * 3) + 1;
+        groundItems = Game.itemManager.getLocationList(oldLocation.map, oldLocation.x, oldLocation.y, true);
+    }
 
-                for (let i = itemsToDrop; i >= 0; i--) {
-                    let droppedItem = character.dropRandomItem();
+    // remove gridlock from the character's target
+    if (character.target) {
+        character.releaseTarget();
+    }
 
-                    if (droppedItem) {
-                        Game.itemManager.drop(oldLocation.map, oldLocation.x, oldLocation.y, droppedItem);
-                    }
-                }
+    // reset the gridlock
+    character.targetedBy = [];
 
-                groundItems = Game.itemManager.getLocationList(oldLocation.map, oldLocation.x, oldLocation.y, true);
-            }
+    const expLoss = character.stats.exp * 0.01;
+    character.updateExp(expLoss * -1);
 
-            // remove gridlock from the character's target
-            if (character.target) {
-                character.releaseTarget()
-                    .then(() => {})
-                    .error(Game.logger.error);
-            }
+    // leave the old grid room
+    socket.leave(character.getLocationId());
 
-            // reset the gridlock
-            character.targetedBy = [];
+    // Let the player know it succeeded
+    Game.eventToRoom(character.getLocationId(), 'info', `You fled the area, dropping some items as you ran away. Fleeing also cost you ${expLoss} reputation.`);
 
-            const expLoss = character.stats.exp * 0.01;
-            character.updateExp(expLoss * -1);
+    // dispatch leave message to grid
+    Game.eventToRoom(character.getLocationId(), 'info', `${character.name} fled the area, dropping some items as they ran away.`);
 
-            // leave the old grid room
-            socket.leave(character.getLocationId());
+    // remove player from the grid list of players
+    Game.socketManager.dispatchToRoom(character.getLocationId(), {
+        type: LEFT_GRID,
+        payload: character.user_id,
+    });
 
-            // Let the player know it succeeded
-            Game.eventToRoom(character.getLocationId(), 'info', `You fled the area, dropping some items as you ran away. Fleeing also cost you ${expLoss} reputation.`);
+    if (groundItems.length) {
+        // send the updated items list to the grid
+        Game.socketManager.dispatchToRoom(character.getLocationId(), {
+            type: UPDATE_GROUND_ITEMS,
+            payload: groundItems,
+        });
+    }
 
-            // dispatch leave message to grid
-            Game.eventToRoom(character.getLocationId(), 'info', `${character.name} fled the area, dropping some items as they ran away.`);
+    // update character location
+    character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
 
-            // remove player from the grid list of players
-            Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                type: LEFT_GRID,
-                payload: character.user_id,
-            });
+    // dispatch join message to new grid
+    Game.eventToRoom(character.getLocationId(), 'info', `${character.name} scrambles in from the ${getDirectionName(moveAction)}`, [character.user_id]);
+    // add player from the grid list of players
+    Game.socketManager.dispatchToRoom(
+        character.getLocationId(),
+        Game.characterManager.joinedGrid(character)
+    );
 
-            if (groundItems.length) {
-                // send the updated items list to the grid
-                Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                    type: UPDATE_GROUND_ITEMS,
-                    payload: groundItems,
-                });
-            }
+    // update the socket room
+    socket.join(character.getLocationId());
 
-            // update character location
-            character.updateLocation(newLocation.map, newLocation.x, newLocation.y);
+    // update client/socket character and location information
+    Game.characterManager.updateClient(character.user_id);
 
-            // change location on the map
-            Game.characterManager.changeLocation(character, newLocation, oldLocation);
-
-            // dispatch join message to new grid
-            Game.eventToRoom(character.getLocationId(), 'info', `${character.name} scrambles in from the ${getDirectionName(moveAction)}`, [character.user_id]);
-            // add player from the grid list of players
-            Game.socketManager.dispatchToRoom(
-                character.getLocationId(),
-                Game.characterManager.joinedGrid(character)
-            );
-
-            // update the socket room
-            socket.join(character.getLocationId());
-
-            // update client/socket character and location information
-            Game.characterManager.updateClient(character.user_id);
-
-            // send the new grid details to the client
-            Game.mapManager.updateClient(character.user_id);
-        })
-        .catch(() => {});
+    // send the new grid details to the client
+    Game.mapManager.updateClient(character.user_id);
 }
 
 module.exports = [

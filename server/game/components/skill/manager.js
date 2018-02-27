@@ -21,10 +21,8 @@ export default class SkillManager {
      * @return {Promise}
      */
     init() {
-        return new Promise((resolve, reject) => {
-            this.Game.commandManager.registerManager(skillCommands);
-            resolve();
-        });
+        this.Game.commandManager.registerManager(skillCommands);
+        console.log('SKILL MANAGER LOADED');
     }
 
     /**
@@ -76,41 +74,37 @@ export default class SkillManager {
      * @return {Promise}
      */
     load(character) {
-        return new Promise((resolve, reject) => {
-            // save the players skills list
-            const playerSkills = character.skills ? {...character.skills} : {};
-            // get the default skills, and overwrite their values (if any) with the value of the players matching skill
-            let skills = this.getDefaults().map((obj) => {
-                // check if the player has that skill already
-                if (playerSkills[obj.id]) {
-                    // if so, overwrite the default value
-                    Object.assign(obj.modifiers, {...playerSkills[obj.id].modifiers});
-                    // remove the skill from the list, so we dont end up with 2 of the same skill when we merge in the
-                    // rest of the skills the player might have, which are not part of the defaults
-                    delete playerSkills[obj.id];
-                }
+        // save the players skills list
+        const playerSkills = character.skills ? {...character.skills} : {};
+        // get the default skills, and overwrite their values (if any) with the value of the players matching skill
+        let skills = this.getDefaults().map((obj) => {
+            // check if the player has that skill already
+            if (playerSkills[obj.id]) {
+                // if so, overwrite the default value
+                Object.assign(obj.modifiers, {...playerSkills[obj.id].modifiers});
+                // remove the skill from the list, so we dont end up with 2 of the same skill when we merge in the
+                // rest of the skills the player might have, which are not part of the defaults
+                delete playerSkills[obj.id];
+            }
 
-                return obj;
-            });
+            return obj;
+        });
 
-            // merge the rest of the player skills which are not part of the defaults
-            skills = skills.concat(Object.values(playerSkills));
+        // merge the rest of the player skills which are not part of the defaults
+        skills = skills.concat(Object.values(playerSkills));
 
-            // prepare the array for the instanciated skills
-            character.skills = [];
+        // prepare the array for the instanciated skills
+        character.skills = [];
 
-            // clear the list and make an array, which will hold our skills
-            skills.forEach((skill) => {
-                let newSkill = this.new(skill);
+        // clear the list and make an array, which will hold our skills
+        skills.forEach((skill) => {
+            let newSkill = this.new(skill);
 
-                newSkill.improve = character.train;
+            newSkill.improve = character.train;
 
-                if (newSkill) {
-                    character.skills.push(newSkill);
-                }
-            });
-
-            resolve();
+            if (newSkill) {
+                character.skills.push(newSkill);
+            }
         });
     }
 }

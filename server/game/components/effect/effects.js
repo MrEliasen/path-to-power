@@ -14,7 +14,8 @@ function drug(character, modifiers = {}, item, Game) {
 
     // check if the character has enough health to use the drug
     if ((character.stats.health + effects.health) <= 0) {
-        return Game.eventToUser(character.user_id, 'warning', 'You decide not to use the drug anyway, as it would probably kill you in your current state.');
+        Game.eventToUser(character.user_id, 'warning', 'You decide not to use the drug anyway, as it would probably kill you in your current state.');
+        return 'Unable to use drug, too lowe health.';
     }
 
     // TODO: check if there are any NPCs nearby
@@ -48,7 +49,8 @@ function miscPhone(character, modifiers = {}, item, Game) {
 
     // check if the character has enough health to use the drug
     if (character.stats.money < effects.cost) {
-        return Game.eventToUser(character.user_id, 'warning', 'You do not have enough money on you, to make a call.');
+        Game.eventToUser(character.user_id, 'warning', 'You do not have enough money on you, to make a call.');
+        return 'Unable to use drug, too lowe health.';
     }
 
     // get the list of NPCS for the map
@@ -86,6 +88,8 @@ function miscPhone(character, modifiers = {}, item, Game) {
         'multiline',
         messageArray
     );
+
+    return effects;
 }
 
 /**
@@ -103,7 +107,8 @@ function miscItemHeal(character, modifiers = {}, item, Game) {
 
     // if a character is at full health, don't waste the item
     if (character.stats.health >= character.stats.health_max) {
-        return Game.eventToUser(character.user_id, 'info', 'You are already at full health.');
+        Game.eventToUser(character.user_id, 'info', 'You are already at full health.');
+        return 'Unable to heal, health already at max';
     }
 
     // give EXP and update health of player

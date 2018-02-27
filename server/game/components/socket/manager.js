@@ -1,4 +1,3 @@
-import Promise from 'bluebird';
 import io from 'socket.io';
 import EventEmitter from 'events';
 import {ACCOUNT_AUTHENTICATE} from '../account/types';
@@ -36,27 +35,26 @@ export default class SocketManager extends EventEmitter {
      * @return {Promise}
      */
     get(user_id) {
-        return new Promise((resolve, reject) => {
-            const socket = this.clients[user_id];
+        const socket = this.clients[user_id];
 
-            if (!socket) {
-                return reject(`No socket found for user: ${user_id}`);
-            }
+        if (!socket) {
+            throw new Error(`No socket found for user: ${user_id}`);
+        }
 
-            resolve(socket);
-        });
+        return socket;
     }
 
     /**
      * Will make the IO server start listening for connections
      */
     listen() {
-        this.Game.logger.info(`Socket is listing on port ${this.Game.config.server.port}`);
         // setup event listeners
         this.io.on('connection', this.onConnection.bind(this));
 
         // listen for connections
         this.server.listen(this.Game.config.server.port);
+
+        console.log(`Socket is listing on port ${this.Game.config.server.port}`);
     }
 
     /**
@@ -67,10 +65,12 @@ export default class SocketManager extends EventEmitter {
         socket.on('dispatch', (action) => {
             this.onClientDispatch(socket, action);
         });
+
         socket.on('logout', (action) => {
             this.onDisconnect({...socket.user});
             socket.user = null;
         });
+
         socket.on('disconnect', () => {
             this.onDisconnect(socket.user);
         });
@@ -82,24 +82,24 @@ export default class SocketManager extends EventEmitter {
      * @return {promise}
      */
     logoutOutSession(user_id) {
-        return new Promise((resolve, reject) => {
-            this.get(user_id)
-                .then((socket) => {
-                    const user = {...socket.user};
-                    socket.user = null;
-                    this.onDisconnect(user, true);
+        let socket;
 
-                    this.dispatchToSocket(socket, {
-                        type: REMOTE_LOGOUT,
-                        payload: {
-                            routeTo: '/',
-                        },
-                    });
-                    resolve();
-                })
-                .catch((err) => {
-                    resolve();
-                });
+        try {
+            socket = this.get(user_id);
+        } catch (err) {
+            return;
+        }
+
+        const user = {...socket.user};
+
+        socket.user = null;
+        this.onDisconnect(user, true);
+
+        this.dispatchToSocket(socket, {
+            type: REMOTE_LOGOUT,
+            payload: {
+                routeTo: '/',
+            },
         });
     }
 
@@ -146,6 +146,14 @@ export default class SocketManager extends EventEmitter {
 
             if (forced) {
                 return this.emit('disconnect', user);
+            }
+
+            // save the character as it is right now,
+            // once the timer hits, it will save once more.
+            try {
+                this.Game.characterManager.save(user.user_id);
+            } catch (err) {
+                this.Game.onError(err);
             }
 
             this.timers[user.user_id] = setTimeout(() =>{
@@ -204,7 +212,7 @@ export default class SocketManager extends EventEmitter {
      */
     dispatchToRoom(roomId, action) {
         if (!roomId) {
-            return this.Game.logger.error('Missing roomId from dispatchToRoom?:', roomId, ' for action:', action);
+            throw new Error('Missing roomID in SocketManager::dispatchToRoom');
         }
 
         this.io.sockets.in(roomId).emit('dispatch', action);
@@ -224,15 +232,8 @@ export default class SocketManager extends EventEmitter {
      * @param  {String} roomId  Room ID to join
      */
     userJoinRoom(user_id, roomId) {
-        const action = this.get(user_id);
-
-        action
-            .then((socket) => {
-                socket.join(roomId);
-            })
-            .catch(() => {});
-
-        return action;
+        const socket = this.get(user_id);
+        socket.join(roomId);
     }
 
     /**
@@ -241,14 +242,7 @@ export default class SocketManager extends EventEmitter {
      * @param  {String} roomId  Room ID to leaves
      */
     userLeaveRoom(user_id, roomId) {
-        const action = this.get(user_id);
-
-        action
-            .then((socket) => {
-                socket.leave(roomId);
-            })
-            .catch(() => {});
-
-        return action;
+        const socket = this.get(user_id);
+        socket.leave(roomId);
     }
 }

@@ -1,7 +1,6 @@
-// our logger
-import winston from 'winston';
 import Promise from 'bluebird';
 import child_process from 'child_process';
+import Logger from './components/logger';
 
 // component manager
 import AccountManager from './components/account/manager';
@@ -68,29 +67,16 @@ class Game {
      * Creates our logger we will be using throughout
      */
     setupLogger() {
-        this.logger = winston.createLogger({
-            level: (process.env.NODE_ENV !== 'production' ? 'info' : 'warning'),
-            format: winston.format.json(),
-            transports: [
-                new winston.transports.File({
-                    filename: 'error.log',
-                    level: 'error',
-                    timestamp: true,
-                }),
-                new winston.transports.File({
-                    filename: 'debug.log',
-                    level: 'debug',
-                    timestamp: true,
-                }),
-            ],
+        this.logger = new Logger({
+            level: (process.env.NODE_ENV === 'development' ? 'info' : 'error'),
+            debugFile: './game.debug.log',
+            infoFile: './game.info.log',
+            warnFile: './game.warn.log',
+            errorFile: './game.error.log',
         });
 
         // if we are not in a production environment, add console logging as well
         if (process.env.NODE_ENV === 'development') {
-            this.logger.add(new winston.transports.Console({
-                format: winston.format.simple(),
-            }));
-
             // enable long stack traces to promises, while in dev
             Promise.longStackTraces();
         }
@@ -106,37 +92,14 @@ class Game {
         // TODO: Before 0.1.0 is released - implement husky package and auto bump version on push.
         this.version = child_process.execSync('git rev-parse --short=7 HEAD').toString().trim();
 
-        await this.itemManager.init().then((count) => {
-            this.logger.info(`ITEM MANAGER LOADED ${count} ITEMS TEMPLATES`);
-        });
-
-        await this.mapManager.init().then((count) => {
-            this.logger.info(`MAP MANAGER LOADED ${count} MAPS`);
-        });
-
-        await this.factionManager.init().then((count) => {
-            this.logger.info(`FACTION MANAGER LOADED ${count} FACTIONS`);
-        });
-
-        await this.shopManager.init().then(() => {
-            this.logger.info('SHOP MANAGER LOADED');
-        });
-
-        await this.structureManager.init().then(() => {
-            this.logger.info('STRUCTURES MANAGER LOADED');
-        });
-
-        await this.commandManager.init().then(() => {
-            this.logger.info('COMMAND MANAGER LOADED');
-        });
-
-        await this.characterManager.init().then(() => {
-            this.logger.info('CHARACTERS MANAGER LOADED');
-        });
-
-        await this.skillManager.init().then(() => {
-            this.logger.info('SKILL MANAGER LOADED');
-        });
+        await this.itemManager.init();
+        await this.mapManager.init();
+        await this.factionManager.init();
+        await this.shopManager.init();
+        await this.structureManager.init();
+        await this.commandManager.init();
+        await this.characterManager.init();
+        await this.skillManager.init();
 
         // setup autosave
         this.setupGameTimers();
@@ -149,32 +112,38 @@ class Game {
      * Timer call method
      * @param  {String} timerName The name of the timer
      */
-    onTimer(timerName) {
-        let callback = () => {};
+    async onTimer(timerName) {
+        this.logger.debug(`Running timer ${timerName}`);
 
         switch (timerName) {
             case 'autosave':
-                callback = () => {
-                    // NOTE: if you want to add anything to the auto save, do it here
-                    this.characterManager.saveAll();
-                };
-                break;
-            case 'newday':
-                callback = () => {
-                    // NOTE: if you want to add anything to the "new day" timer, do it here
-                    this.shopManager.resupplyAll()
-                        .then(() => {
-                            this.socketManager.dispatchToServer(addNews('The sun rises once again, and wave of new drugs flood the streets.'));
-                        })
-                        .catch(() => {
+                // NOTE: if you want to add anything to the auto save, do it here
+                return this.characterManager.saveAll();
 
-                        });
-                };
-                break;
+            case 'newday':
+                // NOTE: if you want to add anything to the "new day" timer, do it here
+                await this.shopManager.resupplyAll();
+                this.socketManager.dispatchToServer(addNews('The sun rises once again, and wave of new drugs flood the streets.'));
+       }
+    }
+
+    /**
+     * Handles error catches, logging the error and (if defined) notifying the user.
+     * @param  {Obj}   err  The error object
+     * @param  {Mixed} user Socket.io Socket or user_id
+     */
+    onError(err, user) {
+        this.logger.error(err);
+
+        if (!user) {
+            return;
         }
 
-        this.logger.debug(`Running timer ${timerName}`);
-        callback();
+        if (typeof user === 'string') {
+            this.eventToUser(user, 'error', 'Something went wrong. Please try again in a moment.');
+        } else {
+            this.eventToSocket(user, 'error', 'Something went wrong. Please try again in a moment.');
+        }
     }
 
     /**
@@ -260,10 +229,9 @@ class Game {
      * Will run when the server receives a SIGTERM signal/is told to shut down.
      * @param {function} callback Will execute when done.
      */
-    async shutdown(callback) {
+    shutdown() {
         this.Game.logger.info('Received shutdown signal, Running shutdown procedure');
-        await this.characterManager.saveAll();
-        callback();
+        return this.characterManager.saveAll();
     }
 }
 

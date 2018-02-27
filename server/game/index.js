@@ -10,6 +10,7 @@ import https from 'https';
 // 3rd party
 import express from 'express';
 import mongoose from 'mongoose';
+import Promise from 'bluebird';
 
 /************************************
  *            FILE CHECK            *
@@ -40,7 +41,7 @@ const Game = require('./game').Game;
 const app = express();
 
 // Connect to the MongoDB
-mongoose.Promise = global.Promise;
+Promise.promisifyAll(mongoose);
 mongoose.connect(config.mongo_db).then(
     () => {
         let webServer;
@@ -62,10 +63,9 @@ mongoose.connect(config.mongo_db).then(
         const GameServer = new Game(webServer, config);
 
         // On shutdown signal, gracefully shutdown the game server.
-        process.on('SIGTERM', function() {
-            GameServer.shutdown(() => {
-                process.exit();
-            });
+        process.on('SIGTERM', async function() {
+            await GameServer.shutdown();
+            process.exit();
         });
     },
     (err) => {

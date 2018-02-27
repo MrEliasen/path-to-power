@@ -26,33 +26,22 @@ export default class MapManager {
      * @return {Promise}
      */
     init() {
-        return new Promise((resolve, rejecte) => {
-            // load map commands
-            this.Game.commandManager.registerManager(mapCommands);
+        // load map commands
+        this.Game.commandManager.registerManager(mapCommands);
 
-            // get the list of map files in our data maps directory
-            const maplist = fs.readdirSync(`${__dirname}/../../data/maps`);
-            let loadedmaps = 0;
+        // get the list of map files in our data maps directory
+        const maplist = fs.readdirSync(`${__dirname}/../../data/maps`);
 
-            // loop each of our mapfiles
-            maplist.map((mapname) => {
-                let mapData = require(`${__dirname}/../../data/maps/${mapname}`);
-                this.maps[mapData.id] = new GameMap(this.Game, mapData);
+        // loop each of our mapfiles
+        maplist.map((mapname) => {
+            let mapData = require(`${__dirname}/../../data/maps/${mapname}`);
+            this.maps[mapData.id] = new GameMap(this.Game, mapData);
 
-                // generate the map, and once done, increment the counter and resolve if all maps are done.
-                this.maps[mapData.id].generate()
-                    .then(() => {
-                        loadedmaps++;
-
-                        if (loadedmaps === maplist.length) {
-                            resolve(maplist.length);
-                        }
-                    })
-                    .catch((err) => {
-                        this.Game.logger.error('MAP LOAD ERROR', err);
-                    });
-            });
+            // generate the map, and once done, increment the counter and resolve if all maps are done.
+            this.maps[mapData.id].generate();
         });
+
+        console.log('MAP MANAGER LOADED');
     }
 
     /**
@@ -69,29 +58,29 @@ export default class MapManager {
      */
     updateClient(user_id) {
         // Get the character object
-        this.Game.characterManager.get(user_id)
-            .then((character) => {
-                const location = [
-                    character.location.map,
-                    character.location.x,
-                    character.location.y,
-                ];
+        const character = this.Game.characterManager.get(user_id);
 
-                // dispatch to client
-                this.Game.socketManager.dispatchToUser(user_id, {
-                    type: JOIN_GRID,
-                    payload: {
-                        description: this.generateDescription(),
-                        players: this.Game.characterManager.getLocationList(...location, character.user_id, true),
-                        npcs: this.Game.npcManager.getLocationList(...location, true),
-                        items: this.Game.itemManager.getLocationList(...location, true),
-                        structures: this.Game.structureManager.getGrid(...location, true),
-                    },
-                });
-            })
-            .catch((err) => {
-                this.Game.logger.error(err);
-            });
+        if (!character) {
+            return;
+        }
+
+        const location = [
+            character.location.map,
+            character.location.x,
+            character.location.y,
+        ];
+
+        // dispatch to client
+        this.Game.socketManager.dispatchToUser(user_id, {
+            type: JOIN_GRID,
+            payload: {
+                description: this.generateDescription(),
+                players: this.Game.characterManager.getLocationList(...location, character.user_id, true),
+                npcs: this.Game.npcManager.getLocationList(...location, true),
+                items: this.Game.itemManager.getLocationList(...location, true),
+                structures: this.Game.structureManager.getGrid(...location, true),
+            },
+        });
     }
 
     /**
@@ -100,15 +89,13 @@ export default class MapManager {
      * @return {Promise}
      */
     get(map_id) {
-        return new Promise((resolve, reject) => {
-            const gameMap = this.maps[map_id];
+        const gameMap = this.maps[map_id];
 
-            if (!gameMap) {
-                return reject(`Map with id ${map_id} was not found`);
-            }
+        if (!gameMap) {
+            return null;
+        }
 
-            resolve(gameMap);
-        });
+        return gameMap;
     }
 
     /**
@@ -117,23 +104,6 @@ export default class MapManager {
      * @return {Map}
      */
     getByName(mapName) {
-        return new Promise((resolve, reject) =>{
-            const gameMap = this.getByNameSync(mapName);
-
-            if (!gameMap) {
-                return reject();
-            }
-
-            resolve(gameMap);
-        });
-    }
-
-    /**
-     * Synchronously get the Map object by name, if exists.
-     * @param  {String} mapName Map name to search for
-     * @return {Map}
-     */
-    getByNameSync(mapName) {
         mapName = mapName.toLowerCase();
         // first check if there is a direct match between the name and a map name
         let mapId = Object.keys(this.maps).find((mapId) => this.maps[mapId].name.toLowerCase() === mapName);
@@ -186,20 +156,17 @@ export default class MapManager {
      * @return {Promise}
      */
     isValidLocation(map_id, x, y) {
-        return new Promise((resolve, reject) => {
-            this.get(map_id).then((gameMap) => {
-                if (!gameMap.isValidPostion(x, y)) {
-                    return reject();
-                }
+        const gameMap = this.get(map_id);
 
-                resolve({
-                    map: gameMap.id,
-                    x: parseInt(x, 10),
-                    y: parseInt(y, 10),
-                });
-            })
-            .catch(() => {});
-        });
+        if (!gameMap.isValidPostion(x, y)) {
+            return null;
+        }
+
+        return {
+            map: gameMap.id,
+            x: parseInt(x, 10),
+            y: parseInt(y, 10),
+        };
     }
 
     /**
@@ -209,7 +176,7 @@ export default class MapManager {
      */
     getInfo(mapObject) {
         if (typeof mapObject === 'string') {
-            mapObject = this.getByNameSync(mapObject);
+            mapObject = this.getByName(mapObject);
 
             // if the command does not exist
             if (!mapObject) {

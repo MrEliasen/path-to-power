@@ -24,11 +24,9 @@ export default class StructureManager {
      * @return {Promise}
      */
     init() {
-        return new Promise((resolve, rejecte) => {
-            // load map commands
-            this.Game.commandManager.registerManager(structureCommands);
-            resolve();
-        });
+        // load map commands
+        this.Game.commandManager.registerManager(structureCommands);
+        console.log('STRUCTURES MANAGER LOADED');
     }
 
     /**
@@ -39,9 +37,7 @@ export default class StructureManager {
      * @param {String} structure_id Structure ID
      * @return {Promise}
      */
-    async add(map_id, x, y, structure_id) {
-        //this.Game.logger.debug('StructureManager::add', {map_id, structure_id, x, y});
-
+    add(map_id, x, y, structure_id) {
         const structureData = structureList[structure_id];
         const newStructure = new Structure(this.Game, structureData, {map: map_id, x, y});
 
@@ -50,7 +46,7 @@ export default class StructureManager {
         this.structures[map_id][`${y}_${x}`] = this.structures[map_id][`${y}_${x}`] || [];
 
         // load any shops which are set for this structure
-        await newStructure.loadShops();
+        newStructure.loadShops();
 
         // add structure to the managed structures array
         this.structures[map_id][`${y}_${x}`].push(newStructure);
@@ -68,22 +64,24 @@ export default class StructureManager {
      * @return {Promise}
      */
     getWithCommand(map_id, x, y, command) {
-        return new Promise((resolve, reject) => {
-            //check if a structure at the given location has the command
-            const structures = this.getGrid(map_id, x, y);
-            let matches = [];
+        //check if a structure at the given location has the command
+        const structures = this.getGrid(map_id, x, y);
+        let matches = [];
 
-            if (structures.length) {
-                matches = structures.filter((structure) => structure.commands[command]);
-            }
+        if (structures.length) {
+            matches = structures.filter((structure) => {
+                if (structure.commands) {
+                    return structure.commands[command];
+                }
+            });
+        }
 
-            // if we didn't find any matching buildings..
-            if (!matches.length) {
-                return reject(`No buildings at ${map_id}/${y}/${x}, matching command ${command}`);
-            }
+        // if we didn't find any matching buildings..
+        if (!matches.length) {
+            return null;
+        }
 
-            resolve(matches);
-        });
+        return matches;
     }
 
     /**
@@ -94,29 +92,27 @@ export default class StructureManager {
      * @return {Promise}
      */
     getWithShop(map_id, x, y) {
-        return new Promise((resolve, reject) => {
-            //check if a structure at the given location has the command
-            const structures = this.getGrid(map_id, x, y);
-            let shops = [];
+        //check if a structure at the given location has the command
+        const structures = this.getGrid(map_id, x, y);
+        let shops = [];
 
-            if (structures.length) {
-                const buildings = structures.filter((structure) => structure.shops && structure.shops.length);
+        if (structures.length) {
+            const buildings = structures.filter((structure) => structure.shops && structure.shops.length);
 
-                // if there are buildings with shops, generate the array of shops to send back to the function caller
-                if (buildings.length) {
-                    buildings.forEach((building) => {
-                        shops = shops.concat(building.shops);
-                    });
-                }
+            // if there are buildings with shops, generate the array of shops to send back to the function caller
+            if (buildings.length) {
+                buildings.forEach((building) => {
+                    shops = shops.concat(building.shops);
+                });
             }
+        }
 
-            // if we didn't find any matching buildings..
-            if (!shops.length) {
-                return reject();
-            }
+        // if we didn't find any matching buildings..
+        if (!shops.length) {
+            return null;
+        }
 
-            resolve(shops);
-        });
+        return shops;
     }
 
     /**

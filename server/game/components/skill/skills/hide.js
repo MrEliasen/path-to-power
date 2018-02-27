@@ -51,7 +51,7 @@ export default class SkillHide {
 
         // dispatch events to the user and the grid, depending on the hidden state
         if (character.hidden) {
-            this.Game.eventToUser(character.user_id, 'success', 'You are now in hiding. Anyone else who where here, would have seen you hide.');
+            this.Game.eventToUser(character.user_id, 'success', 'You are now in hiding. Anyone else who was here would have seen you hide. (they will still need to /search to find you however)');
             this.Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} run into an alley and disappear.`, [character.user_id]);
 
             // re-add the character to the grid player list
@@ -69,7 +69,7 @@ export default class SkillHide {
             // re-add the character to the grid player list
             this.Game.socketManager.dispatchToRoom(
                 character.getLocationId(),
-                this.Game.characterManager.joinedGrid(character)
+                this.Game.characterManager.joinedGrid(character),
             );
         }
     }

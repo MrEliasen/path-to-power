@@ -32,11 +32,9 @@ export default class ShopManager {
      * @return {Promise}
      */
     init() {
-        return new Promise((resolve, rejecte) => {
-            // load map commands
-            this.Game.commandManager.registerManager(shopCommands);
-            resolve();
-        });
+        // load map commands
+        this.Game.commandManager.registerManager(shopCommands);
+        console.log('SHOP MANAGER LOADED');
     }
 
     /**
@@ -51,37 +49,70 @@ export default class ShopManager {
 
         switch (action.type) {
             case SHOP_BUY:
-                this.get(action.payload.shop)
-                    .then((shop) => shop.buyItem(socket.user.user_id, action.payload.index, action.payload.item))
-                    .catch(() => {});
+                return this.onShopBuy(socket, action);
                 break;
 
             case SHOP_SELL:
-                this.get(action.payload.shop)
-                    .then((shop) => shop.sellItem(socket.user.user_id, action.payload.item))
-                    .catch(() => {});
+                return this.onShopSell(socket, action);
                 break;
 
             case SHOP_GET_PRICE:
-                this.get(action.payload.shop)
-                    .then((shop) => {
-                        shop.getItemPrice(action.payload.itemId, action.payload.priceType)
-                            .then((price) => {
-                                this.Game.socketManager.dispatchToSocket(socket, {
-                                    type: SHOP_ITEM_PRICE,
-                                    payload: {
-                                        itemId: action.payload.itemId,
-                                        price,
-                                    },
-                                });
-                            })
-                            .catch(() => {
-
-                            });
-                    })
-                    .catch(() => {});
+                return this.onGetPrice(socket, action)
                 break;
         }
+    }
+
+    /**
+     * Handles shop purchase requests
+     * @param  {Socket.io Socket} socket Socket making the request
+     * @param  {Object}           action Redux action object
+     */
+    onShopBuy(socket, action) {
+        const shop = this.get(action.payload.shop);
+
+        if (!shop) {
+            return;
+        }
+
+        shop.buyItem(socket.user.user_id, action.payload.index, action.payload.item);
+    }
+
+    /**
+     * Handles shop sell requests
+     * @param  {Socket.io Socket} socket Socket making the request
+     * @param  {Object}           action Redux action object
+     */
+    onShopSell(socket, action) {
+        const shop = this.get(action.payload.shop);
+
+        if (!shop) {
+            return;
+        }
+
+        shop.sellItem(socket.user.user_id, action.payload.item);
+    }
+
+    /**
+     * Handles item price requests
+     * @param  {Socket.io Socket} socket Socket making the request
+     * @param  {object}           action Redux action object
+     */
+    onGetPrice(socket, action) {
+        const shop = this.get(action.payload.shop);
+
+        if (!shop) {
+            return;
+        }
+
+        const price = shop.getItemPrice(action.payload.itemId, action.payload.priceType);
+
+        this.Game.socketManager.dispatchToSocket(socket, {
+            type: SHOP_ITEM_PRICE,
+            payload: {
+                itemId: action.payload.itemId,
+                price,
+            },
+        });
     }
 
     /**
@@ -90,15 +121,13 @@ export default class ShopManager {
      * @return {Promise}
      */
     get(fingerprint) {
-        return new Promise((resolve, reject) => {
-            const shop = this.shops.find((obj) => obj.fingerprint === fingerprint);
+        const shop = this.shops.find((obj) => obj.fingerprint === fingerprint);
 
-            if (!shop) {
-                return reject(`No shop with fingerprint ${fingerprint} found.`);
-            }
+        if (!shop) {
+            return null;
+        }
 
-            resolve(shop);
-        });
+        return shop;
     }
 
     /**
@@ -106,20 +135,16 @@ export default class ShopManager {
      * @param {String} shopId Shop ID of the shop to create.
      */
     add(shopId) {
-        return new Promise((resolve, reject) => {
-            //this.Game.logger.info('ShopManager::add', {shopId})
+        const ShopData = ShopList.find((obj) => obj.id === shopId);
+        const newShop = new Shop(this.Game, deepCopyObject(ShopData));
 
-            const ShopData = ShopList.find((obj) => obj.id === shopId);
-            const newShop = new Shop(this.Game, deepCopyObject(ShopData));
+        // load the shop items
+        newShop.load();
 
-            // load the shop items
-            newShop.load();
+        // add building to the managed buildings array
+        this.shops.push(newShop);
 
-            // add building to the managed buildings array
-            this.shops.push(newShop);
-
-            resolve(newShop);
-        });
+        return newShop;
     }
 
     /**
@@ -127,22 +152,13 @@ export default class ShopManager {
      * @return {Void}
      */
     resupplyAll() {
-        return new Promise((resolve, reject) => {
-            // update the pricing on items, with the priceRange array defined.
-            // We update the templates as they will be used for the sell and buy prices
-            this.Game.itemManager.updatePrices()
-                .then(() => {
-                    // resupply all the shops
-                    this.shops.forEach((shop) => {
-                        shop.resupply();
-                    });
+        // update the pricing on items, with the priceRange array defined.
+        // We update the templates as they will be used for the sell and buy prices
+        this.Game.itemManager.updatePrices();
 
-                    resolve();
-                })
-                .catch((err) =>{
-                    this.Game.logger.error(err);
-                    reject();
-                });
+        // resupply all the shops
+        this.shops.forEach((shop) => {
+            shop.resupply();
         });
     }
 }

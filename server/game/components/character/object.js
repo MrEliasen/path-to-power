@@ -180,14 +180,11 @@ export default class Character {
      */
     setTarget(target) {
         // release the gridlock of the current target, if set
-        this.releaseTarget()
-            .then(() => {
-                // set the new target
-                this.target = target;
-                // and gridlock them
-                this.target.gridLock(this);
-            })
-            .catch(() => {});
+        this.releaseTarget();
+        // set the new target
+        this.target = target;
+        // and gridlock them
+        this.target.gridLock(this);
     }
 
     /**
@@ -195,15 +192,12 @@ export default class Character {
      * @return {[type]} [description]
      */
     releaseTarget() {
-        return new Promise((resolve, reject) => {
-            // release the gridlock of the current target, if set
-            if (this.target) {
-                this.target.gridRelease(this.user_id);
-            }
+        // release the gridlock of the current target, if set
+        if (this.target) {
+            this.target.gridRelease(this.user_id);
+        }
 
-            this.target = null;
-            resolve();
-        });
+        this.target = null;
     }
 
     /**
@@ -251,72 +245,64 @@ export default class Character {
      * @return {object} Plain object with the items, and cash dropped
      */
     die() {
-        return new Promise((resolve, reject) => {
-            // release the target from the gridlock/aim
-            this.releaseTarget()
-                .then(() => {
-                     // drop all items and cash
-                    const items = this.inventory.splice(0, this.inventory.length);
-                    const cash = this.stats.money;
-                    const targetedBy = this.targetedBy;
+        // release the target from the gridlock/aim
+        this.releaseTarget();
 
-                    // reset the character inventory, money, gridlock etc.
-                    this.stats.money = 0;
-                    this.targetedBy = [];
-                    this.stats.health = this.stats.health_max;
+         // drop all items and cash
+        const items = this.inventory.splice(0, this.inventory.length);
+        const cash = this.stats.money;
+        const targetedBy = this.targetedBy;
 
-                    const expLost = 0;
-                    // if its a player, reduce their exp
-                    if (this.user_id) {
-                        this.stats.exp * 0.035;
-                        this.updateExp(expLost * -1);
-                    }
+        // reset the character inventory, money, gridlock etc.
+        this.stats.money = 0;
+        this.targetedBy = [];
+        this.stats.health = this.stats.health_max;
 
-                    // return what is dropped by the character
-                    resolve({items, cash, exp: expLost, targetedBy});
-                })
-                .catch((err) => {
-                    reject(err);
-                });
-        });
+        const expLost = 0;
+        // if its a player, reduce their exp
+        if (this.user_id) {
+            this.stats.exp * 0.035;
+            this.updateExp(expLost * -1);
+        }
+
+        // return what is dropped by the character
+        return {
+            items,
+            cash,
+            exp: expLost,
+            targetedBy,
+        };
     }
 
     /**
      * Returns the damage of the equipped ranged weapon + ammo, and reduces durability of ammo.
      * @return {Object}          the damage, -1 if the weapon cannot be fired.
      */
-    fireRangedWeapon() {
-        return new Promise((resolve, reject) => {
-            this.getWeaponDamage('ranged')
-                .then((damage) => {
-                    if (!this.hasAmmo()) {
-                        return reject(0);
-                    }
+    async fireRangedWeapon() {
+        const damage = this.getWeaponDamage('ranged');
+        const ammo = this.getEquipped('ammo');
 
-                    if (this.ignoreQuantity) {
-                        return resolve(damage);
-                    }
+        if (damage === null) {
+            return null;
+        }
 
-                    this.getEquipped('ammo')
-                        .then((item) => {
-                            // reduce ammo durability
-                            item.stats.durability = item.removeDurability(1);
+        if (!this.hasAmmo()) {
+            return null;
+        }
 
-                            // remove ammo if durability is 0
-                            if (item.durability <= 0) {
-                                this.Game.itemManager.remove(this, item);
-                            }
+        if (this.ignoreQuantity) {
+            return damage;
+        }
 
-                            resolve(damage);
-                        })
-                        .catch(() => {
-                            reject();
-                        });
-                })
-                .catch(() => {
-                    reject();
-                });
-        });
+        // reduce ammo durability
+        ammo.removeDurability(1);
+
+        // remove ammo if durability is 0
+        if (ammo.stats.durability <= 0) {
+            await this.Game.itemManager.remove(this, ammo);
+        }
+
+        return damage;
     }
 
     /**
@@ -324,13 +310,13 @@ export default class Character {
      * @return {Boolean}
      */
     hasAmmo() {
-        const equippedAmmo = this.getEquippedSync('ammo');
+        const equippedAmmo = this.getEquipped('ammo');
 
         if (!equippedAmmo) {
             return false;
         }
 
-        if (equippedAmmo.durability <= 0) {
+        if (equippedAmmo.stats.durability <= 0) {
             return false;
         }
 
@@ -342,19 +328,17 @@ export default class Character {
      * @return {Promise}
      */
     getAmmoDamage() {
-        return new Promise((resolve) => {
-            if (!this.hasAmmo()) {
-                return resolve(0);
-            }
+        if (!this.hasAmmo()) {
+            return null;
+        }
 
-            this.getEquipped('ammo')
-                .then((item) => {
-                    resolve(item.stats.damage_bonus);
-                })
-                .catch(() => {
-                    reject();
-                });
-        });
+        const item = this.getEquipped('ammo');
+
+        if (!item) {
+            return null;
+        }
+
+        return item.stats.damage_bonus;
     }
 
     /**
@@ -364,31 +348,18 @@ export default class Character {
      * @return {Promise}         Damage of the weapon
      */
     getWeaponDamage(slot) {
-        return new Promise((resolve, reject) => {
-            this.getEquipped(slot)
-                .then((equippedItem) => {
-                    if (!equippedItem) {
-                        return reject();
-                    }
+        const equippedItem = this.getEquipped(slot);
+        let bonusDamage = 0;
 
-                    this.getAmmoDamage()
-                        .then((ammoDamage) => {
-                            let bonusDamage = 0;
+        if (!equippedItem) {
+            return reject(new Error(`No item equipped in slot ${slot}`));
+        }
 
-                            if (slot === 'ranged') {
-                                bonusDamage = ammoDamage;
-                            }
+        if (slot === 'ranged') {
+            bonusDamage = this.getAmmoDamage();
+        }
 
-                            resolve(Math.floor(Math.random() * (equippedItem.stats.damage_max - equippedItem.stats.damage_min + 1)) + equippedItem.stats.damage_min + bonusDamage);
-                        })
-                        .catch(() => {
-                            reject();
-                        });
-                })
-                .catch(() => {
-                    reject();
-                });
-        });
+        return Math.floor(Math.random() * (equippedItem.stats.damage_max - equippedItem.stats.damage_min + 1)) + equippedItem.stats.damage_min + bonusDamage;
     }
 
     /**
@@ -397,28 +368,6 @@ export default class Character {
      * @return {Promise}
      */
     getEquipped(slot = null) {
-        return new Promise((resolve, reject) => {
-            // if no slot if specified, return all equipped items
-            if (!slot) {
-                return resolve(this.getEquippedSync());
-            }
-
-            const item = this.getEquippedSync(slot);
-
-            if (!item) {
-                return reject();
-            }
-
-            resolve(item);
-        });
-    }
-
-    /**
-     * Get the items which is equipped in the specified slot
-     * @param  {String}  slot The equipment slot
-     * @return {Mixed}        Item if found, null otherwise;
-     */
-    getEquippedSync(slot) {
         // if no slot if specified, return all equipped items
         if (!slot) {
             return this.inventory.filter((obj) => obj.equipped_slot);
@@ -431,17 +380,19 @@ export default class Character {
      * Unequips slotted item, and adds it to the inventory
      * @param  {String} slot  The equipped slot to unequip
      */
-    unEquip(slot) {
+    async unEquip(slot) {
         if (!slot) {
             return false;
         }
 
-        this.getEquipped(slot)
-            .then((item) => {
-                item.equipped_slot = null;
-                this.Game.characterManager.updateClient(this.user_id);
-            })
-            .catch(() => {});
+        const item = this.getEquipped(slot);
+
+        if (!item) {
+            return;
+        }
+
+        item.equipped_slot = null;
+        this.Game.characterManager.updateClient(this.user_id);
     }
 
     /**
@@ -483,19 +434,15 @@ export default class Character {
                 return false;
         }
 
-        this.getEquipped(slot)
-            .then((equippedItem) => {
-                delete equippedItem.equipped_slot;
+        let equippedItem = this.getEquipped(slot);
 
-                // equip the item
-                item.equipped_slot = slot;
-                this.Game.characterManager.updateClient(this.user_id);
-            })
-            .catch(() => {
-                // equip the item
-                item.equipped_slot = slot;
-                this.Game.characterManager.updateClient(this.user_id);
-            });
+        if (equippedItem) {
+            delete equippedItem.equipped_slot;
+        }
+
+        // equip the item
+        item.equipped_slot = slot;
+        this.Game.characterManager.updateClient(this.user_id);
     }
 
     /**
@@ -671,7 +618,7 @@ export default class Character {
         let durability = 0;
         let health = this.stats.health;
         let armorRuined = false;
-        const armorItem = this.getEquippedSync('armor');
+        const armorItem = this.getEquipped('armor');
 
         if (!ignoreArmor && armorItem) {
             durability = armorItem.durability;

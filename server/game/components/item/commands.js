@@ -37,6 +37,7 @@ function cmdDrop(socket, character, command, params, cmdObject, Game) {
 
     // update the clients character informatiom
     Game.characterManager.updateClient(character.user_id, 'inventory');
+
     // send the updated items list to the grid
     Game.socketManager.dispatchToRoom(character.getLocationId(), {
         type: UPDATE_GROUND_ITEMS,
@@ -81,6 +82,7 @@ function cmdDropByIndex(socket, character, command, params, cmdObject, Game) {
 
     // update the clients character informatiom
     Game.characterManager.updateClient(character.user_id, 'inventory');
+
     // send the updated items list to the grid
     Game.socketManager.dispatchToRoom(character.getLocationId(), {
         type: UPDATE_GROUND_ITEMS,
@@ -135,31 +137,31 @@ function cmdPickup(socket, character, command, params, cmdObject, Game) {
     ];
 
     // get the item from the ground
-    Game.itemManager.pickup(...location, item.name, amount)
-        .then((itemObject) => {
-            // make sure the character has room
-            if (!character.hasRoomForItem(itemObject)) {
-                return Game.eventToUser(user_id, 'error', 'You do not have enough inventory space to pickup that item.');
-            }
+    const itemObject = Game.itemManager.pickup(...location, item.name, amount);
 
-            // add to user inventory
-            character.giveItem(itemObject);
-            // update the character details, client side
-            Game.characterManager.updateClient(character.user_id);
-            // update the grid item list for the clients
-            Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                type: UPDATE_GROUND_ITEMS,
-                payload: Game.itemManager.getLocationList(...location, true),
-            });
+    if (typeof itemObject === 'string') {
+        return Game.eventToUser(user_id, 'error', itemObject);
+    }
 
-            // send pickup event to the client
-            Game.eventToSocket(socket, 'info', `You picked up ${(!itemObject.stats.stackable ? 'a' : `${itemObject.stats.durability}x`)} ${itemObject.name} from the ground`);
-            // send pickup event to the grid
-            Game.eventToRoom(character.getLocationId(), 'info', `${character.name} picked up ${(!itemObject.stats.stackable ? 'a' : `${itemObject.stats.durability}x`)} ${itemObject.name} from the ground`, [character.user_id]);
-        })
-        .catch((error) => {
-            Game.eventToSocket(socket, 'error', 'There are no items on the ground, matching that name.');
-        });
+    // make sure the character has room
+    if (!character.hasRoomForItem(itemObject)) {
+        return Game.eventToUser(user_id, 'error', 'You do not have enough inventory space to pickup that item.');
+    }
+
+    // add to user inventory
+    character.giveItem(itemObject);
+    // update the character details, client side
+    Game.characterManager.updateClient(character.user_id);
+    // update the grid item list for the clients
+    Game.socketManager.dispatchToRoom(character.getLocationId(), {
+        type: UPDATE_GROUND_ITEMS,
+        payload: Game.itemManager.getLocationList(...location, true),
+    });
+
+    // send pickup event to the client
+    Game.eventToSocket(socket, 'info', `You picked up ${(!itemObject.stats.stackable ? 'a' : `${itemObject.stats.durability}x`)} ${itemObject.name} from the ground`);
+    // send pickup event to the grid
+    Game.eventToRoom(character.getLocationId(), 'info', `${character.name} picked up ${(!itemObject.stats.stackable ? 'a' : `${itemObject.stats.durability}x`)} ${itemObject.name} from the ground`, [character.user_id]);
 }
 
 /**
@@ -180,7 +182,7 @@ function cmdUseItem(socket, character, command, params, cmdObject, Game) {
         return;
     }
 
-    item.use(character);
+    return item.use(character);
 }
 
 module.exports = [

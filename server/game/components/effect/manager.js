@@ -21,29 +21,20 @@ export default class EffectManager {
      * @param  {Object}    effectModifiers  Additional modifiers to overwrite the defaults
      * @return {Mixed}                      Anything returned from the effect
      */
-    apply(character, effectId, effectModifiers = {}, item = null) {
-        return new Promise((resolve, reject) => {
-            const effect = Effects[effectId];
+    async apply(character, effectId, effectModifiers = {}, item = null) {
+        const effect = Effects[effectId];
 
-            if (!effect) {
-                this.Game.logger.error(`The effect ID ${effectId}, did not match any effects.`);
-                return reject();
-            }
+        if (!effect) {
+            this.Game.logger.error(`The effect ID ${effectId}, did not match any effects.`);
+            return null;
+        }
 
-            const effectOutput = effect(character, effectModifiers || {}, item, this.Game);
+        const output = await effect(character, effectModifiers || {}, item, this.Game);
 
-            // if the effect does not return a promise, just return the output as is
-            if (typeof effectOutput.then !== 'function') {
-                return resolve(effectOutput);
-            }
+        if (typeof output === 'string') {
+            return this.Game.eventToUser(character.user_id, 'error', output);
+        }
 
-            // if its a promise, wait for the resolve/reject
-            effectOutput.then((output) => {
-                resolve(output);
-            })
-            .catch(() => {
-                reject();
-            });
-        });
+        return output;
     }
 }

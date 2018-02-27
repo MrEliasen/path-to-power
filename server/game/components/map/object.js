@@ -19,26 +19,16 @@ export default class GameMap {
      * @return {Promise}
      */
     loadNpcs() {
-        return new Promise(async (resolve, reject) => {
-            const total = this.npcs.length;
-            let loaded = 0;
+        // Load all NPCS for map
+        this.npcs.forEach((npc, index) => {
+            let amount = npc.amount || 1;
 
-            // Load all NPCS for map
-            this.npcs.forEach(async (npc) => {
-                let amount = npc.amount || 1;
-
-                for (let i = amount; i > 0; i--) {
-                    await this.Game.npcManager.create(npc, this, false);
-                }
-
-                loaded++;
-                this.Game.logger.info(`LOADED ${loaded}/${total} NPCs `, {name: this.name});
-
-                if (loaded >= total) {
-                    resolve(loaded);
-                }
-            });
+            for (let i = amount; i > 0; i--) {
+                this.Game.npcManager.create(npc, this, false);
+            }
         });
+
+        return this.npcs.length;
     }
 
     /**
@@ -46,23 +36,12 @@ export default class GameMap {
      * @return {Promise}
      */
     loadStructures() {
-        return new Promise((resolve) => {
-            const total = this.structures.length;
-            let loaded = 0;
-
-            // Load all structures for map
-            this.structures.forEach(async (structure) => {
-                await this.Game.structureManager.add(this.id, structure.x, structure.y, structure.id);
-
-                loaded++;
-                this.Game.logger.info(`LOADED ${loaded}/${total} STRUCTURES `, {name: this.name});
-
-                if (loaded >= total) {
-                    this.Game.logger.info('LOADED ALL STRUCTURES', {name: this.name});
-                    resolve(loaded);
-                }
-            });
+        // Load all structures for map
+        this.structures.forEach((structure) => {
+            this.Game.structureManager.add(this.id, structure.x, structure.y, structure.id);
         });
+
+        return this.structures.length;
     }
 
     /**
@@ -70,25 +49,12 @@ export default class GameMap {
      * @return {Promise}
      */
     generate() {
-        return new Promise((resolve) => {
-            // Save the character information (stats/location/etc)
-            this.loadNpcs()
-                .then((npcs) => {
-                    this.Game.logger.info(`Generated ${npcs} NPCs in map "${this.id}"`);
+        // Save the character information (stats/location/etc)
+        const npcs = this.loadNpcs();
+        this.Game.logger.info(`Generated ${npcs} NPCs in map "${this.id}"`);
 
-                    this.loadStructures()
-                        .then((structures) => {
-                            this.Game.logger.info(`Generated ${structures} structures in map "${this.id}"`);
-                            resolve();
-                        })
-                        .catch((err) => {
-                            this.Game.logger.error(err);
-                        });
-                })
-                .catch((err) => {
-                    this.Game.logger.error(err);
-                });
-        });
+        const structures = this.loadStructures();
+        this.Game.logger.info(`Generated ${structures} structures in map "${this.id}"`);
     }
 
     /**
