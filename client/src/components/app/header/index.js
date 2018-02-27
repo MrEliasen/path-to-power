@@ -1,7 +1,8 @@
 import React from 'react';
-import {withRouter, NavLink, Link} from 'react-router-dom';
+import {withRouter, NavLink} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
+import {Container, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav} from 'reactstrap';
 
 import config from '../../../config';
 
@@ -14,6 +15,7 @@ class Header extends React.Component {
 
         this.state = {
             issueUrl: 'https://github.com/MrEliasen/path-to-power/issues/new',
+            isOpen: false,
         };
     }
 
@@ -104,42 +106,50 @@ class Header extends React.Component {
         if (this.props.character) {
             return (
                 <React.Fragment>
-                    <li><NavLink to="/game">Play Game</NavLink></li>
-                    <li><NavLink to="/auth/settings">Settings</NavLink></li>
-                    <li><NavLink to="/auth/logout" onClick={this.logout.bind(this)}>Logout</NavLink></li>
+                    <NavLink className="nav-link" to="/game">Play Game</NavLink>
+                    <NavLink className="nav-link" to="/auth/settings">Settings</NavLink>
+                    <NavLink className="nav-link" to="/auth/logout" onClick={this.logout.bind(this)}>Logout</NavLink>
                 </React.Fragment>
             );
         } else {
             return (
                 <React.Fragment>
-                    <li><NavLink exact to="/auth">Login</NavLink></li>
-                    <li><NavLink to="/auth/register">Sign up</NavLink></li>
+                    <NavLink className="nav-link" exact to="/auth">Login</NavLink>
+                    <NavLink className="nav-link" to="/auth/register">Sign up</NavLink>
                 </React.Fragment>
             );
         }
     }
 
+
+    toggle() {
+        this.setState({
+            isOpen: !this.state.isOpen,
+        });
+    }
+
     render() {
         return (
-            <React.Fragment>
-                <header id="header">
-                    <div className="container">
-                        <ul className="nav-pages">
-                            <li><Link to="/" className="logo">Path To Power</Link></li>
+            <Navbar color="primary-dark" dark expand="md" id="header">
+                <Container>
+                    <NavbarBrand href="/">Path To Power</NavbarBrand>
+                    <NavbarToggler onClick={this.toggle.bind(this)} className="mr-2" />
+                    <Collapse isOpen={!this.state.isOpen} navbar>
+                        <Nav className="mr-auto" navbar>
                             {
                                 this.props.pages && this.props.pages.length > 0 &&
                                 this.props.pages.map((page, index) => {
-                                    return <li key={index}><NavLink exact to={'/' + page.meta.path}>{page.meta.title}</NavLink></li>;
+                                    return <NavLink className="nav-link" key={index} exact to={'/' + page.meta.path}>{page.meta.title}</NavLink>;
                                 })
                             }
-                            <li><a href={this.state.issueUrl} target="_blank">Report a bug</a></li>
-                        </ul>
-                        <ul className="nav-auth">
+                            <a className="nav-link" href={this.state.issueUrl} target="_blank">Report a bug</a>
+                        </Nav>
+                        <Nav className="ml-auto" navbar>
                             {this.renderNavAuth()}
-                        </ul>
-                    </div>
-                </header>
-            </React.Fragment>
+                        </Nav>
+                    </Collapse>
+                </Container>
+            </Navbar>
         );
     }
 }

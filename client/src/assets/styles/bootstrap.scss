@@ -5,9 +5,11 @@ $body-bg:                   $gray-100;
 $input-bg:                  $gray-100;
 $primary:                   #6b64c2;
 $primary-dark:              #2b284e;
+$link-color:                $primary;
 
 $font-family-sans-serif:    'Roboto', sans-serif;
 $link-hover-decoration:     none;
+$navbar-nav-link-padding-x: .8rem;
 
 $card-border-width:         0;
 $card-cap-bg:               $primary-dark;
@@ -16,7 +18,8 @@ $card-cap-bg:               $primary-dark;
 // Documentation:   https://getbootstrap.com/docs/4.0/getting-started/theming/#maps-and-loops
 
 $theme-colors: (
-    "primary": $primary
+    "primary": $primary,
+    "primary-dark": $primary-dark,
 );
 
 // Customize Bootstrap Components
