@@ -12,6 +12,9 @@ import express from 'express';
 import mongoose from 'mongoose';
 import Promise from 'bluebird';
 
+// Custom
+import API from './api';
+
 /************************************
  *            FILE CHECK            *
  ************************************/
@@ -61,6 +64,8 @@ mongoose.connect(config.mongo_db).then(
         }
 
         const GameServer = new Game(webServer, config);
+        // eslint-disable-next-line
+        const RestServer = API(app);
 
         // On shutdown signal, gracefully shutdown the game server.
         process.on('SIGTERM', async function() {
