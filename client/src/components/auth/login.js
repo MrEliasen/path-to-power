@@ -67,7 +67,7 @@ class AuthLogin extends React.Component {
             return <p>Authenticating...</p>;
         }
 
-        if (this.props.authError) {
+        if (this.props.authError && this.props.authError.message) {
             return <p className="alert alert-error">
                 {this.props.authError.message}
             </p>;
