@@ -1,6 +1,7 @@
 import React from 'react';
 import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
+import {Container, Card, CardHeader, CardBody, Input, Button, FormGroup} from 'reactstrap';
 
 // actions
 import {createCharacter} from './actions';
@@ -34,38 +35,37 @@ class Character extends React.Component {
 
     render() {
         return (
-            <div className="c-character">
-                <div className="__form">
-                    <h3>Create Character</h3>
-
-                    <select
-                        fullWidth={true}
-                        onChange={(event, key, payload) => {
-                            this.setState({city: payload});
-                        }}
-                        value={this.state.city}
-                        floatingLabelText="Select Start City"
-                        floatingLabelStyle={{color: '#FF9800'}}
-                        floatingLabelFocusStyle={{color: '#2196F3'}}
-                    >
-                        {
-                            Object.keys(this.props.game.maps).map((mapId) =>
-                                <option
-                                    key={mapId}
-                                    value={mapId}
-                                >{this.props.game.maps[mapId].name}</option>
-                            )
-                        }
-                    </select>
-
+            <Card className="card-small">
+                <CardHeader>Welcome! Let's create a new character...</CardHeader>
+                <CardBody className="text-center">
                     {
                         this.props.error &&
                         <p>{this.props.error}</p>
                     }
-
-                    <button onClick={this.signup.bind(this)}>Create Character</button>
-                </div>
-            </div>
+                    <form>
+                        <p>Select a city...</p>
+                        <FormGroup>
+                            <Input
+                                type="select"
+                                onChange={(event, key, payload) => {
+                                    this.setState({city: payload});
+                                }}
+                                value={this.state.city}
+                            >
+                                {
+                                    Object.keys(this.props.game.maps).map((mapId) =>
+                                        <option
+                                            key={mapId}
+                                            value={mapId}
+                                        >{this.props.game.maps[mapId].name}</option>
+                                    )
+                                }
+                            </Input>
+                        </FormGroup>
+                        <Button color="primary" onClick={this.signup.bind(this)}>Create character</Button>
+                    </form>
+                </CardBody>
+            </Card>
         );
     }
 }

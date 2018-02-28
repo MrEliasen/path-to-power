@@ -10,6 +10,12 @@ h1, h2, h3, h4, h5, h6 {
 
 #main {
     padding: $grid-gutter-width;
+
+    .card-small {
+        width: 400px;
+        margin: 0 auto;
+        max-width: 100%;
+    }
 }
 
 .svg-inline--fa {
