@@ -204,6 +204,8 @@ export default class AccountManager {
                     },
                 },
             });
+
+            this.Game.sendMotdToSocket(socket);
         } catch (err) {
             // TODO: Test duplicate accounts
             if (err.code === 11000) {
