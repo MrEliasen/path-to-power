@@ -9,12 +9,12 @@ class AuthLogout extends React.Component {
 
     render() {
         return (
-            <div className="card">
-                <div className="card-header">You are now logged out :(</div>
-                <div className="card-body">
+            <Card className="card-small">
+                <CardHeader>You are now logged out :(</CardHeader>
+                <CardBody>
                     <p>Sad to see you go. Please come back!</p>
-                </div>
-            </div>
+                </CardBody>
+            </Card>
         );
     }
 };

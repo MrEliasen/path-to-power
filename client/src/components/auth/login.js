@@ -78,7 +78,7 @@ class AuthLogin extends React.Component {
 
     render() {
         return (
-            <Card>
+            <Card className="card-small">
                 <CardHeader>Let's do this!</CardHeader>
                 <CardBody className="text-center">
                     {this.showStatus()}
@@ -93,7 +93,7 @@ class AuthLogin extends React.Component {
                     </form>
                     <hr />
                     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, laboriosam!</p>
-                    <a className="btn btn-block btn-primary" style={{backgroundColor: '#6441a5'}} href={`https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=${config.twitch.clientId}&redirect_uri=${config.twitch.callbackUrl}&scope=${config.twitch.scope.join(',')}`}>
+                    <a className="btn btn-block btn-primary btn-brand-twitch" href={`https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=${config.twitch.clientId}&redirect_uri=${config.twitch.callbackUrl}&scope=${config.twitch.scope.join(',')}`}>
                         <FontAwesomeIcon icon={['fab', 'twitch']} /> Login with Twitch.tv
                     </a>
                 </CardBody>
