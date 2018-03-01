@@ -2,16 +2,18 @@
 import mongoose from 'mongoose';
 import moment from 'moment';
 import uuid from 'uuid/v4';
+import bcrypt from 'bcrypt';
+import config from '../../../config.json';
 
 // Define our product schema
 const AccountSchema = new mongoose.Schema({
-    twitch_id: {
+    username: {
         type: String,
-        unique: true,
         required: true,
     },
-    display_name: {
+    password: {
         type: String,
+        required: true,
     },
     session_token: {
         type: String,
@@ -21,7 +23,10 @@ const AccountSchema = new mongoose.Schema({
 });
 
 // Execute before each user.save() call
-AccountSchema.pre('save', function(callback) {
+AccountSchema.pre('save', async function(callback) {
+    // set the date for when it was updated
+    this.date_updated = moment().format('ddd, D MMM YYYY H:mm:ss [GMT]');
+
     if (!this.date_added) {
         // set the date for when it was created
         this.date_added = moment().format('ddd, D MMM YYYY H:mm:ss [GMT]');
@@ -32,10 +37,15 @@ AccountSchema.pre('save', function(callback) {
         this.session_token = uuid();
     }
 
-    // set the date for when it was updated
-    this.date_updated = moment().format('ddd, D MMM YYYY H:mm:ss [GMT]');
+    if (this.isModified('password')) {
+        this.password = await bcrypt.hash(this.password, config.authentication.password.rounds);
+    }
     callback();
 });
+
+AccountSchema.methods.verifyPassword = function(string) {
+    return bcrypt.compare(string, this.password);
+};
 
 // Export the Mongoose model
 module.exports = mongoose.model('Account', AccountSchema);

@@ -3,7 +3,6 @@ import child_process from 'child_process';
 import Logger from './components/logger';
 
 // component manager
-import AccountManager from './components/account/manager';
 import CharacterManager from './components/character/manager';
 import SocketManager from './components/socket/manager';
 import MapManager from './components/map/manager';
@@ -43,7 +42,6 @@ class Game {
 
         // Manager placeholders
         this.socketManager = new SocketManager(this, server);
-        this.accountManager = new AccountManager(this);
         this.characterManager = new CharacterManager(this);
         this.mapManager = new MapManager(this);
         this.structureManager = new StructureManager(this);
