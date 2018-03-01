@@ -1,4 +1,4 @@
-import {setup as localAuth} from './local';
+import localAuth from './local';
 
 export default {
     local: localAuth,

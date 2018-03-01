@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import contentFilter from 'content-filter';
 import passport from 'passport';
 import express from 'express';
+import nodemailer from 'nodemailer';
 
 // API Route/enpoint controllers
 import {
@@ -30,6 +31,15 @@ export default function(app, config) {
     app.use(contentFilter({
         methodList: ['GET', 'POST'],
     }));
+    app.set('mailer', nodemailer.createTransport({
+            host: config.mailserver.host,
+            port: config.mailserver.port,
+            auth: {
+                user: config.mailserver.username,
+                pass: config.mailserver.password,
+            },
+        })
+    );
 
     // Set needed headers for the application.
     app.use(function(req, res, next) {
@@ -54,21 +64,22 @@ export default function(app, config) {
         caseSensitive: false,
     });
 
+    // Account Routes
     routes.route('/account')
         .post(createAccount);
-
     routes.route('/account/:userId')
         .delete(deleteAccount)
         .patch(updateAccount);
+    routes.route('/account/:userId/activate')
+        .get(activateAccount);
 
+    // Authentication Routes
     // user/password authentication
     routes.route('/auth')
         .post(authenticate, onAuthSuccess);
-
     // OAuth
     routes.route('/auth/:provider')
         .get(authenticate);
-
     // OAuth callbacks
     routes.route('/auth/:provider/callback')
         .get(authenticate, onAuthSuccess);

@@ -2,12 +2,22 @@ import passport from 'passport';
 import strategies from './strategies';
 import config from '../../../config.json';
 
-export function createAccount(req, res) {
+export const createAccount = strategies.local.signup;
 
-}
+/**
+ * Handles updates to a user account
+ * @param  {Express Request} req
+ * @param  {Express Response} res
+ */
 export function updateAccount(req, res) {
 
 }
+
+/**
+ * Handles account deletions
+ * @param  {Express Request} req
+ * @param  {Express Response} res
+ */
 export function deleteAccount(req, res) {
 
 }
@@ -17,17 +27,21 @@ export function deleteAccount(req, res) {
  * @param  {Express} app
  */
 export function loadStrategies(passport) {
-    config.api.authentication.provider.forEach((provider) => {
-        if (!strategies[provider]) {
-            return console.log(`Provider "${provider}" not found in the list of available strategies.`);
-        }
+    const providers = config.api.authentication.providers;
 
-        if (!strategies[provider].enabled) {
-            return;
-        }
+    for (let provider in providers) {
+        if (providers.hasOwnProperty(provider)) {
+            if (!strategies[provider]) {
+                return console.log(`Provider "${provider}" not found in the list of available strategies.`);
+            }
 
-        strategies[provider](passport);
-    });
+            if (!providers[provider].enabled) {
+                return;
+            }
+
+            strategies[provider].setup(passport);
+        }
+    };
 }
 
 /**
@@ -37,7 +51,7 @@ export function loadStrategies(passport) {
  * @return {Function}
  */
 export function authenticate(req, res) {
-    return passport.authenticate(req.body.method, {session: false});
+    return passport.authenticate(req.body.method + '', {session: false});
 }
 
 /**

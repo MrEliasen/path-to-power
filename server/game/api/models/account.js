@@ -7,13 +7,19 @@ import config from '../../../config.json';
 
 // Define our product schema
 const AccountSchema = new mongoose.Schema({
-    username: {
+    email: {
         type: String,
         required: true,
     },
     password: {
         type: String,
-        required: true,
+    },
+    activated: {
+        type: Boolean,
+        default: false,
+    },
+    activationToken: {
+        type: String,
     },
     session_token: {
         type: String,
