@@ -15,11 +15,12 @@ import {moveCharacter} from './character/actions';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 // Components
-import {Row, Col, Input, Card, CardHeader, CardBody} from 'reactstrap';
+import {Row, Col, Input, Card, CardHeader, CardBody, Modal, ModalHeader, ModalBody} from 'reactstrap';
 import InventoryMenu from './inventory-menu';
 import PlayersMenu from './players-menu';
 import StatsMenu from './stats-menu';
 import Chat from './chat';
+import Inventory from './inventory';
 
 class Game extends React.Component {
     constructor(props) {
@@ -31,12 +32,35 @@ class Game extends React.Component {
             modalShow: false,
             modalData: null,
             autoscroll: true,
+
+            // Temp stuff
+            modalInventory: false,
+            modalShop: false,
+            modalEquipment: false,
+            items: [
+                {
+                    id: 1,
+                    slotId: 4,
+                    name: 'Axe',
+                    count: 1,
+                },
+                {
+                    id: 2,
+                    slotId: 7,
+                    name: 'Gun',
+                    count: 3,
+                },
+            ],
         };
 
         this.isActiveTab = this.isActiveTab.bind(this);
         this.sendCommand = this.sendCommand.bind(this);
         this.setCommand = this.setCommand.bind(this);
         this.sendAction = this.sendAction.bind(this);
+
+        this.toggleInventory = this.toggleInventory.bind(this);
+        this.toggleShop = this.toggleShop.bind(this);
+        this.toggleEquipment = this.toggleEquipment.bind(this);
     }
 
     componentWillMount() {
@@ -154,10 +178,58 @@ class Game extends React.Component {
         }, 250);
     }
 
+    toggleInventory() {
+        this.setState({modalInventory: !this.state.modalInventory});
+    }
+
+    toggleShop() {
+        this.setState({modalShop: !this.state.modalShop});
+    }
+
+    toggleEquipment() {
+        this.setState({modalEquipment: !this.state.modalEquipment});
+    }
+
     render() {
         return (
             <React.Fragment>
                 <div id="game">
+                    <Modal isOpen={this.state.modalInventory} toggle={this.toggleInventory} size="lg">
+                        <ModalHeader toggle={this.toggleInventory}>Inventory</ModalHeader>
+                        <ModalBody>
+                            <Inventory items={this.state.items}/>
+                        </ModalBody>
+                    </Modal>
+                    <Modal isOpen={this.state.modalShop} toggle={this.toggleShop} size="lg">
+                        <ModalHeader toggle={this.toggleShop}>Shop</ModalHeader>
+                        <ModalBody>
+                            <Row>
+                                <Col xs="6">
+                                    <div id="shop">
+                                        Shop slots...
+                                    </div>
+                                </Col>
+                                <Col xs="6">
+                                    <Inventory items={this.state.items}/>
+                                </Col>
+                            </Row>
+                        </ModalBody>
+                    </Modal>
+                    <Modal isOpen={this.state.modalEquipment} toggle={this.toggleEquipment} size="lg">
+                        <ModalHeader toggle={this.toggleEquipment}>Equipment</ModalHeader>
+                        <ModalBody>
+                            <Row>
+                                <Col xs="6">
+                                    <div id="equipment">
+                                        Equipment slots...
+                                    </div>
+                                </Col>
+                                <Col xs="6">
+                                    <Inventory items={this.state.items}/>
+                                </Col>
+                            </Row>
+                        </ModalBody>
+                    </Modal>
                     <Row>
                         <Col className="left">
                             <Card>
@@ -195,11 +267,11 @@ class Game extends React.Component {
                             <Card>
                                 <ul className="toolbar">
                                     <li><span><FontAwesomeIcon icon="dollar-sign" /> ?</span></li>
-                                    <li><a href="#"><FontAwesomeIcon icon="map-marker-alt" /> Map</a></li>
-                                    <li><a href="#"><FontAwesomeIcon icon="shield-alt" /> Inventory: ?/?</a></li>
-                                    <li><a href="#"><FontAwesomeIcon icon="shopping-cart" /> Shop</a></li>
-                                    <li><a href="#"><FontAwesomeIcon icon="tasks" /> Quests: ?</a></li>
-                                    <li><a href="#"><FontAwesomeIcon icon="user-secret" /> Players: ?</a></li>
+                                    <li><a href="#" onClick={this.toggleInventory}><FontAwesomeIcon icon="shield-alt" /> Inventory (2/50)</a></li>
+                                    <li><a href="#" onClick={this.toggleEquipment}><FontAwesomeIcon icon="female" /> Equipment (90%)</a></li>
+                                    <li><a href="#" onClick={this.toggleShop}><FontAwesomeIcon icon="shopping-cart" /> Shop (2)</a></li>
+                                    <li><a href="#"><FontAwesomeIcon icon="tasks" /> Quests (?)</a></li>
+                                    <li><a href="#"><FontAwesomeIcon icon="user-secret" /> Players (?)</a></li>
                                 </ul>
                             </Card>
                             <Card>
