@@ -9,6 +9,8 @@ import {
     UPDATE_CHARACTER,
     MOVE_CHARACTER,
     LEFT_GRID,
+    LOAD_CHARACTER,
+    CREATE_CHARACTER,
 } from './types';
 import {UPDATE_GROUND_ITEMS} from '../item/types';
 import Character from './object';
@@ -60,6 +62,10 @@ export default class CharacterManager {
                 return this.onEquip(socket, action);
             case MOVE_CHARACTER:
                 return this.move(socket, action);
+            case LOAD_CHARACTER:
+                return this.loadCharacter(socket, action);
+            case CREATE_CHARACTER:
+                return this.newCharacter(socket, action);
         }
 
         return null;
@@ -274,15 +280,15 @@ export default class CharacterManager {
      * @param  {Function} callback  Callback function
      * @return {Object}             Object with the character details.
      */
-    async load(userData) {
-        const character = await this.dbLoad(userData.user_id);
+    async load(user_id, characterId) {
+        const character = await this.dbLoad(user_id, characterId);
 
         if (character === null) {
             return null;
         }
 
         const newCharacter = new Character(this.Game, character.toObject());
-        newCharacter.profile_image = userData.profile_image;
+        newCharacter.profile_image = '';
 
         await this.manage(newCharacter);
 
@@ -323,8 +329,8 @@ export default class CharacterManager {
      * @param  {String}   user_id  User ID who owns the character
      * @param  {Function} callback returns error and character object
      */
-    dbLoad(user_id) {
-        return CharacterModel.findOneAsync({user_id: user_id});
+    dbLoad(user_id, characterId) {
+        return CharacterModel.findOneAsync({_id: characterId, user_id: user_id});
     }
 
     /**
@@ -335,10 +341,10 @@ export default class CharacterManager {
      * @param  {Function} callback Callback function
      * @return {Object}            Object with the character details
      */
-    async create(userData, city) {
-        const character = await this.dbCreate(userData.user_id, userData.display_name, city);
+    async create(user_id, characterName, city) {
+        const character = await this.dbCreate(user_id, characterName, city);
         const newCharacter = new Character(this.Game, character.toObject());
-        newCharacter.profile_image = userData.profile_image;
+        newCharacter.profile_image = '';
 
         await this.manage(newCharacter);
         return newCharacter;
@@ -741,5 +747,146 @@ export default class CharacterManager {
         this.Game.mapManager.updateClient(character.user_id);
 
         return oldLocationId;
+    }
+
+    /**
+     * Load account data for an authenticated socket/user.
+     * @param  {Socket.io Socket} socket The authenticated socket
+     */
+    loadCharacter(socket, action) {
+        if (!action.payload.characterId) {
+            return this.Game.socketManager.dispatchToSocket(socket, {
+                type: CHARACTER_LOAD_ERROR,
+                payload: {
+                    message: 'Please select a character to load.',
+                },
+            });
+        }
+
+        try {
+            // attempt to load the character from the database
+            const character = await this.load(socket.user.user_id, action.payload.characterId);
+
+            // game data we will send to the client, with the autentication success
+            const gameData = this.getGameData();
+
+            // If they do not have a character yet, send them to the character creation screen
+            if (!character) {
+                return this.Game.socketManager.dispatchToSocket(socket, {
+                    type: CHARACTER_LOAD_ERROR,
+                    payload: {
+                        message: 'The selected character does not exist.',
+                    },
+                });
+            }
+
+            // Update the client
+            this.Game.mapManager.updateClient(character.user_id);
+
+            this.Game.socketManager.dispatchToSocket(socket, {
+                type: ACCOUNT_AUTHENTICATE_SUCCESS,
+                payload: {
+                    character: character.exportToClient(),
+                    gameData: this.getGameData(),
+                },
+            });
+
+            this.Game.sendMotdToSocket(socket);
+        } catch (err) {
+            this.Game.onError(err, socket);
+        }
+    }
+
+    /**
+     * handles character creation requests from clients
+     * @param  {Socket.IO Object} socket The socket the request from made from
+     * @param  {Object}           action Redux action object
+     */
+    newCharacter(socket, action) {
+        // make sure the client is authenticated
+        if (!socket.user || !socket.user.user_id) {
+            return this.Game.socketManager.dispatchToSocket(socket, {
+                type: CHARACTER_CREATION_ERROR,
+                payload: {
+                    routeTo: '/',
+                },
+            });
+        }
+
+        if (!action.payload.location) {
+            return this.Game.socketManager.dispatchToSocket(socket, {
+                type: CHARACTER_CREATION_ERROR,
+                payload: {
+                    message: 'You must select a start location.',
+                },
+            });
+        }
+
+        if (!action.payload.name) {
+            return this.Game.socketManager.dispatchToSocket(socket, {
+                type: CHARACTER_CREATION_ERROR,
+                payload: {
+                    message: 'You must select a start location.',
+                },
+            });
+        }
+
+        // make sure we have all the details we need to create the character
+        // check we have the starting location
+        let gameMap;
+
+        try {
+            gameMap = this.Game.mapManager.get(action.payload.location);
+        } catch (err) {
+            return this.Game.socketManager.dispatchToSocket(socket, {
+                type: CHARACTER_CREATION_ERROR,
+                payload: {
+                    message: 'Invalid start location.',
+                },
+            });
+        }
+
+        try {
+            // create a new character
+            const newCharacter = await this.create(socket.user.user_id, action.payload.name, gameMap.id);
+
+            // Update the client
+            this.Game.mapManager.updateClient(newCharacter.user_id);
+
+            this.Game.socketManager.dispatchToSocket(socket, {
+                type: CHARACTER_CREATION_SUCCESS,
+                payload: {
+                    character: newCharacter.exportToClient(),
+                    gameData: this.getGameData(),
+                },
+            });
+        } catch (err) {
+            // TODO: Test duplicate accounts
+            if (err.code === 11000) {
+                return this.Game.socketManager.dispatchToSocket(socket, {
+                    type: ACCOUNT_AUTHENTICATE_ERROR,
+                    payload: {
+                        message: 'That character name is already taken.',
+                    },
+                });
+            }
+
+            this.Game.onError(err, socket);
+        }
+    }
+
+    /**
+     * Compiles an object containing all relevant game data for the client
+     * @return {[type]} [description]
+     */
+    getGameData() {
+        // game data we will send to the client, with the autentication success
+        return {
+            maps: this.Game.mapManager.getList(),
+            items: this.Game.itemManager.getTemplates(),
+            players: this.Game.getOnline(),
+            commands: this.Game.commandManager.getList(),
+            levels: Levels,
+        };
     }
 }

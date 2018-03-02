@@ -7,7 +7,6 @@ const CharacterSchema = new mongoose.Schema({
     user_id: {
         type: String,
         required: true,
-        unique: true,
     },
     name: {
         type: String,

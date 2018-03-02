@@ -31,10 +31,6 @@ if (!fs.existsSync(`${__dirname}/../config.json`)) {
 }
 
 let config = require(`${__dirname}/../config.json`);
-if (!config.twitch.clientId || config.twitch.clientId === '') {
-    console.error('ERROR: You must provide a Twitch Application ID for the server to work.');
-    process.exit();
-}
 
 /************************************
  *          INITIALISATION          *

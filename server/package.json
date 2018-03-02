@@ -48,7 +48,6 @@
         "passport-local": "^1.0.0",
         "readline-sync": "^1.4.7",
         "socket.io": "^2.0.4",
-        "superagent": "^3.8.2",
         "uuid": "^3.1.0"
     },
     "devDependencies": {
