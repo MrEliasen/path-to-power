@@ -2,6 +2,8 @@ import React from 'react';
 import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
+import HTML5Backend from 'react-dnd-html5-backend';
+import {DragDropContext as dragDropContext} from 'react-dnd';
 
 import Events from './events';
 import Location from './location';
@@ -338,4 +340,4 @@ function mapStateToProps(state) {
     };
 }
 
-export default withRouter(connect(mapStateToProps, mapActionsToProps)(Game));
+export default withRouter(connect(mapStateToProps, mapActionsToProps)(dragDropContext(HTML5Backend)(Game)));

@@ -1,4 +1,5 @@
 import React from 'react';
+import {DragSource as dragSource} from 'react-dnd';
 import ItemTooltip from '../itemtooltip';
 
 class Item extends React.Component {
@@ -6,51 +7,75 @@ class Item extends React.Component {
         super(props);
 
         this.state = {
+            mousePosition: {x: 0, y: 0},
             showTooltip: false,
         };
 
-        this.item = this.props.item;
         this.onMouseEnter = this.onMouseEnter.bind(this);
         this.onMouseLeave = this.onMouseLeave.bind(this);
         this.onMouseMove = this.onMouseMove.bind(this);
     }
 
+    // Show tooltip
     onMouseEnter(e) {
-        this.setState({showTooltip: {
-            x: e.pageX,
-            y: e.pageY,
-        }});
+        this.setState({showTooltip: true});
     }
 
+    // Hide tooltip
     onMouseLeave(e) {
         this.setState({showTooltip: false});
     }
 
+    // Save mouse position for the tooltip
     onMouseMove(e) {
-        this.setState({showTooltip: {
-            x: e.pageX,
-            y: e.pageY,
-        }});
+        this.setState({
+            mousePosition: {x: e.pageX, y: e.pageY},
+        });
     }
 
     render() {
-        if (! this.item) {
-            return '';
-        }
+        const {isDragging, connectDragSource} = this.props;
 
-        return (
-            <div className="item" onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave} onMouseMove={this.onMouseMove}>
+        return connectDragSource(
+            <div
+                className={'item' + (isDragging ? ' dragging' : '')}
+                onMouseEnter={this.onMouseEnter}
+                onMouseLeave={this.onMouseLeave}
+                onMouseMove={this.onMouseMove}
+            >
                 {
-                    this.state.showTooltip && <ItemTooltip item={this.item} coords={this.state.showTooltip} />
+                    ! isDragging && this.state.showTooltip && <ItemTooltip item={this.props.item} coords={this.state.mousePosition} />
                 }
-                <div className="item-layer item-name"><span>{this.item.name}</span></div>
+                <div className="item-layer item-name"><span>{this.props.item.name}</span></div>
                 {
-                    this.item.count > 1 &&
-                    <div className="item-layer item-count"><span>{this.item.count}</span></div>
+                    this.props.item.count > 1 &&
+                    <div className="item-layer item-count"><span>{this.props.item.count}</span></div>
                 }
             </div>
         );
     }
 }
+const itemSource = {
+    beginDrag(props) {
+      return {id: props.id};
+    },
 
-export default Item;
+    endDrag(props, monitor, component) {
+      if (! monitor.didDrop()) {
+        return;
+      }
+
+      const item = monitor.getItem();
+      const dropResult = monitor.getDropResult();
+      console.log(item, dropResult.listId);
+    },
+};
+
+const collect = (connect, monitor) => {
+    return {
+        connectDragSource: connect.dragSource(),
+        isDragging: monitor.isDragging(),
+    };
+};
+
+export default dragSource('item', itemSource, collect)(Item);
