@@ -11,7 +11,7 @@ import crypto from 'crypto';
 function setup(passport) {
     //setup the stategies we want
     passport.use(new LocalStrategy({
-        usernameField: 'username',
+        usernameField: 'email',
         passwordField: 'password',
     }, LocalAuth));
 }
@@ -20,14 +20,19 @@ function setup(passport) {
  * Setup local authentication
  * @param  {Passport} passport Passport object
  */
-function LocalAuth(username, password, done) {
-    AccountModel.findOne({username: escape(username)}, {username: 1, password: 1}, async (err, account) => {
+function LocalAuth(email, password, done) {
+    AccountModel.findOne({email: escape(email)}, {email: 1, password: 1, activated: 1}, async (err, account) => {
         if (err) {
             return done(err);
         }
 
         if (!account) {
             return done(null, false);
+        }
+
+        if (!account.activated) {
+            // TODO: write a custom callback fuction for handling errors.
+            return done('Your account has not been activated. Please click the activation link sent to your email address.', false);
         }
 
         const same = await account.verifyPassword(password);
@@ -50,6 +55,20 @@ function signup(req, res) {
         return res.status(400).json({
             status: 400,
             error: 'You must supply an email.',
+        });
+    }
+
+    if (!req.body.password) {
+        return res.status(400).json({
+            status: 400,
+            error: 'Please choose a password',
+        });
+    }
+
+    if (req.body.password.length < req.app.get('config').api.authentication.password.minlen) {
+        return res.status(400).json({
+            status: 400,
+            error: 'Your password much be at least 8 characters long.',
         });
     }
 
@@ -83,6 +102,7 @@ function signup(req, res) {
 
         const newAccount = new AccountModel({
             email: req.body.email,
+            password: req.body.password,
             activationToken: token.digest('hex'),
         });
 
@@ -96,7 +116,7 @@ function signup(req, res) {
             }
 
             const mailer = req.app.get('mailer');
-            const link = `http${req.secure ? 's' : ''}//${req.header.host}/api/account/${newAccount._id.toString()}/activate?token=${newAccount.activationToken}`;
+            const link = `http${req.secure ? 's' : ''}//${req.headers.host}/api/account/${newAccount._id.toString()}/activate?token=${newAccount.activationToken}`;
 
              // setup email data with unicode symbols
             let mailOptions = {

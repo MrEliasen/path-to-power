@@ -13,6 +13,7 @@ import {
     deleteAccount,
     authenticate,
     onAuthSuccess,
+    activateAccount,
 } from './authentication';
 
 /**
