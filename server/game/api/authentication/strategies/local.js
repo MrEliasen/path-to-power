@@ -5,25 +5,29 @@ import uuid from 'uuid/v4';
 import crypto from 'crypto';
 
 /**
- * Handle local authentication requests
- * @param  {Function} done
+ * Setup the authentication strategy
+ * @param  {Passport} passport     Passport Object
  */
 function setup(passport) {
     //setup the stategies we want
     passport.use(new LocalStrategy({
         usernameField: 'email',
         passwordField: 'password',
-    }, LocalAuth));
+        failureFlash: false,
+    }, Auth));
 }
 
 /**
- * Setup local authentication
- * @param  {Passport} passport Passport object
+ * Handles authentication requests
+ * @param {String}   email
+ * @param {String}   password
+ * @param {Function} done
  */
-function LocalAuth(email, password, done) {
-    AccountModel.findOne({email: escape(email)}, {email: 1, password: 1, activated: 1}, async (err, account) => {
+function Auth(email, password, done) {
+    AccountModel.findOne({email: escape(email)}, {email: 1, password: 1, activated: 1, session_token: 1}, async (err, account) => {
         if (err) {
-            return done(err);
+            console.log(err)
+            return done('Something went wrong, please try again in a moment.');
         }
 
         if (!account) {

@@ -3,20 +3,23 @@ import mongoose from 'mongoose';
 import moment from 'moment';
 
 // Define our product schema
-const ProviderSchema = new mongoose.Schema({
-    accountId: {
-        type: String,
-        required: true,
-    },
+const IdentitySchema = new mongoose.Schema({
     provider: {
         type: String,
         required: true,
+    },
+    providerId: {
+        type: String,
+        required: true,
+    },
+    account: {
+        type: String,
     },
     date_added: String,
 });
 
 // Execute before each user.save() call
-ProviderSchema.pre('save', async function(callback) {
+IdentitySchema.pre('save', function(callback) {
     if (!this.date_added) {
         // set the date for when it was created
         this.date_added = moment().format('ddd, D MMM YYYY H:mm:ss [GMT]');
@@ -26,4 +29,4 @@ ProviderSchema.pre('save', async function(callback) {
 });
 
 // Export the Mongoose model
-module.exports = mongoose.model('Provider', ProviderSchema);
+module.exports = mongoose.model('Identities', IdentitySchema);

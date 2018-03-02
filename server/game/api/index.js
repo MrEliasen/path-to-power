@@ -12,7 +12,7 @@ import {
     updateAccount,
     deleteAccount,
     authenticate,
-    onAuthSuccess,
+    onAuth,
     activateAccount,
 } from './authentication';
 
@@ -77,13 +77,13 @@ export default function(app, config) {
     // Authentication Routes
     // user/password authentication
     routes.route('/auth')
-        .post(authenticate, onAuthSuccess);
+        .post(authenticate);
     // OAuth
     routes.route('/auth/:provider')
         .get(authenticate);
     // OAuth callbacks
     routes.route('/auth/:provider/callback')
-        .get(authenticate, onAuthSuccess);
+        .get(authenticate, onAuth);
 
     // register the routes to the /api prefix
     app.use('/api', routes);

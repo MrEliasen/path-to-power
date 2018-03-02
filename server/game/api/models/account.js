@@ -9,7 +9,6 @@ import config from '../../../config.json';
 const AccountSchema = new mongoose.Schema({
     email: {
         type: String,
-        required: true,
     },
     password: {
         type: String,

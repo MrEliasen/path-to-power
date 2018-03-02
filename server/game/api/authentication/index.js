@@ -2,6 +2,7 @@ import passport from 'passport';
 import strategies from './strategies';
 import config from '../../../config.json';
 import AccountModel from '../models/account';
+import jwt from 'jsonwebtoken';
 
 export const createAccount = strategies.local.signup;
 
@@ -95,7 +96,14 @@ export function loadStrategies(passport) {
                 return;
             }
 
-            strategies[provider].setup(passport);
+            let callbackUrl = `${config.api.domain}${[80,443].includes(config.api.post) ? '' : `:${config.api.port}`}/api/auth/${provider}/callback`;
+
+            strategies[provider].setup(
+                passport,
+                providers[provider].clientID,
+                providers[provider].clientSecret,
+                callbackUrl
+            );
         }
     };
 }
@@ -107,7 +115,15 @@ export function loadStrategies(passport) {
  * @return {Function}
  */
 export function authenticate(req, res, next) {
-    return passport.authenticate(req.body.method, {session: false})(req, res, next);
+    return passport.authenticate(req.body.method || req.params.provider, {session: false}, (err, success) => {
+        if (success) {
+            return onAuth(req, res, success);
+        }
+
+        res.json({
+            error: err,
+        })
+    })(req, res, next);
 }
 
 /**
@@ -115,14 +131,15 @@ export function authenticate(req, res, next) {
  * @param  {Express Request} req
  * @param  {Express Reponse} res
  */
-export function onAuthSuccess(req, res) {
-    // create JWT
+export function onAuth(req, res, data) {
+    const token = jwt.sign({
+        _id: data._id,
+        session_token: data.session_token,
+    }, req.app.get('config').api.signingKey, {expiresIn: '7d'});
+
     // send JWT back to client
     res.json({
-        status: true,
-        user: {
-            _id: req.user._id,
-            username: req.user.username,
-        },
+        status: 200,
+        authToken: token,
     });
 }
