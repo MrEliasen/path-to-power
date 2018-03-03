@@ -229,7 +229,7 @@ export default class CharacterManager {
         // update the grid's player list
         this.Game.socketManager.dispatchToRoom(
             character.getLocationId(),
-            this.Game.characterManager.joinedGrid(character)
+            this.joinedGrid(character)
         );
 
         try {
@@ -647,7 +647,7 @@ export default class CharacterManager {
             // add player from the grid list of players
             this.Game.socketManager.dispatchToRoom(
                 character.getLocationId(),
-                this.Game.characterManager.joinedGrid(character)
+                this.joinedGrid(character)
             );
 
             // update the socket room
@@ -734,7 +734,7 @@ export default class CharacterManager {
         // add player from the grid list of players
         this.Game.socketManager.dispatchToRoom(
             character.getLocationId(),
-            this.Game.characterManager.joinedGrid(character)
+            this.joinedGrid(character)
         );
 
         // update the socket room
