@@ -1,25 +1,29 @@
-html,
-body {
-    height: 100%;
-    background: #424242;
+img {
+    max-width: 100%;
+    height: auto;
+    display: inline-block;
+}
 
-    #root {
-        height: 100%;
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0;
+}
+
+#main {
+    padding: $grid-gutter-width;
+
+    .card-small {
+        width: 400px;
+        margin: 0 auto;
+        max-width: 100%;
     }
 }
 
-.e-padding {
-    padding: 10px 15px;
-    overflow-y: auto;
+.svg-inline--fa {
+    margin: 0 5px;
 }
 
-.e-fullHeight {
-    height: 100%;
+button .svg-inline--fa,
+.btn .svg-inline--fa {
+    vertical-align: middle;
+    font-size: 130%;
 }
-
-.e-clickable {
-    cursor: pointer;
-}
-
-@import 'mixins';
-@import 'components/components';

@@ -1,0 +1,108 @@
+#inventory {
+    position: relative;
+    display: flex;
+    overflow: auto;
+    height: 600px;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-items: flex-start;
+    align-content: flex-start;
+
+}
+
+.item-slot {
+    position: relative;
+    z-index: 2222;
+    width: 50px;
+    height: 50px;
+    background: #666;
+    border: 1px #333 solid;
+    border-radius: 5px;
+    margin: 3px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, .3);
+    user-select: none;
+
+    .layer {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        opacity: .5;
+    }
+
+    .yellow {
+        border: 1px yellow solid;
+        background-color: yellow;
+    }
+    .red {
+        border: 1px red solid;
+        background-color: red;
+    }
+    .green {
+        border: 1px green solid;
+        background-color: green;
+    }
+}
+
+.item {
+    position: absolute;
+    z-index: 99999;
+    width: 50px;
+    height: 50px;
+    line-height: 1;
+    font-size: 12px;
+    background: rgb(50, 54, 50);
+    border-radius: 5px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, .3);
+
+    &.dragging {
+        opacity: .5;
+    }
+
+    .item-layer {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        padding: 2px;
+    }
+
+    .item-name {
+        display: flex;
+        color: #aaa;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .item-count {
+        display: flex;
+        color: #eee;
+        justify-content: flex-end;
+        align-items: flex-end;
+    }
+}
+
+.item-tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, .9);
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, .3);
+    padding: 4px 8px;
+    color: #eee;
+    z-index: 1100;
+    width: auto;
+    min-width: 100px;
+    max-width: 200px;
+    border-radius: 3px;
+
+    .name {
+        font-size: 120%;
+        color: green;
+    }
+    .count {
+        font-size: 90%;
+    }
+}

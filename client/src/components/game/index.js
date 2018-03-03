@@ -2,26 +2,28 @@ import React from 'react';
 import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
+import HTML5Backend from 'react-dnd-html5-backend';
+import {DragDropContext as dragDropContext} from 'react-dnd';
 
-import Events from '../events';
-import Location from '../location';
-import Shop from '../shop';
+import Events from './events';
+import Location from './location';
+import Shop from './shop';
+import BottomMenu from './bottom-menu';
 
-import {clearEvents, newEvent} from '../events/actions';
+import {clearEvents, newEvent} from './events/actions';
 import {newCommand} from './actions';
-import {moveCharacter} from '../character/actions';
+import {moveCharacter} from './character/actions';
+
+import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 // Components
-import InventoryMenu from '../inventory-menu';
-import PlayersMenu from '../players-menu';
-import StatsMenu from '../stats-menu';
-import Chat from '../chat';
-
-// UI
-import Paper from 'material-ui/Paper';
-import Dialog from 'material-ui/Dialog';
-import LinearProgress from 'material-ui/LinearProgress';
-import AutoComplete from 'material-ui/AutoComplete';
+import {Row, Col, Input, Card, CardHeader, CardBody, Modal, ModalHeader, ModalBody} from 'reactstrap';
+import InventoryMenu from './inventory-menu';
+import PlayersMenu from './players-menu';
+import StatsMenu from './stats-menu';
+import Chat from './chat';
+import Inventory from './inventory';
+import ItemSlot from './itemslot';
 
 class Game extends React.Component {
     constructor(props) {
@@ -33,12 +35,21 @@ class Game extends React.Component {
             modalShow: false,
             modalData: null,
             autoscroll: true,
+
+            // Temp stuff
+            modalInventory: false,
+            modalShop: false,
+            modalEquipment: false,
         };
 
         this.isActiveTab = this.isActiveTab.bind(this);
         this.sendCommand = this.sendCommand.bind(this);
         this.setCommand = this.setCommand.bind(this);
         this.sendAction = this.sendAction.bind(this);
+
+        this.toggleInventory = this.toggleInventory.bind(this);
+        this.toggleShop = this.toggleShop.bind(this);
+        this.toggleEquipment = this.toggleEquipment.bind(this);
     }
 
     componentWillMount() {
@@ -55,7 +66,7 @@ class Game extends React.Component {
 
     componentDidUpdate(prevProps) {
         if (this.state.autoscroll) {
-            document.getElementsByClassName('c-game__chat')[0].scrollTop = document.getElementsByClassName('c-game__chat')[0].scrollHeight;
+            document.querySelector('.card-chat').scrollTop = document.querySelector('.card-chat').scrollHeight;
         }
     }
 
@@ -75,7 +86,7 @@ class Game extends React.Component {
             case '/':
                 // set focus if they are not typing into an input field
                 if (!document.activeElement.value) {
-                    document.querySelector('.c-game_command input').focus();
+                    document.querySelector('#input-command').focus();
                 }
                 break;
         }
@@ -151,84 +162,148 @@ class Game extends React.Component {
     setCommand(command) {
         this.setState({command});
         setTimeout(() => {
-            document.querySelector('.c-game_command input').focus();
-            document.querySelector('.c-game_command input').setSelectionRange(command.length, command.length);
+            document.querySelector('#input-command').focus();
+            document.querySelector('#input-command').setSelectionRange(command.length, command.length);
         }, 250);
+    }
+
+    toggleInventory() {
+        this.setState({modalInventory: !this.state.modalInventory});
+    }
+
+    toggleShop() {
+        this.setState({modalShop: !this.state.modalShop});
+    }
+
+    toggleEquipment() {
+        this.setState({modalEquipment: !this.state.modalEquipment});
     }
 
     render() {
         return (
-            <div className="c-game">
-                <Paper zDepth={1} rounded={true} className="c-game__location e-padding">
-                    <Location />
-                </Paper>
-                <div className="c-game__communication">
-                    <Paper zDepth={1} rounded={true} className="c-game__news e-padding">
-                        {
-                            this.props.game.news &&
-                            <h3 style={this.props.game.news.colour}>{this.props.game.news.message}</h3>
-                        }
-                    </Paper>
-                    <Paper zDepth={1} rounded={true} className="c-game__chat e-padding">
-                        <Chat />
-                    </Paper>
-                </div>
-                <Events />
-                <div className="c-game_command">
-                    <AutoComplete
-                        ref={(e) => this.$autocomplete = e}
-                        id="input-command"
-                        fullWidth={true}
-                        searchText={this.state.command}
-                        onUpdateInput={(command) => {
-                            this.setState({command: command});
-                            setTimeout(() => {
-                                document.querySelector('.c-game_command input').focus();
-                            }, 100);
-                        }}
-                        onKeyPress={(e) => {
-                            if (e.key && e.key == 'Enter') {
-                                this.sendCommand();
+            <React.Fragment>
+                <div id="game">
+                    <Modal isOpen={this.state.modalInventory} toggle={this.toggleInventory} size="lg">
+                        <ModalHeader toggle={this.toggleInventory}>Inventory</ModalHeader>
+                        <ModalBody>
+                            <Inventory />
+                        </ModalBody>
+                    </Modal>
+                    <Modal isOpen={this.state.modalEquipment} toggle={this.toggleEquipment} size="lg">
+                        <ModalHeader toggle={this.toggleEquipment}>Equipment</ModalHeader>
+                        <ModalBody>
+                            <Row>
+                                <Col xs="6">
+                                    <div id="equipment">
+                                        <ItemSlot slotId="head" />
+                                    </div>
+                                </Col>
+                                <Col xs="6">
+                                    <Inventory />
+                                </Col>
+                            </Row>
+                        </ModalBody>
+                    </Modal>
+                    <Modal isOpen={this.state.modalShop} toggle={this.toggleShop} size="lg">
+                        <ModalHeader toggle={this.toggleShop}>Shop</ModalHeader>
+                        <ModalBody>
+                            <Row>
+                                <Col xs="6">
+                                    <div id="shop">
+                                        Shop slots...
+                                    </div>
+                                </Col>
+                                <Col xs="6">
+                                    <Inventory />
+                                </Col>
+                            </Row>
+                        </ModalBody>
+                    </Modal>
+                    <Row>
+                        <Col className="left">
+                            <Card>
+                                <CardHeader>Character</CardHeader>
+                                <CardBody>
+                                    <StatsMenu />
+                                </CardBody>
+                            </Card>
+                            <Card>
+                                <CardHeader>Location</CardHeader>
+                                <CardBody>
+                                    [Minimap]
+                                    <hr />
+                                    <Location />
+                                </CardBody>
+                            </Card>
+                            <Card>
+                                <CardHeader>Equipment</CardHeader>
+                                <CardBody>
+                                    <InventoryMenu sendCommand={this.sendCommand} sendAction={this.sendAction} />
+                                </CardBody>
+                            </Card>
+                            <Card>
+                                <CardHeader>Players Online</CardHeader>
+                                <CardBody>
+                                    <PlayersMenu sendCommand={this.sendCommand} setCommand={this.setCommand} />
+                                </CardBody>
+                            </Card>
+                            {
+                                this.props.character &&
+                                <BottomMenu className="c-bottom-menu" socket={this.props.socket} />
                             }
-                        }}
-                        onNewRequest={() => {
-                            document.querySelector('.c-game_command input').focus();
-                        }}
-                        floatingLabelText="Type your commands here, and hit Enter."
-                        floatingLabelStyle={{color: '#FF9800'}}
-                        floatingLabelFocusStyle={{color: '#2196F3'}}
-                        inputStyle={{color: '#fff'}}
-                        filter={(searchText, key) => searchText.length > 1 && key.indexOf(searchText) !== -1}
-                        dataSource={Object.keys(this.props.game.commands).concat(['/commandlist', '/commands', '/clear'])}
-                        anchorOrigin={{vertical: 'top', horizontal: 'left'}}
-                        targetOrigin={{vertical: 'bottom', horizontal: 'left'}}
-                        listStyle={{
-                            background: '#40C4FF',
-                        }}
-                        menuStyle={{
-                            maxHeight: '150px',
-                            overflowY: 'auto',
-                        }}
-                        menuProps={{
-                            id: 'c-autocomplete__menu',
-                        }}
-                    />
+                        </Col>
+                        <Col sm="9" className="middle">
+                            <Card>
+                                <ul className="toolbar">
+                                    <li><span><FontAwesomeIcon icon="dollar-sign" /> ?</span></li>
+                                    <li><a href="#" onClick={this.toggleInventory}><FontAwesomeIcon icon="shield-alt" /> Inventory (2/50)</a></li>
+                                    <li><a href="#" onClick={this.toggleEquipment}><FontAwesomeIcon icon="female" /> Equipment (90%)</a></li>
+                                    <li><a href="#" onClick={this.toggleShop}><FontAwesomeIcon icon="shopping-cart" /> Shop (2)</a></li>
+                                    <li><a href="#"><FontAwesomeIcon icon="tasks" /> Quests (?)</a></li>
+                                    <li><a href="#"><FontAwesomeIcon icon="user-secret" /> Players (?)</a></li>
+                                </ul>
+                            </Card>
+                            <Card>
+                                <CardHeader>Chat</CardHeader>
+                                <CardBody className="card-messages card-chat">
+                                    <Chat />
+                                </CardBody>
+                            </Card>
+                            <Card>
+                                <CardHeader>Events</CardHeader>
+                                <CardBody className="card-messages card-events">
+                                    <Events />
+                                </CardBody>
+                            </Card>
+                            <Input
+                                id="input-command"
+                                onKeyPress={(e) => {
+                                    if (e.key && e.key == 'Enter') {
+                                        this.sendCommand();
+                                    }
+                                }}
+                                onChange={(e) => {
+                                    this.setState({command: e.target.value});
+                                }}
+                                value={this.state.command}
+                                placeholder="Type your commands here, and hit Enter."
+                                type="input"
+                                name="input"
+                            />
+                            {
+                                this.props.game.news &&
+                                <h3 style={this.props.game.news.colour}>{this.props.game.news.message}</h3>
+                            }
+                            <div style={{textAlign: 'center'}}>
+                                {this.props.connection.lastEvent}<br />
+                                {!this.props.connection.isConnected}
+                                <div mode="indeterminate" />
+                            </div>
+                        </Col>
+                    </Row>
                 </div>
-
-                <InventoryMenu sendCommand={this.sendCommand} sendAction={this.sendAction} />
-                <PlayersMenu sendCommand={this.sendCommand} setCommand={this.setCommand} />
-                <StatsMenu />
                 <Shop sendAction={this.sendAction} />
-
-                <Dialog
-                    title={this.props.connection.lastEvent}
-                    open={!this.props.connection.isConnected}
-                    modal={true}
-                    titleStyle={{textAlign: 'center'}}
-                >
-                    <LinearProgress mode="indeterminate" />
-                </Dialog>
-            </div>
+            </React.Fragment>
         );
     }
 }
@@ -252,4 +327,4 @@ function mapStateToProps(state) {
     };
 }
 
-export default withRouter(connect(mapStateToProps, mapActionsToProps)(Game));
+export default withRouter(connect(mapStateToProps, mapActionsToProps)(dragDropContext(HTML5Backend)(Game)));
