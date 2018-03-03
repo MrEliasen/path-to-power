@@ -67,7 +67,11 @@ const itemSource = {
 
       const item = monitor.getItem();
       const dropResult = monitor.getDropResult();
-      console.log(item, dropResult.listId);
+      console.log(item, dropResult);
+      if (dropResult && dropResult.slotId) {
+          // TODO: Update the item.slotId to the value of dropResult.slotId
+          // Dennis: I don't know how to do this with Redux yet - or should the Redux action be in ItemSlot ?
+      }
     },
 };
 

@@ -23,6 +23,7 @@ import PlayersMenu from './players-menu';
 import StatsMenu from './stats-menu';
 import Chat from './chat';
 import Inventory from './inventory';
+import ItemSlot from './itemslot';
 
 class Game extends React.Component {
     constructor(props) {
@@ -39,20 +40,6 @@ class Game extends React.Component {
             modalInventory: false,
             modalShop: false,
             modalEquipment: false,
-            items: [
-                {
-                    id: 1,
-                    slotId: 4,
-                    name: 'Axe',
-                    count: 1,
-                },
-                {
-                    id: 2,
-                    slotId: 7,
-                    name: 'Gun',
-                    count: 3,
-                },
-            ],
         };
 
         this.isActiveTab = this.isActiveTab.bind(this);
@@ -199,7 +186,22 @@ class Game extends React.Component {
                     <Modal isOpen={this.state.modalInventory} toggle={this.toggleInventory} size="lg">
                         <ModalHeader toggle={this.toggleInventory}>Inventory</ModalHeader>
                         <ModalBody>
-                            <Inventory items={this.state.items}/>
+                            <Inventory />
+                        </ModalBody>
+                    </Modal>
+                    <Modal isOpen={this.state.modalEquipment} toggle={this.toggleEquipment} size="lg">
+                        <ModalHeader toggle={this.toggleEquipment}>Equipment</ModalHeader>
+                        <ModalBody>
+                            <Row>
+                                <Col xs="6">
+                                    <div id="equipment">
+                                        <ItemSlot slotId="head" />
+                                    </div>
+                                </Col>
+                                <Col xs="6">
+                                    <Inventory />
+                                </Col>
+                            </Row>
                         </ModalBody>
                     </Modal>
                     <Modal isOpen={this.state.modalShop} toggle={this.toggleShop} size="lg">
@@ -212,22 +214,7 @@ class Game extends React.Component {
                                     </div>
                                 </Col>
                                 <Col xs="6">
-                                    <Inventory items={this.state.items}/>
-                                </Col>
-                            </Row>
-                        </ModalBody>
-                    </Modal>
-                    <Modal isOpen={this.state.modalEquipment} toggle={this.toggleEquipment} size="lg">
-                        <ModalHeader toggle={this.toggleEquipment}>Equipment</ModalHeader>
-                        <ModalBody>
-                            <Row>
-                                <Col xs="6">
-                                    <div id="equipment">
-                                        Equipment slots...
-                                    </div>
-                                </Col>
-                                <Col xs="6">
-                                    <Inventory items={this.state.items}/>
+                                    <Inventory />
                                 </Col>
                             </Row>
                         </ModalBody>

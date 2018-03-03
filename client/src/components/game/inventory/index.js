@@ -7,7 +7,6 @@ class Inventory extends React.Component {
 
         // Fake sluts
         this.slots = Array.from(Array(100).keys());
-        this.items = this.props.items;
     }
 
     render() {
@@ -15,7 +14,7 @@ class Inventory extends React.Component {
             <div id="inventory">
                 {
                     this.slots.length && this.slots.map((slotId, index) => {
-                        return <ItemSlot key={index} items={this.items} slotId={slotId} />;
+                        return <ItemSlot key={index} slotId={'inv-' + slotId} />;
                     })
                 }
             </div>
