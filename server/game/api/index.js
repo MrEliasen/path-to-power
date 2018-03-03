@@ -14,6 +14,7 @@ import {
     authenticate,
     onAuth,
     activateAccount,
+    getAuthList,
 } from './authentication';
 
 /**
@@ -77,6 +78,7 @@ export default function(app, config) {
     // Authentication Routes
     // user/password authentication
     routes.route('/auth')
+        .get(getAuthList)
         .post(authenticate);
     // OAuth
     routes.route('/auth/:provider')

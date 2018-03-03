@@ -3,6 +3,7 @@ import {routerReducer} from 'react-router-redux';
 
 import AppReducer from './components/app/reducer';
 import AuthReducer from './components/auth/reducer';
+import AccountReducer from './components/account/reducer';
 import CharacterReducer from './components/game/character/reducer';
 import GameReducer from './components/game/reducer';
 import EventsReducer from './components/game/events/reducer';
@@ -16,6 +17,7 @@ import StatsReducer from './components/game/stats-menu/reducer';
 
 const rootReducer = combineReducers({
     app: AppReducer,
+    account: AccountReducer,
     inventorymenu: InventoryReducer,
     playersmenu: PlayersReducer,
     statsmenu: StatsReducer,

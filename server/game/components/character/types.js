@@ -7,3 +7,4 @@ export const JOIN_GRID = 'JOIN_GRID';
 export const MOVE_CHARACTER = 'MOVE_CHARACTER';
 export const LEFT_GRID = 'LEFT_GRID';
 export const JOINED_GRID = 'JOINED_GRID';
+export const CHARACTERS_GET_LIST = 'CHARACTERS_GET_LIST';

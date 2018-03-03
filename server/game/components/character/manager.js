@@ -11,6 +11,7 @@ import {
     LEFT_GRID,
     LOAD_CHARACTER,
     CREATE_CHARACTER,
+    CHARACTERS_GET_LIST,
 } from './types';
 import {UPDATE_GROUND_ITEMS} from '../item/types';
 import Character from './object';
@@ -66,6 +67,8 @@ export default class CharacterManager {
                 return this.loadCharacter(socket, action);
             case CREATE_CHARACTER:
                 return this.newCharacter(socket, action);
+            case CHARACTERS_GET_LIST:
+                return this.getCharacterList(socket, action);
         }
 
         return null;
@@ -753,7 +756,7 @@ export default class CharacterManager {
      * Load account data for an authenticated socket/user.
      * @param  {Socket.io Socket} socket The authenticated socket
      */
-    loadCharacter(socket, action) {
+    async loadCharacter(socket, action) {
         if (!action.payload.characterId) {
             return this.Game.socketManager.dispatchToSocket(socket, {
                 type: CHARACTER_LOAD_ERROR,
@@ -802,7 +805,7 @@ export default class CharacterManager {
      * @param  {Socket.IO Object} socket The socket the request from made from
      * @param  {Object}           action Redux action object
      */
-    newCharacter(socket, action) {
+    async newCharacter(socket, action) {
         // make sure the client is authenticated
         if (!socket.user || !socket.user.user_id) {
             return this.Game.socketManager.dispatchToSocket(socket, {

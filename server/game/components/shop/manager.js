@@ -57,7 +57,7 @@ export default class ShopManager {
                 break;
 
             case SHOP_GET_PRICE:
-                return this.onGetPrice(socket, action)
+                return this.onGetPrice(socket, action);
                 break;
         }
     }

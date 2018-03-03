@@ -115,14 +115,25 @@ export function loadStrategies(passport) {
  * @return {Function}
  */
 export function authenticate(req, res, next) {
-    return passport.authenticate(req.body.method || req.params.provider, {session: false}, (err, success) => {
+    const method = req.body.method || req.params.provider;
+
+    if (!method) {
+        return res.status(400).json({
+            status: 400,
+            error: 'Invalid authentication method.',
+        });
+    }
+
+    return passport.authenticate(method, {session: false}, (err, success, info, status) => {
         if (success) {
             return onAuth(req, res, success);
         }
 
-        res.json({
-            error: err,
-        })
+
+        res.status(status || 400).json({
+            status: status || 400,
+            error: err || info.message,
+        });
     })(req, res, next);
 }
 
@@ -141,5 +152,37 @@ export function onAuth(req, res, data) {
     res.json({
         status: 200,
         authToken: token,
+    });
+}
+
+/**
+ * Loads the authentication strategies
+ * @param  {Express} app
+ */
+export function getAuthList(req, res) {
+    const providers = config.api.authentication.providers;
+    const authlist = [];
+
+    for (let provider in providers) {
+        if (providers.hasOwnProperty(provider)) {
+            if (!strategies[provider]) {
+                continue;
+            }
+
+            if (!providers[provider].enabled) {
+                continue;
+            }
+
+            authlist.push({
+                provider,
+                name: providers[provider].name,
+                authUrl: `${config.api.domain}${[80, 443].includes(config.api.post) ? '' : `:${config.api.port}`}/api/auth/${provider}`
+            });
+        }
+    };
+
+    res.json({
+        status: 200,
+        authlist,
     });
 }

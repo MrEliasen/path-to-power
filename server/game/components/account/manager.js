@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 // account specific imports
+import AccountModel from '../../api/models/account';
 import {
     ACCOUNT_AUTHENTICATE,
     ACCOUNT_AUTHENTICATE_ERROR,
@@ -44,11 +45,11 @@ export default class AccountManager {
      * @param  {Object} action Redux action object
      */
     async authenticate(socket, action) {
-        if (!action.payload.token) {
+        if (!action.payload) {
             return;
         }
 
-        jwt.verify(action.payload.token, this.Game.config.api.signingKey, (err, decoded) => {
+        jwt.verify(action.payload, this.Game.config.api.signingKey, async (err, decoded) => {
             if (err) {
                 return this.Game.socketManager.dispatchToSocket(socket, {
                     type: ACCOUNT_AUTHENTICATE_ERROR,
@@ -56,8 +57,23 @@ export default class AccountManager {
                 });
             }
 
-            const account = await AccountModel.findOneAsync({_id: escape(decoded.data._id)}, {_id: 1});
-            const user_id = account._id.toString();
+            let account;
+            let user_id;
+
+            try {
+                account = await AccountModel.findOneAsync({_id: escape(decoded._id), session_token: escape(decoded.session_token)}, {_id: 1});
+
+                if (!account) {
+                    return this.Game.socketManager.dispatchToSocket(socket, {
+                        type: ACCOUNT_AUTHENTICATE_ERROR,
+                        payload: 'Invalid authentication token. Please try again.',
+                    });
+                }
+
+                user_id = account._id.toString();
+            } catch (err) {
+                this.Game.onError(err, socket);
+            }
 
             try {
                 // logout any other session(s) if found
@@ -74,12 +90,22 @@ export default class AccountManager {
 
             // add the socket to the list of active clients
             this.Game.socketManager.add(socket);
+
+            // fetch the list of available game maps, for the user to selected from, when
+            // creating a new character.
+            const gameMaps = this.Game.mapManager.getList();
+
             return this.Game.socketManager.dispatchToSocket(socket, {
                 type: ACCOUNT_AUTHENTICATE_SUCCESS,
                 payload: {
                     gameData: {
-                        maps: gameData.maps,
-                    }
+                        maps: Object.keys(gameMaps).map((mapId) => {
+                            return {
+                                id: mapId,
+                                name: gameMaps[mapId].name,
+                            };
+                        }),
+                    },
                 },
             });
         });

@@ -10,7 +10,7 @@ import PageNotFound from '../page/404';
 
 import AuthContainer from '../auth';
 import GameContainer from '../game';
-import Character from '../game/character';
+import AccountContainer from '../account';
 
 // Components
 import Header from './header';
@@ -24,7 +24,6 @@ import '../../assets/twitch';
 import config from '../../config';
 
 // actions
-import {authLogin} from '../auth/actions';
 import {setConnectionStatus, setSocket, dispatchServerAction} from './actions';
 
 class App extends React.Component {
@@ -79,14 +78,16 @@ class App extends React.Component {
 
     onReconnect() {
         // re-authenticate
-        if (Twitch.getToken() && this.socket) {
+        /*if (this.socket) {
             this.socket.emit('dispatch', authLogin({
                 twitch_token: Twitch.getToken(),
             }));
-        }
+        }*/
     }
 
     onDispatch(data) {
+        console.log(data);
+
         // if the dispatch has an ignore tag, and the user is defined within this tag, ignore the dispatch
         if (data.payload && data.payload.ignore) {
             if (this.props.character && data.payload.ignore.includes(this.props.character.user_id)) {
@@ -162,7 +163,7 @@ class App extends React.Component {
                             }
                             <Route path="/auth" component={AuthContainer} />
                             <Route path="/game" component={GameContainer} />
-                            <Route path="/character" component={Character} />
+                            <Route path="/account" component={AccountContainer} />
                             <Route component={PageNotFound} />
                         </Switch>
                     </Container>

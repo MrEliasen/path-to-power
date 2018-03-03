@@ -2,101 +2,176 @@ import React from 'react';
 import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
+import axios from 'axios';
 import config from '../../config';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import {Card, CardHeader, CardBody, Input, Button, FormGroup} from 'reactstrap';
 
 // Actions
-import {authLogin, newAuthError} from './actions';
+import {authLogin} from './actions';
+import {ACCOUNT_AUTHENTICATE} from './types';
 
 class AuthLogin extends React.Component {
     constructor(props) {
         super(props);
+
+        this.state = {
+            strategies: null,
+            email: '',
+            password: '',
+            error: '',
+        };
+
+        this.authenticate = this.authenticate.bind(this);
+    }
+
+    componentWillMount() {
+        this.fetchAuthStrategies();
+        this.autoLogin();
     }
 
     componentWillReceiveProps(nextProps) {
-        if (nextProps.characterLoaded) {
-            return this.props.history.push('/game');
-        }
-
-        if (!this.props.isConnected && nextProps.isConnected) {
-            this.authenticate(nextProps.socket);
+        // check if the client has already logged in
+        if (nextProps.authToken && nextProps.socket) {
+            this.authenticateSocket(nextProps.socket, nextProps.authToken);
         }
     }
 
-    authenticate(socket) {
-        Twitch.events.addListener('auth.login', () => {
-            socket.emit('dispatch', authLogin({
-                twitch_token: Twitch.getToken(),
-            }));
+    fetchAuthStrategies() {
+        axios.get(`${config.api.host}/api/auth`)
+            .then((response) => {
+                this.setState({
+                    strategies: response.data.authlist,
+                });
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
+
+    autoLogin() {
+        let authToken = localStorage.getItem('authToken');
+
+        if (!authToken) {
+            return;
+        }
+
+        this.props.authLogin(authToken);
+    }
+
+    authenticate() {
+        const state = {...this.state};
+        // clear the error message
+        this.setState({
+            status: null,
         });
 
-        Twitch.init({
-            clientId: config.twitch.clientId,
-        }, (error, status) => {
-            if (error) {
-                return this.props.newAuthError({
-                    message: 'An error occured with Twitch.tv!',
-                    type: 'error',
-                });
-            }
+        axios
+            .post(`${config.api.host}/api/auth`, {
+                email: state.email,
+                password: state.password,
+                method: 'local',
+            })
+            .then((response) => {
+                localStorage.setItem('authToken', response.data.authToken);
+                this.props.authLogin(response.data.authToken);
+            })
+            .catch((err) => {
+                let errorMsg = 'Something went wrong. Please try again in a moment.';
 
-            // if not authenticated already.
-            if (!status.authenticated) {
-                if (window.location.pathname === '/auth') {
-                    return this.props.history.push('/');
+                if (err.response) {
+                    errorMsg = err.response.data.error || errorMsg;
                 }
 
-                if (!status.token) {
-                    return this.props.newAuthError({
-                        message: 'Authentication error. Twitch login was likely cancelled.',
-                        type: 'error',
-                    });
-                }
-
-                return Twitch.login({
-                    scope: config.twitch.scope,
+                this.setState({
+                    status: {
+                        message: errorMsg,
+                        isError: true,
+                    },
                 });
-            }
+            });
+    }
+
+    authenticateSocket(socket, token) {
+        socket.emit('dispatch', {
+            type: ACCOUNT_AUTHENTICATE,
+            payload: token,
         });
     }
 
     showStatus() {
-        if (!this.props.authError) {
-            return <p>Authenticating...</p>;
+        if (!this.state.status) {
+            return null;
         }
 
-        if (this.props.authError && this.props.authError.message) {
-            return <p className="alert alert-error">
-                {this.props.authError.message}
-            </p>;
-        }
-
-        return null;
+        return <p className={`alert alert-${this.state.status.isError ? 'danger' : 'success'}`}>
+            {this.state.status.message}
+        </p>;
     }
 
     render() {
         return (
             <Card className="card-small">
                 <CardHeader>Let's do this!</CardHeader>
-                <CardBody className="text-center">
-                    {this.showStatus()}
-                    <form>
-                        <FormGroup>
-                            <Input type="email" name="email" value="" placeholder="Email" autoComplete="email" />
-                        </FormGroup>
-                        <FormGroup>
-                            <Input type="password" name="password" value="" placeholder="Password" autoComplete="current-password" />
-                        </FormGroup>
-                        <Button color="primary">Login</Button>
-                    </form>
-                    <hr />
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, laboriosam!</p>
-                    <a className="btn btn-block btn-primary btn-brand-twitch" href={`https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=${config.twitch.clientId}&redirect_uri=${config.twitch.callbackUrl}&scope=${config.twitch.scope.join(',')}`}>
-                        <FontAwesomeIcon icon={['fab', 'twitch']} /> Login with Twitch.tv
-                    </a>
-                </CardBody>
+                {
+                    this.state.strategies &&
+                    <CardBody className="text-center">
+                        {this.showStatus()}
+                        {
+                            // if local authentication strategy is enabled
+                            this.state.strategies.find((auth) => auth.provider === 'local') &&
+                            <React.Fragment>
+                                <FormGroup>
+                                    <Input
+                                        type="email"
+                                        name="email"
+                                        placeholder="Email"
+                                        autoComplete="email"
+                                        onChange={(e) => {
+                                            this.setState({
+                                                email: e.target.value,
+                                            });
+                                        }}
+                                        value={this.state.email}
+                                    />
+                                </FormGroup>
+                                <FormGroup>
+                                    <Input
+                                        type="password"
+                                        name="password"
+                                        placeholder="Password"
+                                        autoComplete="current-password"
+                                        onChange={(e) => {
+                                            this.setState({
+                                                password: e.target.value,
+                                            });
+                                        }}
+                                        value={this.state.password}
+                                    />
+                                </FormGroup>
+                                <Button onClick={this.authenticate} color="primary">Login</Button>
+                                <hr />
+                            </React.Fragment>
+                        }
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, laboriosam!</p>
+                        {
+                            this.state.strategies.map((strat) => {
+                                if (strat.provider === 'local') {
+                                    return null;
+                                }
+
+                                return <a key={strat.provider} className={`btn btn-block btn-primary btn-brand-${strat.provider}`} href={strat.authUrl}>
+                                    <FontAwesomeIcon icon={['fab', strat.provider]} /> Login with {strat.name}
+                                </a>;
+                            })
+                        }
+                    </CardBody>
+                }
+                {
+                    !this.state.strategies &&
+                    <p>Loading..</p>
+                }
             </Card>
         );
     }
@@ -104,15 +179,13 @@ class AuthLogin extends React.Component {
 
 function mapStateToProps(state) {
     return {
-        characterLoaded: state.character ? true : false,
-        authError: {...state.auth},
-        isConnected: state.app.connected,
+        authToken: state.auth ? state.auth.authToken : null,
         socket: state.app.socket,
     };
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({newAuthError}, dispatch);
+    return bindActionCreators({authLogin}, dispatch);
 }
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(AuthLogin));

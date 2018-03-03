@@ -26,23 +26,23 @@ function setup(passport) {
 function Auth(email, password, done) {
     AccountModel.findOne({email: escape(email)}, {email: 1, password: 1, activated: 1, session_token: 1}, async (err, account) => {
         if (err) {
-            console.log(err)
+            console.log(err);
             return done('Something went wrong, please try again in a moment.');
         }
 
         if (!account) {
-            return done(null, false);
+            return done('Invalid email and password combination.');
         }
 
         if (!account.activated) {
             // TODO: write a custom callback fuction for handling errors.
-            return done('Your account has not been activated. Please click the activation link sent to your email address.', false);
+            return done('Your account has not been activated. Please click the activation link sent to your email address.');
         }
 
         const same = await account.verifyPassword(password);
 
         if (!same) {
-            return done(null, false);
+            return done('Invalid email and password combination.');
         }
 
         return done(null, account.toObject());

@@ -1,7 +1,6 @@
 import {
     ACCOUNT_LOGOUT,
     ACCOUNT_AUTHENTICATE,
-    ACCOUNT_AUTHENTICATE_ERROR,
 } from './types';
 
 export function authLogout() {
@@ -11,16 +10,9 @@ export function authLogout() {
     };
 }
 
-export function authLogin(data) {
+export function authLogin(jwt) {
     return {
         type: ACCOUNT_AUTHENTICATE,
-        payload: data,
-    };
-}
-
-export function newAuthError(notification) {
-    return {
-        type: ACCOUNT_AUTHENTICATE_ERROR,
-        payload: notification,
+        payload: jwt,
     };
 }
