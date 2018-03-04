@@ -79,7 +79,7 @@ function mapStateToProps(state) {
     return {
         characterLoaded: state.character ? true : false,
         game: {...state.game},
-        error: state.auth ? state.auth.message : null,
+        error: null,
         socket: state.app.socket,
     };
 }

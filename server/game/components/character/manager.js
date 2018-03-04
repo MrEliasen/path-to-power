@@ -12,6 +12,7 @@ import {
     LOAD_CHARACTER,
     CREATE_CHARACTER,
     CHARACTERS_GET_LIST,
+    CHARACTERS_LIST,
 } from './types';
 import {UPDATE_GROUND_ITEMS} from '../item/types';
 import Character from './object';
@@ -185,6 +186,32 @@ export default class CharacterManager {
                 user_id,
             },
         });
+    }
+
+    /**
+     * Fetches a list of all characters for the account
+     * @param  {Socket.io Socket} socket The requesting socket
+     * @param  {Object}           action Redux action object
+     */
+    async getCharacterList(socket, action) {
+        try {
+            const characters = await CharacterModel.findAsync({user_id: socket.user.user_id});
+
+            this.Game.socketManager.dispatchToSocket(socket, {
+                type: CHARACTERS_LIST,
+                payload: characters.map((obj) => {
+                    return {
+                        name: obj.name,
+                        stats: obj.stats,
+                        abilities: obj.abilities,
+                        location: obj.location,
+                        skills: obj.skills,
+                    };
+                }),
+            });
+        } catch (err) {
+            this.Game.onError(err, socket);
+        }
     }
 
     /**

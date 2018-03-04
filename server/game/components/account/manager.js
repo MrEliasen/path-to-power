@@ -77,14 +77,13 @@ export default class AccountManager {
 
             try {
                 // logout any other session(s) if found
-                await this.Game.socketManager.logoutOutSession(user_id);
+                await this.Game.socketManager.logoutOutSession(socket, user_id);
             } catch (err) {
                 this.Game.onError(err, socket);
             }
 
             // add the authenticated use to the socket object
             socket.user = {
-                ...account,
                 user_id,
             };
 

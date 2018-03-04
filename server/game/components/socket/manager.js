@@ -81,12 +81,16 @@ export default class SocketManager extends EventEmitter {
      * @param  {String} user_id The user_id of the user to logout
      * @return {promise}
      */
-    logoutOutSession(user_id) {
+    logoutOutSession(newSocket, user_id) {
         let socket;
 
         try {
             socket = this.get(user_id);
         } catch (err) {
+            return;
+        }
+
+        if (newSocket.user && socket.user && newSocket.user.user_id === socket.user.user_id) {
             return;
         }
 
@@ -139,7 +143,7 @@ export default class SocketManager extends EventEmitter {
      * @param  {Socket.IO Socket} socket
      * @param  {Bool}             forced Wether this disconnection was forced or not
      */
-    onDisconnect(user = null, forced = false) {
+    async onDisconnect(user = null, forced = false) {
         // if the user is logged in, set a timer for when we remove them from the game.
         if (user) {
             this.Game.logger.info('Socket disconnected', user);
@@ -151,7 +155,7 @@ export default class SocketManager extends EventEmitter {
             // save the character as it is right now,
             // once the timer hits, it will save once more.
             try {
-                this.Game.characterManager.save(user.user_id);
+                await this.Game.characterManager.save(user.user_id);
             } catch (err) {
                 this.Game.onError(err);
             }

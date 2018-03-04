@@ -9,8 +9,8 @@ import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import {Card, CardHeader, CardBody, Input, Button, FormGroup} from 'reactstrap';
 
 // Actions
-import {authLogin} from './actions';
-import {ACCOUNT_AUTHENTICATE} from './types';
+import {authLogin} from '../account/actions';
+import {ACCOUNT_AUTHENTICATE} from '../account/types';
 
 class AuthLogin extends React.Component {
     constructor(props) {
@@ -32,9 +32,13 @@ class AuthLogin extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
+        if (nextProps.loggedIn) {
+            this.props.history.push('/account/characters');
+        }
+
         // check if the client has already logged in
-        if (nextProps.authToken && nextProps.socket) {
-            this.authenticateSocket(nextProps.socket, nextProps.authToken);
+        if (!this.props.authToken && nextProps.authToken) {
+            this.authenticateSocket(nextProps.authToken);
         }
     }
 
@@ -93,8 +97,8 @@ class AuthLogin extends React.Component {
             });
     }
 
-    authenticateSocket(socket, token) {
-        socket.emit('dispatch', {
+    authenticateSocket(token) {
+        this.props.socket.emit('dispatch', {
             type: ACCOUNT_AUTHENTICATE,
             payload: token,
         });
@@ -179,13 +183,16 @@ class AuthLogin extends React.Component {
 
 function mapStateToProps(state) {
     return {
-        authToken: state.auth ? state.auth.authToken : null,
+        authToken: state.account.authToken,
+        loggedIn: state.account.loggedIn,
         socket: state.app.socket,
     };
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({authLogin}, dispatch);
+    return bindActionCreators({
+        authLogin,
+    }, dispatch);
 }
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(AuthLogin));

@@ -7,7 +7,7 @@ import {Container, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav} from 'reac
 import config from '../../../config';
 
 // actions
-import {authLogout} from '../../auth/actions';
+import {authLogout} from '../../account/actions';
 
 class Header extends React.Component {
     constructor(props) {

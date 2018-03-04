@@ -9,6 +9,12 @@ class CharacterList extends React.Component {
     }
 
     componentWillMount() {
+        if (!this.props.loggedIn) {
+            this.props.history.push('/auth');
+        }
+    }
+
+    componentDidMount() {
         this.props.socket.emit('dispatch', {
             type: CHARACTERS_GET_LIST,
             payload: null,
@@ -40,6 +46,7 @@ class CharacterList extends React.Component {
  */
 function mapStateToProps(state) {
     return {
+        loggedIn: state.account.loggedIn,
         socket: state.app.socket,
         characters: state.account.characters || null,
     };

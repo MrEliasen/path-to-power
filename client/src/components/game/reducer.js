@@ -1,5 +1,5 @@
 import {ADD_ONLINE_PLAYER, REMOVE_ONLINE_PLAYER, CHAT_MESSAGE, NEWS_UPDATE} from './types';
-import {ACCOUNT_LOGOUT, ACCOUNT_AUTHENTICATE_SUCCESS, ACCOUNT_AUTHENTICATE_NEW} from '../auth/types';
+import {ACCOUNT_LOGOUT, ACCOUNT_AUTHENTICATE_SUCCESS, ACCOUNT_AUTHENTICATE_NEW} from '../account/types';
 import {REMOTE_LOGOUT} from '../../shared/types';
 import {getRandomColour} from '../../helper';
 
@@ -25,7 +25,6 @@ export default function(state = defaultState, action) {
                 },
             };
 
-        case ACCOUNT_AUTHENTICATE_SUCCESS:
         case ACCOUNT_AUTHENTICATE_NEW:
             return {
                 ...state,
