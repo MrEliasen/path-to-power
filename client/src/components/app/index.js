@@ -147,6 +147,14 @@ class App extends React.Component {
         this.setState({pages});
     }
 
+    renderGameRoute(component) {
+        if (!this.props.isConnected) {
+            return <p>Connecting...</p>;
+        }
+
+        return component;
+    }
+
     render() {
         return (
             <React.Fragment>
@@ -161,9 +169,9 @@ class App extends React.Component {
                                     }} />;
                                 })
                             }
-                            <Route path="/auth" component={AuthContainer} />
-                            <Route path="/game" component={GameContainer} />
-                            <Route path="/account" component={AccountContainer} />
+                            <Route path="/auth" render={() => this.renderGameRoute(<AuthContainer/>)} />
+                            <Route path="/game" render={() => this.renderGameRoute(<GameContainer/>)} />
+                            <Route path="/account" render={() => this.renderGameRoute(<AccountContainer/>)} />
                             <Route component={PageNotFound} />
                         </Switch>
                     </Container>
@@ -183,6 +191,7 @@ function bindActionsToProps(dispatch) {
 
 function mapStateToProps(state) {
     return {
+        isConnected: state.app.connected,
         character: state.character ? {...state.character} : null,
     };
 }
