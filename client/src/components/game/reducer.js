@@ -25,7 +25,7 @@ export default function(state = defaultState, action) {
                 },
             };
 
-        case ACCOUNT_AUTHENTICATE_NEW:
+        case ACCOUNT_AUTHENTICATE_SUCCESS:
             return {
                 ...state,
                 ...action.payload.gameData,

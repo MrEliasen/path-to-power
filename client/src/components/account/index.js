@@ -2,7 +2,7 @@ import React from 'react';
 import {withRouter, Route} from 'react-router-dom';
 
 import characterList from './list';
-import characterCreate from './create';
+import characterNew from './new';
 
 class Account extends React.Component {
     constructor(props) {
@@ -13,7 +13,7 @@ class Account extends React.Component {
         return (
             <div id="account">
                 <Route path="/account/characters" exact component={characterList} />
-                <Route path="/account/characters/create" component={characterCreate} />
+                <Route path="/account/characters/new" component={characterNew} />
             </div>
         );
     }

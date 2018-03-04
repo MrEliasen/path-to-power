@@ -10,9 +10,10 @@ import {
     MOVE_CHARACTER,
     LEFT_GRID,
     LOAD_CHARACTER,
-    CREATE_CHARACTER,
     CHARACTERS_GET_LIST,
     CHARACTERS_LIST,
+    CHARACTER_CREATE,
+    CHARACTER_CREATE_ERROR,
 } from './types';
 import {UPDATE_GROUND_ITEMS} from '../item/types';
 import Character from './object';
@@ -66,7 +67,7 @@ export default class CharacterManager {
                 return this.move(socket, action);
             case LOAD_CHARACTER:
                 return this.loadCharacter(socket, action);
-            case CREATE_CHARACTER:
+            case CHARACTER_CREATE:
                 return this.newCharacter(socket, action);
             case CHARACTERS_GET_LIST:
                 return this.getCharacterList(socket, action);
@@ -836,7 +837,7 @@ export default class CharacterManager {
         // make sure the client is authenticated
         if (!socket.user || !socket.user.user_id) {
             return this.Game.socketManager.dispatchToSocket(socket, {
-                type: CHARACTER_CREATION_ERROR,
+                type: CHARACTER_CREATE_ERROR,
                 payload: {
                     routeTo: '/',
                 },
@@ -845,7 +846,7 @@ export default class CharacterManager {
 
         if (!action.payload.location) {
             return this.Game.socketManager.dispatchToSocket(socket, {
-                type: CHARACTER_CREATION_ERROR,
+                type: CHARACTER_CREATE_ERROR,
                 payload: {
                     message: 'You must select a start location.',
                 },
@@ -869,7 +870,7 @@ export default class CharacterManager {
             gameMap = this.Game.mapManager.get(action.payload.location);
         } catch (err) {
             return this.Game.socketManager.dispatchToSocket(socket, {
-                type: CHARACTER_CREATION_ERROR,
+                type: CHARACTER_CREATE_ERROR,
                 payload: {
                     message: 'Invalid start location.',
                 },
@@ -884,7 +885,7 @@ export default class CharacterManager {
             this.Game.mapManager.updateClient(newCharacter.user_id);
 
             this.Game.socketManager.dispatchToSocket(socket, {
-                type: CHARACTER_CREATION_SUCCESS,
+                type: CHARACTER_CREATE_SUCCESS,
                 payload: {
                     character: newCharacter.exportToClient(),
                     gameData: this.getGameData(),
@@ -894,7 +895,7 @@ export default class CharacterManager {
             // TODO: Test duplicate accounts
             if (err.code === 11000) {
                 return this.Game.socketManager.dispatchToSocket(socket, {
-                    type: ACCOUNT_AUTHENTICATE_ERROR,
+                    type: CHARACTER_CREATE_ERROR,
                     payload: {
                         message: 'That character name is already taken.',
                     },

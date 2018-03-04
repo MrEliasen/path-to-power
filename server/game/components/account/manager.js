@@ -98,12 +98,7 @@ export default class AccountManager {
                 type: ACCOUNT_AUTHENTICATE_SUCCESS,
                 payload: {
                     gameData: {
-                        maps: Object.keys(gameMaps).map((mapId) => {
-                            return {
-                                id: mapId,
-                                name: gameMaps[mapId].name,
-                            };
-                        }),
+                        maps: gameMaps,
                     },
                 },
             });
