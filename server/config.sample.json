@@ -1,9 +1,6 @@
 {
     "mongo_db": "mongodb://localhost:27017/ptp",
     "redis_server": "//localhost:6379",
-    "twitch": {
-        "clientId": ""
-    },
     "server": {
         "port": 8086,
         "certificate": {
@@ -12,8 +9,37 @@
             "ca": ""
         }
     },
+    "mailserver": {
+        "host": "smtp.mailserver.tld",
+        "port": 587,
+        "username": "",
+        "password": "",
+        "sender": ""
+    },
+    "api": {
+        "domain": "http://localhost",
+        "signingKey": "",
+        "port": 8087,
+        "authentication": {
+            "password": {
+                "rounds": 11,
+                "minlen": 8
+            },
+            "providers": {
+                "local": {
+                    "enabled": true
+                },
+                "github": {
+                    "enabled": false,
+                    "clientID": "",
+                    "clientSecret": "",
+                    "name": "GitHub"
+                }
+            }
+        }
+    },
     "game": {
-        "logout_timer": 5000,
+        "logout_timer": 10000,
         "defaultStats": {
             "health_max": 100,
             "money": 300,
