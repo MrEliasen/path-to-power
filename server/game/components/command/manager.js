@@ -105,8 +105,10 @@ export default class CommandManager {
         }
 
         const character = this.Game.characterManager.get(socket.user.user_id);
+        // true by default, as we assume all commands are only meant for in-game use; unless explicitly told otherwise
+        const inGameCommand = typeof this.commands[command].inGameCommand === 'undefined' ? true : this.commands[command].inGameCommand;
 
-        if (!character) {
+        if (!character && inGameCommand) {
             return;
         }
 
@@ -405,6 +407,10 @@ export default class CommandManager {
                             break;
 
                         case 'shop':
+                            if (!player) {
+                                return 'Unable to perform command. It requires you to be logged into a character.';
+                            }
+
                             value = this.Game.structureManager.getWithShop(player.location.map, player.location.x, player.location.y);
 
                             if (value) {
@@ -437,6 +443,10 @@ export default class CommandManager {
                         case 'player':
                         case 'target':
                         case 'npc':
+                            if (!player) {
+                                return 'Unable to perform command. It requires you to be logged into a character.';
+                            }
+
                             // if there is no rule modifiers, assume no location restrictions
                             // and player (since actions towards NPCs are inherently restricted to grid)
                             if (!rule[1]) {
