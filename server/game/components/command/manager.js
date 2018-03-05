@@ -440,6 +440,15 @@ export default class CommandManager {
                             }
                             break;
 
+                        case 'character':
+                            value = this.Game.characterManager.load(socket.user.user_id, msgParam.toLowerCase());
+
+                            // no item found by name or ID
+                            if (!value) {
+                                return `You do not have a character named ${param.name}.`;
+                            }
+                            break;
+
                         case 'player':
                         case 'target':
                         case 'npc':
