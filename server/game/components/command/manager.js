@@ -113,7 +113,7 @@ export default class CommandManager {
         }
 
         try {
-            const parsedParams = this.validate(character, params, this.commands[command].params);
+            const parsedParams = this.validate(character, params, this.commands[command].params, socket);
 
             // If the params is a string and not an array, something went wrong
             if (typeof parsedParams === 'string') {
