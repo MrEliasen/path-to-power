@@ -1,13 +1,32 @@
-import {UPDATE_CHARACTER} from './types';
-import {CHARACTER_LOGIN} from '../../account/types';
 import {ACCOUNT_LOGOUT} from '../../account/types';
 import {REMOTE_LOGOUT} from '../../../shared/types';
+import {
+    CHARACTERS_LIST,
+    CHARACTER_LOGIN,
+    UPDATE_CHARACTER,
+} from './types';
 
-export default function(state = null, action) {
+const defaultState = {
+    selected: null,
+    list: null,
+};
+
+export default function(state = defaultState, action) {
     switch (action.type) {
+        case ACCOUNT_LOGOUT:
+        case REMOTE_LOGOUT:
+            return defaultState;
+
+        case CHARACTERS_LIST:
+            return {
+                ...state,
+                list: action.payload,
+            };
+
         case CHARACTER_LOGIN:
             return {
-                ...action.payload.character,
+                ...state,
+                selected: action.payload.character,
             };
 
         case UPDATE_CHARACTER:
@@ -15,12 +34,6 @@ export default function(state = null, action) {
                 ...state,
                 ...action.payload,
             };
-
-        case ACCOUNT_LOGOUT:
-            return null;
-
-        case REMOTE_LOGOUT:
-            return null;
     }
 
     return state;

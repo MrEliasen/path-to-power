@@ -33,7 +33,7 @@ class AuthLogin extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.loggedIn) {
-            this.props.history.push('/account/characters');
+            this.props.history.push('/account');
         }
 
         // check if the client has already logged in

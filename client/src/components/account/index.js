@@ -1,8 +1,4 @@
 import React from 'react';
-import {withRouter, Route} from 'react-router-dom';
-
-import characterList from './list';
-import characterNew from './new';
 
 class Account extends React.Component {
     constructor(props) {
@@ -12,11 +8,10 @@ class Account extends React.Component {
     render() {
         return (
             <div id="account">
-                <Route path="/account/characters" exact component={characterList} />
-                <Route path="/account/characters/new" component={characterNew} />
+                <p>Your account.</p>
             </div>
         );
     }
 };
 
-export default withRouter(Account);
+export default Account;

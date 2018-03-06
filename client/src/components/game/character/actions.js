@@ -1,11 +1,4 @@
-import {MOVE_CHARACTER, CREATE_CHARACTER} from './types';
-
-export function createCharacter(characterData) {
-    return {
-        type: CREATE_CHARACTER,
-        payload: characterData,
-    };
-}
+import {MOVE_CHARACTER} from './types';
 
 export function moveCharacter(direction) {
     return {

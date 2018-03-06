@@ -72,8 +72,8 @@ function mapStateToProps(state) {
     return {
         loggedIn: state.account.loggedIn,
         socket: state.app.socket,
-        character: state.character,
-        characters: state.account.characters || null,
+        character: state.character.selected,
+        characterList: state.character.list,
     };
 }
 
