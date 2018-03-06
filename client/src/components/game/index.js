@@ -7,7 +7,7 @@ import {DragDropContext as dragDropContext} from 'react-dnd';
 
 import Events from './events';
 import Location from './location';
-import Shop from './shop';
+// import Shop from './shop';
 import BottomMenu from './bottom-menu';
 
 import {clearEvents, newEvent} from './events/actions';
@@ -303,7 +303,7 @@ class Game extends React.Component {
                         </Col>
                     </Row>
                 </div>
-                <Shop sendAction={this.sendAction} />
+                {/* <Shop sendAction={this.sendAction} /> --- OLD SHOP */}
             </React.Fragment>
         );
     }
