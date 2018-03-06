@@ -51,7 +51,7 @@ class CharacterCreate extends React.Component {
                                 });
                             }}
                         >
-                            <option value="" disabled defaultValue hidden>Select Start Location</option>
+                            <option value="" defaultValue hidden>Select Start Location</option>
                             {
                                 Object.keys(this.props.gameMaps).map((mapId) => {
                                     return <option key={mapId} value={`"${this.props.gameMaps[mapId].name}"`}>{this.props.gameMaps[mapId].name}</option>;
