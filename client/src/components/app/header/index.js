@@ -34,51 +34,10 @@ class Header extends React.Component {
     }
 
     logout() {
-        Twitch.logout((error) => {
-            localStorage.removeItem('account');
-            this.props.authLogout();
-            // this.props.socket.close();
-            this.props.socket.emit('logout');
-            this.goHome();
-        });
-    }
-
-    renderToolbarButtons() {
-        let authButton = null;
-        let twitchIcon = <svg style={{width: '24px', height: '24px'}} viewBox="0 0 24 24"><path fill="#ffffff" d="M4,2H22V14L17,19H13L10,22H7V19H2V6L4,2M20,13V4H6V16H9V19L12,16H17L20,13M15,7H17V12H15V7M12,7V12H10V7H12Z" /></svg>;
-        if (this.props.character) {
-            authButton = <button
-                labelcolor="#ffffff"
-                backgroundcolor="#6441A4"
-                icon={<span />}
-                onClick={this.logout.bind(this)}
-            >Log Out</button>;
-        } else {
-            authButton = <a
-                labelcolor="#ffffff"
-                backgroundcolor="#6441A4"
-                icon={twitchIcon}
-                href={`https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=${config.twitch.clientId}&redirect_uri=${config.twitch.callbackUrl}&scope=${config.twitch.scope.join(',')}`}
-            >Login With Twitch</a>;
-        }
-
-        return (
-            <div className="c-header__toolbar">
-                {
-                    !this.props.isConnected &&
-                    <span text="Connecting.." />
-                }
-                {authButton}
-                <a
-                    href="https://github.com/MrEliasen/path-to-power/wiki"
-                    target="_blank"
-                >How To Play</a>
-                <a
-                    href={this.state.issueUrl}
-                    target="_blank"
-                >Report A Bug</a>
-            </div>
-        );
+        localStorage.removeItem('authToken');
+        this.props.authLogout();
+        this.props.socket.emit('logout');
+        this.goHome();
     }
 
     generateIssueLink() {
@@ -101,9 +60,8 @@ class Header extends React.Component {
             });
     }
 
-
     renderNavAuth() {
-        if (this.props.character) {
+        if (this.props.loggedIn) {
             return (
                 <React.Fragment>
                     <NavLink className="nav-link" to="/game">Play Game</NavLink>
@@ -156,9 +114,9 @@ class Header extends React.Component {
 
 function mapStateToProps(state) {
     return {
-        gamedata: state.game,
         character: state.character.selected,
         isConnected: state.app.connected,
+        loggedIn: state.account.loggedIn,
         socket: state.app.socket,
     };
 }
