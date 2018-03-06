@@ -2,6 +2,8 @@ import GithubStrategy from 'passport-github';
 import AccountModel from '../../models/account';
 import IdentityModel from '../../models/identity';
 
+let logger;
+
 /**
  * Setup the authentication strategy
  * @param  {Passport} passport     Passport Object
@@ -9,7 +11,9 @@ import IdentityModel from '../../models/identity';
  * @param  {String}   clientSecret App Client Secret
  * @param  {String}   callbackUrl  App callback url
  */
-function setup(passport, clientId, clientSecret, callbackUrl) {
+function setup(passport, clientId, clientSecret, callbackUrl, loggerObj) {
+    logger = loggerObj
+
     //setup the stategies we want
     passport.use(new GithubStrategy({
         clientID: clientId,
@@ -24,7 +28,7 @@ function setup(passport, clientId, clientSecret, callbackUrl) {
 function Auth(accessToken, refreshToken, profile, cb) {
     IdentityModel.findOne({provider: escape(profile.provider), providerId: escape(profile.id)}, {account: 1}, async (err, identity) => {
         if (err) {
-            console.log(err);
+            logger.error(err);
             return cb('Something went wrong, please try again in a moment.');
         }
 
@@ -33,7 +37,7 @@ function Auth(accessToken, refreshToken, profile, cb) {
                 const accountId = await signup();
                 identity = await createIdentity(profile.provider, profile.id, accountId);
             } catch (err) {
-                console.log(err);
+                logger.error(err);
                 return cb('Something went wrong, please try again in a moment.');
             }
         }

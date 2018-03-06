@@ -4,11 +4,15 @@ import activationEmail from '../../../data/emails/activation.js';
 import uuid from 'uuid/v4';
 import crypto from 'crypto';
 
+let logger;                                                            
+
 /**
  * Setup the authentication strategy
  * @param  {Passport} passport     Passport Object
  */
-function setup(passport) {
+function setup(passport, clientId, clientSecret, callbackUrl, loggerObj) {
+    logger = loggerObj
+
     //setup the stategies we want
     passport.use(new LocalStrategy({
         usernameField: 'email',
@@ -26,7 +30,7 @@ function setup(passport) {
 function Auth(email, password, done) {
     AccountModel.findOne({email: escape(email)}, {email: 1, password: 1, activated: 1, session_token: 1}, async (err, account) => {
         if (err) {
-            console.log(err);
+            logger.error(err);
             return done('Something went wrong, please try again in a moment.');
         }
 
@@ -133,7 +137,7 @@ function signup(req, res) {
             // send mail with defined transport object
             mailer.sendMail(mailOptions, (error, info) => {
                 if (error) {
-                    return console.log(error);
+                    return logger.error(error);
                 }
 
                 res.status(203).json({

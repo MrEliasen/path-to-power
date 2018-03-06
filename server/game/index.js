@@ -14,6 +14,7 @@ import Promise from 'bluebird';
 
 // Custom
 import API from './api';
+import Logger from './components/logger';
 
 /************************************
  *            FILE CHECK            *
@@ -59,7 +60,17 @@ mongoose.connect(config.mongo_db).then(
             webServer = http.createServer(app);
         }
 
-        const GameServer = new Game(webServer, config);
+        const logger = new Logger({
+            level: (process.env.NODE_ENV === 'development' ? 'info' : 'error'),
+            debugFile: './game.debug.log',
+            infoFile: './game.info.log',
+            warnFile: './game.warn.log',
+            errorFile: './game.error.log',
+        });
+
+        app.set('logger', logger);
+
+        const GameServer = new Game(webServer, config, logger);
         // eslint-disable-next-line
         const RestServer = API(app, config);
 

@@ -83,13 +83,13 @@ export function activateAccount(req, res) {
  * Loads the authentication strategies
  * @param  {Express} app
  */
-export function loadStrategies(passport) {
+export function loadStrategies(passport, logger) {
     const providers = config.api.authentication.providers;
 
     for (let provider in providers) {
         if (providers.hasOwnProperty(provider)) {
             if (!strategies[provider]) {
-                return console.log(`Provider "${provider}" not found in the list of available strategies.`);
+                return logger.error(`Provider "${provider}" not found in the list of available strategies.`);
             }
 
             if (!providers[provider].enabled) {
@@ -102,7 +102,8 @@ export function loadStrategies(passport) {
                 passport,
                 providers[provider].clientID,
                 providers[provider].clientSecret,
-                callbackUrl
+                callbackUrl,
+                logger
             );
         }
     };

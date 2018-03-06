@@ -58,7 +58,7 @@ export default function(app, config) {
     });
 
     // load all authentication strategies
-    loadStrategies(passport);
+    loadStrategies(passport, app.get('logger'));
 
     // setup API routes
     // eslint-disable-next-line

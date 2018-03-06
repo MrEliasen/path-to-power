@@ -1,6 +1,5 @@
 import Promise from 'bluebird';
 import child_process from 'child_process';
-import Logger from './components/logger';
 
 // component manager
 import AccountManager from './components/account/manager';
@@ -29,11 +28,17 @@ class Game {
      * @param  {Express} server Express/http server object
      * @param  {Object}  config The server config file object
      */
-    constructor(server, config, autoInit = true) {
+    constructor(server, config, logger, autoInit = true) {
         this.config = config;
 
+        // if we are not in a production environment, add console logging as well
+        if (process.env.NODE_ENV === 'development') {
+            // enable long stack traces to promises, while in dev
+            Promise.longStackTraces();
+        }
+
         // setup the winston logger
-        this.setupLogger();
+        this.logger = logger;
 
         // will hold the latest commit ID of the server
         this.version = '';
@@ -61,27 +66,6 @@ class Game {
             // load game data
             this.init();
         }
-    }
-
-    /**
-     * Creates our logger we will be using throughout
-     */
-    setupLogger() {
-        this.logger = new Logger({
-            level: (process.env.NODE_ENV === 'development' ? 'info' : 'error'),
-            debugFile: './game.debug.log',
-            infoFile: './game.info.log',
-            warnFile: './game.warn.log',
-            errorFile: './game.error.log',
-        });
-
-        // if we are not in a production environment, add console logging as well
-        if (process.env.NODE_ENV === 'development') {
-            // enable long stack traces to promises, while in dev
-            Promise.longStackTraces();
-        }
-
-        this.logger.info('Logger initiated.');
     }
 
     /**
