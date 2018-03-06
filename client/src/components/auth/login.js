@@ -55,12 +55,23 @@ class AuthLogin extends React.Component {
     }
 
     autoLogin() {
+        const GETtoken = window.location.search.replace('?token=', '');
+
+        if (GETtoken) {
+            return this.saveAuthToken(GETtoken);
+        }
+
         let authToken = localStorage.getItem('authToken');
 
         if (!authToken) {
             return;
         }
 
+        this.props.authLogin(authToken);
+    }
+
+    saveAuthToken(authToken) {
+        localStorage.setItem('authToken', authToken);
         this.props.authLogin(authToken);
     }
 
@@ -78,8 +89,7 @@ class AuthLogin extends React.Component {
                 method: 'local',
             })
             .then((response) => {
-                localStorage.setItem('authToken', response.data.authToken);
-                this.props.authLogin(response.data.authToken);
+                this.saveAuthToken(response.data.authToken);
             })
             .catch((err) => {
                 let errorMsg = 'Something went wrong. Please try again in a moment.';

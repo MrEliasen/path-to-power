@@ -127,7 +127,7 @@ export function authenticate(req, res, next) {
 
     return passport.authenticate(method, {session: false}, (err, success, info, status) => {
         if (success) {
-            return onAuth(req, res, success);
+            return onAuth(req, res, success, method !== 'local');
         }
 
 
@@ -143,11 +143,15 @@ export function authenticate(req, res, next) {
  * @param  {Express Request} req
  * @param  {Express Reponse} res
  */
-export function onAuth(req, res, data) {
+export function onAuth(req, res, data, redirect) {
     const token = jwt.sign({
         _id: data._id,
         session_token: data.session_token,
     }, req.app.get('config').api.signingKey, {expiresIn: '7d'});
+
+    if (redirect) {
+        return res.redirect(`${req.app.get('config').clientUrl}/auth?token=${token}`);
+    }
 
     // send JWT back to client
     res.json({

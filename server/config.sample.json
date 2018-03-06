@@ -1,6 +1,6 @@
 {
     "mongo_db": "mongodb://localhost:27017/ptp",
-    "redis_server": "//localhost:6379",
+    "clientUrl": "http://localhost:8080",
     "server": {
         "port": 8086,
         "certificate": {

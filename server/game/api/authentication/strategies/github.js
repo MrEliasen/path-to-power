@@ -26,7 +26,7 @@ function setup(passport, clientId, clientSecret, callbackUrl, loggerObj) {
  * Handles authentication requests
  */
 function Auth(accessToken, refreshToken, profile, cb) {
-    IdentityModel.findOne({provider: escape(profile.provider), providerId: escape(profile.id)}, {account: 1}, async (err, identity) => {
+    IdentityModel.findOne({provider: escape(profile.provider), providerId: escape(profile.id)}, async (err, identity) => {
         if (err) {
             logger.error(err);
             return cb('Something went wrong, please try again in a moment.');
@@ -34,16 +34,36 @@ function Auth(accessToken, refreshToken, profile, cb) {
 
         if (!identity) {
             try {
-                const accountId = await signup();
-                identity = await createIdentity(profile.provider, profile.id, accountId);
+                const account = await signup();
+                identity = await createIdentity(profile.provider, profile.id, account._id.toString());
             } catch (err) {
                 logger.error(err);
                 return cb('Something went wrong, please try again in a moment.');
             }
         }
 
-        return cb(null, {
-            _id: identity.account,
+        // load the account data, associated with the identity
+        AccountModel.findOne({_id: escape(identity.account)}, {_id: 1, session_token: 1}, async (err, account) => {
+            if (err) {
+                logger.error(err);
+                return cb('Something went wrong, please try again in a moment.');
+            }
+
+            // if the account was deleted, create a new account
+            if (!account) {
+                const account = await signup();
+                identity.account = account._id.toString();
+
+                try {
+                    // update the identity with the new account id
+                    await identity.saveAsync();
+                } catch (err) {
+                    logger.error(err);
+                    return cb('Something went wrong, please try again in a moment.');
+                }
+            }
+
+            return cb(null, account.toObject());
         });
     });
 }
@@ -71,7 +91,7 @@ async function createIdentity(provider, providerId, accountId) {
 async function signup() {
     const newAccount = new AccountModel({});
     await newAccount.save();
-    return newAccount._id.toString();
+    return newAccount;
 }
 
 module.exports = {
