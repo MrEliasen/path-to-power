@@ -36,7 +36,7 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
 ReactDOM.render(
     <Provider store={store}>
         <BrowserRouter>
-                <App/>
+            <App/>
         </BrowserRouter>
     </Provider>,
     document.querySelector('#root')
