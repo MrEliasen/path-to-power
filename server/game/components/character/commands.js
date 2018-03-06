@@ -1,3 +1,5 @@
+import {CHARACTER_CREATE_SUCCESS, CHARACTER_CREATE_ERROR, CHARACTER_LOGIN} from './types';
+
 /**
  * Check attack cooldown ticks of character
  * @param  {Character}   character The character whos cooldown to check
@@ -340,6 +342,71 @@ function cmdStrike(socket, character, command, params, cmdObject, Game) {
     });
 }
 
+/**
+ * Character creation command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
+async function cmdCharacterCreate(socket, character, command, params, cmdObject, Game) {
+    let name = params[0];
+    let startLocation = params[1];
+
+    try {
+        // create a new character
+        const newCharacter = await Game.characterManager.create(socket.user.user_id, name, startLocation.id);
+
+        Game.socketManager.dispatchToSocket(socket, {
+            type: CHARACTER_CREATE_SUCCESS,
+            payload: {
+                character: newCharacter.exportToClient(),
+            },
+        });
+    } catch (err) {
+        if (err.code === 11000) {
+            return Game.socketManager.dispatchToSocket(socket, {
+                type: CHARACTER_CREATE_ERROR,
+                payload: {
+                    message: 'That character name is already taken.',
+                },
+            });
+        }
+
+        Game.onError(err, socket);
+    }
+}
+
+/**
+ * Character selection command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
+async function cmdCharacterSelect(socket, character, command, params, cmdObject, Game) {
+    const characterToLoad = params[0];
+
+    try {
+        // Login the character
+        await Game.characterManager.manage(characterToLoad);
+
+        Game.socketManager.dispatchToSocket(socket, {
+            type: CHARACTER_LOGIN,
+            payload: {
+                character: characterToLoad.exportToClient(),
+                gameData: Game.characterManager.getGameData(),
+            },
+        });
+    } catch (err) {
+        Game.onError(err, socket);
+    }
+}
+
 module.exports = [
     {
         command: '/aim',
@@ -397,5 +464,38 @@ module.exports = [
         aliases: [],
         description: 'Attcks a target (/aim) with your equipped melee weapon.',
         method: cmdStrike,
+    },
+    {
+        command: '/characterselect',
+        aliases: [],
+        params: [
+            {
+                name: 'Character Name',
+                desc: 'The name of the character you wish to login as',
+                rules: 'required|character',
+            },
+        ],
+        inGameCommand: false,
+        description: 'Login to the game with the specified character',
+        method: cmdCharacterSelect,
+    },
+    {
+        command: '/charactercreate',
+        aliases: [],
+        params: [
+            {
+                name: 'Name',
+                desc: 'The name of your character',
+                rules: 'required|minlen:2|maxlen:25',
+            },
+            {
+                name: 'Start Location',
+                desc: 'The location you want your character to start at.',
+                rules: 'required|gamemap',
+            },
+        ],
+        inGameCommand: false,
+        description: 'Create a new character. Only possible if you are not already logged in to another account.',
+        method: cmdCharacterCreate,
     },
 ];

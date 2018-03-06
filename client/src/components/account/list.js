@@ -1,12 +1,15 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {withRouter, Link} from 'react-router-dom';
-import {Card, CardBody} from 'reactstrap';
+import {Card, CardBody, Button} from 'reactstrap';
 import {CHARACTERS_GET_LIST} from './types';
+import {newCommand} from '../game/actions';
 
 class CharacterList extends React.Component {
     constructor(props) {
         super(props);
+
+        this.selectCharacter = this.selectCharacter.bind(this);
     }
 
     componentWillMount() {
@@ -20,6 +23,16 @@ class CharacterList extends React.Component {
             type: CHARACTERS_GET_LIST,
             payload: null,
         });
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.character) {
+            this.props.history.push('/game');
+        }
+    }
+
+    selectCharacter(name) {
+        this.props.socket.emit('dispatch', newCommand(`/characterselect ${name}`));
     }
 
     render() {
@@ -41,6 +54,7 @@ class CharacterList extends React.Component {
                                 <li>Cash: {obj.stats.cash}</li>
                                 <li>Bank: {obj.stats.bank}</li>
                             </ul>
+                            <Button color="success" onClick={() => this.selectCharacter(obj.name)}>Play</Button>
                         </div>)
                     }
                 </CardBody>
@@ -58,6 +72,7 @@ function mapStateToProps(state) {
     return {
         loggedIn: state.account.loggedIn,
         socket: state.app.socket,
+        character: state.character,
         characters: state.account.characters || null,
     };
 }

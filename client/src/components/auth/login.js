@@ -26,7 +26,7 @@ class AuthLogin extends React.Component {
         this.authenticate = this.authenticate.bind(this);
     }
 
-    componentWillMount() {
+    componentDidMount() {
         this.fetchAuthStrategies();
         this.autoLogin();
     }

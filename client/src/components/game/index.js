@@ -61,6 +61,7 @@ class Game extends React.Component {
     }
 
     componentWillUnmount() {
+        this.props.socket.emit('logout');
         document.removeEventListener('keydown', this.onKeyPress.bind(this));
     }
 
