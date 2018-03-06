@@ -156,8 +156,8 @@ class Header extends React.Component {
 
 function mapStateToProps(state) {
     return {
-        gamedata: {...state.game},
-        character: state.character ? {...state.character} : null,
+        gamedata: state.game,
+        character: state.character.selected,
         isConnected: state.app.connected,
         socket: state.app.socket,
     };

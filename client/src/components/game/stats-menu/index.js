@@ -45,7 +45,7 @@ class StatsMenu extends React.Component {
 
 function mapStateToProps(state) {
     return {
-        character: state.character ? {...state.character} : null,
+        character: state.character.selected,
         open: state.statsmenu.open,
     };
 }

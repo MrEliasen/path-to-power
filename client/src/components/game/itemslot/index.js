@@ -72,7 +72,7 @@ const collect = (connect, monitor) => {
 };
 function mapStateToProps(state) {
     return {
-        inventory: state.character ? [...state.character.inventory] : [],
+        inventory: state.character.selected.inventory,
     };
 }
 

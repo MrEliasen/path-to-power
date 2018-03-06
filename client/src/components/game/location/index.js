@@ -141,7 +141,7 @@ function mapStateToProps(state) {
         maps: {...state.game.maps},
         location: {...state.location},
         itemlist: {...state.game.items},
-        character: state.character ? {...state.character} : null,
+        character: state.character.selected,
     };
 }
 

@@ -68,7 +68,7 @@ function mapActionsToProps(dispatch) {
 function mapStateToProps(state) {
     return {
         structures: state.character ? [
-            ...state.game.maps[state.character.location.map].buildings,
+            ...state.game.maps[state.character.selected.location.map].buildings,
         ] : null,
     };
 }

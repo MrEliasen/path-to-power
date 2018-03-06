@@ -319,7 +319,7 @@ function mapActionsToProps(dispatch) {
 function mapStateToProps(state) {
     return {
         game: {...state.game},
-        character: state.character ? {...state.character} : null,
+        character: state.character.selected,
         socket: state.app.socket,
         connection: {
             isConnected: state.app.connected,

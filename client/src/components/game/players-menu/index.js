@@ -71,7 +71,7 @@ class PlayersMenu extends React.Component {
 function mapStateToProps(state) {
     return {
         players: [...state.game.players],
-        character: state.character ? {...state.character} : null,
+        character: state.character.selected,
         open: state.playersmenu.open,
     };
 }

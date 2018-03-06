@@ -247,8 +247,8 @@ function mapStateToProps(state) {
     return {
         shop: state.shop ? {...state.shop} : null,
         items: {...state.game.items},
-        inventory: state.character ? [...state.character.inventory] : null,
-        stats: state.character ? {...state.character.stats} : null,
+        inventory: state.character.selected.inventory,
+        stats: state.character.selected.stats,
         notification: {},
     };
 }

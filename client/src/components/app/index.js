@@ -192,7 +192,7 @@ function bindActionsToProps(dispatch) {
 function mapStateToProps(state) {
     return {
         isConnected: state.app.connected,
-        character: state.character ? {...state.character} : null,
+        character: state.character.selected,
     };
 }
 

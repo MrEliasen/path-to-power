@@ -81,7 +81,7 @@ class InventoryMenu extends React.Component {
         return (
             <React.Fragment>
                 <div className="c-inventory-menu" >
-                    <div>{`Inventory (${this.props.inventory.length}/${this.props.charcterStats.inventorySize})`}</div>
+                    <div>{`Inventory (${this.props.inventory.length}/${this.props.characterStats.inventorySize})`}</div>
                     <div>Equipped Items</div>
                     {
                         hasEquippedItems &&
@@ -171,8 +171,8 @@ class InventoryMenu extends React.Component {
 
 function mapStateToProps(state) {
     return {
-        inventory: state.character ? [...state.character.inventory] : [],
-        charcterStats: state.character ? {...state.character.stats} : {},
+        inventory: state.character.selected.inventory,
+        characterStats: state.character.selected.stats,
         open: state.inventorymenu.open,
     };
 }
