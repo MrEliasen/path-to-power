@@ -1,7 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {Card, CardBody, FormGroup, Button, Input} from 'reactstrap';
-import {CHARACTER_CREATE} from './types';
+import {newCommand} from '../game/actions';
 
 class CharacterCreate extends React.Component {
     constructor(props) {
@@ -23,14 +23,7 @@ class CharacterCreate extends React.Component {
 
     createCharacter() {
         const {name, location} = this.state;
-
-        this.props.socket.emit('dispatch', {
-            type: CHARACTER_CREATE,
-            payload: {
-                name,
-                location,
-            },
-        });
+        this.props.socket.emit('dispatch', newCommand(`/createcharacter ${name} ${location}`));
     }
 
     render() {
@@ -61,7 +54,7 @@ class CharacterCreate extends React.Component {
                             <option value="" disabled defaultValue hidden>Select Start Location</option>
                             {
                                 Object.keys(this.props.gameMaps).map((mapId) => {
-                                    return <option key={mapId} value={mapId}>{this.props.gameMaps[mapId].name}</option>;
+                                    return <option key={mapId} value={`"${this.props.gameMaps[mapId].name}"`}>{this.props.gameMaps[mapId].name}</option>;
                                 })
                             }
                         </Input>
