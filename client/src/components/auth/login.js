@@ -147,6 +147,7 @@ class AuthLogin extends React.Component {
                                 </FormGroup>
                                 <Button onClick={this.authenticate} color="primary">Login</Button>
                                 <hr />
+                                <Button onClick={() => this.props.history.push('/game')} color="warning">Go To /Game</Button>
                             </React.Fragment>
                         }
                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, laboriosam!</p>
