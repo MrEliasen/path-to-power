@@ -1,21 +1,21 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {withRouter, Link} from 'react-router-dom';
-import {Card, CardBody, Button} from 'reactstrap';
+import {CardDeck, Card, CardTitle, CardText, CardBody, Button, FormGroup, Input, Modal, ModalHeader, ModalBody, CardSubtitle} from 'reactstrap';
 import {CHARACTERS_GET_LIST} from './types';
-import {newCommand} from '../game/actions';
+import {newCommand} from '../actions';
 
-class CharacterList extends React.Component {
+class Character extends React.Component {
     constructor(props) {
         super(props);
 
-        this.selectCharacter = this.selectCharacter.bind(this);
-    }
+        this.state = {
+            name: '',
+            location: '',
+            modalCharacter: false,
+        };
 
-    componentWillMount() {
-        if (!this.props.loggedIn) {
-            this.props.history.push('/auth');
-        }
+        this.selectCharacter = this.selectCharacter.bind(this);
+        this.createCharacter = this.createCharacter.bind(this);
     }
 
     componentDidMount() {
@@ -25,40 +25,76 @@ class CharacterList extends React.Component {
         });
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.character) {
-            this.props.history.push('/game');
-        }
-    }
-
     selectCharacter(name) {
         this.props.socket.emit('dispatch', newCommand(`/characterselect ${name}`));
     }
 
+    createCharacter() {
+        const {name, location} = this.state;
+        this.props.socket.emit('dispatch', newCommand(`/charactercreate ${name} ${location}`));
+    }
+
     render() {
         return (
-            <Card className="card-small">
-                <CardBody>
-                    <Link className="btn btn-block btn-primary" to={'/account/characters/new'}>Create New Character</Link>
+            <React.Fragment>
+                {
+                    !this.props.characterList &&
+                    <p>Loading character list..</p>
+                }
+                <CardDeck>
                     {
-                        !this.props.characters &&
-                        <p>Loading character list..</p>
+                        this.props.characterList &&
+                        this.props.characterList.map((obj) => <Card key={obj.name}>
+                            <CardBody>
+                                <CardTitle>{obj.name}</CardTitle>
+                                <CardSubtitle>City..</CardSubtitle>
+                                <ul>
+                                    <li>Health: {obj.stats.health}</li>
+                                    <li>Reputaion: {obj.stats.exp}</li>
+                                    <li>Cash: {obj.stats.cash}</li>
+                                    <li>Bank: {obj.stats.bank}</li>
+                                </ul>
+                                <Button block color="success" onClick={() => this.selectCharacter(obj.name)}>Play</Button>
+                            </CardBody>
+                        </Card>)
                     }
-                    {
-                        this.props.characters &&
-                        this.props.characters.map((obj) => <div key={obj.name}>
-                            <strong>{obj.name}</strong><br/>
-                            <ul>
-                                <li>Health: {obj.stats.health}</li>
-                                <li>Reputaion: {obj.stats.exp}</li>
-                                <li>Cash: {obj.stats.cash}</li>
-                                <li>Bank: {obj.stats.bank}</li>
-                            </ul>
-                            <Button color="success" onClick={() => this.selectCharacter(obj.name)}>Play</Button>
-                        </div>)
-                    }
-                </CardBody>
-            </Card>
+                    <Card>
+                        <CardBody>
+                            <CardTitle>Create Character</CardTitle>
+                            <FormGroup>
+                                <Input
+                                    type="text"
+                                    placeholder="Enter character name"
+                                    onChange={(e) => {
+                                        this.setState({
+                                            name: e.target.value,
+                                        });
+                                    }}
+                                    value={this.state.name}
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Input
+                                    type='select'
+                                    onChange={(e) => {
+                                        this.setState({
+                                            location: e.target.value,
+                                        });
+                                    }}
+                                >
+                                    <option value="" defaultValue hidden>Select Start Location</option>
+                                    {
+                                        Object.keys(this.props.gameMaps).map((mapId) => {
+                                            return <option key={mapId} value={`"${this.props.gameMaps[mapId].name}"`}>{this.props.gameMaps[mapId].name}</option>;
+                                        })
+                                    }
+                                </Input>
+                            </FormGroup>
+                            <Button color='primary' block={true} onClick={this.createCharacter}>Create Character</Button>
+                        </CardBody>
+                    </Card>
+                </CardDeck>
+            </React.Fragment>
         );
     }
 }
@@ -70,11 +106,11 @@ class CharacterList extends React.Component {
  */
 function mapStateToProps(state) {
     return {
-        loggedIn: state.account.loggedIn,
+        gameMaps: state.game.maps,
         socket: state.app.socket,
         character: state.character.selected,
         characterList: state.character.list,
     };
 }
 
-export default withRouter(connect(mapStateToProps)(CharacterList));
+export default connect(mapStateToProps)(Character);
