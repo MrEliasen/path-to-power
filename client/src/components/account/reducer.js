@@ -12,14 +12,13 @@ export default function(state = defaultState, action) {
 
         case ACCOUNT_AUTHENTICATE:
             return {
-                ...state,
                 authToken: action.payload,
+                loggedIn: true,
             };
 
         case ACCOUNT_AUTHENTICATE_SUCCESS:
             return {
                 ...state,
-                loggedIn: true,
             };
     }
 

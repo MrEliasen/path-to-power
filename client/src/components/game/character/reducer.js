@@ -4,6 +4,7 @@ import {
     CHARACTERS_LIST,
     CHARACTER_LOGIN,
     UPDATE_CHARACTER,
+    CHARACTER_CREATE_SUCCESS,
 } from './types';
 
 const defaultState = {
@@ -27,6 +28,15 @@ export default function(state = defaultState, action) {
             return {
                 ...state,
                 selected: action.payload.character,
+            };
+
+        case CHARACTER_CREATE_SUCCESS:
+            return {
+                ...state,
+                list: [
+                    ...state.list,
+                    action.payload.character,
+                ],
             };
 
         case UPDATE_CHARACTER:

@@ -55,6 +55,11 @@ class Game extends React.Component {
             return this.props.history.push('/auth');
         }
 
+        this.props.socket.emit('dispatch', {
+            type: 'ACCOUNT_AUTHENTICATE',
+            payload: this.props.authToken
+        });
+
         document.addEventListener('keydown', this.onKeyPress.bind(this));
     }
 
@@ -334,6 +339,7 @@ function mapStateToProps(state) {
         character: state.character.selected,
         socket: state.app.socket,
         loggedIn: state.account.loggedIn,
+        authToken: state.account.authToken,
         connection: {
             isConnected: state.app.connected,
             lastEvent: state.app.connectedEvent,
