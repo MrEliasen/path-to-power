@@ -37,8 +37,6 @@ class Game extends React.Component {
             modalData: null,
             autoscroll: true,
 
-            // Temp stuff
-            modalInventory: false,
             modalShop: false,
             modalEquipment: false,
         };
@@ -48,7 +46,6 @@ class Game extends React.Component {
         this.setCommand = this.setCommand.bind(this);
         this.sendAction = this.sendAction.bind(this);
 
-        this.toggleInventory = this.toggleInventory.bind(this);
         this.toggleShop = this.toggleShop.bind(this);
         this.toggleEquipment = this.toggleEquipment.bind(this);
     }
@@ -172,10 +169,6 @@ class Game extends React.Component {
         }, 250);
     }
 
-    toggleInventory() {
-        this.setState({modalInventory: !this.state.modalInventory});
-    }
-
     toggleShop() {
         this.setState({modalShop: !this.state.modalShop});
     }
@@ -187,12 +180,6 @@ class Game extends React.Component {
     renderModals() {
         return (
             <React.Fragment>
-                <Modal isOpen={this.state.modalInventory} toggle={this.toggleInventory} size="lg">
-                    <ModalHeader toggle={this.toggleInventory}>Inventory</ModalHeader>
-                    <ModalBody>
-                        <Inventory />
-                    </ModalBody>
-                </Modal>
                 <Modal isOpen={this.state.modalEquipment} toggle={this.toggleEquipment} size="lg">
                     <ModalHeader toggle={this.toggleEquipment}>Equipment</ModalHeader>
                     <ModalBody>
@@ -273,9 +260,8 @@ class Game extends React.Component {
                         <Card>
                             <ul className="toolbar">
                                 <li><span><FontAwesomeIcon icon="dollar-sign" /> ?</span></li>
-                                <li><a href="#" onClick={this.toggleInventory}><FontAwesomeIcon icon="shield-alt" /> Inventory (2/50)</a></li>
-                                <li><a href="#" onClick={this.toggleEquipment}><FontAwesomeIcon icon="female" /> Equipment (90%)</a></li>
-                                <li><a href="#" onClick={this.toggleShop}><FontAwesomeIcon icon="shopping-cart" /> Shop (2)</a></li>
+                                <li><a href="#" onClick={this.toggleEquipment}><FontAwesomeIcon icon="shield-alt" /> Equipment ({this.props.character.inventory.length}/{this.props.character.stats.inventorySize})</a></li>
+                                <li><a href="#" onClick={this.toggleShop}><FontAwesomeIcon icon="shopping-cart" /> Shop (?)</a></li>
                                 <li><a href="#"><FontAwesomeIcon icon="tasks" /> Quests (?)</a></li>
                                 <li><a href="#"><FontAwesomeIcon icon="user-secret" /> Players (?)</a></li>
                             </ul>
