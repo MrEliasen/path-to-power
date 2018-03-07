@@ -1,9 +1,12 @@
 @import 'inventory';
 
 #game {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
+
+    .ui {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+    }
 
     p {
         margin: 0px;
