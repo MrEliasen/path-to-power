@@ -10,7 +10,6 @@ import {Card, CardHeader, CardBody, Input, Button, FormGroup} from 'reactstrap';
 
 // Actions
 import {authLogin} from '../account/actions';
-import {ACCOUNT_AUTHENTICATE} from '../account/types';
 
 class AuthLogin extends React.Component {
     constructor(props) {
@@ -29,17 +28,6 @@ class AuthLogin extends React.Component {
     componentDidMount() {
         this.fetchAuthStrategies();
         this.autoLogin();
-    }
-
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.loggedIn) {
-            this.props.history.push('/account');
-        }
-
-        // check if the client has already logged in
-        if (!this.props.authToken && nextProps.authToken) {
-            this.authenticateSocket(nextProps.authToken);
-        }
     }
 
     fetchAuthStrategies() {
@@ -105,13 +93,6 @@ class AuthLogin extends React.Component {
                     },
                 });
             });
-    }
-
-    authenticateSocket(token) {
-        this.props.socket.emit('dispatch', {
-            type: ACCOUNT_AUTHENTICATE,
-            payload: token,
-        });
     }
 
     showStatus() {
@@ -195,7 +176,6 @@ function mapStateToProps(state) {
     return {
         authToken: state.account.authToken,
         loggedIn: state.account.loggedIn,
-        socket: state.app.socket,
     };
 }
 
