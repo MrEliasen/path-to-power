@@ -2,10 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Provider} from 'react-redux';
 import {createStore, applyMiddleware, compose} from 'redux';
+import createSagaMiddleware from 'redux-saga'
 import {BrowserRouter} from 'react-router-dom';
 
 import reducers from './reducers';
 import App from './components/app';
+import sagas from './sagas';
 
 // FontAwesome Setup
 import FontAwesome from '@fortawesome/fontawesome';
@@ -17,6 +19,7 @@ FontAwesome.library.add(FontAwesomeBrands, FontAwesomeIcons);
 import './assets/styles/all.scss';
 
 let store;
+const sagaMiddleware = createSagaMiddleware();
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
     // browser redux development tools enabled (does not work on mobile)
@@ -24,14 +27,16 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
     store = createStore(
         reducers,
         composeEnhancers(
-            applyMiddleware()
+            applyMiddleware(sagaMiddleware)
         )
     );
 } else {
     // Production & mobile tests
-    const createStoreWithMiddleware = applyMiddleware()(createStore);
+    const createStoreWithMiddleware = applyMiddleware(sagaMiddleware)(createStore);
     store = createStoreWithMiddleware(reducers);
 }
+
+sagaMiddleware.run(sagas);
 
 ReactDOM.render(
     <Provider store={store}>

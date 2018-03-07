@@ -10,6 +10,7 @@ const HTMLWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: [
+    'babel-polyfill',
     'webpack-dev-server/client',
     './src/index.js',
   ],
