@@ -16,16 +16,6 @@ import AccountContainer from '../account';
 import Header from './header';
 import {Container} from 'reactstrap';
 
-// Twitch old ass lib
-// TODO: Code own implementation
-import '../../assets/twitch';
-
-// client config
-import config from '../../config';
-
-// actions
-import {setConnectionStatus, setSocket, dispatchServerAction} from './actions';
-
 class App extends React.Component {
     constructor(props) {
         super(props);
