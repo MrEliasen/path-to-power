@@ -1,4 +1,4 @@
-import {ACCOUNT_AUTHENTICATE, ACCOUNT_LOGOUT, ACCOUNT_AUTHENTICATE_SUCCESS} from './types';
+import {ACCOUNT_AUTHENTICATE_SUCCESS, ACCOUNT_LOGOUT} from './types';
 
 const defaultState = {
     authToken: null,
@@ -10,15 +10,10 @@ export default function(state = defaultState, action) {
         case ACCOUNT_LOGOUT:
             return defaultState;
 
-        case ACCOUNT_AUTHENTICATE:
+        case ACCOUNT_AUTHENTICATE_SUCCESS:
             return {
                 authToken: action.payload,
                 loggedIn: true,
-            };
-
-        case ACCOUNT_AUTHENTICATE_SUCCESS:
-            return {
-                ...state,
             };
     }
 

@@ -1,6 +1,7 @@
 import {
     ACCOUNT_LOGOUT,
     ACCOUNT_AUTHENTICATE,
+    ACCOUNT_AUTHENTICATE_SAVE,
 } from './types';
 
 export function authLogout() {
@@ -12,7 +13,17 @@ export function authLogout() {
 
 export function authLogin(jwt) {
     return {
-        type: ACCOUNT_AUTHENTICATE,
+        type: ACCOUNT_AUTHENTICATE_SAVE,
         payload: jwt,
+    };
+}
+
+export function authLocal(email, password) {
+    return {
+        type: ACCOUNT_AUTHENTICATE,
+        payload: {
+            email,
+            password,
+        },
     };
 }

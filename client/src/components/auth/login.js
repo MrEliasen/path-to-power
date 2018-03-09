@@ -2,14 +2,14 @@ import React from 'react';
 import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
-import axios from 'axios';
 import config from '../../config';
+import axios from 'axios';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import {Card, CardHeader, CardBody, Input, Button, Form, FormGroup} from 'reactstrap';
 
 // Actions
-import {authLogin} from '../account/actions';
+import {authLogin, authLocal} from '../account/actions';
 
 class AuthLogin extends React.Component {
     constructor(props) {
@@ -26,7 +26,6 @@ class AuthLogin extends React.Component {
     }
 
     componentDidMount() {
-        this.fetchAuthStrategies();
         this.autoLogin();
     }
 
@@ -52,7 +51,7 @@ class AuthLogin extends React.Component {
         let authToken = localStorage.getItem('authToken');
 
         if (!authToken) {
-            return;
+            return this.fetchAuthStrategies();
         }
 
         this.props.authLogin(authToken);
@@ -70,29 +69,7 @@ class AuthLogin extends React.Component {
             status: null,
         });
 
-        axios
-            .post(`${config.api.host}/api/auth`, {
-                email: state.email,
-                password: state.password,
-                method: 'local',
-            })
-            .then((response) => {
-                this.saveAuthToken(response.data.authToken);
-            })
-            .catch((err) => {
-                let errorMsg = 'Something went wrong. Please try again in a moment.';
-
-                if (err.response) {
-                    errorMsg = err.response.data.error || errorMsg;
-                }
-
-                this.setState({
-                    status: {
-                        message: errorMsg,
-                        isError: true,
-                    },
-                });
-            });
+        this.props.authLocal(state.email, state.password);
     }
 
     showStatus() {
@@ -183,6 +160,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         authLogin,
+        authLocal,
     }, dispatch);
 }
 
