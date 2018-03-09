@@ -2,8 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Provider} from 'react-redux';
 import {createStore, applyMiddleware, compose} from 'redux';
-import createSagaMiddleware from 'redux-saga'
-import {BrowserRouter} from 'react-router-dom';
+import createSagaMiddleware from 'redux-saga';
+
+// Redux routing
+import createHistory from 'history/createBrowserHistory';
+import {ConnectedRouter, routerMiddleware} from 'react-router-redux';
+const history = createHistory();
+const historyMiddleware = routerMiddleware(history);
 
 import reducers from './reducers';
 import App from './components/app';
@@ -27,12 +32,12 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
     store = createStore(
         reducers,
         composeEnhancers(
-            applyMiddleware(sagaMiddleware)
+            applyMiddleware(sagaMiddleware, historyMiddleware)
         )
     );
 } else {
     // Production & mobile tests
-    const createStoreWithMiddleware = applyMiddleware(sagaMiddleware)(createStore);
+    const createStoreWithMiddleware = applyMiddleware(sagaMiddleware, historyMiddleware)(createStore);
     store = createStoreWithMiddleware(reducers);
 }
 
@@ -40,9 +45,9 @@ sagaMiddleware.run(sagas);
 
 ReactDOM.render(
     <Provider store={store}>
-        <BrowserRouter>
+        <ConnectedRouter history={history}>
             <App/>
-        </BrowserRouter>
+        </ConnectedRouter>
     </Provider>,
     document.querySelector('#root')
 );
