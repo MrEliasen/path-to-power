@@ -3,7 +3,7 @@ import axios from 'axios';
 import config from '../../config';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
-import {Card, CardHeader, CardBody, Input, Button, FormGroup} from 'reactstrap';
+import {Card, CardHeader, CardBody, Input, Button, Form, FormGroup} from 'reactstrap';
 
 class AuthRegister extends React.Component {
     constructor(props) {
@@ -101,7 +101,7 @@ class AuthRegister extends React.Component {
                         {
                             // if local authentication strategy is enabled
                             this.state.strategies.find((auth) => auth.provider === 'local') &&
-                            <React.Fragment>
+                            <Form>
                                 <FormGroup>
                                     <Input
                                         type="email"
@@ -149,7 +149,7 @@ class AuthRegister extends React.Component {
                                 </FormGroup>
                                 <Button onClick={this.register} disabled={this.state.sending} color="primary">Create account</Button>
                                 <hr />
-                            </React.Fragment>
+                            </Form>
                         }
                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, laboriosam!</p>
                         {

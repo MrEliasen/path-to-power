@@ -6,7 +6,7 @@ import axios from 'axios';
 import config from '../../config';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
-import {Card, CardHeader, CardBody, Input, Button, FormGroup} from 'reactstrap';
+import {Card, CardHeader, CardBody, Input, Button, Form, FormGroup} from 'reactstrap';
 
 // Actions
 import {authLogin} from '../account/actions';
@@ -116,7 +116,7 @@ class AuthLogin extends React.Component {
                         {
                             // if local authentication strategy is enabled
                             this.state.strategies.find((auth) => auth.provider === 'local') &&
-                            <React.Fragment>
+                            <Form>
                                 <FormGroup>
                                     <Input
                                         type="email"
@@ -148,7 +148,7 @@ class AuthLogin extends React.Component {
                                 <Button onClick={this.authenticate} color="primary">Login</Button>
                                 <hr />
                                 <Button onClick={() => this.props.history.push('/game')} color="warning">Go To /Game</Button>
-                            </React.Fragment>
+                            </Form>
                         }
                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, laboriosam!</p>
                         {
