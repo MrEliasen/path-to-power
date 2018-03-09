@@ -29,6 +29,7 @@
         "@fortawesome/react-fontawesome": "0.0.17",
         "axios": "^0.18.0",
         "bootstrap": "^4.0.0",
+        "classnames": "^2.2.5",
         "jsonp": "^0.2.1",
         "react": "^16.2.0",
         "react-dnd": "^2.5.4",
