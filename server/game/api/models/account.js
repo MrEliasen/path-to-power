@@ -43,9 +43,7 @@ AccountSchema.pre('save', async function(callback) {
     }
 
     if (this.isModified('password')) {
-        debugger;
         this.password = await bcrypt.hash(this.password, config.api.authentication.password.rounds);
-        debugger;
     }
     callback();
 });
