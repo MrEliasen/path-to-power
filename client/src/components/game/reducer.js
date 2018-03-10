@@ -8,6 +8,7 @@ import {ACCOUNT_AUTHENTICATE_SUCCESS} from '../account/types';
 import {CHARACTER_LOGIN} from './character/types';
 import {REMOTE_LOGOUT} from '../../shared/types';
 import {GAME_LOGOUT} from './types';
+import {MAPS_LIST} from './map/types';
 import {getRandomColour} from '../../helper';
 
 const defaultState = {
@@ -30,6 +31,12 @@ export default function(state = defaultState, action) {
                     message: action.payload,
                     colour: getRandomColour(),
                 },
+            };
+
+        case MAPS_LIST:
+            return {
+                ...state,
+                maps: action.payload,
             };
 
         case CHARACTER_LOGIN:

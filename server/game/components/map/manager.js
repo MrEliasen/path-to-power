@@ -4,7 +4,7 @@ import fs from 'fs';
 // manager specific imports
 import GameMap from './object';
 import descriptionList from '../../data/descriptions.json';
-import {JOIN_GRID} from './types';
+import {JOIN_GRID, MAPS_GET_LIST, MAPS_LIST} from './types';
 import mapCommands from './commands';
 
 /**
@@ -19,6 +19,8 @@ export default class MapManager {
         this.Game = Game;
         // the list of maps to manage
         this.maps = {};
+        // listen for dispatches from the socket manager
+        this.Game.socketManager.on('dispatch', this.onDispatch.bind(this));
     }
 
     /**
@@ -42,6 +44,33 @@ export default class MapManager {
         });
 
         console.log('MAP MANAGER LOADED');
+    }
+
+    /**
+     * checks for dispatches, and reacts only if the type is listend to
+     * @param  {Socket.IO Socket} socket Client who dispatched the action
+     * @param  {Object} action The redux action
+     */
+    onDispatch(socket, action) {
+        switch (action.type) {
+            case MAPS_GET_LIST:
+                return this.sendMapList(socket, action);
+        }
+
+        return null;
+    }
+
+    /**
+     * Dispatches the list of available maps to the client
+     * @param  {Socket.io Socket} socket The socket the request is from
+     */
+    sendMapList(socket) {
+        const list = this.getList();
+
+        this.Game.socketManager.dispatchToSocket(socket, {
+            type: MAPS_LIST,
+            payload: list,
+        });
     }
 
     /**

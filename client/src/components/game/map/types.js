@@ -11,3 +11,6 @@ export const CLIENT_DROP_MULTIPLE_ITEMS = 'CLIENT_DROP_MULTIPLE_ITEMS';
 
 export const NPC_JOINED_GRID = 'NPC_JOINED_GRID';
 export const NPC_LEFT_GRID = 'NPC_LEFT_GRID';
+
+export const MAPS_GET_LIST = 'MAPS_GET_LIST';
+export const MAPS_LIST = 'MAPS_LIST';

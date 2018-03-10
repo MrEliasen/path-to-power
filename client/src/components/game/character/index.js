@@ -3,6 +3,7 @@ import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
 import {CardDeck, Card, CardTitle, CardBody, Button, FormGroup, Input} from 'reactstrap';
 import {CHARACTERS_GET_LIST} from './types';
+import {MAPS_GET_LIST} from '../map/types';
 import {newCommand} from '../actions';
 import {socketSend} from '../../app/actions';
 import CharacterCard from './card';
@@ -24,6 +25,10 @@ class Character extends React.Component {
     componentDidMount() {
         this.props.socketSend({
             type: CHARACTERS_GET_LIST,
+            payload: null,
+        });
+        this.props.socketSend({
+            type: MAPS_GET_LIST,
             payload: null,
         });
     }
