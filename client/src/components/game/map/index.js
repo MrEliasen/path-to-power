@@ -195,7 +195,7 @@ class Map extends React.Component {
 function mapStateToProps(state) {
     return {
         maps: {...state.game.maps},
-        location: {...state.location},
+        location: {...state.map},
         itemlist: {...state.game.items},
         character: state.character.selected,
     };

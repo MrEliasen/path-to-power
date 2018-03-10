@@ -1,4 +1,11 @@
-import {SHOP_LOAD, SHOP_EVENT, SHOP_UPDATE, SHOP_ITEM_PRICE, REMOTE_LOGOUT} from '../../../shared/types';
+import {
+    SHOP_LOAD,
+    SHOP_EVENT,
+    SHOP_UPDATE,
+    SHOP_ITEM_PRICE,
+    REMOTE_LOGOUT
+} from '../../../shared/types';
+import {GAME_LOGOUT} from '../types';
 import {SHOP_CLOSE} from './types';
 
 export default function(state = null, action) {
@@ -46,7 +53,9 @@ export default function(state = null, action) {
                 ...state,
                 details: action.payload,
             };
+
         case REMOTE_LOGOUT:
+        case GAME_LOGOUT:
             return null;
     }
 

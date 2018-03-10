@@ -130,7 +130,6 @@ function* logoutGame(action) {
         type: SOCKET_SEND,
         payload: action,
     });
-    //yield put(push('/game'));
     return action;
 }
 

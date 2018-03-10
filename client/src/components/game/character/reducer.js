@@ -1,4 +1,4 @@
-import {ACCOUNT_LOGOUT} from '../../account/types';
+import {GAME_LOGOUT} from '../types';
 import {REMOTE_LOGOUT} from '../../../shared/types';
 import {
     CHARACTERS_LIST,
@@ -14,8 +14,8 @@ const defaultState = {
 
 export default function(state = defaultState, action) {
     switch (action.type) {
-        case ACCOUNT_LOGOUT:
         case REMOTE_LOGOUT:
+        case GAME_LOGOUT:
             return defaultState;
 
         case CHARACTERS_LIST:

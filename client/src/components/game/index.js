@@ -11,10 +11,9 @@ import Map from './map';
 import BottomMenu from './bottom-menu';
 
 import {clearEvents, newEvent} from './events/actions';
-import {newCommand} from './actions';
+import {newCommand, gameLogout} from './actions';
 import {moveCharacter} from './character/actions';
 import {socketSend} from '../app/actions';
-import {GAME_LOGOUT} from './types';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
@@ -62,10 +61,7 @@ class Game extends React.Component {
     }
 
     componentWillUnmount() {
-        this.props.socketSend({
-            type: GAME_LOGOUT,
-            payload: null,
-        });
+        this.props.gameLogout();
 
         document.removeEventListener('keydown', this.onKeyPress.bind(this));
     }
@@ -331,6 +327,7 @@ function mapActionsToProps(dispatch) {
         newEvent,
         socketSend,
         newCommand,
+        gameLogout,
     }, dispatch);
 }
 

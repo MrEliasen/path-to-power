@@ -9,6 +9,7 @@ import {
     NPC_LEFT_GRID,
 } from './types';
 import {REMOTE_LOGOUT} from '../../../shared/types';
+import {GAME_LOGOUT} from '../types';
 
 const defaultState = {
     description: '',
@@ -120,7 +121,9 @@ export default function(state = defaultState, action) {
                 ...state,
                 npcs,
             };
+
         case REMOTE_LOGOUT:
+        case GAME_LOGOUT:
             return defaultState;
     }
 

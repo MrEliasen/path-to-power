@@ -1,6 +1,13 @@
-import {ADD_ONLINE_PLAYER, REMOVE_ONLINE_PLAYER, CHAT_MESSAGE, NEWS_UPDATE} from './types';
-import {ACCOUNT_LOGOUT, ACCOUNT_AUTHENTICATE_SUCCESS, CHARACTER_LOGIN} from '../account/types';
+import {
+    ADD_ONLINE_PLAYER,
+    REMOVE_ONLINE_PLAYER,
+    CHAT_MESSAGE,
+    NEWS_UPDATE,
+} from './types';
+import {ACCOUNT_AUTHENTICATE_SUCCESS} from '../account/types';
+import {CHARACTER_LOGIN} from './character/types';
 import {REMOTE_LOGOUT} from '../../shared/types';
+import {GAME_LOGOUT} from './types';
 import {getRandomColour} from '../../helper';
 
 const defaultState = {
@@ -63,8 +70,8 @@ export default function(state = defaultState, action) {
                 chat,
             };
 
-        case ACCOUNT_LOGOUT:
         case REMOTE_LOGOUT:
+        case GAME_LOGOUT:
             return defaultState;
     }
 

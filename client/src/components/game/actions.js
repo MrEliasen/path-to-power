@@ -1,4 +1,4 @@
-import {GAME_COMMAND} from './types';
+import {GAME_COMMAND, GAME_LOGOUT} from './types';
 import {socketSend} from '../app/actions';
 
 export function newCommand(command) {
@@ -6,4 +6,11 @@ export function newCommand(command) {
         type: GAME_COMMAND,
         payload: command,
     });
+}
+
+export function gameLogout(command) {
+    return {
+        type: GAME_LOGOUT,
+        payload: null,
+    };
 }

@@ -1,5 +1,6 @@
 import {NEW_EVENT, COMMAND_ERROR, CLEAR_EVENTS} from './types';
 import {REMOTE_LOGOUT} from '../../../shared/types';
+import {GAME_LOGOUT} from '../types';
 
 export default function(state = [], action) {
     let events;
@@ -36,6 +37,7 @@ export default function(state = [], action) {
             return events.reverse().splice(0, 100).reverse();
 
         case REMOTE_LOGOUT:
+        case GAME_LOGOUT:
             return [];
     }
 
