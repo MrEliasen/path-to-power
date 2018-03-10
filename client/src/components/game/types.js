@@ -3,3 +3,4 @@ export const CHAT_MESSAGE = 'CHAT_MESSAGE';
 export const REMOVE_ONLINE_PLAYER = 'REMOVE_ONLINE_PLAYER';
 export const GAME_COMMAND = 'GAME_COMMAND';
 export const NEWS_UPDATE = 'NEWS_UPDATE';
+export const GAME_LOGOUT = 'GAME_LOGOUT';

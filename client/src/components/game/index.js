@@ -13,6 +13,8 @@ import BottomMenu from './bottom-menu';
 import {clearEvents, newEvent} from './events/actions';
 import {newCommand} from './actions';
 import {moveCharacter} from './character/actions';
+import {socketSend} from '../app/actions';
+import {GAME_LOGOUT} from './types';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
@@ -56,16 +58,15 @@ class Game extends React.Component {
             return this.props.history.push('/auth');
         }
 
-        this.props.socket.emit('dispatch', {
-            type: 'ACCOUNT_AUTHENTICATE',
-            payload: this.props.authToken,
-        });
-
         document.addEventListener('keydown', this.onKeyPress.bind(this));
     }
 
     componentWillUnmount() {
-        this.props.socket.emit('logout');
+        this.props.socketSend({
+            type: GAME_LOGOUT,
+            payload: null,
+        });
+
         document.removeEventListener('keydown', this.onKeyPress.bind(this));
     }
 
@@ -147,7 +148,7 @@ class Game extends React.Component {
     }
 
     sendAction(action) {
-        this.props.socket.emit('dispatch', action);
+        this.props.socketSend(action);
     }
 
     sendCommand(command = null) {
@@ -161,7 +162,7 @@ class Game extends React.Component {
                 message: '',
             });
         } else {
-            this.props.socket.emit('dispatch', newCommand(command));
+            this.props.newCommand(command);
         }
 
         this.setState({command: ''});
@@ -324,6 +325,8 @@ function mapActionsToProps(dispatch) {
     return bindActionCreators({
         clearEvents,
         newEvent,
+        socketSend,
+        newCommand,
     }, dispatch);
 }
 

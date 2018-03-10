@@ -1,4 +1,4 @@
-import {CONNECTION_STATUS, CONNECTION_SOCKET} from './types';
+import {CONNECTION_STATUS, SOCKET_CONNECT, SOCKET_SEND} from './types';
 
 export function setConnectionStatus(connected, connectedEvent) {
     return {
@@ -10,13 +10,17 @@ export function setConnectionStatus(connected, connectedEvent) {
     };
 }
 
-export function setSocket(socket) {
+export function socketConnect() {
     return {
-        type: CONNECTION_SOCKET,
-        payload: socket,
+        type: SOCKET_CONNECT,
+        payload: null,
     };
 }
 
-export function dispatchServerAction(action) {
-    return action;
+
+export function socketSend(action) {
+    return {
+        type: SOCKET_SEND,
+        payload: action,
+    };
 }

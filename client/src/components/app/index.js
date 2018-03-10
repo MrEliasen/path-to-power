@@ -16,6 +16,9 @@ import AccountContainer from '../account';
 import Header from './header';
 import {Container} from 'reactstrap';
 
+// actions
+import {socketConnect} from './actions';
+
 class App extends React.Component {
     constructor(props) {
         super(props);
@@ -29,50 +32,8 @@ class App extends React.Component {
         this.getPages();
     }
 
-    componentWillUnmount() {
-        if (this.socket) {
-            this.socket.close();
-        }
-    }
-
     componentDidMount() {
-        this.connect();
-    }
-
-    /**
-     * Setup the socket io client, and connect to the server
-     */
-    connect() {
-        this.socket = io(config.socket.host, {
-            reconnect: true,
-        });
-
-        this.socket
-            .on('connect', this.onConnect.bind(this))
-            .on('reconnect', this.onConnect.bind(this))
-            .on('connect_timeout', this.onTimeout.bind(this))
-            .on('disconnect', this.onTimeout.bind(this))
-            .on('reconnect', this.onReconnect.bind(this))
-            .on('dispatch', this.onDispatch.bind(this));
-
-        this.props.setSocket(this.socket);
-    }
-
-    onConnect() {
-        this.props.setConnectionStatus(true, 'Connected');
-    }
-
-    onTimeout() {
-        this.props.setConnectionStatus(false, 'Connection Timed Out - Reconnecting');
-    }
-
-    onReconnect() {
-        // re-authenticate
-        /*if (this.socket) {
-            this.socket.emit('dispatch', authLogin({
-                twitch_token: Twitch.getToken(),
-            }));
-        }*/
+        this.props.socketConnect();
     }
 
     onDispatch(data) {
@@ -171,11 +132,9 @@ class App extends React.Component {
     }
 }
 
-function bindActionsToProps(dispatch) {
+function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-        setConnectionStatus,
-        setSocket,
-        dispatchServerAction,
+        socketConnect,
     }, dispatch);
 }
 
@@ -186,4 +145,4 @@ function mapStateToProps(state) {
     };
 }
 
-export default withRouter(connect(mapStateToProps, bindActionsToProps)(App));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));

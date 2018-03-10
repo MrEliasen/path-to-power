@@ -1,8 +1,10 @@
 import React from 'react';
+import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
 import {CardDeck, Card, CardTitle, CardBody, Button, FormGroup, Input} from 'reactstrap';
 import {CHARACTERS_GET_LIST} from './types';
 import {newCommand} from '../actions';
+import {socketSend} from '../../app/actions';
 import CharacterCard from './card';
 
 class Character extends React.Component {
@@ -20,19 +22,19 @@ class Character extends React.Component {
     }
 
     componentDidMount() {
-        this.props.socket.emit('dispatch', {
+        this.props.socketSend({
             type: CHARACTERS_GET_LIST,
             payload: null,
         });
     }
 
     selectCharacter(name) {
-        this.props.socket.emit('dispatch', newCommand(`/characterselect ${name}`));
+        this.props.newCommand(`/characterselect ${name}`);
     }
 
     createCharacter() {
         const {name, location} = this.state;
-        this.props.socket.emit('dispatch', newCommand(`/charactercreate ${name} ${location}`));
+        this.props.newCommand(`/charactercreate ${name} ${location}`);
     }
 
     render() {
@@ -88,6 +90,13 @@ class Character extends React.Component {
     }
 }
 
+function mapDispatchToProps(dispatch) {
+    return bindActionCreators({
+        socketSend,
+        newCommand,
+    }, dispatch);
+}
+
 /**
  * Maps redux state to properties
  * @param  {Object} state Redux store state object
@@ -102,4 +111,4 @@ function mapStateToProps(state) {
     };
 }
 
-export default connect(mapStateToProps)(Character);
+export default connect(mapStateToProps, mapDispatchToProps)(Character);

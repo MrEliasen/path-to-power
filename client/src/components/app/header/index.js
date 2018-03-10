@@ -4,8 +4,6 @@ import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import {Container, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav} from 'reactstrap';
 
-import config from '../../../config';
-
 // actions
 import {authLogout} from '../../account/actions';
 
@@ -29,15 +27,9 @@ class Header extends React.Component {
         }
     }
 
-    goHome() {
-        this.props.history.push('/');
-    }
-
     logout() {
         localStorage.removeItem('authToken');
         this.props.authLogout();
-        this.props.socket.emit('logout');
-        this.goHome();
     }
 
     generateIssueLink() {
@@ -66,7 +58,7 @@ class Header extends React.Component {
                 <React.Fragment>
                     <NavLink className="nav-link" to="/game">Play Game</NavLink>
                     <NavLink className="nav-link" to="/auth/settings">Settings</NavLink>
-                    <NavLink className="nav-link" to="/auth/logout" onClick={this.logout.bind(this)}>Logout</NavLink>
+                    <a className="nav-link" href="#" onClick={this.logout.bind(this)}>Logout</a>
                 </React.Fragment>
             );
         } else {

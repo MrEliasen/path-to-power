@@ -20,7 +20,7 @@ class BottomMenu extends React.Component {
         if (command.toLowerCase() === '/clear') {
             this.props.clearEvents();
         } else {
-            this.props.socket.emit('dispatch', newCommand(command));
+            this.props.newCommand(command);
         }
     }
 
@@ -62,6 +62,7 @@ function mapActionsToProps(dispatch) {
         toggleStatsMenu,
         clearEvents,
         newEvent,
+        newCommand,
     }, dispatch);
 }
 

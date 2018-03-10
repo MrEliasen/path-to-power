@@ -1,8 +1,9 @@
 import {GAME_COMMAND} from './types';
+import {socketSend} from '../app/actions';
 
 export function newCommand(command) {
-    return {
+    return socketSend({
         type: GAME_COMMAND,
         payload: command,
-    };
+    });
 }
