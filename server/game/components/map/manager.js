@@ -1,5 +1,5 @@
 import fs from 'fs';
-import Promise from 'bluebird';
+// import Promise from 'bluebird';
 
 // manager specific imports
 import GameMap from './object';
@@ -127,6 +127,7 @@ export default class MapManager {
             list[mapId] = {
                 name: this.maps[mapId].name,
                 buildings: this.Game.structureManager.getMapData(mapId),
+                gridSize: this.maps[mapId].gridSize,
             };
         });
 
