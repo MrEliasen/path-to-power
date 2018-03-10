@@ -25,6 +25,7 @@ import Chat from './chat';
 import Inventory from './inventory';
 import ItemSlot from './itemslot';
 import Character from './character';
+import CharacterCard from './character/card';
 
 class Game extends React.Component {
     constructor(props) {
@@ -230,6 +231,7 @@ class Game extends React.Component {
             <div className="ui">
                 <Row>
                     <Col className="left">
+                        <CharacterCard character={this.props.character} />
                         <Location />
                         <Card>
                             <CardHeader>Character</CardHeader>
