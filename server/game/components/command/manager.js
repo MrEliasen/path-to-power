@@ -1,4 +1,3 @@
-import Promise from 'bluebird';
 import escapeStringRegex from 'escape-string-regexp';
 import {GAME_COMMAND} from './types';
 import commandCommands from './commands';

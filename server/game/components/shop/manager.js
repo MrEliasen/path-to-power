@@ -1,5 +1,3 @@
-import Promise from 'bluebird';
-
 // manager specific imports
 import shopCommands from './commands';
 import ShopList from '../../data/shops.json';

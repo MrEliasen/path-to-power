@@ -1,4 +1,3 @@
-import Promise from 'bluebird';
 import Character from '../character/object';
 import uuid from 'uuid/v4';
 

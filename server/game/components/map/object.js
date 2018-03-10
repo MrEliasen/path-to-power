@@ -1,5 +1,3 @@
-import Promise from 'bluebird';
-
 /**
  * Game map object
  */

@@ -1,4 +1,3 @@
-import Promise from 'bluebird';
 import uuid from 'uuid/v4';
 import {SHOP_UPDATE} from '../../../shared/types';
 import {dice} from '../../helper';

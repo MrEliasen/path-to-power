@@ -1,5 +1,3 @@
-import Promise from 'bluebird';
-
 // manager specific imports
 import SkillList from './skills';
 import skillCommands from './commands';

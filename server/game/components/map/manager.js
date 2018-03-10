@@ -1,5 +1,4 @@
 import fs from 'fs';
-// import Promise from 'bluebird';
 
 // manager specific imports
 import GameMap from './object';

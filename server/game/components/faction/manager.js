@@ -1,4 +1,3 @@
-import Promise from 'bluebird';
 import uuid from 'uuid/v4';
 import FactionModel from './model';
 import Faction from './object';
