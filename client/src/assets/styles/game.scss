@@ -12,6 +12,36 @@
         margin: 0px;
     }
 
+    #map {
+        background: $gray-100;
+        margin: -1px;
+
+        .y {
+            display: flex;
+        }
+
+        .x {
+            flex: 1 0 auto;
+            height: auto;
+            background: $gray-300;
+            margin: 1px;
+
+            &::before {
+                content: '';
+                float: left;
+                padding-top: 100%;
+            }
+
+            &.b {
+                background: rgb(41, 145, 9);
+            }
+
+            &.c {
+                background: rgb(170, 9, 9);
+            }
+        }
+    }
+
     .card-messages {
         @include mudfont;
 
@@ -22,6 +52,43 @@
 
             li {
                 margin-top: 5px;
+            }
+        }
+    }
+
+    .card-deck .card {
+        flex: 0 0 calc(25% - #{$grid-gutter-width});
+        margin-bottom: $grid-gutter-width;
+    }
+
+    .card-character {
+
+        .stats {
+            background: $gray-200;
+            border-radius: $border-radius;
+            margin-bottom: $grid-gutter-width / 2;
+            font-size: ($font-size-base * .75);
+        }
+
+        .card-avatar {
+            display: flex;
+            width: 100%;
+            height: 100px;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            border-top-left-radius: $border-radius;
+            border-top-right-radius: $border-radius;
+            text-align: center;
+
+            .name {
+                font-size: 140%;
+            }
+
+            .map {
+                font-size: 90%;
+                line-height: 1;
             }
         }
     }

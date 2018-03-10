@@ -1,8 +1,9 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {CardDeck, Card, CardTitle, CardText, CardBody, Button, FormGroup, Input, Modal, ModalHeader, ModalBody, CardSubtitle} from 'reactstrap';
+import {CardDeck, Card, CardTitle, CardBody, Button, FormGroup, Input} from 'reactstrap';
 import {CHARACTERS_GET_LIST} from './types';
 import {newCommand} from '../actions';
+import CharacterCard from './card';
 
 class Character extends React.Component {
     constructor(props) {
@@ -44,19 +45,7 @@ class Character extends React.Component {
                 <CardDeck>
                     {
                         this.props.characterList &&
-                        this.props.characterList.map((obj) => <Card key={obj.name}>
-                            <CardBody>
-                                <CardTitle>{obj.name}</CardTitle>
-                                <CardSubtitle>City..</CardSubtitle>
-                                <ul>
-                                    <li>Health: {obj.stats.health}</li>
-                                    <li>Reputaion: {obj.stats.exp}</li>
-                                    <li>Cash: {obj.stats.cash}</li>
-                                    <li>Bank: {obj.stats.bank}</li>
-                                </ul>
-                                <Button block color="success" onClick={() => this.selectCharacter(obj.name)}>Play</Button>
-                            </CardBody>
-                        </Card>)
+                        this.props.characterList.map((obj, index) => <CharacterCard key={index} onSelect={this.selectCharacter} character={obj} />)
                     }
                     <Card>
                         <CardBody>

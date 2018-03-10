@@ -1,4 +1,4 @@
-import Promise from 'bluebird';
+// import Promise from 'bluebird';
 
 // manager specific imports
 import Structure from './object';
@@ -163,6 +163,7 @@ export default class StructureManager {
             structureList[gridId].forEach((obj) => {
                 structureData.push({
                     name: obj.name,
+                    colour: obj.colour,
                     location: {
                         x: obj.location.x,
                         y: obj.location.y,

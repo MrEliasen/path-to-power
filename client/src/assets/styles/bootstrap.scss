@@ -11,6 +11,8 @@ $font-family-sans-serif:    'Roboto', sans-serif;
 $link-hover-decoration:     none;
 $navbar-nav-link-padding-x: .8rem;
 
+$progress-height:           1.5rem;
+
 $card-border-width:         0;
 $card-cap-bg:               $primary-dark;
 
@@ -34,6 +36,10 @@ $theme-colors: (
         padding: .4rem $card-spacer-x;
         color: $white;
     }
+}
+
+.progress {
+    margin-bottom: .5rem;
 }
 
 .btn:hover {

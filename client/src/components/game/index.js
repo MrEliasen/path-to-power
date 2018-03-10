@@ -25,6 +25,7 @@ import Chat from './chat';
 import Inventory from './inventory';
 import ItemSlot from './itemslot';
 import Character from './character';
+import CharacterCard from './character/card';
 
 class Game extends React.Component {
     constructor(props) {
@@ -57,7 +58,7 @@ class Game extends React.Component {
 
         this.props.socket.emit('dispatch', {
             type: 'ACCOUNT_AUTHENTICATE',
-            payload: this.props.authToken
+            payload: this.props.authToken,
         });
 
         document.addEventListener('keydown', this.onKeyPress.bind(this));
@@ -230,18 +231,12 @@ class Game extends React.Component {
             <div className="ui">
                 <Row>
                     <Col className="left">
+                        <CharacterCard character={this.props.character} />
+                        <Location />
                         <Card>
                             <CardHeader>Character</CardHeader>
                             <CardBody>
                                 <StatsMenu />
-                            </CardBody>
-                        </Card>
-                        <Card>
-                            <CardHeader>Location</CardHeader>
-                            <CardBody>
-                                [Minimap]
-                                <hr />
-                                <Location />
                             </CardBody>
                         </Card>
                         <Card>
@@ -264,7 +259,6 @@ class Game extends React.Component {
                     <Col sm="9" className="middle">
                         <Card>
                             <ul className="toolbar">
-                                <li><span><FontAwesomeIcon icon="dollar-sign" /> ?</span></li>
                                 <li><a href="#" onClick={this.toggleEquipment}><FontAwesomeIcon icon="shield-alt" /> Equipment ({this.props.character.inventory.length}/{this.props.character.stats.inventorySize})</a></li>
                                 <li><a href="#" onClick={this.toggleShop}><FontAwesomeIcon icon="shopping-cart" /> Shop (?)</a></li>
                                 <li><a href="#"><FontAwesomeIcon icon="tasks" /> Quests (?)</a></li>
