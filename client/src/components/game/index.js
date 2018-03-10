@@ -230,18 +230,11 @@ class Game extends React.Component {
             <div className="ui">
                 <Row>
                     <Col className="left">
+                        <Location />
                         <Card>
                             <CardHeader>Character</CardHeader>
                             <CardBody>
                                 <StatsMenu />
-                            </CardBody>
-                        </Card>
-                        <Card>
-                            <CardHeader>Location</CardHeader>
-                            <CardBody>
-                                [Minimap]
-                                <hr />
-                                <Location />
                             </CardBody>
                         </Card>
                         <Card>
