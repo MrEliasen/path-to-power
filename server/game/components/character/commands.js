@@ -402,6 +402,9 @@ async function cmdCharacterSelect(socket, character, command, params, cmdObject,
                 gameData: Game.characterManager.getGameData(),
             },
         });
+
+        // send MOTD after logging in the character
+        Game.sendMotdToSocket(socket);
     } catch (err) {
         Game.onError(err, socket);
     }
