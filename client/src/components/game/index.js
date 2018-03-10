@@ -57,7 +57,7 @@ class Game extends React.Component {
 
         this.props.socket.emit('dispatch', {
             type: 'ACCOUNT_AUTHENTICATE',
-            payload: this.props.authToken
+            payload: this.props.authToken,
         });
 
         document.addEventListener('keydown', this.onKeyPress.bind(this));
