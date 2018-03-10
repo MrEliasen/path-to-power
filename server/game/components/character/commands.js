@@ -403,6 +403,9 @@ async function cmdCharacterSelect(socket, character, command, params, cmdObject,
             },
         });
 
+        // send the grid details of the current location
+        Game.mapManager.updateClient(characterToLoad.user_id);
+
         // send MOTD after logging in the character
         Game.sendMotdToSocket(socket);
     } catch (err) {
