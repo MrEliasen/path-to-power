@@ -259,7 +259,6 @@ class Game extends React.Component {
                     <Col sm="9" className="middle">
                         <Card>
                             <ul className="toolbar">
-                                <li><span><FontAwesomeIcon icon="dollar-sign" /> ?</span></li>
                                 <li><a href="#" onClick={this.toggleEquipment}><FontAwesomeIcon icon="shield-alt" /> Equipment ({this.props.character.inventory.length}/{this.props.character.stats.inventorySize})</a></li>
                                 <li><a href="#" onClick={this.toggleShop}><FontAwesomeIcon icon="shopping-cart" /> Shop (?)</a></li>
                                 <li><a href="#"><FontAwesomeIcon icon="tasks" /> Quests (?)</a></li>
