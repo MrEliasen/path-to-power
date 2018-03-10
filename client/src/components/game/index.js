@@ -25,7 +25,7 @@ import PlayersMenu from './players-menu';
 import StatsMenu from './stats-menu';
 import Chat from './chat';
 import Inventory from './inventory';
-import ItemSlot from './itemslot';
+import ItemSlot from './item/slot';
 import Character from './character';
 import CharacterCard from './character/card';
 

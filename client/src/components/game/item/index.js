@@ -1,6 +1,6 @@
 import React from 'react';
 import {DragSource as dragSource} from 'react-dnd';
-import ItemTooltip from '../itemtooltip';
+import ItemTooltip from './tooltip';
 
 class Item extends React.Component {
     constructor(props) {

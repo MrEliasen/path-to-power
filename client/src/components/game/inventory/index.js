@@ -1,5 +1,5 @@
 import React from 'react';
-import ItemSlot from '../itemslot';
+import ItemSlot from '../item/slot';
 
 class Inventory extends React.Component {
     constructor(props) {
