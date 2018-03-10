@@ -7,3 +7,6 @@ export const SHOP_UPDATE = 'SHOP_UPDATE';
 export const SHOP_EVENT = 'SHOP_EVENT';
 
 export const REMOTE_LOGOUT = 'REMOTE_LOGOUT';
+
+export const ACCOUNT_LOGOUT = 'ACCOUNT_LOGOUT';
+export const GAME_LOGOUT = 'GAME_LOGOUT';

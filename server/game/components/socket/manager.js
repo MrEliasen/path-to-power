@@ -1,7 +1,7 @@
 import io from 'socket.io';
 import EventEmitter from 'events';
 import {ACCOUNT_AUTHENTICATE} from '../account/types';
-import {REMOTE_LOGOUT} from '../../../shared/types';
+import {REMOTE_LOGOUT, ACCOUNT_LOGOUT, GAME_LOGOUT} from '../../../shared/types';
 
 /**
  * Socket manager
@@ -66,13 +66,8 @@ export default class SocketManager extends EventEmitter {
             this.onClientDispatch(socket, action);
         });
 
-        socket.on('logout', (action) => {
-            this.onDisconnect({...socket.user});
-            socket.user = null;
-        });
-
         socket.on('disconnect', () => {
-            this.onDisconnect(socket.user);
+            this.onDisconnect(socket);
         });
     }
 
@@ -94,10 +89,7 @@ export default class SocketManager extends EventEmitter {
             return;
         }
 
-        const user = {...socket.user};
-
-        socket.user = null;
-        this.onDisconnect(user, true);
+        this.onDisconnect(socket, true, false);
 
         this.dispatchToSocket(socket, {
             type: REMOTE_LOGOUT,
@@ -140,13 +132,20 @@ export default class SocketManager extends EventEmitter {
 
     /**
      * Handles socket disconnections
-     * @param  {Socket.IO Socket} socket
-     * @param  {Bool}             forced Wether this disconnection was forced or not
+     * @param  {Socket.IO Socket} socket        The socket the request from made from
+     * @param  {Bool}             forced        Wether this disconnection was forced or not
+     * @param  {Bool}             accountLogout If we should logout the whole account
      */
-    async onDisconnect(user = null, forced = false) {
+    async onDisconnect(socket, forced = false, accountLogout = false) {
+        const user = socket.user ? {...socket.user} : null;
+
         // if the user is logged in, set a timer for when we remove them from the game.
         if (user) {
             this.Game.logger.info('Socket disconnected', user);
+
+            if (accountLogout) {
+                socket.user = null;
+            }
 
             if (forced) {
                 return this.emit('disconnect', user);
@@ -193,6 +192,10 @@ export default class SocketManager extends EventEmitter {
         // being authenticated, ignore the request.
         if (!socket.user && action.type !== ACCOUNT_AUTHENTICATE) {
             return;
+        }
+
+        if ([ACCOUNT_LOGOUT, GAME_LOGOUT].includes(action.type)) {
+            this.onDisconnect(socket, false, action.type === ACCOUNT_LOGOUT);
         }
 
         // emit the dispatch, which managers listen for
