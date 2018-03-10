@@ -42,7 +42,10 @@ export default function(state = defaultState, action) {
         case UPDATE_CHARACTER:
             return {
                 ...state,
-                ...action.payload,
+                selected: {
+                    ...state.selected,
+                    ...action.payload,
+                },
             };
     }
 
