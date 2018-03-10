@@ -80,7 +80,13 @@ class Game extends React.Component {
     }
 
     onKeyPress(e) {
+        // User isn't playing a character, ABORT!
         if (!this.props.character) {
+            return;
+        }
+
+        // User is typing something, ABORT!
+        if (document.activeElement.value) {
             return;
         }
 
@@ -89,14 +95,12 @@ class Game extends React.Component {
             case 'ArrowDown':
             case 'ArrowLeft':
             case 'ArrowRight':
+                e.preventDefault();
                 this.movePosition(e);
                 break;
 
             case '/':
-                // set focus if they are not typing into an input field
-                if (!document.activeElement.value) {
-                    document.querySelector('#input-command').focus();
-                }
+                document.querySelector('#input-command').focus();
                 break;
         }
     }
