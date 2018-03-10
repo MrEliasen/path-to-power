@@ -26,20 +26,22 @@ class PlayerMap extends React.Component {
     }
 
     renderMinimap() {
-        const gridX = 30;
-        const gridY = 30;
         let grid = [];
         let buildings = {};
+        let map = this.props.maps[this.props.character.location.map];
+
+        if (typeof map === 'undefined') {
+            return grid;
+        }
 
         // Let's cache the buildings array here to avoid affecting performance inside the nested loop
-        let map = this.props.maps[this.props.character.location.map];
         map.buildings.map((building) => {
             buildings[building.location.x + '-' + building.location.y] = building.colour;
         });
 
-        for (let y = 0; y < gridY; y++) {
+        for (let y = 0; y < map.gridSize.y; y++) {
             let cells = [];
-            for (let x = 0; x < gridX; x++) {
+            for (let x = 0; x < map.gridSize.x; x++) {
                 let cellId = x + '-' + y;
                 let classes = ['x'];
                 let styles = {};
