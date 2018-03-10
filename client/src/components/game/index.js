@@ -6,7 +6,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import {DragDropContext as dragDropContext} from 'react-dnd';
 
 import Events from './events';
-import Location from './location';
+import Map from './map';
 // import Shop from './shop';
 import BottomMenu from './bottom-menu';
 
@@ -237,7 +237,7 @@ class Game extends React.Component {
                 <Row>
                     <Col className="left">
                         <CharacterCard character={this.props.character} />
-                        <Location />
+                        <Map />
                         <Card>
                             <CardHeader>Character</CardHeader>
                             <CardBody>

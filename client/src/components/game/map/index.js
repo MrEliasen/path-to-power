@@ -6,7 +6,7 @@ import {Card, CardBody, CardHeader} from 'reactstrap';
 import classnames from 'classnames';
 import {getStringColour} from '../../../helper';
 
-class PlayerMap extends React.Component {
+class Map extends React.Component {
     constructor(props) {
         super(props);
 
@@ -25,7 +25,7 @@ class PlayerMap extends React.Component {
         });
     }
 
-    renderMinimap() {
+    renderGrid() {
         let grid = [];
         let buildings = {};
         let map = this.props.maps[this.props.character.location.map];
@@ -84,13 +84,16 @@ class PlayerMap extends React.Component {
 
         return (
             <Card>
-                <CardHeader>Location</CardHeader>
+                <CardHeader>
+                    <div className="float-right">
+                        N {this.props.character.location.y} : E {this.props.character.location.x}
+                    </div>
+                    Map: {this.props.maps[this.props.character.location.map].name}
+                </CardHeader>
                 <div id="map">
-                    {this.renderMinimap()}
+                    {this.renderGrid()}
                 </div>
                 <CardBody>
-                    <strong>Location:</strong> {this.props.maps[this.props.character.location.map].name}<br />
-                    <strong>Compass:</strong> North {this.props.character.location.y} / East {this.props.character.location.x}<br/>
                     "{location.description}"<br/>
                     <div className="c-game__event-divider" />
                     {
@@ -202,4 +205,4 @@ function mapActionsToProps(dispatch) {
     return bindActionCreators({newEvent}, dispatch);
 }
 
-export default connect(mapStateToProps, mapActionsToProps)(PlayerMap);
+export default connect(mapStateToProps, mapActionsToProps)(Map);
