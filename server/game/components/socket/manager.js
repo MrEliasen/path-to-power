@@ -155,6 +155,10 @@ export default class SocketManager extends EventEmitter {
             // save the character as it is right now,
             // once the timer hits, it will save once more.
             try {
+                if (!this.Game.characterManager.get(user.user_id)) {
+                    return;
+                }
+
                 await this.Game.characterManager.save(user.user_id);
             } catch (err) {
                 this.Game.onError(err);
