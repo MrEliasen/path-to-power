@@ -161,7 +161,7 @@ export default class Faction {
             // let the online member know the faction was disbanded
             this.Game.eventToUser(member.user_id, 'warning', `Your faction ${this.name}, was disbanded.`);
             // remove the faction tag from the name, in the online list
-            this.Game.characterManager.dispatchUpdatePlayerList(member.user_id);
+            this.Game.characterManager.dispatchUpdateCharacterList(member.user_id);
         });
     }
 

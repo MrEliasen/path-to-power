@@ -57,7 +57,7 @@
                 "interval": 1800000
             }
         ],
-        "playerCooldowns":  {
+        "cooldowns":  {
             "move": 0.3,
             "attack": 2.0,
             "aim": 1.0,

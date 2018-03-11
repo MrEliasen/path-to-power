@@ -194,24 +194,24 @@ export default class CommandManager {
      * @param  {Object}   location      A character/npc location object
      * @param  {Bool}     ignoreNPCs    Whether to include NPCs or not
      * @param  {Bool}     ignorePlayers Whether to include players or not
-     * @param  {String}   playerId      Player who we should exclude from the list
+     * @param  {String}   user_id       The character ID of the user who we should exclude from the list
      */
-    findAtLocation(findName, location, ignoreNPCs = false, ignorePlayers = false, playerId = null) {
+    findAtLocation(findName, location, ignoreNPCs = false, ignoreCharacters = false, user_id = null) {
         // get he list of players and NPCS at the grid
-        const playersAtGrid = this.Game.characterManager.getLocationList(location.map, location.x, location.y);
+        const charactersAtGrid = this.Game.characterManager.getLocationList(location.map, location.x, location.y);
         const NPCsAtGrid = this.Game.npcManager.getLocationList(location.map, location.x, location.y);
         let characters = [];
 
-        if (!ignorePlayers) {
+        if (!ignoreCharacters) {
             // Find target matching the name exactly
-            characters = playersAtGrid.filter((user) => {
-                return user.name_lowercase === findName && !user.hidden && user.user_id !== playerId;
+            characters = charactersAtGrid.filter((user) => {
+                return user.name_lowercase === findName && !user.hidden && user.user_id !== user_id;
             });
 
             if (!characters.length) {
                 // Otherwise find target matching the beginning of the name
-                characters = playersAtGrid.filter((user) => {
-                    return user.name_lowercase.indexOf(findName) === 0 && !user.hidden && user.user_id !== playerId;
+                characters = charactersAtGrid.filter((user) => {
+                    return user.name_lowercase.indexOf(findName) === 0 && !user.hidden && user.user_id !== user_id;
                 });
             }
         }
@@ -284,13 +284,13 @@ export default class CommandManager {
 
     /**
      * Validates a command's params
-     * @param  {Character}        player  The character object of the player executing the command
-     * @param  {array}            params  Params from the client commandnt command
-     * @param  {array}            rules   Param rules for the command
-     * @param  {Socket.io Socket} socket  Param rules for the command
+     * @param  {Character}        character The character object of the player executing the command
+     * @param  {array}            params    Params from the client commandnt command
+     * @param  {array}            rules     Param rules for the command
+     * @param  {Socket.io Socket} socket    Param rules for the command
      * @return {Promise}
      */
-    async validate(player, msgParams, cmdParams, socket) {
+    async validate(character, msgParams, cmdParams, socket) {
         // check if there are any params defined for the command at all
         if (!cmdParams) {
             return [];
@@ -407,11 +407,11 @@ export default class CommandManager {
                             break;
 
                         case 'shop':
-                            if (!player) {
+                            if (!character) {
                                 return 'Unable to perform command. It requires you to be logged into a character.';
                             }
 
-                            value = this.Game.structureManager.getWithShop(player.location.map, player.location.x, player.location.y);
+                            value = this.Game.structureManager.getWithShop(character.location.map, character.location.x, character.location.y);
 
                             if (value) {
                                 return `The ${param.name} is not a valid shop, at your current location.`;
@@ -452,7 +452,7 @@ export default class CommandManager {
                         case 'player':
                         case 'target':
                         case 'npc':
-                            if (!player) {
+                            if (!character) {
                                 return 'Unable to perform command. It requires you to be logged into a character.';
                             }
 
@@ -469,7 +469,7 @@ export default class CommandManager {
 
                             // assume we will search in the grid by detault
                             let location = {
-                                ...player.location,
+                                ...character.location,
                             };
 
                             // if rule modifier is set to map, null out the x an y so
@@ -484,7 +484,7 @@ export default class CommandManager {
                                 location,
                                 rule[0] === 'player',
                                 rule[0] === 'npc',
-                                player.user_id,
+                                character.user_id,
                             );
 
                             if (typeof value === 'string') {

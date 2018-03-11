@@ -222,13 +222,13 @@ export default class Character {
      * @param  {String} user_id User ID
      */
     gridRelease(user_id) {
-        const playerIndex = this.targetedBy.findIndex((obj) => obj.user_id === user_id);
+        const characterIndex = this.targetedBy.findIndex((obj) => obj.user_id === user_id);
 
-        if (playerIndex === -1) {
+        if (characterIndex === -1) {
             return;
         }
 
-        this.targetedBy.splice(playerIndex, 1);
+        this.targetedBy.splice(characterIndex, 1);
     }
 
     /**

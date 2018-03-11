@@ -37,7 +37,7 @@ async function cmdFactionCreate(socket, character, command, params, cmdObject, G
 
         Game.eventToSocket(socket, 'success', 'Your new faction has been created!');
         // update the clients with the new player name
-        Game.characterManager.dispatchUpdatePlayerList(socket.user.user_id);
+        Game.characterManager.dispatchUpdateCharacterList(socket.user.user_id);
     } catch (err) {
         Game.onError(err, socket);
     }
@@ -154,7 +154,7 @@ async function cmdFactionAcceptInvite(socket, character, command, params, cmdObj
         });
 
         // update their presence on the online player list
-        Game.characterManager.dispatchUpdatePlayerList(character.user_id);
+        Game.characterManager.dispatchUpdateCharacterList(character.user_id);
     } catch (err) {
         Game.onError(err, socket);
     }
@@ -236,7 +236,7 @@ async function cmdFactionKick(socket, character, command, params, cmdObject, Gam
     });
 
     // update their presence on the online player list
-    Game.characterManager.dispatchUpdatePlayerList(targetCharacter.user_id);
+    Game.characterManager.dispatchUpdateCharacterList(targetCharacter.user_id);
 
     // if they are not online, remove character from faction in the database only
     const dbCharacter = await Game.characterManager.dbGetByName(targetCharacter.name);

@@ -145,7 +145,7 @@ export default class CharacterManager {
      * @param  {String} user_id The user ID
      * @param  {String} name    Name of the character
      */
-    dispatchUpdatePlayerList(user_id) {
+    dispatchUpdateCharacterList(user_id) {
         const character = this.get(user_id);
 
         if (!character) {
@@ -172,7 +172,7 @@ export default class CharacterManager {
      * Dispatches an event to all sockets, removing a player tfrom the playerlist
      * @param  {String} user_id The user ID
      */
-    dispatchRemoveFromPlayerList(user_id) {
+    dispatchRemoveFromCharacterList(user_id) {
         // update the clients online player list
         this.Game.socketManager.dispatchToServer({
             type: REMOVE_ONLINE_PLAYER,
@@ -244,7 +244,7 @@ export default class CharacterManager {
 
         // add the character object to the managed list of characters
         this.characters.push(character);
-        this.dispatchUpdatePlayerList(character.user_id);
+        this.dispatchUpdateCharacterList(character.user_id);
 
         const socket = this.Game.socketManager.get(character.user_id);
 
@@ -295,7 +295,7 @@ export default class CharacterManager {
         }
 
         this.characters = this.characters.filter((obj) => obj.user_id !== user_id);
-        this.dispatchRemoveFromPlayerList(user_id);
+        this.dispatchRemoveFromCharacterList(user_id);
     }
 
     /**
