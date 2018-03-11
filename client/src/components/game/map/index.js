@@ -88,7 +88,7 @@ class Map extends React.Component {
                     <div className="float-right">
                         N {this.props.character.location.y} : E {this.props.character.location.x}
                     </div>
-                    Map: {this.props.maps[this.props.character.location.map].name}
+                    {this.props.maps[this.props.character.location.map].name}
                 </CardHeader>
                 <div id="map">
                     {this.renderGrid()}
