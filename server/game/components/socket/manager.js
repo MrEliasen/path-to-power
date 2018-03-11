@@ -1,6 +1,6 @@
 import io from 'socket.io';
 import EventEmitter from 'events';
-import {ACCOUNT_AUTHENTICATE} from '../account/types';
+import {ACCOUNT_AUTHENTICATE} from '../user/types';
 import {REMOTE_LOGOUT, ACCOUNT_LOGOUT, GAME_LOGOUT} from '../../../shared/types';
 
 /**

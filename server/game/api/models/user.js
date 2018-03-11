@@ -6,7 +6,7 @@ import bcrypt from 'bcrypt';
 import config from '../../../config.json';
 
 // Define our product schema
-const AccountSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
     email: {
         type: String,
     },
@@ -28,7 +28,7 @@ const AccountSchema = new mongoose.Schema({
 });
 
 // Execute before each user.save() call
-AccountSchema.pre('save', async function(callback) {
+UserSchema.pre('save', async function(callback) {
     // set the date for when it was updated
     this.date_updated = moment().format('ddd, D MMM YYYY H:mm:ss [GMT]');
 
@@ -48,9 +48,9 @@ AccountSchema.pre('save', async function(callback) {
     callback();
 });
 
-AccountSchema.methods.verifyPassword = function(string) {
+UserSchema.methods.verifyPassword = function(string) {
     return bcrypt.compare(string, this.password);
 };
 
 // Export the Mongoose model
-module.exports = mongoose.model('Account', AccountSchema);
+module.exports = mongoose.model('User', UserSchema);

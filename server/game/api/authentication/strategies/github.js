@@ -1,5 +1,5 @@
 import GithubStrategy from 'passport-github';
-import AccountModel from '../../models/account';
+import UserModel from '../../models/user';
 import IdentityModel from '../../models/identity';
 
 let logger;
@@ -12,7 +12,7 @@ let logger;
  * @param  {String}   callbackUrl  App callback url
  */
 function setup(passport, clientId, clientSecret, callbackUrl, loggerObj) {
-    logger = loggerObj
+    logger = loggerObj;
 
     //setup the stategies we want
     passport.use(new GithubStrategy({
@@ -34,64 +34,84 @@ function Auth(accessToken, refreshToken, profile, cb) {
 
         if (!identity) {
             try {
-                const account = await signup();
-                identity = await createIdentity(profile.provider, profile.id, account._id.toString());
+                identity = await createIdentity(profile.provider, profile.id);
             } catch (err) {
                 logger.error(err);
                 return cb('Something went wrong, please try again in a moment.');
             }
         }
 
-        // load the account data, associated with the identity
-        AccountModel.findOne({_id: escape(identity.account)}, {_id: 1, session_token: 1}, async (err, account) => {
+        // if the identity have no user associated with it, create a new user.
+        // If the userId is not a valid objectId, mongoose will throw a cast error.
+        if (!identity.userId) {
+            const newUser = await createNewUser(identity);
+
+            if (!newUser) {
+                return cb('Something went wrong, please try again in a moment.');
+            }
+
+            return cb(null, newUser.toObject());
+        }
+
+        // load the user data, associated with the identity
+        UserModel.findOne({_id: escape(identity.userId)}, {_id: 1, session_token: 1}, async (err, user) => {
             if (err) {
                 logger.error(err);
                 return cb('Something went wrong, please try again in a moment.');
             }
 
-            // if the account was deleted, create a new account
-            if (!account) {
-                const account = await signup();
-                identity.account = account._id.toString();
+            // if the user was deleted, create a new user
+            if (!user) {
+                user = await createNewUser(identity);
 
-                try {
-                    // update the identity with the new account id
-                    await identity.saveAsync();
-                } catch (err) {
-                    logger.error(err);
+                if (!user) {
                     return cb('Something went wrong, please try again in a moment.');
                 }
             }
 
-            return cb(null, account.toObject());
+            return cb(null, user.toObject());
         });
     });
 }
 
 /**
- * Handles account creation with this strategy
- * @param  {Express Request} req
- * @param  {Express Response} res
+ * Creates a new user and updates the identity's userId
+ * @param  {MongoDB Object} identity The identity up update
  */
-async function createIdentity(provider, providerId, accountId) {
-    const newIdentity = new IdentityModel({
-        provider,
-        providerId,
-        account: accountId,
-    });
-    await newIdentity.save();
-    return newIdentity;
+async function createNewUser(identity) {
+    const newUser = new UserModel({});
+    await newUser.saveAsync();
+
+    if (!newUser) {
+        return null;
+    }
+
+    identity.userId = newUser._id.toString();
+
+    try {
+        // update the identity with the new user id
+        await identity.saveAsync();
+    } catch (err) {
+        logger.error(err);
+        return null;
+    }
+
+    return newUser;
 }
 
 /**
- * Handles account creation with this strategy
+ * Handles creation of new OAuth identities
  * @param  {Express Request} req
  * @param  {Express Response} res
  */
-async function signup() {
-    const newAccount = new AccountModel({});
-    await newAccount.save();
-    return newAccount;
+async function createIdentity(provider, providerId, userId) {
+    const newIdentity = new IdentityModel({
+        provider,
+        providerId,
+        userId: userId || null,
+    });
+    await newIdentity.save();
+    return newIdentity;
 }
 
 module.exports = {

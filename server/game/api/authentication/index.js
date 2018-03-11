@@ -1,35 +1,35 @@
 import passport from 'passport';
 import strategies from './strategies';
 import config from '../../../config.json';
-import AccountModel from '../models/account';
+import UserModel from '../models/user';
 import jwt from 'jsonwebtoken';
 
-export const createAccount = strategies.local.signup;
+export const createUser = strategies.local.signup;
 
 /**
- * Handles updates to a user account
+ * Handles updates to a user
  * @param  {Express Request} req
  * @param  {Express Response} res
  */
-export function updateAccount(req, res) {
+export function updateUser(req, res) {
 
 }
 
 /**
- * Handles account deletions
+ * Handles user deletions
  * @param  {Express Request} req
  * @param  {Express Response} res
  */
-export function deleteAccount(req, res) {
+export function deleteUser(req, res) {
 
 }
 
 /**
- * Handles account activation requests
+ * Handles user activation requests
  * @param  {Express Request} req
  * @param  {Express Response} res
  */
-export function activateAccount(req, res) {
+export function activateUser(req, res) {
     if (!req.query.token || !req.query.token.length) {
         return res.status(400).json({
             status: 400,
@@ -44,7 +44,7 @@ export function activateAccount(req, res) {
         });
     }
 
-    AccountModel.findOne({_id: escape(req.params.userId), activationToken: escape(req.query.token)}, (err, user) => {
+    UserModel.findOne({_id: escape(req.params.userId), activationToken: escape(req.query.token)}, (err, user) => {
         if (err) {
             return res.status(500).json({
                 status: 500,
@@ -59,7 +59,7 @@ export function activateAccount(req, res) {
             });
         }
 
-        // activate the account and remove the token
+        // activate the user and remove the token
         user.activationToken = '';
         user.activated = true;
 

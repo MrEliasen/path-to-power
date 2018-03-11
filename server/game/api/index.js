@@ -8,13 +8,13 @@ import nodemailer from 'nodemailer';
 // API Route/enpoint controllers
 import {
     loadStrategies,
-    createAccount,
-    updateAccount,
-    deleteAccount,
+    createUser,
+    updateUser,
+    deleteUser,
+    activateUser,
     authenticate,
-    onAuth,
-    activateAccount,
     getAuthList,
+    onAuth,
 } from './authentication';
 
 /**
@@ -67,13 +67,13 @@ export default function(app, config) {
     });
 
     // Account Routes
-    routes.route('/account')
-        .post(createAccount);
-    routes.route('/account/:userId')
-        .delete(deleteAccount)
-        .patch(updateAccount);
-    routes.route('/account/:userId/activate')
-        .get(activateAccount);
+    routes.route('/users')
+        .post(createUser);
+    routes.route('/users/:userId')
+        .delete(deleteUser)
+        .patch(updateUser);
+    routes.route('/users/:userId/activate')
+        .get(activateUser);
 
     // Authentication Routes
     // user/password authentication

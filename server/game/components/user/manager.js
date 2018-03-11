@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 
-// account specific imports
-import AccountModel from '../../api/models/account';
+// user specific imports
+import UserModel from '../../api/models/user';
 import {
     ACCOUNT_AUTHENTICATE,
     ACCOUNT_AUTHENTICATE_ERROR,
@@ -11,7 +11,7 @@ import {
 /**
  * Account manager class
  */
-export default class AccountManager {
+export default class UserManager {
     /**
      * Class constructor
      * @param  {Game} Game The main game object
@@ -22,7 +22,7 @@ export default class AccountManager {
         // Listen for dispatches from the socket manager
         Game.socketManager.on('dispatch', this.handleDispatch.bind(this));
         // log Manager progress
-        this.Game.logger.info('AccountManager::constructor Loaded');
+        this.Game.logger.info('UserManager::constructor Loaded');
     }
 
     /**
@@ -51,26 +51,28 @@ export default class AccountManager {
 
         jwt.verify(action.payload, this.Game.config.api.signingKey, async (err, decoded) => {
             if (err) {
+                debugger;
                 return this.Game.socketManager.dispatchToSocket(socket, {
                     type: ACCOUNT_AUTHENTICATE_ERROR,
                     payload: 'Invalid authentication token. Please try again.',
                 });
             }
 
-            let account;
+            let user;
             let user_id;
 
             try {
-                account = await AccountModel.findOneAsync({_id: escape(decoded._id), session_token: escape(decoded.session_token)}, {_id: 1});
+                user = await UserModel.findOneAsync({_id: escape(decoded._id), session_token: escape(decoded.session_token)}, {_id: 1});
 
-                if (!account) {
+                if (!user) {
+                    debugger;
                     return this.Game.socketManager.dispatchToSocket(socket, {
                         type: ACCOUNT_AUTHENTICATE_ERROR,
                         payload: 'Invalid authentication token. Please try again.',
                     });
                 }
 
-                user_id = account._id.toString();
+                user_id = user._id.toString();
             } catch (err) {
                 this.Game.onError(err, socket);
             }

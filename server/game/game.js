@@ -2,7 +2,7 @@ import Promise from 'bluebird';
 import child_process from 'child_process';
 
 // component manager
-import AccountManager from './components/account/manager';
+import UserManager from './components/user/manager';
 import CharacterManager from './components/character/manager';
 import SocketManager from './components/socket/manager';
 import MapManager from './components/map/manager';
@@ -48,7 +48,7 @@ class Game {
 
         // Manager placeholders
         this.socketManager = new SocketManager(this, server);
-        this.accountManager = new AccountManager(this);
+        this.userManager = new UserManager(this);
         this.characterManager = new CharacterManager(this);
         this.mapManager = new MapManager(this);
         this.structureManager = new StructureManager(this);

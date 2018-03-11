@@ -12,7 +12,7 @@ const IdentitySchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    account: {
+    userId: {
         type: String,
     },
     date_added: String,

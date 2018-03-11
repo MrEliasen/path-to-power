@@ -49,7 +49,7 @@ class AuthRegister extends React.Component {
         });
 
         axios
-            .post(`${config.api.host}/api/account`, {
+            .post(`${config.api.host}/api/users`, {
                 email: state.email,
                 password: state.password,
                 method: 'local',

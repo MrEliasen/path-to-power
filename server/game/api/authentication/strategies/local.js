@@ -1,17 +1,17 @@
 import LocalStrategy from 'passport-local';
-import AccountModel from '../../models/account';
+import UserModel from '../../models/user';
 import activationEmail from '../../../data/emails/activation.js';
 import uuid from 'uuid/v4';
 import crypto from 'crypto';
 
-let logger;                                                            
+let logger;
 
 /**
  * Setup the authentication strategy
  * @param  {Passport} passport     Passport Object
  */
 function setup(passport, clientId, clientSecret, callbackUrl, loggerObj) {
-    logger = loggerObj
+    logger = loggerObj;
 
     //setup the stategies we want
     passport.use(new LocalStrategy({
@@ -28,33 +28,37 @@ function setup(passport, clientId, clientSecret, callbackUrl, loggerObj) {
  * @param {Function} done
  */
 function Auth(email, password, done) {
-    AccountModel.findOne({email: escape(email)}, {email: 1, password: 1, activated: 1, session_token: 1}, async (err, account) => {
-        if (err) {
-            logger.error(err);
-            return done('Something went wrong, please try again in a moment.');
+    UserModel.findOne(
+        {email: escape(email)},
+        {email: 1, password: 1, activated: 1, session_token: 1},
+        async (err, user) => {
+            if (err) {
+                logger.error(err);
+                return done('Something went wrong, please try again in a moment.');
+            }
+
+            if (!user) {
+                return done('Invalid email and password combination.');
+            }
+
+            if (!user.activated) {
+                // TODO: write a custom callback fuction for handling errors.
+                return done('Your account has not been activated. Please click the activation link sent to your email address.');
+            }
+
+            const same = await user.verifyPassword(password);
+
+            if (!same) {
+                return done('Invalid email and password combination.');
+            }
+
+            return done(null, user.toObject());
         }
-
-        if (!account) {
-            return done('Invalid email and password combination.');
-        }
-
-        if (!account.activated) {
-            // TODO: write a custom callback fuction for handling errors.
-            return done('Your account has not been activated. Please click the activation link sent to your email address.');
-        }
-
-        const same = await account.verifyPassword(password);
-
-        if (!same) {
-            return done('Invalid email and password combination.');
-        }
-
-        return done(null, account.toObject());
-    });
+    );
 }
 
 /**
- * Handles account creation with this strategy
+ * Handles user creation with this strategy
  * @param  {Express Request} req
  * @param  {Express Response} res
  */
@@ -87,7 +91,7 @@ function signup(req, res) {
         });
     }
 
-    AccountModel.findOne({email: escape(req.body.email)}, (err, account) => {
+    UserModel.findOne({email: escape(req.body.email)}, (err, user) => {
         if (err) {
             return res.status(500).json({
                 status: 500,
@@ -97,7 +101,7 @@ function signup(req, res) {
         }
 
         // Email already in use
-        if (account) {
+        if (user) {
             return res.status(409).json({
                 status: 409,
                 error: 'An account is already signed up using that email.',
@@ -108,13 +112,13 @@ function signup(req, res) {
         const token = crypto.createHmac('sha256', req.app.get('config').api.signingKey);
         token.update(uuid());
 
-        const newAccount = new AccountModel({
+        const newUser = new UserModel({
             email: req.body.email,
             password: req.body.password,
             activationToken: token.digest('hex'),
         });
 
-        newAccount.save((err) => {
+        newUser.save((err) => {
             if (err) {
                 return res.status(500).json({
                     status: 500,
@@ -124,12 +128,12 @@ function signup(req, res) {
             }
 
             const mailer = req.app.get('mailer');
-            const link = `http${req.secure ? 's' : ''}//${req.headers.host}/api/account/${newAccount._id.toString()}/activate?token=${newAccount.activationToken}`;
+            const link = `http${req.secure ? 's' : ''}//${req.headers.host}/api/users/${newUser._id.toString()}/activate?token=${newUser.activationToken}`;
 
              // setup email data with unicode symbols
             let mailOptions = {
                 from: req.app.get('config').mailserver.sender,
-                to: newAccount.email,
+                to: newUser.email,
                 subject: 'PTP | Account Activation',
                 html: activationEmail(link),
             };
