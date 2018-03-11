@@ -74,6 +74,13 @@
         color: #aaa;
         justify-content: center;
         align-items: center;
+        padding: 6px;
+
+        span {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
     }
 
     .item-count {
