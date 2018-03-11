@@ -26,7 +26,8 @@ class Chat extends React.Component {
 
         // Unfortunately there's no timestamp in the game yet
         // TODO: Add timestamp to the messages on the server?
-        let time = new Date().toLocaleString();
+        let date = new Date();
+        let time = [date.getHours(), date.getMinutes(), date.getSeconds()].join(':');
 
         switch (message.type) {
             case 'global':
@@ -55,7 +56,7 @@ class Chat extends React.Component {
             <li key={index} className={'chat-' + message.type}>
                 <span className="timestamp">{time}</span>
                 <span className="prefix">{prefix}</span>
-                <span className="name">{message.name}:</span>
+                {message.name && <span className="name">{message.name}:</span>}
                 <span className="message">{message.message}</span>
             </li>
         );
