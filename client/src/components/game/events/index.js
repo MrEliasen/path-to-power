@@ -1,22 +1,10 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import Chat from '../chat';
 
 class Events extends React.Component {
     constructor(props) {
         super(props);
-
-        this.state = {
-            autoscroll: true,
-        };
-
-        this.renderEvent = this.renderEvent.bind(this);
-    }
-
-    componentDidUpdate(prevProps) {
-        if (this.state.autoscroll) {
-            const elem = document.getElementsByClassName('events')[0];
-            elem.scrollTop = elem.scrollHeight;
-        }
     }
 
     generateDescription(command, modOverwrites) {
@@ -44,96 +32,131 @@ class Events extends React.Component {
         return description;
     }
 
-    buildingInfo(event, index) {
-        return <div key={index}>
-            <p>
-                The following is available in the <span style={{color: event.structure.colour}}>
-                    [{ event.structure.name }]
-                </span>:
-            </p>
-            {
-                Object.keys(event.structure.commands).length > 0 &&
+    buildingInfo(event) {
+        const lines = [];
+
+        if (! event.structure) {
+            return lines;
+        }
+
+        lines.push(
+            <React.Fragment>
+                The following is available in the <span style={{color: event.structure.colour}}>[{ event.structure.name }]</span>:
+            </React.Fragment>
+        );
+
+        let commands = Object.keys(event.structure.commands);
+
+        if (commands.length > 0) {
+            lines.push(
                 <React.Fragment>
                     <strong>Commands</strong>
-                    {
-                        Object.keys(event.structure.commands).map((command) =>
-                            <p key={command}>
-                                <i>{command}</i>: {
-                                    this.generateDescription(
-                                        command,
-                                        event.structure.commands[command]
-                                    )
-                                }
-                            </p>
-                        )
-                    }
                 </React.Fragment>
-            }
-            {
-                event.structure.shops.length > 0 &&
+            );
+
+            commands.forEach((command) => {
+                lines.push(
+                    <React.Fragment>
+                        <i>{command}</i>: {this.generateDescription(command, event.structure.commands[command])}
+                    </React.Fragment>
+                );
+            });
+        }
+
+        if (event.structure.shops.length > 0) {
+            lines.push(
                 <React.Fragment>
                     <strong>Shops</strong>
-                    {
-                        event.structure.shops.map((shop) =>
-                            <p key={shop.id}>
-                                /shop <i>{shop.name}</i>: {shop.description}
-                            </p>
-                        )
-                    }
                 </React.Fragment>
-            }
-        </div>;
+            );
+
+            event.structure.shops.forEach((shop) => {
+                lines.push(
+                    <React.Fragment>
+                        /shop <i>{shop.name}</i>: {shop.description}
+                    </React.Fragment>
+                );
+            });
+        }
+
+        return lines;
     }
 
     generateCommandList() {
-        const commands = Object.keys(this.props.commandlist);
+        let lines = [];
 
-        return commands.sort().map((command) => {
+        Object.keys(this.props.commandlist).sort().map((command) => {
             let commandObj = this.props.commandlist[command];
 
-            return <p key={command}>
-                <strong>{command}</strong>:&nbsp;
-                {commandObj.description}&nbsp;
-                {
-                    commandObj.aliases &&
-                    commandObj.aliases.length > 0 &&
-                    <strong>(aliases: {commandObj.aliases.join(', ')})</strong>
-                }
-            </p>;
+            lines.push(
+                <React.Fragment>
+                    <strong>{command}</strong>:&nbsp;{commandObj.description}&nbsp;
+                </React.Fragment>
+            );
+
+            if (commandObj.aliases && commandObj.aliases.length > 0) {
+                lines.push(
+                    <React.Fragment>
+                        <strong>(aliases: {commandObj.aliases.join(', ')})</strong>
+                    </React.Fragment>
+                );
+            }
         });
+
+        return lines;
     }
 
-    renderEvent(event, index) {
-        switch (event.type) {
-            case 'structure-info':
-                return this.buildingInfo(event, index);
-            case 'command-error':
-                return <p className="alert-danger">{event.message}</p>;
-            case 'system':
-                return <p className="alert-warning">{event.message}</p>;
-            case 'commandlist':
-                return this.generateCommandList();
-            case 'multiline':
-                return event.message.map((msg, subIndex) =>
-                    <p key={subIndex}>{msg}</p>
-                );
-        }
+    renderEvents() {
+        let events = [];
 
-        return <p>{event.message}</p>;
+        this.props.events.forEach((event, index) => {
+            switch (event.type) {
+                case 'structure-info':
+                    this.buildingInfo(event).forEach((line) => {
+                        events.push({
+                            ...event,
+                            message: line,
+                        });
+                    });
+                    break;
+                case 'command-error':
+                    events.push({
+                        ...event,
+                        message: <span className="alert-danger">{event.message}</span>,
+                    });
+                    break;
+                case 'system':
+                    events.push({
+                        ...event,
+                        message: <span className="alert-warning">{event.message}</span>,
+                    });
+                    break;
+                case 'commandlist':
+                    this.generateCommandList().forEach((line) => {
+                        events.push({
+                            ...event,
+                            message: line,
+                        });
+                    });
+                    break;
+                case 'multiline':
+                    [...event.message].forEach((line) => {
+                        events.push({
+                            ...event,
+                            message: line,
+                        });
+                    });
+                    break;
+                default:
+                    events.push(event);
+            }
+        });
+
+        return events;
     }
 
     render() {
-        return (
-            <div className="events e-padding">
-                {
-                    this.props.events &&
-                    this.props.events.map((event, index) => <React.Fragment key={index}>
-                        <div className="event-sparator"></div>
-                        {this.renderEvent(event, index)}
-                    </React.Fragment>)
-                }
-            </div>
-        );
+        return <Chat title="Events" messages={this.renderEvents()} lines="16" />;
     }
 }
 

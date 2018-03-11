@@ -55,8 +55,9 @@
         }
     }
 
-    .card-messages {
+    .card-chat .messages {
         @include mudfont;
+        overflow: auto;
 
         ul {
             margin: 0px;
@@ -64,7 +65,13 @@
             list-style: none;
 
             li {
-                margin-top: 5px;
+                span {
+                    margin-right: 2px;
+
+                    &.timestamp {
+                        color: $gray-600;
+                    }
+                }
             }
         }
     }
@@ -108,18 +115,6 @@
 
     .middle {
 
-        .card-body {
-            overflow: auto;
-        }
-
-        .card-chat {
-            height: 20vh;
-        }
-
-        .card-events {
-            height: 40vh;
-        }
-
         .toolbar {
             display: flex;
             flex-direction: row;
@@ -147,7 +142,6 @@
 
     .card {
         .card-body {
-            min-height: 120px;
             padding: 10px 15px;
         }
     }

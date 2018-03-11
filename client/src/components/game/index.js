@@ -266,18 +266,8 @@ class Game extends React.Component {
                                 <li><a href="#"><FontAwesomeIcon icon="user-secret" /> Players (?)</a></li>
                             </ul>
                         </Card>
-                        <Card>
-                            <CardHeader>Chat</CardHeader>
-                            <CardBody className="card-messages card-chat">
-                                <Chat />
-                            </CardBody>
-                        </Card>
-                        <Card>
-                            <CardHeader>Events</CardHeader>
-                            <CardBody className="card-messages card-events">
-                                <Events />
-                            </CardBody>
-                        </Card>
+                        <Chat title="Chat" messages={this.props.chat} lines="10" />
+                        <Events />
                         <Input
                             id="input-command"
                             onKeyPress={(e) => {
@@ -335,6 +325,8 @@ function mapStateToProps(state) {
     return {
         game: {...state.game},
         character: state.character.selected,
+        chat: state.game.chat,
+        events: state.events,
         socket: state.app.socket,
         loggedIn: state.account.loggedIn,
         authToken: state.account.authToken,
