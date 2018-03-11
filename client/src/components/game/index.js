@@ -50,6 +50,7 @@ class Game extends React.Component {
 
         this.toggleShop = this.toggleShop.bind(this);
         this.toggleEquipment = this.toggleEquipment.bind(this);
+        this.toggleStats = this.toggleStats.bind(this);
     }
 
     componentWillMount() {
@@ -184,9 +185,19 @@ class Game extends React.Component {
         this.setState({modalEquipment: !this.state.modalEquipment});
     }
 
+    toggleStats() {
+        this.setState({modalStats: !this.state.modalStats});
+    }
+
     renderModals() {
         return (
             <React.Fragment>
+                <Modal isOpen={this.state.modalStats} toggle={this.toggleStats} size="lg">
+                    <ModalHeader toggle={this.toggleStats}>Stats</ModalHeader>
+                    <ModalBody>
+                        <StatsMenu />
+                    </ModalBody>
+                </Modal>
                 <Modal isOpen={this.state.modalEquipment} toggle={this.toggleEquipment} size="lg">
                     <ModalHeader toggle={this.toggleEquipment}>Equipment</ModalHeader>
                     <ModalBody>
@@ -235,12 +246,6 @@ class Game extends React.Component {
                         <CharacterCard character={this.props.character} />
                         <Map />
                         <Card>
-                            <CardHeader>Character</CardHeader>
-                            <CardBody>
-                                <StatsMenu />
-                            </CardBody>
-                        </Card>
-                        <Card>
                             <CardHeader>Equipment</CardHeader>
                             <CardBody>
                                 <InventoryMenu sendCommand={this.sendCommand} sendAction={this.sendAction} />
@@ -260,6 +265,7 @@ class Game extends React.Component {
                     <Col sm="9" className="middle">
                         <Card>
                             <ul className="toolbar">
+                                <li><a href="#" onClick={this.toggleStats}><FontAwesomeIcon icon="chart-bar" /> Stats</a></li>
                                 <li><a href="#" onClick={this.toggleEquipment}><FontAwesomeIcon icon="shield-alt" /> Equipment ({this.props.character.inventory.length}/{this.props.character.stats.inventorySize})</a></li>
                                 <li><a href="#" onClick={this.toggleShop}><FontAwesomeIcon icon="shopping-cart" /> Shop (?)</a></li>
                                 <li><a href="#"><FontAwesomeIcon icon="tasks" /> Quests (?)</a></li>
