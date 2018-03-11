@@ -1,4 +1,8 @@
-import {SHOP_SELL, SHOP_BUY, SHOP_GET_PRICE} from '../../../shared/types';
+import {
+    SHOP_SELL,
+    SHOP_BUY,
+    SHOP_GET_PRICE,
+} from 'shared/actionTypes';
 import {SHOP_CLOSE} from './types';
 
 export function shopBuy(itemId, index, shopFingerprint) {

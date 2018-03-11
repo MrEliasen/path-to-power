@@ -1,4 +1,4 @@
-import {SHOP_LOAD} from '../../../shared/types';
+import {SHOP_LOAD} from 'shared/actionTypes';
 
 /**
  * shop command logic

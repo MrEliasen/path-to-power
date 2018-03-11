@@ -1,11 +1,11 @@
-import {GAME_LOGOUT} from '../types';
-import {REMOTE_LOGOUT} from '../../../shared/types';
 import {
+    CHARACTER_UPDATE,
     CHARACTERS_LIST,
     CHARACTER_LOGIN,
-    UPDATE_CHARACTER,
     CHARACTER_CREATE_SUCCESS,
-} from './types';
+    CHARACTER_LOGOUT,
+    CHARACTER_REMOTE_LOGOUT,
+} from 'shared/actionTypes';
 
 const defaultState = {
     selected: null,
@@ -14,8 +14,8 @@ const defaultState = {
 
 export default function(state = defaultState, action) {
     switch (action.type) {
-        case REMOTE_LOGOUT:
-        case GAME_LOGOUT:
+        case CHARACTER_REMOTE_LOGOUT:
+        case CHARACTER_LOGOUT:
             return defaultState;
 
         case CHARACTERS_LIST:
@@ -39,7 +39,7 @@ export default function(state = defaultState, action) {
                 ],
             };
 
-        case UPDATE_CHARACTER:
+        case CHARACTER_UPDATE:
             return {
                 ...state,
                 selected: {

@@ -1,16 +1,20 @@
-import {GAME_COMMAND, GAME_LOGOUT} from './types';
+import {
+    COMMAND_CHAT_COMMAND,
+    CHARACTER_LOGOUT,
+} from 'shared/actionTypes';
+
 import {socketSend} from '../app/actions';
 
 export function newCommand(command) {
     return socketSend({
-        type: GAME_COMMAND,
+        type: COMMAND_CHAT_COMMAND,
         payload: command,
     });
 }
 
 export function gameLogout(command) {
     return {
-        type: GAME_LOGOUT,
+        type: CHARACTER_LOGOUT,
         payload: null,
     };
 }

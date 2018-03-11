@@ -1,4 +1,4 @@
-import {CHAT_MESSAGE} from '../command/types';
+import {COMMAND_CHAT_MESSAGE} from 'shared/actionTypes';
 
 /**
  * Faction create command logic
@@ -145,7 +145,7 @@ async function cmdFactionAcceptInvite(socket, character, command, params, cmdObj
 
         // let the faction know, a new memeber joined
         Game.socketManager.dispatchToRoom(character.faction.faction_id, {
-            type: CHAT_MESSAGE,
+            type: COMMAND_CHAT_MESSAGE,
             payload: {
                 name: null,
                 message: `${character.name} has joined ${character.faction.name}!`,
@@ -186,7 +186,7 @@ function cmdFactionSay(socket, character, command, params, cmdObject, Game) {
     Game.cooldownManager.add(character, 'chat', null, true);
 
     Game.socketManager.dispatchToRoom(character.faction.faction_id, {
-        type: CHAT_MESSAGE,
+        type: COMMAND_CHAT_MESSAGE,
         payload: {
             user_id: character.user_id,
             name: character.name,
@@ -227,7 +227,7 @@ async function cmdFactionKick(socket, character, command, params, cmdObject, Gam
     await character.faction.removeMember(targetCharacter);
     // let the member know they where removed from the faction
     Game.socketManager.dispatchToUser(targetCharacter.user_id, {
-        type: CHAT_MESSAGE,
+        type: COMMAND_CHAT_MESSAGE,
         payload: {
             name: null,
             message: `You have been kicked/removed from ${character.faction.name}!`,
@@ -250,7 +250,7 @@ async function cmdFactionKick(socket, character, command, params, cmdObject, Gam
 
     // let the faction know, a member was removed
     Game.socketManager.dispatchToRoom(character.faction.faction_id, {
-        type: CHAT_MESSAGE,
+        type: COMMAND_CHAT_MESSAGE,
         payload: {
             name: null,
             message: `${dbCharacter.name} was removed from ${character.faction.name}!`,
@@ -290,7 +290,7 @@ async function cmdFactionMakeLeader(socket, character, command, params, cmdObjec
     await character.faction.makeLeader(targetCharacter);
     // let the faction know a new leader was assigned
     Game.socketManager.dispatchToRoom(character.faction.faction_id, {
-        type: CHAT_MESSAGE,
+        type: COMMAND_CHAT_MESSAGE,
         payload: {
             name: null,
             message: `${targetCharacter.name} has been promoted to the new leader of ${character.faction.name}!`,

@@ -1,5 +1,7 @@
-import {UPDATE_GROUND_ITEMS} from '../item/types';
-import {LEFT_GRID} from '../character/types';
+import {
+    CHARACTER_LEFT_GRID,
+    ITEM_GROUND_ITEMS,
+} from 'shared/actionTypes';
 
 /**
  * Get the direction based on the movement action
@@ -122,14 +124,14 @@ function cmdFlee(socket, character, command, params, cmdObject, Game) {
 
     // remove player from the grid list of players
     Game.socketManager.dispatchToRoom(character.getLocationId(), {
-        type: LEFT_GRID,
+        type: CHARACTER_LEFT_GRID,
         payload: character.user_id,
     });
 
     if (groundItems.length) {
         // send the updated items list to the grid
         Game.socketManager.dispatchToRoom(character.getLocationId(), {
-            type: UPDATE_GROUND_ITEMS,
+            type: ITEM_GROUND_ITEMS,
             payload: groundItems,
         });
     }

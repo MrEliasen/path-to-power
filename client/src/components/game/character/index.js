@@ -1,9 +1,12 @@
+import {
+    CHARACTERS_GET_LIST,
+    MAP_GET_LIST,
+} from 'shared/actionTypes';
+
 import React from 'react';
 import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
 import {CardDeck, Card, CardTitle, CardBody, Button, FormGroup, Input} from 'reactstrap';
-import {CHARACTERS_GET_LIST} from './types';
-import {MAPS_GET_LIST} from '../map/types';
 import {newCommand} from '../actions';
 import {socketSend} from '../../app/actions';
 import CharacterCard from './card';
@@ -28,7 +31,7 @@ class Character extends React.Component {
             payload: null,
         });
         this.props.socketSend({
-            type: MAPS_GET_LIST,
+            type: MAP_GET_LIST,
             payload: null,
         });
     }

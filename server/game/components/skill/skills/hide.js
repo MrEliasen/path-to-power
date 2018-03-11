@@ -1,6 +1,6 @@
 import {
-    LEFT_GRID,
-} from '../../character/types';
+    CHARACTER_LEFT_GRID,
+} from 'shared/actionTypes';
 
 /**
  * Hide skill logic
@@ -56,7 +56,7 @@ export default class SkillHide {
 
             // re-add the character to the grid player list
             this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                type: LEFT_GRID,
+                type: CHARACTER_LEFT_GRID,
                 payload: character.user_id,
             });
 

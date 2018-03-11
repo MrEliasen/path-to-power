@@ -1,5 +1,4 @@
 import {CONNECTION_STATUS, CONNECTION_SOCKET} from './types';
-// import {REMOTE_LOGOUT} from '../../../shared/types';
 
 const defaultState = {
     connected: false,

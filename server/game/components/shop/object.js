@@ -1,5 +1,5 @@
 import uuid from 'uuid/v4';
-import {SHOP_UPDATE} from '../../../shared/types';
+import {SHOP_UPDATE} from 'shared/actionTypes';
 import {dice} from '../../helper';
 
 /**

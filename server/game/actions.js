@@ -1,4 +1,7 @@
-import {NEW_EVENT, NEWS_UPDATE} from './types';
+import {
+    GAME_EVENT,
+    GAME_NEWS,
+} from 'shared/actionTypes';
 
 /**
  * New event action creator
@@ -9,7 +12,7 @@ import {NEW_EVENT, NEWS_UPDATE} from './types';
  */
 export function newEvent(type, message, ignore =[]) {
     return {
-        type: NEW_EVENT,
+        type: GAME_EVENT,
         payload: {
             type,
             message,
@@ -24,7 +27,7 @@ export function newEvent(type, message, ignore =[]) {
  */
 export function addNews(message) {
     return {
-        type: NEWS_UPDATE,
+        type: GAME_NEWS,
         payload: message,
     };
 }

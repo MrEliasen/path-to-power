@@ -10,14 +10,17 @@ import {authLogin} from './components/account/actions';
 import {setConnectionStatus} from './components/app/actions';
 
 // types
-import {SOCKET_SEND, SOCKET_LOGOUT} from './components/app/types';
-import {GAME_LOGOUT} from './components/game/types';
 import {
-    ACCOUNT_AUTHENTICATE,
+    USER_AUTHENTICATE,
+    USER_AUTHENTICATE_ERROR,
+    USER_AUTHENTICATE_SUCCESS,
+    USER_LOGOUT,
+    CHARACTER_LOGOUT,
+} from 'shared/actionTypes';
+
+import {SOCKET_SEND, SOCKET_LOGOUT} from './components/app/types';
+import {
     ACCOUNT_AUTHENTICATE_SAVE,
-    ACCOUNT_AUTHENTICATE_SUCCESS,
-    ACCOUNT_AUTHENTICATE_ERROR,
-    ACCOUNT_LOGOUT,
 } from './components/account/types';
 
 // misc
@@ -92,14 +95,14 @@ function* saveAuthDetails(action) {
     yield put({
         type: SOCKET_SEND,
         payload: {
-            type: 'ACCOUNT_AUTHENTICATE',
+            type: USER_AUTHENTICATE,
             payload: action.payload,
         },
     });
 
     const result = yield race([
-        take(ACCOUNT_AUTHENTICATE_ERROR),
-        take(ACCOUNT_AUTHENTICATE_SUCCESS),
+        take(USER_AUTHENTICATE_ERROR),
+        take(USER_AUTHENTICATE_SUCCESS),
     ]);
 
     if (result[0]) {
@@ -160,15 +163,15 @@ function* checkLocalAuth(action) {
 }
 
 function* onAuthAttempt() {
-    yield takeLatest(ACCOUNT_AUTHENTICATE, checkLocalAuth);
+    yield takeLatest(USER_AUTHENTICATE, checkLocalAuth);
 }
 
 function* onGameLogout() {
-    yield takeLatest(GAME_LOGOUT, logoutGame);
+    yield takeLatest(CHARACTER_LOGOUT, logoutGame);
 }
 
 function* onAccountLogout() {
-    yield takeLatest(ACCOUNT_LOGOUT, logoutAccount);
+    yield takeLatest(USER_LOGOUT, logoutAccount);
 }
 
 function* onAuthSuccess() {

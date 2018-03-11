@@ -1,15 +1,13 @@
 import {
-    JOIN_GRID,
-    JOINED_GRID,
-    LEFT_GRID,
-    UPDATE_GROUND_ITEMS,
-    CLIENT_PICKUP_ITEM,
-    CLIENT_DROP_MULTIPLE_ITEMS,
+    MAP_GRID_DETAILS,
+    CHARACTER_LEFT_GRID,
+    CHARACTER_JOINED_GRID,
     NPC_JOINED_GRID,
     NPC_LEFT_GRID,
-} from './types';
-import {REMOTE_LOGOUT} from '../../../shared/types';
-import {GAME_LOGOUT} from '../types';
+    CHARACTER_LOGOUT,
+    CHARACTER_REMOTE_LOGOUT,
+    ITEM_GROUND_ITEMS,
+} from 'shared/actionTypes';
 
 const defaultState = {
     description: '',
@@ -25,13 +23,13 @@ export default function(state = defaultState, action) {
 
     switch (action.type) {
         // When the character moves, and joins a new grid
-        case JOIN_GRID:
+        case MAP_GRID_DETAILS:
             return {
                 ...action.payload,
             };
 
         // when another character joins the players grid
-        case JOINED_GRID:
+        case CHARACTER_JOINED_GRID:
             players = [...state.players];
 
             if (players.find((user) => user.user_id === action.payload.user_id)) {
@@ -45,7 +43,7 @@ export default function(state = defaultState, action) {
             };
 
         // when another character leaves the players grid
-        case LEFT_GRID:
+        case CHARACTER_LEFT_GRID:
             players = [...state.players];
             players = players.filter((user) => user.user_id !== action.payload);
             return {
@@ -53,50 +51,10 @@ export default function(state = defaultState, action) {
                 players,
             };
 
-        case CLIENT_DROP_MULTIPLE_ITEMS:
-            local = {...state.local};
-
-            action.payload.map((item) => {
-                if (item.stackable) {
-                    let stacked = false;
-                    local.items.map((item, index) => {
-                        if (item.id === item.id) {
-                            stacked = true;
-                            local.items[index].durability += item.durability;
-                        }
-                    });
-
-                    if (!stacked) {
-                        local.items.push(item);
-                    }
-                } else {
-                    local.items.push(item);
-                }
-            });
-
-            return {
-                ...state,
-                local,
-            };
-
-        case UPDATE_GROUND_ITEMS:
+        case ITEM_GROUND_ITEMS:
             return {
                 ...state,
                 items: action.payload,
-            };
-
-        case CLIENT_PICKUP_ITEM:
-            local = {...state.local};
-
-            if (action.payload.remove) {
-                local.items.splice(action.payload.index, 1);
-            } else {
-                local.items[action.payload.index].durability = local.items[action.payload.index].durability - action.payload.amount;
-            }
-
-            return {
-                ...state,
-                local,
             };
 
         // when another character joins the npcs grid
@@ -122,8 +80,8 @@ export default function(state = defaultState, action) {
                 npcs,
             };
 
-        case REMOTE_LOGOUT:
-        case GAME_LOGOUT:
+        case CHARACTER_REMOTE_LOGOUT:
+        case CHARACTER_LOGOUT:
             return defaultState;
     }
 

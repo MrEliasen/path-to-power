@@ -1,14 +1,15 @@
 import {
-    ADD_ONLINE_PLAYER,
-    REMOVE_ONLINE_PLAYER,
-    CHAT_MESSAGE,
-    NEWS_UPDATE,
-} from './types';
-import {ACCOUNT_AUTHENTICATE_SUCCESS} from '../account/types';
-import {CHARACTER_LOGIN} from './character/types';
-import {REMOTE_LOGOUT} from '../../shared/types';
-import {GAME_LOGOUT} from './types';
-import {MAPS_LIST} from './map/types';
+    CHARACTER_ONLINE_ADD,
+    CHARACTER_ONLINE_REMOVE,
+    CHARACTER_LOGIN,
+    COMMAND_CHAT_MESSAGE,
+    MAP_LIST,
+    USER_AUTHENTICATE_SUCCESS,
+    GAME_NEWS,
+    CHARACTER_LOGOUT,
+    CHARACTER_REMOTE_LOGOUT,
+} from 'shared/actionTypes';
+
 import {getRandomColour} from '../../helper';
 
 const defaultState = {
@@ -24,7 +25,7 @@ export default function(state = defaultState, action) {
     let players;
 
     switch (action.type) {
-        case NEWS_UPDATE:
+        case GAME_NEWS:
             return {
                 ...state,
                 news: {
@@ -33,20 +34,20 @@ export default function(state = defaultState, action) {
                 },
             };
 
-        case MAPS_LIST:
+        case MAP_LIST:
             return {
                 ...state,
                 maps: action.payload,
             };
 
         case CHARACTER_LOGIN:
-        case ACCOUNT_AUTHENTICATE_SUCCESS:
+        case USER_AUTHENTICATE_SUCCESS:
             return {
                 ...state,
                 ...action.payload.gameData,
             };
 
-        case ADD_ONLINE_PLAYER:
+        case CHARACTER_ONLINE_ADD:
             players = state.players.filter((user) => user.user_id !== action.payload.user_id);
             players.push(action.payload);
 
@@ -55,7 +56,7 @@ export default function(state = defaultState, action) {
                 players,
             };
 
-        case REMOVE_ONLINE_PLAYER:
+        case CHARACTER_ONLINE_REMOVE:
             players = state.players.filter((user) => user.user_id !== action.payload.user_id);
 
             return {
@@ -63,7 +64,7 @@ export default function(state = defaultState, action) {
                 players,
             };
 
-        case CHAT_MESSAGE:
+        case COMMAND_CHAT_MESSAGE:
             let chat = [...state.chat];
             chat.push(action.payload);
 
@@ -77,8 +78,8 @@ export default function(state = defaultState, action) {
                 chat,
             };
 
-        case REMOTE_LOGOUT:
-        case GAME_LOGOUT:
+        case CHARACTER_REMOTE_LOGOUT:
+        case CHARACTER_LOGOUT:
             return defaultState;
     }
 

@@ -1,4 +1,8 @@
-import {CHARACTER_CREATE_SUCCESS, CHARACTER_CREATE_ERROR, CHARACTER_LOGIN} from './types';
+import {
+    CHARACTER_CREATE_SUCCESS,
+    CHARACTER_CREATE_ERROR,
+    CHARACTER_LOGIN,
+} from 'shared/actionTypes';
 
 /**
  * Check attack cooldown ticks of character

@@ -8,7 +8,7 @@ import {
     SHOP_SELL,
     SHOP_ITEM_PRICE,
     SHOP_GET_PRICE,
-} from '../../../shared/types';
+} from 'shared/actionTypes';
 
 /**
  * Shop Manager

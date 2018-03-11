@@ -1,11 +1,10 @@
 import {
+    CHARACTER_REMOTE_LOGOUT,
     SHOP_LOAD,
-    SHOP_EVENT,
     SHOP_UPDATE,
     SHOP_ITEM_PRICE,
-    REMOTE_LOGOUT
-} from '../../../shared/types';
-import {GAME_LOGOUT} from '../types';
+    CHARACTER_LOGOUT,
+} from 'shared/actionTypes';
 import {SHOP_CLOSE} from './types';
 
 export default function(state = null, action) {
@@ -21,17 +20,6 @@ export default function(state = null, action) {
             return {
                 ...state,
                 open: false,
-            };
-
-        case SHOP_EVENT:
-            // bootstrap converter
-            if (action.payload.type === 'error') {
-                action.payload.type = 'danger';
-            }
-
-            return {
-                ...state,
-                notification: action.payload,
             };
 
         case SHOP_UPDATE:
@@ -54,8 +42,8 @@ export default function(state = null, action) {
                 details: action.payload,
             };
 
-        case REMOTE_LOGOUT:
-        case GAME_LOGOUT:
+        case CHARACTER_REMOTE_LOGOUT:
+        case CHARACTER_LOGOUT:
             return null;
     }
 

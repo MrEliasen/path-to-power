@@ -1,8 +1,9 @@
-import {NEW_EVENT, CLEAR_EVENTS} from './types';
+import {GAME_EVENT} from 'shared/actionTypes';
+import {CLEAR_EVENTS} from './types';
 
 export function newEvent(payload) {
     return {
-        type: NEW_EVENT,
+        type: GAME_EVENT,
         payload,
     };
 }

@@ -1,8 +1,8 @@
-import {MOVE_CHARACTER} from './types';
+import {CHARACTER_MOVE} from 'shared/actionTypes';
 
 export function moveCharacter(direction) {
     return {
-        type: MOVE_CHARACTER,
+        type: CHARACTER_MOVE,
         payload: direction,
     };
 }

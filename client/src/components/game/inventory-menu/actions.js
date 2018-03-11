@@ -1,4 +1,9 @@
-import {INVENTORY_MENU_TOGGLE, EQUIP_ITEM, UNEQUIP_ITEM} from './types';
+import {
+    CHARACTER_EQUIP_ITEM,
+    CHARACTER_UNEQUIP_ITEM,
+} from 'shared/actionTypes';
+
+import {INVENTORY_MENU_TOGGLE} from './types';
 
 export function toggleInventoryMenu() {
     return {
@@ -9,14 +14,14 @@ export function toggleInventoryMenu() {
 
 export function equipItem(index) {
     return {
-        type: EQUIP_ITEM,
+        type: CHARACTER_EQUIP_ITEM,
         payload: index,
     };
 }
 
 export function unequipItem(slot) {
     return {
-        type: UNEQUIP_ITEM,
+        type: CHARACTER_UNEQUIP_ITEM,
         payload: slot,
     };
 }

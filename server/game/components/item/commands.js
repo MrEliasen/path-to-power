@@ -1,4 +1,4 @@
-import {UPDATE_GROUND_ITEMS} from './types';
+import {ITEM_GROUND_ITEMS} from 'shared/actionTypes';
 
 /**
  * Drop item command logic
@@ -40,7 +40,7 @@ function cmdDrop(socket, character, command, params, cmdObject, Game) {
 
     // send the updated items list to the grid
     Game.socketManager.dispatchToRoom(character.getLocationId(), {
-        type: UPDATE_GROUND_ITEMS,
+        type: ITEM_GROUND_ITEMS,
         payload: items_ground,
     });
 
@@ -85,7 +85,7 @@ function cmdDropByIndex(socket, character, command, params, cmdObject, Game) {
 
     // send the updated items list to the grid
     Game.socketManager.dispatchToRoom(character.getLocationId(), {
-        type: UPDATE_GROUND_ITEMS,
+        type: ITEM_GROUND_ITEMS,
         payload: items_ground,
     });
 
@@ -154,7 +154,7 @@ function cmdPickup(socket, character, command, params, cmdObject, Game) {
     Game.characterManager.updateClient(character.user_id);
     // update the grid item list for the clients
     Game.socketManager.dispatchToRoom(character.getLocationId(), {
-        type: UPDATE_GROUND_ITEMS,
+        type: ITEM_GROUND_ITEMS,
         payload: Game.itemManager.getLocationList(...location, true),
     });
 

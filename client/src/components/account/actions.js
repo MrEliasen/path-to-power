@@ -1,12 +1,15 @@
 import {
-    ACCOUNT_LOGOUT,
-    ACCOUNT_AUTHENTICATE,
+    USER_AUTHENTICATE,
+    USER_LOGOUT,
+} from 'shared/actionTypes';
+
+import {
     ACCOUNT_AUTHENTICATE_SAVE,
 } from './types';
 
 export function authLogout() {
     return {
-        type: ACCOUNT_LOGOUT,
+        type: USER_LOGOUT,
         payload: {},
     };
 }
@@ -20,7 +23,7 @@ export function authLogin(jwt) {
 
 export function authLocal(email, password) {
     return {
-        type: ACCOUNT_AUTHENTICATE,
+        type: USER_AUTHENTICATE,
         payload: {
             email,
             password,

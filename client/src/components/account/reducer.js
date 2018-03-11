@@ -1,4 +1,7 @@
-import {ACCOUNT_AUTHENTICATE_SUCCESS, ACCOUNT_LOGOUT} from './types';
+import {
+    USER_AUTHENTICATE_SUCCESS,
+    USER_LOGOUT,
+} from 'shared/actionTypes';
 
 const defaultState = {
     authToken: null,
@@ -7,10 +10,10 @@ const defaultState = {
 
 export default function(state = defaultState, action) {
     switch (action.type) {
-        case ACCOUNT_LOGOUT:
+        case USER_LOGOUT:
             return defaultState;
 
-        case ACCOUNT_AUTHENTICATE_SUCCESS:
+        case USER_AUTHENTICATE_SUCCESS:
             return {
                 authToken: action.payload,
                 loggedIn: true,

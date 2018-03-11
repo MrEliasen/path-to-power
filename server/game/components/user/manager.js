@@ -1,12 +1,13 @@
 import jwt from 'jsonwebtoken';
 
 // user specific imports
-import UserModel from '../../api/models/user';
 import {
-    ACCOUNT_AUTHENTICATE,
-    ACCOUNT_AUTHENTICATE_ERROR,
-    ACCOUNT_AUTHENTICATE_SUCCESS,
-} from './types';
+    USER_AUTHENTICATE,
+    USER_AUTHENTICATE_ERROR,
+    USER_AUTHENTICATE_SUCCESS,
+} from 'shared/actionTypes';
+
+import UserModel from '../../api/models/user';
 
 /**
  * Account manager class
@@ -32,7 +33,7 @@ export default class UserManager {
      */
     handleDispatch(socket, action) {
         switch (action.type) {
-            case ACCOUNT_AUTHENTICATE:
+            case USER_AUTHENTICATE:
                 return this.authenticate(socket, action);
         }
 
@@ -53,7 +54,7 @@ export default class UserManager {
             if (err) {
                 debugger;
                 return this.Game.socketManager.dispatchToSocket(socket, {
-                    type: ACCOUNT_AUTHENTICATE_ERROR,
+                    type: USER_AUTHENTICATE_ERROR,
                     payload: 'Invalid authentication token. Please try again.',
                 });
             }
@@ -67,7 +68,7 @@ export default class UserManager {
                 if (!user) {
                     debugger;
                     return this.Game.socketManager.dispatchToSocket(socket, {
-                        type: ACCOUNT_AUTHENTICATE_ERROR,
+                        type: USER_AUTHENTICATE_ERROR,
                         payload: 'Invalid authentication token. Please try again.',
                     });
                 }
@@ -97,7 +98,7 @@ export default class UserManager {
             const gameMaps = this.Game.mapManager.getList();
 
             return this.Game.socketManager.dispatchToSocket(socket, {
-                type: ACCOUNT_AUTHENTICATE_SUCCESS,
+                type: USER_AUTHENTICATE_SUCCESS,
                 payload: {
                     gameData: {
                         maps: gameMaps,

@@ -1,6 +1,6 @@
 import {
-    JOINED_GRID,
-} from '../../character/types';
+    CHARACTER_JOINED_GRID,
+} from 'shared/actionTypes';
 
 /**
  * Search Skill logic
@@ -72,7 +72,7 @@ export default class SkillSearch {
 
                         // re-add the character to the grid player list
                         this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                            type: JOINED_GRID,
+                            type: CHARACTER_JOINED_GRID,
                             payload: {
                                 name: characterObj.name,
                                 user_id: characterObj.user_id,

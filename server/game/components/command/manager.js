@@ -1,5 +1,5 @@
 import escapeStringRegex from 'escape-string-regexp';
-import {GAME_COMMAND} from './types';
+import {COMMAND_CHAT_COMMAND} from 'shared/actionTypes';
 import commandCommands from './commands';
 import {deepCopyObject} from '../../helper';
 
@@ -82,7 +82,7 @@ export default class CommandManager {
      * @param  {Object}           action The redux action
      */
     async onDispatch(socket, action) {
-        if (action.type !== GAME_COMMAND) {
+        if (action.type !== COMMAND_CHAT_COMMAND) {
             return;
         }
 

@@ -1,7 +1,12 @@
+import {
+    ITEM_GROUND_ITEMS,
+    NPC_JOINED_GRID,
+    NPC_LEFT_GRID,
+    NPC_GRID_DETAILS,
+} from 'shared/actionTypes';
+
 import NPC from './object';
 import NPCList from '../../data/npcs.json';
-import {NPC_JOINED_GRID, NPC_LEFT_GRID, UPDATE_GRID_NPCS} from './types';
-import {UPDATE_GROUND_ITEMS} from '../item/types';
 import namesList from '../../data/names.json';
 import {deepCopyObject, ucfirst} from '../../helper';
 
@@ -273,7 +278,7 @@ export default class NPCManager {
     updateGrid(location, locationId) {
         // dispatch to client
         this.Game.socketManager.dispatchToRoom(locationId, {
-            type: UPDATE_GRID_NPCS,
+            type: NPC_GRID_DETAILS,
             payload: this.getLocationList(location.map, location.x, location.y, true),
         });
     }
@@ -378,7 +383,7 @@ export default class NPCManager {
 
         // update the client's ground look at the location
         this.Game.socketManager.dispatchToRoom(oldLocationId, {
-            type: UPDATE_GROUND_ITEMS,
+            type: ITEM_GROUND_ITEMS,
             payload: this.Game.itemManager.getLocationList(oldLocation.map, oldLocation.x, oldLocation.y, true),
         });
 

@@ -1,6 +1,14 @@
 {
-  "presets": [
-    "env",
-    "stage-2"
-  ]
+    "presets": [
+        "env",
+        "stage-2"
+    ],
+    "plugins": [
+        ["module-resolver", {
+            "root": ["./"],
+            "alias": {
+                "shared": "./shared"
+            }
+        }]
+    ]
 }

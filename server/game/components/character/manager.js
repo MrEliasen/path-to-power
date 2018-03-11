@@ -2,17 +2,17 @@ import Promise from 'bluebird';
 
 // Manager specific imports
 import {
-    ADD_ONLINE_PLAYER,
-    REMOVE_ONLINE_PLAYER,
-    EQUIP_ITEM,
-    UNEQUIP_ITEM,
-    UPDATE_CHARACTER,
-    MOVE_CHARACTER,
-    LEFT_GRID,
+    CHARACTER_ONLINE_ADD,
+    CHARACTER_ONLINE_REMOVE,
+    CHARACTER_UPDATE,
+    CHARACTER_EQUIP_ITEM,
+    CHARACTER_UNEQUIP_ITEM,
+    CHARACTER_LEFT_GRID,
+    CHARACTER_MOVE,
     CHARACTERS_GET_LIST,
     CHARACTERS_LIST,
-} from './types';
-import {UPDATE_GROUND_ITEMS} from '../item/types';
+    ITEM_GROUND_ITEMS,
+} from 'shared/actionTypes';
 import Character from './object';
 import CharacterModel from './model';
 import characterCommands from './commands';
@@ -56,11 +56,11 @@ export default class CharacterManager {
      */
     onDispatch(socket, action) {
         switch (action.type) {
-            case UNEQUIP_ITEM:
+            case CHARACTER_UNEQUIP_ITEM:
                 return this.onUnEquip(socket, action);
-            case EQUIP_ITEM:
+            case CHARACTER_EQUIP_ITEM:
                 return this.onEquip(socket, action);
-            case MOVE_CHARACTER:
+            case CHARACTER_MOVE:
                 return this.move(socket, action);
             case CHARACTERS_GET_LIST:
                 return this.getCharacterList(socket, action);
@@ -112,7 +112,7 @@ export default class CharacterManager {
         const characterData = character.exportToClient();
 
         this.Game.socketManager.dispatchToUser(user_id, {
-            type: UPDATE_CHARACTER,
+            type: CHARACTER_UPDATE,
             payload: property ? {[property]: characterData[property]} : characterData,
         });
     }
@@ -154,7 +154,7 @@ export default class CharacterManager {
 
         // update the clients online player list
         this.Game.socketManager.dispatchToServer({
-            type: ADD_ONLINE_PLAYER,
+            type: CHARACTER_ONLINE_ADD,
             payload: {
                 user_id: character.user_id,
                 name: character.name,
@@ -175,7 +175,7 @@ export default class CharacterManager {
     dispatchRemoveFromCharacterList(user_id) {
         // update the clients online player list
         this.Game.socketManager.dispatchToServer({
-            type: REMOVE_ONLINE_PLAYER,
+            type: CHARACTER_ONLINE_REMOVE,
             payload: {
                 user_id,
             },
@@ -286,7 +286,7 @@ export default class CharacterManager {
 
         // remove player from the grid list of players
         this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-            type: LEFT_GRID,
+            type: CHARACTER_LEFT_GRID,
             payload: character.user_id,
         });
 
@@ -657,7 +657,7 @@ export default class CharacterManager {
             this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} leaves to the ${directionOut}`, [character.user_id]);
             // remove player from the grid list of players
             this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                type: LEFT_GRID,
+                type: CHARACTER_LEFT_GRID,
                 payload: character.user_id,
             });
 
@@ -717,7 +717,7 @@ export default class CharacterManager {
 
         // remove player from the grid list of players
         this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-            type: LEFT_GRID,
+            type: CHARACTER_LEFT_GRID,
             payload: character.user_id,
         });
 
@@ -750,7 +750,7 @@ export default class CharacterManager {
 
         // update the client's ground look at the location
         this.Game.socketManager.dispatchToRoom(oldLocationId, {
-            type: UPDATE_GROUND_ITEMS,
+            type: ITEM_GROUND_ITEMS,
             payload: this.Game.itemManager.getLocationList(oldLocation.map, oldLocation.x, oldLocation.y, true),
         });
 

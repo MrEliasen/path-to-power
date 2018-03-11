@@ -1,7 +1,12 @@
+import {
+    USER_AUTHENTICATE,
+    USER_LOGOUT,
+    CHARACTER_LOGOUT,
+    CHARACTER_REMOTE_LOGOUT,
+} from 'shared/actionTypes';
+
 import io from 'socket.io';
 import EventEmitter from 'events';
-import {ACCOUNT_AUTHENTICATE} from '../user/types';
-import {REMOTE_LOGOUT, ACCOUNT_LOGOUT, GAME_LOGOUT} from '../../../shared/types';
 
 /**
  * Socket manager
@@ -92,7 +97,7 @@ export default class SocketManager extends EventEmitter {
         this.onDisconnect(socket, true, false);
 
         this.dispatchToSocket(socket, {
-            type: REMOTE_LOGOUT,
+            type: CHARACTER_REMOTE_LOGOUT,
             payload: {
                 routeTo: '/',
             },
@@ -190,12 +195,12 @@ export default class SocketManager extends EventEmitter {
 
         // if the client is not authenticating, but sending dispatches without
         // being authenticated, ignore the request.
-        if (!socket.user && action.type !== ACCOUNT_AUTHENTICATE) {
+        if (!socket.user && action.type !== USER_AUTHENTICATE) {
             return;
         }
 
-        if ([ACCOUNT_LOGOUT, GAME_LOGOUT].includes(action.type)) {
-            this.onDisconnect(socket, false, action.type === ACCOUNT_LOGOUT);
+        if ([USER_LOGOUT, CHARACTER_LOGOUT].includes(action.type)) {
+            this.onDisconnect(socket, false, action.type === USER_LOGOUT);
         }
 
         // emit the dispatch, which managers listen for

@@ -1,9 +1,14 @@
 import fs from 'fs';
 
 // manager specific imports
+import {
+    MAP_GRID_DETAILS,
+    MAP_GET_LIST,
+    MAP_LIST,
+} from 'shared/actionTypes';
+
 import GameMap from './object';
 import descriptionList from '../../data/descriptions.json';
-import {JOIN_GRID, MAPS_GET_LIST, MAPS_LIST} from './types';
 import mapCommands from './commands';
 
 /**
@@ -52,7 +57,7 @@ export default class MapManager {
      */
     onDispatch(socket, action) {
         switch (action.type) {
-            case MAPS_GET_LIST:
+            case MAP_GET_LIST:
                 return this.sendMapList(socket, action);
         }
 
@@ -67,7 +72,7 @@ export default class MapManager {
         const list = this.getList();
 
         this.Game.socketManager.dispatchToSocket(socket, {
-            type: MAPS_LIST,
+            type: MAP_LIST,
             payload: list,
         });
     }
@@ -100,7 +105,7 @@ export default class MapManager {
 
         // dispatch to client
         this.Game.socketManager.dispatchToUser(user_id, {
-            type: JOIN_GRID,
+            type: MAP_GRID_DETAILS,
             payload: {
                 description: this.generateDescription(),
                 players: this.Game.characterManager.getLocationList(...location, character.user_id, true),
