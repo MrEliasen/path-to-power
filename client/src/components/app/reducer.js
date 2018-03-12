@@ -1,4 +1,9 @@
-import {CONNECTION_STATUS, CONNECTION_SOCKET} from './types';
+import {
+    CONNECTION_STATUS,
+    CONNECTION_SOCKET,
+    NOTIFICATION_SET,
+    NOTIFICATION_CLEAR,
+} from './types';
 
 const defaultState = {
     connected: false,
@@ -17,6 +22,16 @@ export default function(state = defaultState, action) {
             return {
                 ...state,
                 socket: action.payload,
+            };
+        case NOTIFICATION_SET:
+            return {
+                ...state,
+                notification: action.payload,
+            };
+        case NOTIFICATION_CLEAR:
+            return {
+                ...state,
+                notification: null,
             };
     }
 
