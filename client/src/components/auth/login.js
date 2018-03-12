@@ -7,6 +7,7 @@ import axios from 'axios';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import {Card, CardHeader, CardBody, Input, Button, Form, FormGroup} from 'reactstrap';
+import Notification from '../ui/notification';
 
 // Actions
 import {authLogin, authLocal} from '../account/actions';
@@ -94,6 +95,7 @@ class AuthLogin extends React.Component {
                             // if local authentication strategy is enabled
                             this.state.strategies.find((auth) => auth.provider === 'local') &&
                             <Form>
+                                <Notification />
                                 <FormGroup>
                                     <Input
                                         type="email"

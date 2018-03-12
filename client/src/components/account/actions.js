@@ -5,6 +5,7 @@ import {
 
 import {
     ACCOUNT_AUTHENTICATE_SAVE,
+    USER_SIGNUP,
 } from './types';
 
 export function authLogout() {
@@ -18,6 +19,16 @@ export function authLogin(jwt) {
     return {
         type: ACCOUNT_AUTHENTICATE_SAVE,
         payload: jwt,
+    };
+}
+
+export function userSignUp(email, password) {
+    return {
+        type: USER_SIGNUP,
+        payload: {
+            email,
+            password,
+        },
     };
 }
 

@@ -1,9 +1,13 @@
 import React from 'react';
+import {bindActionCreators} from 'redux';
+import {connect} from 'react-redux';
 import axios from 'axios';
 import config from '../../config';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import {Card, CardHeader, CardBody, Input, Button, Form, FormGroup} from 'reactstrap';
+import Notification from '../ui/notification';
+import {userSignUp} from '../account/actions';
 
 class AuthRegister extends React.Component {
     constructor(props) {
@@ -39,55 +43,7 @@ class AuthRegister extends React.Component {
 
     register() {
         const state = {...this.state};
-        // clear the status message
-        this.setState({
-            status: {
-                message: 'Creating Account',
-                type: 'info',
-            },
-            sending: true,
-        });
-
-        axios
-            .post(`${config.api.host}/api/users`, {
-                email: state.email,
-                password: state.password,
-                method: 'local',
-            })
-            .then((response) => {
-                this.setState({
-                    sending: false,
-                    status: {
-                        message: response.data.message,
-                        type: 'success',
-                    },
-                });
-            })
-            .catch((err) => {
-                let errorMsg = 'Something went wrong. Please try again in a moment.';
-
-                if (err.response) {
-                    errorMsg = err.response.data.error || errorMsg;
-                }
-
-                this.setState({
-                    sending: false,
-                    status: {
-                        message: errorMsg,
-                        type: 'danger',
-                    },
-                });
-            });
-    }
-
-    showStatus() {
-        if (!this.state.status) {
-            return null;
-        }
-
-        return <p className={`alert alert-${this.state.status.type}`}>
-            {this.state.status.message}
-        </p>;
+        this.props.userSignUp(state.email, state.password);
     }
 
     render() {
@@ -97,7 +53,7 @@ class AuthRegister extends React.Component {
                 {
                     this.state.strategies &&
                     <CardBody className="text-center">
-                        {this.showStatus()}
+                        <Notification />
                         {
                             // if local authentication strategy is enabled
                             this.state.strategies.find((auth) => auth.provider === 'local') &&
@@ -170,4 +126,10 @@ class AuthRegister extends React.Component {
     }
 };
 
-export default AuthRegister;
+function mapDispatchToProps(dispatch) {
+    return bindActionCreators({
+        userSignUp,
+    }, dispatch);
+}
+
+export default connect(null, mapDispatchToProps)(AuthRegister);

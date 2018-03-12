@@ -17,11 +17,12 @@ import {
     USER_LOGOUT,
     CHARACTER_LOGOUT,
 } from 'shared/actionTypes';
-
-import {SOCKET_SEND, SOCKET_LOGOUT} from './components/app/types';
 import {
-    ACCOUNT_AUTHENTICATE_SAVE,
-} from './components/account/types';
+    SOCKET_SEND,
+    NOTIFICATION_SET,
+    NOTIFICATION_CLEAR,
+} from './components/app/types';
+import {ACCOUNT_AUTHENTICATE_SAVE, USER_SIGNUP} from './components/account/types';
 
 // misc
 import config from './config';
@@ -138,6 +139,11 @@ function* logoutGame(action) {
 
 function* checkLocalAuth(action) {
     try {
+        yield put({
+            type: NOTIFICATION_CLEAR,
+            payload: null,
+        });
+
         const response = yield axios.post(`${config.api.host}/api/auth`, {
             email: action.payload.email,
             password: action.payload.password,
@@ -153,10 +159,47 @@ function* checkLocalAuth(action) {
         }
 
         yield put({
-            type: 'NOTIFICATION_NEW',
+            type: NOTIFICATION_SET,
             payload: {
                 message: errorMsg,
-                isError: true,
+                type: 'error',
+            },
+        });
+    }
+}
+
+function* signUpUser(action) {
+    try {
+        yield put({
+            type: NOTIFICATION_CLEAR,
+            payload: null,
+        });
+
+        const response = yield axios.post(`${config.api.host}/api/users`, {
+            email: action.payload.email,
+            password: action.payload.password,
+            method: 'local',
+        });
+
+        yield put({
+            type: NOTIFICATION_SET,
+            payload: {
+                message: response.data.message,
+                type: 'success',
+            },
+        });
+    } catch (err) {
+        let errorMsg = 'Something went wrong. Please try again in a moment.';
+
+        if (err.response) {
+            errorMsg = err.response.data.error || errorMsg;
+        }
+
+        yield put({
+            type: NOTIFICATION_SET,
+            payload: {
+                message: errorMsg,
+                type: 'error',
             },
         });
     }
@@ -178,6 +221,10 @@ function* onAuthSuccess() {
     yield takeLatest(ACCOUNT_AUTHENTICATE_SAVE, saveAuthDetails);
 }
 
+function* onSignUpAttempt() {
+    yield takeLatest(USER_SIGNUP, signUpUser);
+}
+
 /* ** ** ** ** **  ** ** ** ** ** ** */
 
 function* Sagas() {
@@ -187,6 +234,7 @@ function* Sagas() {
         onGameLogout(),
         onAuthAttempt(),
         setupWebSocket(),
+        onSignUpAttempt(),
     ]);
 }
 
