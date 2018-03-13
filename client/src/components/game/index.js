@@ -241,6 +241,7 @@ class Game extends React.Component {
         // Otherwise show the game ui
         return (
             <div className="ui">
+                <Container>
                 <Row>
                     <Col className="left">
                         <CharacterCard character={this.props.character} />
@@ -300,6 +301,7 @@ class Game extends React.Component {
                         </div>
                     </Col>
                 </Row>
+                </Container>
             </div>
         );
     }
