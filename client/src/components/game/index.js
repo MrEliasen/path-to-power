@@ -7,26 +7,22 @@ import {DragDropContext as dragDropContext} from 'react-dnd';
 
 import Events from './events';
 import Map from './map';
+import MapMenu from './map/menu';
 // import Shop from './shop';
-import BottomMenu from './bottom-menu';
 
 import {clearEvents, newEvent} from './events/actions';
 import {newCommand, gameLogout} from './actions';
 import {moveCharacter} from './character/actions';
 import {socketSend} from '../app/actions';
 
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
-
 // Components
-import {Row, Col, Input, Card, CardHeader, CardBody, Modal, ModalHeader, ModalBody} from 'reactstrap';
-import InventoryMenu from './inventory-menu';
-import PlayersMenu from './players-menu';
-import StatsMenu from './stats-menu';
+import {Container, Row, Col, Input, Modal, ModalHeader, ModalBody, InputGroup, InputGroupAddon, Button} from 'reactstrap';
 import Chat from './chat';
 import Inventory from './inventory';
-import ItemSlot from './item/slot';
 import Character from './character';
 import CharacterCard from './character/card';
+import CharacterMenu from './character/menu';
+import CharacterCombatMenu from './character/combat';
 
 class Game extends React.Component {
     constructor(props) {
@@ -40,7 +36,6 @@ class Game extends React.Component {
             autoscroll: true,
 
             modalShop: false,
-            modalEquipment: false,
         };
 
         this.isActiveTab = this.isActiveTab.bind(this);
@@ -49,8 +44,6 @@ class Game extends React.Component {
         this.sendAction = this.sendAction.bind(this);
 
         this.toggleShop = this.toggleShop.bind(this);
-        this.toggleEquipment = this.toggleEquipment.bind(this);
-        this.toggleStats = this.toggleStats.bind(this);
     }
 
     componentWillMount() {
@@ -181,38 +174,9 @@ class Game extends React.Component {
         this.setState({modalShop: !this.state.modalShop});
     }
 
-    toggleEquipment() {
-        this.setState({modalEquipment: !this.state.modalEquipment});
-    }
-
-    toggleStats() {
-        this.setState({modalStats: !this.state.modalStats});
-    }
-
     renderModals() {
         return (
             <React.Fragment>
-                <Modal isOpen={this.state.modalStats} toggle={this.toggleStats} size="lg">
-                    <ModalHeader toggle={this.toggleStats}>Stats</ModalHeader>
-                    <ModalBody>
-                        <StatsMenu />
-                    </ModalBody>
-                </Modal>
-                <Modal isOpen={this.state.modalEquipment} toggle={this.toggleEquipment} size="lg">
-                    <ModalHeader toggle={this.toggleEquipment}>Equipment</ModalHeader>
-                    <ModalBody>
-                        <Row>
-                            <Col xs="6">
-                                <div id="equipment">
-                                    <ItemSlot slotId="head" />
-                                </div>
-                            </Col>
-                            <Col xs="6">
-                                <Inventory />
-                            </Col>
-                        </Row>
-                    </ModalBody>
-                </Modal>
                 <Modal isOpen={this.state.modalShop} toggle={this.toggleShop} size="lg">
                     <ModalHeader toggle={this.toggleShop}>Shop</ModalHeader>
                     <ModalBody>
@@ -246,50 +210,6 @@ class Game extends React.Component {
                     <Col className="left">
                         <CharacterCard character={this.props.character} />
                         <Map />
-                        <Card>
-                            <CardHeader>Equipment</CardHeader>
-                            <CardBody>
-                                <InventoryMenu sendCommand={this.sendCommand} sendAction={this.sendAction} />
-                            </CardBody>
-                        </Card>
-                        <Card>
-                            <CardHeader>Players Online</CardHeader>
-                            <CardBody>
-                                <PlayersMenu sendCommand={this.sendCommand} setCommand={this.setCommand} />
-                            </CardBody>
-                        </Card>
-                        {
-                            this.props.character &&
-                            <BottomMenu className="c-bottom-menu" socket={this.props.socket} />
-                        }
-                    </Col>
-                    <Col sm="9" className="middle">
-                        <Card>
-                            <ul className="toolbar">
-                                <li><a href="#" onClick={this.toggleStats}><FontAwesomeIcon icon="chart-bar" /> Stats</a></li>
-                                <li><a href="#" onClick={this.toggleEquipment}><FontAwesomeIcon icon="shield-alt" /> Equipment ({this.props.character.inventory.length}/{this.props.character.stats.inventorySize})</a></li>
-                                <li><a href="#" onClick={this.toggleShop}><FontAwesomeIcon icon="shopping-cart" /> Shop (?)</a></li>
-                                <li><a href="#"><FontAwesomeIcon icon="tasks" /> Quests (?)</a></li>
-                                <li><a href="#"><FontAwesomeIcon icon="user-secret" /> Players (?)</a></li>
-                            </ul>
-                        </Card>
-                        <Chat title="Chat" messages={this.props.chat} lines="10" />
-                        <Events />
-                        <Input
-                            id="input-command"
-                            onKeyPress={(e) => {
-                                if (e.key && e.key == 'Enter') {
-                                    this.sendCommand();
-                                }
-                            }}
-                            onChange={(e) => {
-                                this.setState({command: e.target.value});
-                            }}
-                            value={this.state.command}
-                            placeholder="Type your commands here, and hit Enter."
-                            type="input"
-                            name="input"
-                        />
                         {
                             this.props.game.news &&
                             <h3 style={this.props.game.news.colour}>{this.props.game.news.message}</h3>
@@ -299,6 +219,31 @@ class Game extends React.Component {
                             {!this.props.connection.isConnected}
                             <div mode="indeterminate" />
                         </div>
+                    </Col>
+                    <Col sm="9" className="middle">
+                        <CharacterMenu />
+                        <MapMenu />
+                        <CharacterCombatMenu />
+                        <Chat title="Chat" messages={this.props.chat} lines="10" />
+                        <Events />
+                        <InputGroup>
+                            <Input
+                                id="input-command"
+                                onKeyPress={(e) => {
+                                    if (e.key && e.key == 'Enter') {
+                                        this.sendCommand();
+                                    }
+                                }}
+                                onChange={(e) => {
+                                    this.setState({command: e.target.value});
+                                }}
+                                value={this.state.command}
+                                placeholder="Type your commands here, and hit Enter."
+                                type="input"
+                                name="input"
+                            />
+                            <InputGroupAddon addonType="append"><Button color="primary">Send</Button></InputGroupAddon>
+                        </InputGroup>
                     </Col>
                 </Row>
                 </Container>
@@ -333,11 +278,15 @@ function mapStateToProps(state) {
     return {
         game: {...state.game},
         character: state.character.selected,
+        players: state.game.players,
         chat: state.game.chat,
         events: state.events,
         socket: state.app.socket,
         loggedIn: state.account.loggedIn,
         authToken: state.account.authToken,
+        structures: state.character.selected ? [
+            ...state.game.maps[state.character.selected.location.map].buildings,
+        ] : null,
         connection: {
             isConnected: state.app.connected,
             lastEvent: state.app.connectedEvent,

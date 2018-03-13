@@ -119,25 +119,32 @@
 
     .middle {
 
-        .toolbar {
+        .menu {
             display: flex;
             flex-direction: row;
-            margin: 0;
-            padding: 0;
 
-            li {
-                flex: auto;
-                display: inline-block;
-                margin: 0;
-                padding: 0;
-
-                > * {
-                    display: block;
-                    padding: 5px 15px;
-                    color: inherit;
-                    text-align: center;
-                }
+            &.menu-combat {
+                margin-left: 20%;
+                margin-right: 20%;
+                background: $red;
+                color: $white;
                 a:hover {
+                    background-color: rgba(255, 255, 255, .1);
+                }
+            }
+
+            &.menu-map {
+                display: inline-flex;
+            }
+
+            > * {
+                flex: auto;
+                display: block;
+                padding: 5px 15px;
+                color: inherit;
+                text-align: center;
+
+                &:hover {
                     background-color: #eee;
                 }
             }

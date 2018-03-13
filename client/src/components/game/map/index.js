@@ -14,15 +14,6 @@ class Map extends React.Component {
             sidebar: 'players',
             command: '',
         };
-
-        this.showStructureInfo = this.showStructureInfo.bind(this);
-    }
-
-    showStructureInfo(structure) {
-        this.props.newEvent({
-            type: 'structure-info',
-            structure: structure,
-        });
     }
 
     renderGrid() {
@@ -71,17 +62,6 @@ class Map extends React.Component {
     }
 
     render() {
-        // if the character is not load, dont continue
-        if (!this.props.character) {
-            return null;
-        }
-
-        const location = this.props.location;
-        const hasPlayers = location.players.length ? true : false;
-        const hasItems = location.items.length ? true : false;
-        const hasStructures = location.structures.length ? true : false;
-        const hasNPCs = location.npcs.length ? true : false;
-
         return (
             <Card>
                 <CardHeader>
@@ -94,98 +74,7 @@ class Map extends React.Component {
                     {this.renderGrid()}
                 </div>
                 <CardBody>
-                    "{location.description}"<br/>
-                    <div className="c-game__event-divider" />
-                    {
-                        hasStructures &&
-                        <React.Fragment>
-                            <strong className="infoheader">Buildings</strong>
-                            <p>
-                                {
-                                    location.structures.map((structure, index) =>
-                                        <React.Fragment key={index}>
-                                            {
-                                                index !== 0 &&
-                                                <span>, </span>
-                                            }
-                                            <span
-                                                className="e-clickable"
-                                                style={{color: structure.colour}}
-                                                onClick={() => this.showStructureInfo(structure)}
-                                            >
-                                                {structure.name}
-                                            </span>
-                                        </React.Fragment>
-                                    )
-                                }
-                            </p>
-                        </React.Fragment>
-                    }
-                    {
-                        hasPlayers &&
-                        <React.Fragment>
-                            <strong className="infoheader">Players</strong>
-                            <p>
-                                {
-                                    location.players.map((user, index) =>
-                                        <React.Fragment key={user.user_id}>
-                                            {
-                                                index !== 0 &&
-                                                <span>, </span>
-                                            }
-                                            <span>
-                                                {user.name}
-                                            </span>
-                                        </React.Fragment>
-                                    )
-                                }
-                            </p>
-                        </React.Fragment>
-                    }
-                    {
-                        hasNPCs &&
-                        <React.Fragment>
-                            <strong className="infoheader">NPCs</strong>
-                            <p>
-                                {
-                                    location.npcs.map((NPC, index) =>
-                                        <React.Fragment key={index}>
-                                            {
-                                                index !== 0 &&
-                                                <span>, </span>
-                                            }
-                                            <span>
-                                                {NPC.name} the {NPC.type} (HP: {NPC.health})
-                                            </span>
-                                        </React.Fragment>
-                                    )
-                                }
-                            </p>
-                        </React.Fragment>
-                    }
-                    {
-                        hasItems &&
-                        <React.Fragment>
-                            <strong className="infoheader">Items on the ground</strong>
-                            <p>
-                                {
-                                    location.items.map((item, index) => {
-                                        if (item) {
-                                            const itemObj = this.props.itemlist[item.id];
-
-                                            return <React.Fragment key={index}>
-                                                {
-                                                    index !== 0 &&
-                                                    <span>, </span>
-                                                }
-                                                {(itemObj.stats.stackable ? `(${item.durability}) ` : '')}{itemObj.name}
-                                            </React.Fragment>;
-                                        }
-                                    })
-                                }
-                            </p>
-                        </React.Fragment>
-                    }
+                    {this.props.map.description}
                 </CardBody>
             </Card>
         );
@@ -195,7 +84,7 @@ class Map extends React.Component {
 function mapStateToProps(state) {
     return {
         maps: {...state.game.maps},
-        location: {...state.map},
+        map: {...state.map},
         itemlist: {...state.game.items},
         character: state.character.selected,
     };
