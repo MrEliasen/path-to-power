@@ -45,16 +45,15 @@ class Events extends React.Component {
             </React.Fragment>
         );
 
-        let commands = Object.keys(event.structure.commands);
 
-        if (commands.length > 0) {
+        if (event.structure.commands && event.structure.commands.length > 0) {
             lines.push(
                 <React.Fragment>
                     <strong>Commands</strong>
                 </React.Fragment>
             );
 
-            commands.forEach((command) => {
+            Object.keys(event.structure.commands).forEach((command) => {
                 lines.push(
                     <React.Fragment>
                         <i>{command}</i>: {this.generateDescription(command, event.structure.commands[command])}
@@ -63,7 +62,7 @@ class Events extends React.Component {
             });
         }
 
-        if (event.structure.shops.length > 0) {
+        if (event.structure.shops && event.structure.shops.length > 0) {
             lines.push(
                 <React.Fragment>
                     <strong>Shops</strong>
