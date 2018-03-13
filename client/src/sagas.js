@@ -26,6 +26,32 @@ import {ACCOUNT_AUTHENTICATE_SAVE, USER_SIGNUP} from './components/account/types
 
 // misc
 import config from './config';
+
+function* doAPICall(endpoint, data) {
+    try {
+        yield put({
+            type: NOTIFICATION_CLEAR,
+            payload: null,
+        });
+
+        return yield call(axios.post, `${config.api.host}/api/${endpoint}`, data);
+    } catch (err) {
+        let errorMsg = 'Something went wrong. Please try again in a moment.';
+
+        if (err.response) {
+            errorMsg = err.response.data.error || errorMsg;
+        }
+
+        yield put({
+            type: NOTIFICATION_SET,
+            payload: {
+                message: errorMsg,
+                type: 'error',
+            },
+        });
+    }
+}
+
 /*
     Socket
     ------------------------
@@ -138,71 +164,42 @@ function* logoutGame(action) {
 }
 
 function* checkLocalAuth(action) {
-    try {
-        yield put({
-            type: NOTIFICATION_CLEAR,
-            payload: null,
-        });
+    const data = {
+        email: action.payload.email,
+        password: action.payload.password,
+        method: 'local',
+    };
 
-        const response = yield axios.post(`${config.api.host}/api/auth`, {
-            email: action.payload.email,
-            password: action.payload.password,
-            method: 'local',
-        });
+    const response = yield call(doAPICall, 'auth', data);
 
-        yield put(authLogin(response.data.authToken));
-    } catch (err) {
-        let errorMsg = 'Something went wrong. Please try again in a moment.';
-
-        if (err.response) {
-            errorMsg = err.response.data.error || errorMsg;
-        }
-
-        yield put({
-            type: NOTIFICATION_SET,
-            payload: {
-                message: errorMsg,
-                type: 'error',
-            },
-        });
+    if (!response) {
+        return;
     }
+
+    yield put(authLogin(response.data.authToken));
 }
 
 function* signUpUser(action) {
-    try {
-        yield put({
-            type: NOTIFICATION_CLEAR,
-            payload: null,
-        });
+    const data = {
+        email: action.payload.email,
+        password: action.payload.password,
+        confirm: action.payload.confirm,
+        method: 'local',
+    };
 
-        const response = yield axios.post(`${config.api.host}/api/users`, {
-            email: action.payload.email,
-            password: action.payload.password,
-            method: 'local',
-        });
+    const response = yield call(doAPICall, 'users', data);
 
-        yield put({
-            type: NOTIFICATION_SET,
-            payload: {
-                message: response.data.message,
-                type: 'success',
-            },
-        });
-    } catch (err) {
-        let errorMsg = 'Something went wrong. Please try again in a moment.';
-
-        if (err.response) {
-            errorMsg = err.response.data.error || errorMsg;
-        }
-
-        yield put({
-            type: NOTIFICATION_SET,
-            payload: {
-                message: errorMsg,
-                type: 'error',
-            },
-        });
+    if (!response) {
+        return;
     }
+
+    put({
+        type: NOTIFICATION_SET,
+        payload: {
+            message: response.data.message,
+            type: 'success',
+        },
+    });
 }
 
 function* onAuthAttempt() {
