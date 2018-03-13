@@ -77,6 +77,13 @@ function signup(req, res) {
         });
     }
 
+    if (req.body.password !== req.body.passwordConfirm) {
+        return res.status(400).json({
+            status: 400,
+            error: 'Your passwords did not seem to match.',
+        });
+    }
+
     if (req.body.password.length < req.app.get('config').api.authentication.password.minlen) {
         return res.status(400).json({
             status: 400,

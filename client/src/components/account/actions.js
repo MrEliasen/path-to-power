@@ -22,12 +22,13 @@ export function authLogin(jwt) {
     };
 }
 
-export function userSignUp(email, password) {
+export function userSignUp(email, password, passwordConfirm) {
     return {
         type: USER_SIGNUP,
         payload: {
             email,
             password,
+            passwordConfirm,
         },
     };
 }

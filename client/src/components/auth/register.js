@@ -17,7 +17,7 @@ class AuthRegister extends React.Component {
             strategies: null,
             email: '',
             password: '',
-            passwordRepeat: '',
+            passwordConfirm: '',
             status: null,
             sending: false,
         };
@@ -43,7 +43,7 @@ class AuthRegister extends React.Component {
 
     register() {
         const state = {...this.state};
-        this.props.userSignUp(state.email, state.password);
+        this.props.userSignUp(state.email, state.password, state.passwordConfirm);
     }
 
     render() {
@@ -97,10 +97,10 @@ class AuthRegister extends React.Component {
                                         disabled={this.state.sending}
                                         onChange={(e) => {
                                             this.setState({
-                                                passwordRepeat: e.target.value,
+                                                passwordConfirm: e.target.value,
                                             });
                                         }}
-                                        value={this.state.passwordRepeat}
+                                        value={this.state.passwordConfirm}
                                     />
                                 </FormGroup>
                                 <Button onClick={this.register} disabled={this.state.sending} color="primary">Create account</Button>
