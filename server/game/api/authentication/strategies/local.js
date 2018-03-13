@@ -8,9 +8,10 @@ let logger;
 
 /**
  * Setup the authentication strategy
- * @param  {Passport} passport     Passport Object
+ * @param  {Passport} passport  Passport Object
+ * @param  {Logger}   loggerObj The logger
  */
-function setup(passport, clientId, clientSecret, callbackUrl, loggerObj) {
+function setup(passport, loggerObj) {
     logger = loggerObj;
 
     //setup the stategies we want

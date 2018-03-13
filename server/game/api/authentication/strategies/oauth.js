@@ -1,4 +1,3 @@
-import GithubStrategy from 'passport-github';
 import UserModel from '../../models/user';
 import IdentityModel from '../../models/identity';
 
@@ -6,19 +5,19 @@ let logger;
 
 /**
  * Setup the authentication strategy
- * @param  {Passport} passport     Passport Object
- * @param  {String}   clientId     App client ID
- * @param  {String}   clientSecret App Client Secret
- * @param  {String}   callbackUrl  App callback url
+ * @param  {Passport} passport  Passport Object
+ * @param  {Object}   details   The strategy details, like clientId, secret, callback url etc.
+ * @param  {Logger}   loggerObj The logger
  */
-function setup(passport, clientId, clientSecret, callbackUrl, loggerObj) {
+function setup(passport, details, loggerObj) {
     logger = loggerObj;
+    const Strategy = require(`passport-${details.id}`).Strategy;
 
     //setup the stategies we want
-    passport.use(new GithubStrategy({
-        clientID: clientId,
-        clientSecret: clientSecret,
-        callbackURL: callbackUrl,
+    passport.use(new Strategy({
+        clientID: details.clientID,
+        clientSecret: details.clientSecret,
+        callbackURL: details.callbackUrl,
     }, Auth));
 }
 

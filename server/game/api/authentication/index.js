@@ -1,10 +1,50 @@
 import passport from 'passport';
-import strategies from './strategies';
 import config from '../../../config.json';
 import UserModel from '../models/user';
 import jwt from 'jsonwebtoken';
 
-export const createUser = strategies.local.signup;
+// authentication strategies
+import {signup, setup as localSetup} from './strategies/local';
+import {setup as oauthSetup} from './strategies/oauth';
+
+/**
+ * Loads the authentication strategies
+ * @param  {Express} app
+ */
+export function loadStrategies(passport, logger) {
+    const providers = config.api.authentication.providers;
+
+    for (let provider in providers) {
+        if (providers.hasOwnProperty(provider)) {
+            if (!providers[provider].enabled) {
+                continue;
+            }
+
+            let callbackUrl = `${config.api.domain}${[80, 443].includes(config.api.post) ? '' : `:${config.api.port}`}/api/auth/${providers[provider].id}/callback`;
+
+            // if its the local auth provider, we have to use a separate strategy from OAuth.
+            if (provider === 'local') {
+                localSetup(passport, logger);
+                continue;
+            }
+
+            try {
+                oauthSetup(
+                    passport,
+                    {
+                        ...providers[provider],
+                        callbackUrl,
+                    },
+                    logger
+                );
+            } catch (err) {
+                logger.error(err);
+            }
+        }
+    };
+}
+
+export const createUser = signup;
 
 /**
  * Handles updates to a user
@@ -80,36 +120,6 @@ export function activateUser(req, res) {
 }
 
 /**
- * Loads the authentication strategies
- * @param  {Express} app
- */
-export function loadStrategies(passport, logger) {
-    const providers = config.api.authentication.providers;
-
-    for (let provider in providers) {
-        if (providers.hasOwnProperty(provider)) {
-            if (!strategies[provider]) {
-                return logger.error(`Provider "${provider}" not found in the list of available strategies.`);
-            }
-
-            if (!providers[provider].enabled) {
-                return;
-            }
-
-            let callbackUrl = `${config.api.domain}${[80,443].includes(config.api.post) ? '' : `:${config.api.port}`}/api/auth/${provider}/callback`;
-
-            strategies[provider].setup(
-                passport,
-                providers[provider].clientID,
-                providers[provider].clientSecret,
-                callbackUrl,
-                logger
-            );
-        }
-    };
-}
-
-/**
  * Handles authentication requests
  * @param  {Express Request} req
  * @param  {Express Response} res
@@ -170,10 +180,6 @@ export function getAuthList(req, res) {
 
     for (let provider in providers) {
         if (providers.hasOwnProperty(provider)) {
-            if (!strategies[provider]) {
-                continue;
-            }
-
             if (!providers[provider].enabled) {
                 continue;
             }
@@ -181,7 +187,7 @@ export function getAuthList(req, res) {
             authlist.push({
                 provider,
                 name: providers[provider].name,
-                authUrl: `${config.api.domain}${[80, 443].includes(config.api.post) ? '' : `:${config.api.port}`}/api/auth/${provider}`
+                authUrl: `${config.api.domain}${[80, 443].includes(config.api.post) ? '' : `:${config.api.port}`}/api/auth/${providers[provider].id}`,
             });
         }
     };
