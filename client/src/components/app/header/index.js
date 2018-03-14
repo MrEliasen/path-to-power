@@ -27,7 +27,7 @@ class Header extends React.Component {
             return (
                 <React.Fragment>
                     <NavLink className="nav-link" to="/game">Play Game</NavLink>
-                    <NavLink className="nav-link" to="/auth/settings">Settings</NavLink>
+                    <NavLink className="nav-link" to="/account">Account</NavLink>
                     <a className="nav-link" href="#" onClick={this.logout.bind(this)}>Logout</a>
                 </React.Fragment>
             );
