@@ -4,19 +4,19 @@ import {withRouter, Route, Switch} from 'react-router-dom';
 import {connect} from 'react-redux';
 import Yaml from 'js-yaml';
 
-// Pages
+// Components
 import Page from '../page';
 import PageNotFound from '../page/404';
-
 import AuthContainer from '../auth';
 import GameContainer from '../game';
 import AccountContainer from '../account';
-
-// Components
 import Header from './header';
-import {Container} from 'reactstrap';
 
-// actions
+// UI
+import {Container} from 'reactstrap';
+import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+
+// Redux
 import {socketConnect} from './actions';
 
 class App extends React.Component {
@@ -30,10 +30,17 @@ class App extends React.Component {
 
     componentWillMount() {
         this.getPages();
+        this.generateIssueLink();
     }
 
     componentDidMount() {
         this.props.socketConnect();
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.character && !this.props.character) {
+            this.generateIssueLink();
+        }
     }
 
     onDispatch(data) {
@@ -98,6 +105,26 @@ class App extends React.Component {
         this.setState({pages});
     }
 
+    generateIssueLink() {
+        fetch('https://raw.githubusercontent.com/MrEliasen/path-to-power/master/.github/ISSUE_TEMPLATE.md')
+            .then((response) => response.text())
+            .then((text) => {
+                // replace static information
+                text = text.replace('**Operating System**:', `**Operating System**: ${window.navigator.platform}`);
+                text = text.replace('**Browser/Version**:', `**Browser/Version**: ${window.navigator.userAgent}`);
+
+                if (this.props.character) {
+                    text = text.replace('**In-Game Name**: (if applicable)', `**In-Game Name**: ${this.props.character.name}`);
+                }
+
+                this.setState({
+                    issueUrl: `https://github.com/MrEliasen/path-to-power/issues/new?body=${encodeURIComponent(text)}`,
+                });
+            })
+            .catch((err) => {
+            });
+    }
+
     renderGameRoute(component) {
         if (!this.props.isConnected) {
             return <p>Connecting...</p>;
@@ -127,6 +154,7 @@ class App extends React.Component {
                         </Switch>
                     </Container>
                 </main>
+                <a href={this.state.issueUrl} target="_blank" id="bug"><FontAwesomeIcon icon="bug" />Found a bug?</a>
             </React.Fragment>
         );
     }

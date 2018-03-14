@@ -17,39 +17,9 @@ class Header extends React.Component {
         };
     }
 
-    componentWillMount() {
-        this.generateIssueLink();
-    }
-
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.character && !this.props.character) {
-            this.generateIssueLink();
-        }
-    }
-
     logout() {
         localStorage.removeItem('authToken');
         this.props.authLogout();
-    }
-
-    generateIssueLink() {
-        fetch('https://raw.githubusercontent.com/MrEliasen/path-to-power/master/.github/ISSUE_TEMPLATE.md')
-            .then((response) => response.text())
-            .then((text) => {
-                // replace static information
-                text = text.replace('**Operating System**:', `**Operating System**: ${window.navigator.platform}`);
-                text = text.replace('**Browser/Version**:', `**Browser/Version**: ${window.navigator.userAgent}`);
-
-                if (this.props.character) {
-                    text = text.replace('**In-Game Name**: (if applicable)', `**In-Game Name**: ${this.props.character.name}`);
-                }
-
-                this.setState({
-                    issueUrl: `https://github.com/MrEliasen/path-to-power/issues/new?body=${encodeURIComponent(text)}`,
-                });
-            })
-            .catch((err) => {
-            });
     }
 
     renderNavAuth() {
@@ -92,7 +62,6 @@ class Header extends React.Component {
                                     return <NavLink className="nav-link" key={index} exact to={'/' + page.meta.path}>{page.meta.title}</NavLink>;
                                 })
                             }
-                            <a className="nav-link" href={this.state.issueUrl} target="_blank">Report a bug</a>
                         </Nav>
                         <Nav className="ml-auto" navbar>
                             {this.renderNavAuth()}

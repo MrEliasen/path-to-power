@@ -18,6 +18,22 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+#bug {
+    position: fixed;
+    z-index: 9999;
+    right: $grid-gutter-width;
+    bottom: 0;
+    padding: 5px 15px;
+    border-top-left-radius: $border-radius;
+    border-top-right-radius: $border-radius;
+    background-color: $primary-dark;
+    color: $white;
+
+    &:hover {
+        background-color: $primary;
+    }
+}
+
 .svg-inline--fa {
     margin: 0 5px;
 }
