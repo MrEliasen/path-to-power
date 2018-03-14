@@ -27,7 +27,8 @@
             },
             "providers": {
                 "local": {
-                    "enabled": true
+                    "enabled": true,
+                    "activationLink": true
                 },
                 "github": {
                     "enabled": false,

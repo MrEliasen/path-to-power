@@ -116,14 +116,20 @@ function signup(req, res) {
             });
         }
 
-        // create activation key
-        const token = crypto.createHmac('sha256', req.app.get('config').api.signingKey);
-        token.update(uuid());
+        const requireActivation = req.app.get('config').api.authentication.providers.local.activationLink;
+        let newUser;
+        let token;
 
-        const newUser = new UserModel({
+        if (requireActivation) {
+            // create activation key
+            token = crypto.createHmac('sha256', req.app.get('config').api.signingKey);
+            token.update(uuid());
+        }
+
+        newUser = new UserModel({
             email: req.body.email,
             password: req.body.password,
-            activationToken: token.digest('hex'),
+            activationToken: requireActivation ? token.digest('hex') : '',
         });
 
         newUser.save((err) => {
@@ -132,6 +138,13 @@ function signup(req, res) {
                     status: 500,
                     error: 'Something went wrong while trying to process your request. Please try again in a moment.',
                     err: err,
+                });
+            }
+
+            if (!requireActivation) {
+                return res.status(203).json({
+                    status: 203,
+                    message: 'Your account has been created!',
                 });
             }
 
