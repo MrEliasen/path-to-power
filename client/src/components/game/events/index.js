@@ -46,7 +46,7 @@ class Events extends React.Component {
         );
 
 
-        if (event.structure.commands && event.structure.commands.length > 0) {
+        if (event.structure.commands) {
             lines.push(
                 <React.Fragment>
                     <strong>Commands</strong>
@@ -62,7 +62,7 @@ class Events extends React.Component {
             });
         }
 
-        if (event.structure.shops && event.structure.shops.length > 0) {
+        if (event.structure.shops) {
             lines.push(
                 <React.Fragment>
                     <strong>Shops</strong>
