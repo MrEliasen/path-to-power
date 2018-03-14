@@ -108,12 +108,8 @@ class MapMenu extends React.Component {
     }
 
     render() {
-        if (!
-            this.props.map.structures.length +
-            this.props.map.items.length +
-            this.props.map.players.length +
-            this.props.map.npcs.length
-        ) {
+        const total = this.props.map.structures.length + this.props.map.items.length + this.props.map.players.length + this.props.map.npcs.length;
+        if (total === 0) {
             return '';
         }
 
