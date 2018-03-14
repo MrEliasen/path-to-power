@@ -29,14 +29,14 @@ import {ACCOUNT_AUTHENTICATE_SAVE, USER_SIGNUP} from './components/account/types
 // misc
 import config from './config';
 
-function* doAPICall(endpoint, data) {
+function* doAPICall(endpoint, data, method = 'get') {
     try {
         yield put({
             type: NOTIFICATION_CLEAR,
             payload: null,
         });
 
-        return yield call(axios.post, `${config.api.host}/api/${endpoint}`, data);
+        return yield call(axios[method], `${config.api.host}/api/${endpoint}`, data);
     } catch (err) {
         let errorMsg = 'Something went wrong. Please try again in a moment.';
 
@@ -172,7 +172,7 @@ function* checkLocalAuth(action) {
         method: 'local',
     };
 
-    const response = yield call(doAPICall, 'auth', data);
+    const response = yield call(doAPICall, 'auth', data, 'post');
 
     if (!response) {
         return;
@@ -189,7 +189,7 @@ function* signUpUser(action) {
         method: 'local',
     };
 
-    const response = yield call(doAPICall, 'users', data);
+    const response = yield call(doAPICall, 'users', data, 'post');
 
     if (!response) {
         return;
