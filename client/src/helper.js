@@ -1,3 +1,9 @@
+/**
+ * Generate a "random" number between a min and max
+ * @param  {Number} min Min value
+ * @param  {Number} max Max value
+ * @return {Number}     The result
+ */
 export function dice(min = 0, max) {
     return Math.floor(
         (Math.random() * (
@@ -6,6 +12,10 @@ export function dice(min = 0, max) {
     );
 }
 
+/**
+ * Generate a random HSL colour
+ * @return {Object} Objectin with colour set to the hsl color (css friendly)
+ */
 export function getRandomColour() {
     let colour = [];
 

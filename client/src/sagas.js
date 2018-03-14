@@ -28,6 +28,7 @@ import {ACCOUNT_AUTHENTICATE_SAVE, USER_SIGNUP} from './components/account/types
 
 // misc
 import config from './config';
+import {cacheGet, cacheSet} from './helper';
 
 function* doAPICall(endpoint, data, method = 'get') {
     try {
@@ -185,7 +186,7 @@ function* signUpUser(action) {
     const data = {
         email: action.payload.email,
         password: action.payload.password,
-        confirm: action.payload.confirm,
+        passwordConfirm: action.payload.passwordConfirm,
         method: 'local',
     };
 
@@ -195,7 +196,7 @@ function* signUpUser(action) {
         return;
     }
 
-    put({
+    yield put({
         type: NOTIFICATION_SET,
         payload: {
             message: response.data.message,
