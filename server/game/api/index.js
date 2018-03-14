@@ -11,10 +11,12 @@ import {
     createUser,
     updateUser,
     deleteUser,
+    getUser,
     activateUser,
     authenticate,
     getAuthList,
     onAuth,
+    isAuthenticated,
 } from './authentication';
 
 /**
@@ -48,9 +50,9 @@ export default function(app, config) {
         // Website you wish to allow to connect
         res.setHeader('Access-Control-Allow-Origin', '*');
         // Request methods you wish to allow
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
         // Request headers you wish to allow
-        res.setHeader('Access-Control-Allow-Headers', 'Accept, X-Requested-With, Content-Type');
+        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Accept, X-Requested-With, Content-Type');
         // Whether requests needs to include cookies in the requests sent to the API. We shouldn't use this unless we retained sessions etc. which we don't!
         res.setHeader('Access-Control-Allow-Credentials', false);
         // Pass to next middleware
@@ -70,6 +72,7 @@ export default function(app, config) {
     routes.route('/users')
         .post(createUser);
     routes.route('/users/:userId')
+        .get(isAuthenticated, getUser)
         .delete(deleteUser)
         .patch(updateUser);
     routes.route('/users/:userId/activate')

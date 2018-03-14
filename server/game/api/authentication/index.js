@@ -1,6 +1,7 @@
 import passport from 'passport';
 import config from '../../../config.json';
 import UserModel from '../models/user';
+import IdentityModel from '../models/identity';
 import jwt from 'jsonwebtoken';
 
 // authentication strategies
@@ -65,8 +66,37 @@ export function deleteUser(req, res) {
 }
 
 /**
- * Handles user activation requests
+ * Handles user fetch
  * @param  {Express Request} req
+ * @param  {Express Response} res
+ */
+export async function getUser(req, res) {
+    try {
+        const identities = await IdentityModel.findAsync(
+            {userId: req.user._id},
+            {_id: 0, provider: 1, date_added: 1}
+        );
+
+        res.json({
+            status: 200,
+            user: {
+                ...req.user,
+                identities,
+            },
+        });
+    } catch (err) {
+        logger.error(err);
+
+        return res.status(500).json({
+            status: 500,
+            error: 'Something went wrong. Please try again in a moment.',
+        });
+    }
+}
+
+/**
+ * Handles user activation requests
+ * @param  {Express Request}  req
  * @param  {Express Response} res
  */
 export function activateUser(req, res) {
@@ -195,5 +225,58 @@ export function getAuthList(req, res) {
     res.json({
         status: 200,
         authlist,
+    });
+}
+
+/**
+ * Verifies a request has a legit auth token
+ * @param  {Express Request}   req
+ * @param  {Express Response}  res
+ * @param  {Function}          next
+ */
+export function isAuthenticated(req, res, next) {
+    const token = req.headers['authorization'];
+
+    if (!token) {
+        return res.status(401).json({
+            status: 401,
+            message: 'Invalid authorisation token.',
+        });
+    }
+
+    jwt.verify(token.replace('Bearer ', ''), req.app.get('config').api.signingKey, (err, decoded) => {
+        if (err) {
+            return res.status(401).json({
+                status: 401,
+                message: 'Invalid authorisation token.',
+            });
+        }
+
+        // check the token is for the user we are altering.
+        if (!req.params.userId || req.params.userId !== decoded._id) {
+            return res.status(401).json({
+                status: 401,
+                message: 'Invalid authorisation token.',
+            });
+        }
+
+        UserModel.findOne(
+            {_id: decoded._id, session_token: decoded.session_token},
+            {_id: 1, session_token: 1, activated: 1, date_added: 1, password: 1},
+            (err, user) => {
+                if (err || !user) {
+                    return res.status(401).json({
+                        status: 401,
+                        message: 'Invalid authorisation token.',
+                    });
+                }
+
+                // check if the user has set a password (have local auth enabled)
+                user.password = user.password ? true : false;
+
+                req.user = user.toObject();
+                next();
+            }
+        );
     });
 }

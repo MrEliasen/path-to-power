@@ -39,6 +39,7 @@ function* doAPICall(endpoint, data, method = 'get') {
 
         return yield call(axios[method], `${config.api.host}/api/${endpoint}`, data);
     } catch (err) {
+        console.log(err);
         let errorMsg = 'Something went wrong. Please try again in a moment.';
 
         if (err.response) {
