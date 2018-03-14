@@ -78,7 +78,9 @@ function Auth(accessToken, refreshToken, profile, cb) {
  * @param  {MongoDB Object} identity The identity up update
  */
 async function createNewUser(identity) {
-    const newUser = new UserModel({});
+    const newUser = new UserModel({
+        activated: true,
+    });
     await newUser.saveAsync();
 
     if (!newUser) {
