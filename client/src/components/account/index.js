@@ -1,6 +1,8 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import {bindActionCreators} from 'redux';
 import {withRouter} from 'react-router-dom';
+import {getStrategies} from '../auth/actions';
 
 class Account extends React.Component {
     constructor(props) {
@@ -9,7 +11,11 @@ class Account extends React.Component {
 
     componentWillMount() {
         if (!this.props.loggedIn) {
-            this.props.history.push('/auth');
+            return this.props.history.push('/auth');
+        }
+
+        if (!this.props.strategies) {
+            this.props.getStrategies();
         }
     }
 
@@ -25,7 +31,14 @@ class Account extends React.Component {
 function mapStateToProps(state) {
     return {
         loggedIn: state.account.loggedIn,
+        strategies: state.auth.strategies,
     };
 }
 
-export default withRouter(connect(mapStateToProps)(Account));
+function mapDispatchToProps(dispatch) {
+    return bindActionCreators({
+        getStrategies,
+    }, dispatch);
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Account));

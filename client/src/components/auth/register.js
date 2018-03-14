@@ -1,13 +1,13 @@
 import React from 'react';
 import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
-import axios from 'axios';
-import config from '../../config';
+
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import {Card, CardHeader, CardBody, Input, Button, Form, FormGroup} from 'reactstrap';
 import Notification from '../ui/notification';
 import {userSignUp} from '../account/actions';
+import {getStrategies} from '../auth/actions';
 
 class AuthRegister extends React.Component {
     constructor(props) {
@@ -25,20 +25,10 @@ class AuthRegister extends React.Component {
         this.register = this.register.bind(this);
     }
 
-    componentWillMount() {
-        this.fetchAuthStrategies();
-    }
-
-    fetchAuthStrategies() {
-        axios.get(`${config.api.host}/api/auth`)
-            .then((response) => {
-                this.setState({
-                    strategies: response.data.authlist,
-                });
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+    componentDidMount() {
+        if (!this.props.strategies) {
+            this.props.getStrategies();
+        }
     }
 
     register() {
@@ -51,12 +41,12 @@ class AuthRegister extends React.Component {
             <Card className="card-small">
                 <CardHeader>Welcome to the party!</CardHeader>
                 {
-                    this.state.strategies &&
+                    this.props.strategies &&
                     <CardBody className="text-center">
                         <Notification />
                         {
                             // if local authentication strategy is enabled
-                            this.state.strategies.find((auth) => auth.provider === 'local') &&
+                            this.props.strategies.find((auth) => auth.provider === 'local') &&
                             <Form>
                                 <FormGroup>
                                     <Input
@@ -109,7 +99,7 @@ class AuthRegister extends React.Component {
                         }
                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, laboriosam!</p>
                         {
-                            this.state.strategies.map((strat) => {
+                            this.props.strategies.map((strat) => {
                                 if (strat.provider === 'local') {
                                     return null;
                                 }
@@ -126,10 +116,17 @@ class AuthRegister extends React.Component {
     }
 };
 
+function mapStateToProps(state) {
+    return {
+        strategies: state.auth.strategies,
+    };
+}
+
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         userSignUp,
+        getStrategies,
     }, dispatch);
 }
 
-export default connect(null, mapDispatchToProps)(AuthRegister);
+export default connect(mapStateToProps, mapDispatchToProps)(AuthRegister);

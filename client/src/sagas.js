@@ -22,6 +22,8 @@ import {
     NOTIFICATION_SET,
     NOTIFICATION_CLEAR,
 } from './components/app/types';
+import {saveStrategies} from './components/auth/actions';
+import {AUTH_STRATEGIES_GET} from './components/auth/types';
 import {ACCOUNT_AUTHENTICATE_SAVE, USER_SIGNUP} from './components/account/types';
 
 // misc
@@ -202,6 +204,23 @@ function* signUpUser(action) {
     });
 }
 
+function* getAuthStrategies(action) {
+    let authList = cacheGet('strategies');
+
+    if (!authList) {
+        const response = yield call(doAPICall, 'auth', {});
+
+        if (!response) {
+            return;
+        }
+
+        authList = response.data.authlist;
+        cacheSet('strategies', authList, 600);
+    }
+
+    yield put(saveStrategies(authList));
+}
+
 function* onAuthAttempt() {
     yield takeLatest(USER_AUTHENTICATE, checkLocalAuth);
 }
@@ -220,6 +239,10 @@ function* onAuthSuccess() {
 
 function* onSignUpAttempt() {
     yield takeLatest(USER_SIGNUP, signUpUser);
+}
+
+function* onFetchStrategies() {
+    yield takeLatest(AUTH_STRATEGIES_GET, getAuthStrategies);
 }
 
 /* ** ** ** ** **  ** ** ** ** ** ** */
@@ -244,6 +267,7 @@ function* Sagas() {
         setupWebSocket(),
         onSignUpAttempt(),
         onRouteChange(),
+        onFetchStrategies(),
     ]);
 }
 

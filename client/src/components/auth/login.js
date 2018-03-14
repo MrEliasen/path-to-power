@@ -2,8 +2,6 @@ import React from 'react';
 import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
-import config from '../../config';
-import axios from 'axios';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import {Card, CardHeader, CardBody, Input, Button, Form, FormGroup} from 'reactstrap';
@@ -11,6 +9,7 @@ import Notification from '../ui/notification';
 
 // Actions
 import {authLogin, authLocal} from '../account/actions';
+import {getStrategies} from '../auth/actions';
 
 class AuthLogin extends React.Component {
     constructor(props) {
@@ -30,18 +29,6 @@ class AuthLogin extends React.Component {
         this.autoLogin();
     }
 
-    fetchAuthStrategies() {
-        axios.get(`${config.api.host}/api/auth`)
-            .then((response) => {
-                this.setState({
-                    strategies: response.data.authlist,
-                });
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    }
-
     autoLogin() {
         const GETtoken = window.location.search.replace('?token=', '');
 
@@ -52,7 +39,7 @@ class AuthLogin extends React.Component {
         let authToken = localStorage.getItem('authToken');
 
         if (!authToken) {
-            return this.fetchAuthStrategies();
+            return this.props.getStrategies();
         }
 
         this.props.authLogin(authToken);
@@ -88,12 +75,12 @@ class AuthLogin extends React.Component {
             <Card className="card-small">
                 <CardHeader>Let's do this!</CardHeader>
                 {
-                    this.state.strategies &&
+                    this.props.strategies &&
                     <CardBody className="text-center">
                         {this.showStatus()}
                         {
                             // if local authentication strategy is enabled
-                            this.state.strategies.find((auth) => auth.provider === 'local') &&
+                            this.props.strategies.find((auth) => auth.provider === 'local') &&
                             <Form>
                                 <Notification />
                                 <FormGroup>
@@ -130,7 +117,7 @@ class AuthLogin extends React.Component {
                         }
                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, laboriosam!</p>
                         {
-                            this.state.strategies.map((strat) => {
+                            this.props.strategies.map((strat) => {
                                 if (strat.provider === 'local') {
                                     return null;
                                 }
@@ -143,7 +130,7 @@ class AuthLogin extends React.Component {
                     </CardBody>
                 }
                 {
-                    !this.state.strategies &&
+                    !this.props.strategies &&
                     <p>Loading..</p>
                 }
             </Card>
@@ -155,6 +142,7 @@ function mapStateToProps(state) {
     return {
         authToken: state.account.authToken,
         loggedIn: state.account.loggedIn,
+        strategies: state.auth.strategies,
     };
 }
 
@@ -162,6 +150,7 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         authLogin,
         authLocal,
+        getStrategies,
     }, dispatch);
 }
 
