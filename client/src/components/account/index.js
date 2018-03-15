@@ -38,39 +38,30 @@ class Account extends React.Component {
     }
 
     render() {
+        if (! this.props.strategies) {
+            return '';
+        }
+
+        let authLocal = this.props.strategies.find((strat) => strat.provider === 'local');
+        let authOther = this.props.strategies.filter((strat) => strat.provider !== 'local');
+
         return (
             <Row>
-            {
-                this.props.strategies &&
-                <React.Fragment>
-                    {
-                        // if local authentication strategy is enabled
-                        this.props.strategies.find((auth) => auth.provider === 'local') &&
-                        <Col sm="12" md="6">
-                            <Card className="card-small">
-                                <CardHeader>Update/Add Password</CardHeader>
-                                <CardBody className="text-center">
-                                    <Form>
-                                        <Notification />
-                                        {
-                                            1 == 2 &&
-                                            <FormGroup>
-                                                <Input
-                                                    type="password"
-                                                    placeholder="Current Password"
-                                                    onChange={(e) => {
-                                                        this.setState({
-                                                            password: e.target.value,
-                                                        });
-                                                    }}
-                                                    value={this.state.password}
-                                                />
-                                            </FormGroup>
-                                        }
+                {
+                    // Show if local authentication strategy is enabled
+                    authLocal &&
+                    <Col sm="12" md="6">
+                        <Card className="card-small">
+                            <CardHeader>Update/Add Password</CardHeader>
+                            <CardBody className="text-center">
+                                <Form>
+                                    <Notification />
+                                    {
+                                        1 == 2 &&
                                         <FormGroup>
                                             <Input
                                                 type="password"
-                                                placeholder="New Password"
+                                                placeholder="Current Password"
                                                 onChange={(e) => {
                                                     this.setState({
                                                         password: e.target.value,
@@ -79,35 +70,47 @@ class Account extends React.Component {
                                                 value={this.state.password}
                                             />
                                         </FormGroup>
-                                        <FormGroup>
-                                            <Input
-                                                type="password"
-                                                placeholder="Confirm New Password"
-                                                onChange={(e) => {
-                                                    this.setState({
-                                                        passwordConfirm: e.target.value,
-                                                    });
-                                                }}
-                                                value={this.state.passwordConfirm}
-                                            />
-                                        </FormGroup>
-                                        <Button onClick={() => {}} block={true} color="primary">Update</Button>
-                                    </Form>
-                                </CardBody>
-                            </Card>
-                        </Col>
-                    }
+                                    }
+                                    <FormGroup>
+                                        <Input
+                                            type="password"
+                                            placeholder="New Password"
+                                            onChange={(e) => {
+                                                this.setState({
+                                                    password: e.target.value,
+                                                });
+                                            }}
+                                            value={this.state.password}
+                                        />
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <Input
+                                            type="password"
+                                            placeholder="Confirm New Password"
+                                            onChange={(e) => {
+                                                this.setState({
+                                                    passwordConfirm: e.target.value,
+                                                });
+                                            }}
+                                            value={this.state.passwordConfirm}
+                                        />
+                                    </FormGroup>
+                                    <Button onClick={() => {}} block={true} color="primary">Update</Button>
+                                </Form>
+                            </CardBody>
+                        </Card>
+                    </Col>
+                }
+                {
+                    // Show if we have any strategies other than local authentication
+                    authOther && authOther.length > 0 &&
                     <Col sm="12" md="6">
                         <Card className="card-small">
                             <CardHeader>Link/Unlink Accounts</CardHeader>
                             <CardBody className="text-center">
                                 {
-                                    this.props.strategies &&
-                                    this.props.strategies.map((strat) => {
-                                        if (strat.provider === 'local') {
-                                            return null;
-                                        }
 
+                                    authOther.map((strat) => {
                                         return <a key={strat.provider} className={`btn btn-block btn-primary btn-brand-${strat.provider}`} href={strat.authUrl}>
                                             <FontAwesomeIcon icon={['fab', strat.provider]} /> Link {strat.name}
                                         </a>;
@@ -116,8 +119,7 @@ class Account extends React.Component {
                             </CardBody>
                         </Card>
                     </Col>
-                </React.Fragment>
-            }
+                }
             </Row>
         );
     }
