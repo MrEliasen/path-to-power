@@ -3,7 +3,7 @@ import {connect} from 'react-redux';
 
 // Components
 import Inventory from '../inventory';
-import StatsMenu from '../stats-menu';
+import Stats from './stats';
 import Players from '../players';
 import ItemSlot from '../item/slot';
 
@@ -79,7 +79,7 @@ class CharacterMenu extends React.Component {
                 <Modal isOpen={this.state.modalStats} toggle={this.toggleStats} size="lg">
                     <ModalHeader toggle={this.toggleStats}>Stats</ModalHeader>
                     <ModalBody>
-                        <StatsMenu />
+                        <Stats />
                     </ModalBody>
                 </Modal>
                 <Modal isOpen={this.state.modalQuests} toggle={this.toggleQuests} size="lg">
