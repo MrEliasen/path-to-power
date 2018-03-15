@@ -17,6 +17,8 @@ import {
     getAuthList,
     onAuth,
     isAuthenticated,
+    resetPassword,
+    resetConfirm,
 } from './authentication';
 
 /**
@@ -83,11 +85,17 @@ export default function(app, config) {
     routes.route('/auth')
         .get(getAuthList)
         .post(authenticate);
+
+    // password reset requests
+    routes.route('/auth/reset')
+        .post(resetPassword);
+    routes.route('/auth/reset/:userId')
+        .get(resetConfirm);
+
     // OAuth
-    routes.route('/auth/:provider')
+    routes.route('/auth/provider/:provider')
         .get(authenticate);
-    // OAuth callbacks
-    routes.route('/auth/:provider/callback')
+    routes.route('/auth/provider/:provider/callback')
         .get(authenticate, onAuth);
 
     // register the routes to the /api prefix

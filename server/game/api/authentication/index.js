@@ -5,8 +5,8 @@ import IdentityModel from '../models/identity';
 import jwt from 'jsonwebtoken';
 
 // authentication strategies
-import {signup, setup as localSetup} from './strategies/local';
-import {setup as oauthSetup} from './strategies/oauth';
+import * as localAuth from './strategies/local';
+import oauthSetup from './strategies/oauth';
 
 /**
  * Loads the authentication strategies
@@ -21,11 +21,11 @@ export function loadStrategies(passport, logger) {
                 continue;
             }
 
-            let callbackUrl = `${config.api.domain}${[80, 443].includes(config.api.post) ? '' : `:${config.api.port}`}/api/auth/${providers[provider].id}/callback`;
+            let callbackUrl = `${config.api.domain}${[80, 443].includes(config.api.post) ? '' : `:${config.api.port}`}/api/auth/provider/${providers[provider].id}/callback`;
 
             // if its the local auth provider, we have to use a separate strategy from OAuth.
             if (provider === 'local') {
-                localSetup(passport, logger);
+                localAuth.setup(passport, logger);
                 continue;
             }
 
@@ -45,7 +45,20 @@ export function loadStrategies(passport, logger) {
     };
 }
 
-export const createUser = signup;
+/**
+ * Handle local auth sign up
+ */
+export const createUser = localAuth.signup;
+
+/**
+ * Handle local auth password reset requests
+ */
+export const resetPassword = localAuth.passwordReset;
+
+/**
+ * Handle local auth password reset confirmation links
+ */
+export const resetConfirm = localAuth.resetConfirm;
 
 /**
  * Handles updates to a user
@@ -217,7 +230,7 @@ export function getAuthList(req, res) {
             authlist.push({
                 provider,
                 name: providers[provider].name,
-                authUrl: `${config.api.domain}${[80, 443].includes(config.api.post) ? '' : `:${config.api.port}`}/api/auth/${providers[provider].id}`,
+                authUrl: `${config.api.domain}${[80, 443].includes(config.api.post) ? '' : `:${config.api.port}`}/api/auth/provider/${providers[provider].id}`,
             });
         }
     };

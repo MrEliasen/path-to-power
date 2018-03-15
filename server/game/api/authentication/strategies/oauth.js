@@ -9,7 +9,7 @@ let logger;
  * @param  {Object}   details   The strategy details, like clientId, secret, callback url etc.
  * @param  {Logger}   loggerObj The logger
  */
-function setup(passport, details, loggerObj) {
+export default function setup(passport, details, loggerObj) {
     logger = loggerObj;
     const Strategy = require(`passport-${details.id}`).Strategy;
 
@@ -114,7 +114,3 @@ async function createIdentity(provider, providerId, userId) {
     await newIdentity.save();
     return newIdentity;
 }
-
-module.exports = {
-    setup,
-};

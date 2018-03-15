@@ -23,6 +23,9 @@ const UserSchema = new mongoose.Schema({
     session_token: {
         type: String,
     },
+    passwordReset: {
+        type: {},
+    },
     date_added: String,
     date_updated: String,
 });

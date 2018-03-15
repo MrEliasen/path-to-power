@@ -1,5 +1,6 @@
 import React from 'react';
 import {withRouter} from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
@@ -112,6 +113,7 @@ class AuthLogin extends React.Component {
                                     />
                                 </FormGroup>
                                 <Button onClick={this.authenticate} color="primary">Login</Button>
+                                <p className="text-right"><Link to="/auth/reset">Forgot password?</Link></p>
                                 <hr />
                             </Form>
                         }

@@ -23,7 +23,7 @@ import {
     NOTIFICATION_CLEAR,
 } from './components/app/types';
 import {saveStrategies} from './components/auth/actions';
-import {AUTH_STRATEGIES_GET} from './components/auth/types';
+import {AUTH_STRATEGIES_GET, AUTH_PASSWORD_RESET} from './components/auth/types';
 import {ACCOUNT_AUTHENTICATE_SAVE, USER_SIGNUP} from './components/account/types';
 
 // misc
@@ -223,6 +223,24 @@ function* getAuthStrategies(action) {
     yield put(saveStrategies(authList));
 }
 
+function* resetPassword(action) {
+    const response = yield call(doAPICall, 'auth/reset', {
+        email: action.payload,
+    }, 'post');
+
+    if (!response) {
+        return;
+    }
+
+    yield put({
+        type: NOTIFICATION_SET,
+        payload: {
+            message: response.data.message,
+            type: 'success',
+        },
+    });
+}
+
 function* onAuthAttempt() {
     yield takeLatest(USER_AUTHENTICATE, checkLocalAuth);
 }
@@ -245,6 +263,10 @@ function* onSignUpAttempt() {
 
 function* onFetchStrategies() {
     yield takeLatest(AUTH_STRATEGIES_GET, getAuthStrategies);
+}
+
+function* onResetPassword() {
+    yield takeLatest(AUTH_PASSWORD_RESET, resetPassword);
 }
 
 /* ** ** ** ** **  ** ** ** ** ** ** */
@@ -270,6 +292,7 @@ function* Sagas() {
         onSignUpAttempt(),
         onRouteChange(),
         onFetchStrategies(),
+        onResetPassword(),
     ]);
 }
 
