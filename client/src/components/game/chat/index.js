@@ -54,7 +54,7 @@ class Chat extends React.Component {
 
         return (
             <li key={index} className={'chat-' + message.type}>
-                <span className="timestamp">{time}</span>
+                {false && <span className="timestamp">{time}</span>}
                 <span className="prefix">{prefix}</span>
                 {message.name && <span className="name">{message.name}:</span>}
                 <span className="message">{message.message}</span>
