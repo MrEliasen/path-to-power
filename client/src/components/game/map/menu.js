@@ -133,15 +133,15 @@ class MapMenu extends React.Component {
                         }
                         {
                             this.props.map.items.length > 0 &&
-                            <a href="#" onclick={this.toggleItems}><FontAwesomeIcon icon="shield" /> Items ({this.props.map.items.length})</a>
+                            <a href="#" onClick={this.toggleItems}><FontAwesomeIcon icon="shield" /> Items ({this.props.map.items.length})</a>
                         }
                         {
                             this.props.map.players.length > 0 &&
-                            <a href="#" onclick={this.togglePlayers}><FontAwesomeIcon icon="user-secret" /> Players ({this.props.map.players.length})</a>
+                            <a href="#" onClick={this.togglePlayers}><FontAwesomeIcon icon="user-secret" /> Players ({this.props.map.players.length})</a>
                         }
                         {
                             this.props.map.npcs.length > 0 &&
-                            <a href="#" onclick={this.toggleNPCs}><FontAwesomeIcon icon="user-secret" /> NPCs ({this.props.map.npcs.length})</a>
+                            <a href="#" onClick={this.toggleNPCs}><FontAwesomeIcon icon="user-secret" /> NPCs ({this.props.map.npcs.length})</a>
                         }
                     </Card>
                 </div>
