@@ -12,7 +12,7 @@ import ShopReducer from './components/game/shop/reducer';
 
 // refactored reducers
 import InventoryReducer from './components/game/inventory-menu/reducer';
-import PlayersReducer from './components/game/players-menu/reducer';
+import PlayersReducer from './components/game/players/reducer';
 import StatsReducer from './components/game/stats-menu/reducer';
 
 const rootReducer = combineReducers({

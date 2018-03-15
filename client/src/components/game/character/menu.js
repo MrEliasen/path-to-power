@@ -4,10 +4,10 @@ import {connect} from 'react-redux';
 // Components
 import Inventory from '../inventory';
 import StatsMenu from '../stats-menu';
-import PlayersMenu from '../players-menu';
+import Players from '../players';
 import ItemSlot from '../item/slot';
 
-// Packages
+// UI
 import {Card, Modal, ModalHeader, ModalBody, Row, Col} from 'reactstrap';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
@@ -91,7 +91,7 @@ class CharacterMenu extends React.Component {
                 <Modal isOpen={this.state.modalPlayers} toggle={this.togglePlayers} size="lg">
                     <ModalHeader toggle={this.togglePlayers}>Players Online</ModalHeader>
                     <ModalBody>
-                        <PlayersMenu sendCommand={this.sendCommand} setCommand={this.setCommand} />
+                        <Players />
                     </ModalBody>
                 </Modal>
             </React.Fragment>
