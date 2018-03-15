@@ -2,10 +2,12 @@ import React from 'react';
 import {withRouter, NavLink} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
-import {Container, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav} from 'reactstrap';
 
-// actions
+// Redux
 import {authLogout} from '../../account/actions';
+
+// UI
+import {Container, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav} from 'reactstrap';
 
 class Header extends React.Component {
     constructor(props) {
@@ -52,7 +54,7 @@ class Header extends React.Component {
         return (
             <Navbar color="primary-dark" dark expand="md" id="header">
                 <Container>
-                    <NavbarBrand href="/">Path To Power</NavbarBrand>
+                    <NavbarBrand href="#" onClick={() => this.props.history.push('/')}>Path To Power</NavbarBrand>
                     <NavbarToggler onClick={this.toggle.bind(this)} className="mr-2" />
                     <Collapse isOpen={!this.state.isOpen} navbar>
                         <Nav className="mr-auto" navbar>
