@@ -1,141 +1,64 @@
 import React from 'react';
+import {withRouter, Route, Switch, NavLink} from 'react-router-dom';
 import {connect} from 'react-redux';
-import {bindActionCreators} from 'redux';
-import {withRouter} from 'react-router-dom';
-import {
-    Row,
-    Col,
-    Card,
-    CardHeader,
-    CardBody,
-    Input,
-    Button,
-    Form,
-    FormGroup,
-} from 'reactstrap';
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
-import {getStrategies} from '../auth/actions';
-import Notification from '../ui/notification';
+
+// Components
+import AccountOverview from './overview';
+import AccountProfile from './profile';
+import AccountSettings from './settings';
+import AccountSecurity from './security';
+import AccountConnections from './connections';
+import AccountNotifications from './notifications';
+
+// UI
+import {Row, Col, Card, CardHeader, ListGroup} from 'reactstrap';
 
 class Account extends React.Component {
     constructor(props) {
         super(props);
-
-        this.state = {
-            password: '',
-            passwordConfirm: '',
-        };
     }
 
     componentWillMount() {
         if (!this.props.loggedIn) {
             return this.props.history.push('/auth');
         }
-
-        if (!this.props.strategies) {
-            this.props.getStrategies();
-        }
     }
 
     render() {
-        if (! this.props.strategies) {
-            return '';
-        }
-
-        let authLocal = this.props.strategies.find((strat) => strat.provider === 'local');
-        let authOther = this.props.strategies.filter((strat) => strat.provider !== 'local');
-
         return (
             <Row>
-                {
-                    // Show if local authentication strategy is enabled
-                    authLocal &&
-                    <Col sm="12" md="6">
-                        <Card className="card-small">
-                            <CardHeader>Update/Add Password</CardHeader>
-                            <CardBody className="text-center">
-                                <Form>
-                                    <Notification />
-                                    {
-                                        1 == 2 &&
-                                        <FormGroup>
-                                            <Input
-                                                type="password"
-                                                placeholder="Current Password"
-                                                onChange={(e) => {
-                                                    this.setState({
-                                                        password: e.target.value,
-                                                    });
-                                                }}
-                                                value={this.state.password}
-                                            />
-                                        </FormGroup>
-                                    }
-                                    <FormGroup>
-                                        <Input
-                                            type="password"
-                                            placeholder="New Password"
-                                            onChange={(e) => {
-                                                this.setState({
-                                                    password: e.target.value,
-                                                });
-                                            }}
-                                            value={this.state.password}
-                                        />
-                                    </FormGroup>
-                                    <FormGroup>
-                                        <Input
-                                            type="password"
-                                            placeholder="Confirm New Password"
-                                            onChange={(e) => {
-                                                this.setState({
-                                                    passwordConfirm: e.target.value,
-                                                });
-                                            }}
-                                            value={this.state.passwordConfirm}
-                                        />
-                                    </FormGroup>
-                                    <Button onClick={() => {}} block={true} color="primary">Update</Button>
-                                </Form>
-                            </CardBody>
-                        </Card>
-                    </Col>
-                }
-                {
-                    // Show if we have any strategies other than local authentication
-                    authOther && authOther.length > 0 &&
-                    <Col sm="12" md="6">
-                        <Card className="card-small">
-                            <CardHeader>Link/Unlink Accounts</CardHeader>
-                            <CardBody className="text-center">
-                                {
-
-                                    authOther.map((strat) => {
-                                        return <a key={strat.provider} className={`btn btn-block btn-primary btn-brand-${strat.provider}`} href={strat.authUrl}>
-                                            <FontAwesomeIcon icon={['fab', strat.provider]} /> Link {strat.name}
-                                        </a>;
-                                    })
-                                }
-                            </CardBody>
-                        </Card>
-                    </Col>
-                }
+                <Col sm="3">
+                    <Card>
+                        <CardHeader>Account</CardHeader>
+                        <ListGroup flush>
+                            <NavLink exact to="/account" className="list-group-item">Overview</NavLink>
+                            <NavLink exact to="/account/profile" className="list-group-item">Profile</NavLink>
+                            <NavLink exact to="/account/settings" className="list-group-item">Settings</NavLink>
+                            <NavLink exact to="/account/security" className="list-group-item">Login and Security</NavLink>
+                            <NavLink exact to="/account/connections" className="list-group-item">Connections</NavLink>
+                            <NavLink exact to="/account/notifications" className="list-group-item">Notifications</NavLink>
+                        </ListGroup>
+                    </Card>
+                </Col>
+                <Col>
+                    <Switch>
+                        <Route path="/account/profile" component={AccountProfile} />
+                        <Route path="/account/settings" component={AccountSettings} />
+                        <Route path="/account/security" component={AccountSecurity} />
+                        <Route path="/account/connections" component={AccountConnections} />
+                        <Route path="/account/notifications" component={AccountNotifications} />
+                        <Route component={AccountOverview} />
+                    </Switch>
+                </Col>
             </Row>
         );
     }
-};
+}
 
 function mapStateToProps(state) {
     return {
         loggedIn: state.account.loggedIn,
-        strategies: state.auth.strategies,
     };
 }
 
-function mapDispatchToProps(dispatch) {
-    return bindActionCreators({
-        getStrategies,
-    }, dispatch);
-}
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Account));
+export default withRouter(connect(mapStateToProps)(Account));
