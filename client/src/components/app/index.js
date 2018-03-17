@@ -154,7 +154,7 @@ class App extends React.Component {
                         </Switch>
                     </Container>
                 </main>
-                <a href={this.state.issueUrl} target="_blank" id="bug"><FontAwesomeIcon icon="bug" />Found a bug?</a>
+                <a href={this.state.issueUrl} target="_blank" className="btn btn-primary" id="bug"><FontAwesomeIcon icon="bug" />Found a bug?</a>
             </React.Fragment>
         );
     }
