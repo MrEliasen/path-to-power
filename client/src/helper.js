@@ -76,7 +76,7 @@ export function cacheGet(key) {
  */
 export function cacheSet(key, data, expire = null) {
     // set the cache expiry based on the key, if defined
-    expire = config.cache[key] || expire;
+    expire = config.caching[key] || expire;
 
     let storeValue = {
         expire: expire ? ((new Date().getTime() / 1000) + expire) : null,
