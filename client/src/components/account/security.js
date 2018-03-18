@@ -1,21 +1,19 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
-import {withRouter} from 'react-router-dom';
 import {
-    Row,
     Col,
     Card,
     CardHeader,
     CardBody,
     Input,
     Button,
-    Form,
     FormGroup,
+    Label,
+    Form,
 } from 'reactstrap';
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import {getStrategies} from '../auth/actions';
-import {getUserDetails, updateAccount} from './actions';
+import {updateAccount} from './actions';
 import Notification from '../ui/notification';
 
 class AccountSecurity extends React.Component {
@@ -33,11 +31,7 @@ class AccountSecurity extends React.Component {
     }
 
     componentWillMount() {
-        if (!this.props.loggedIn) {
-            return this.props.history.push('/auth');
-        }
         this.props.getStrategies();
-        this.props.getUserDetails(this.props.user._id, this.props.authToken);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -68,110 +62,98 @@ class AccountSecurity extends React.Component {
         }
 
         let authLocal = this.props.strategies.find((strat) => strat.provider === 'local');
-        let authOther = this.props.strategies.filter((strat) => strat.provider !== 'local');
 
         return (
-            <Row>
-                {
+            <Card>
+                <CardHeader>Login & Security</CardHeader>
+                <CardBody>
+                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Iusto eligendi quidem totam ea adipisci, ad vero provident quos ducimus pariatur atque repudiandae est autem distinctio magni aliquam recusandae tempora qui.</p>
+                    <hr/>
+                    <Notification />
+                    {
                     // Show if local authentication strategy is enabled
                     authLocal &&
-                    <Col sm="12" md="6">
-                        <Card className="card-small">
-                            <CardHeader>Update/Add Password</CardHeader>
-                            <CardBody className="text-center">
-                                <Form>
-                                    <Notification />
-                                    <FormGroup>
-                                        <Input
-                                            type="email"
-                                            name="email"
-                                            placeholder="Account Email"
-                                            autoComplete="email"
-                                            onChange={(e) => {
-                                                this.setState({
-                                                    email: e.target.value,
-                                                });
-                                            }}
-                                            value={this.state.email}
-                                        />
-                                    </FormGroup>
-                                    <hr/>
-                                    {
-                                        this.props.user.hasPassword &&
-                                        <FormGroup>
-                                            <Input
-                                                type="password"
-                                                name="password"
-                                                placeholder="Current Password"
-                                                autoComplete="current-password"
-                                                onChange={(e) => {
-                                                    this.setState({
-                                                        currentPassword: e.target.value,
-                                                    });
-                                                }}
-                                                value={this.state.currentPassword}
-                                            />
-                                        </FormGroup>
-                                    }
-                                    <FormGroup>
+                        <Form>
+                            <FormGroup row>
+                                <Label for="user-firstname" sm="3">Email</Label>
+                                <Col col="9">
+                                    <Input
+                                        type="email"
+                                        name="email"
+                                        placeholder="Account Email"
+                                        autoComplete="email"
+                                        onChange={(e) => {
+                                            this.setState({
+                                                email: e.target.value,
+                                            });
+                                        }}
+                                        value={this.state.email}
+                                    />
+                                </Col>
+                            </FormGroup>
+                            {
+                                this.props.user.hasPassword &&
+                                <FormGroup row>
+                                    <Label for="user-lastname" sm="3">Current Password</Label>
+                                    <Col col="9">
                                         <Input
                                             type="password"
-                                            name="new-password"
-                                            placeholder="New Password"
-                                            autoComplete="new-password"
+                                            name="password"
+                                            placeholder="Current Password"
+                                            autoComplete="current-password"
                                             onChange={(e) => {
                                                 this.setState({
-                                                    password: e.target.value,
+                                                    currentPassword: e.target.value,
                                                 });
                                             }}
-                                            value={this.state.password}
+                                            value={this.state.currentPassword}
                                         />
-                                    </FormGroup>
-                                    <FormGroup>
-                                        <Input
-                                            type="password"
-                                            name="confirm-password"
-                                            placeholder="Confirm New Password"
-                                            onChange={(e) => {
-                                                this.setState({
-                                                    passwordConfirm: e.target.value,
-                                                });
-                                            }}
-                                            value={this.state.passwordConfirm}
-                                        />
-                                    </FormGroup>
-                                    <Button onClick={this.updateDetails} block={true} color="primary">Update</Button>
-                                </Form>
-                            </CardBody>
-                        </Card>
-                    </Col>
-                }
-                {
-                    // Show if we have any strategies other than local authentication
-                    authOther && authOther.length > 0 &&
-                    <Col sm="12" md="6">
-                        <Card className="card-small">
-                            <CardHeader>Link/Unlink Accounts</CardHeader>
-                            <CardBody className="text-center">
-                                {
-
-                                    authOther.map((strat) => {
-                                        const isLinked = this.props.user.identities.find((obj) => obj.provider === strat.provider);
-
-                                        return <a
-                                            key={strat.provider}
-                                            className={`btn btn-block btn-brand-${strat.provider} ${isLinked ? 'btn-success' : 'btn-primary'}`}
-                                            href={strat.authUrl}
-                                        >
-                                            <FontAwesomeIcon icon={['fab', strat.provider]} /> Link {strat.name}
-                                        </a>;
-                                    })
-                                }
-                            </CardBody>
-                        </Card>
-                    </Col>
-                }
-            </Row>
+                                    </Col>
+                                </FormGroup>
+                            }
+                            <FormGroup row>
+                                <Label for="user-firstname" sm="3">New Password</Label>
+                                <Col col="9">
+                                    <Input
+                                        type="password"
+                                        name="new-password"
+                                        placeholder="New Password"
+                                        autoComplete="new-password"
+                                        onChange={(e) => {
+                                            this.setState({
+                                                password: e.target.value,
+                                            });
+                                        }}
+                                        value={this.state.password}
+                                    />
+                                </Col>
+                            </FormGroup>
+                            <FormGroup row>
+                                <Label for="user-firstname" sm="3">Confirm Password</Label>
+                                <Col col="9">
+                                    <Input
+                                        type="password"
+                                        name="confirm-password"
+                                        autoComplete="new-password"
+                                        placeholder="Confirm New Password"
+                                        onChange={(e) => {
+                                            this.setState({
+                                                passwordConfirm: e.target.value,
+                                            });
+                                        }}
+                                        value={this.state.passwordConfirm}
+                                    />
+                                </Col>
+                            </FormGroup>
+                            <FormGroup row>
+                                <Col sm={{size: 9, offset: 3}}>
+                                    <Button onClick={this.updateDetails} color="primary">Save changes</Button>
+                                </Col>
+                            </FormGroup>
+                        </Form>
+                    }
+                </CardBody>
+            </Card>
         );
     }
 };
@@ -189,9 +171,8 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         getStrategies,
-        getUserDetails,
         updateAccount,
     }, dispatch);
 }
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(AccountSecurity));
+export default connect(mapStateToProps, mapDispatchToProps)(AccountSecurity);

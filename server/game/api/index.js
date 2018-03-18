@@ -15,6 +15,7 @@ import {
     resetPassword,
     resetConfirm,
     linkProvider,
+    unlinkProvider,
 } from './authentication';
 
 import {
@@ -97,8 +98,11 @@ export default function(app, config) {
         .post(resetPassword);
     routes.route('/auth/reset/:userId')
         .get(resetConfirm);
+    // Linking and unlinking of providers
     routes.route('/auth/link')
         .post(linkProvider);
+    routes.route('/auth/unlink')
+        .post(isAuthenticated, unlinkProvider);
 
     // OAuth
     routes.route('/auth/provider/:provider')

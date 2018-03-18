@@ -3,6 +3,7 @@ import {
     AUTH_STRATEGIES_GET,
     AUTH_PASSWORD_RESET,
     AUTH_LINK,
+    AUTH_UNLINK,
 } from './types';
 
 export function saveStrategies(strategies) {
@@ -32,6 +33,17 @@ export function linkProvider(authToken, providerToken) {
         payload: {
             authToken,
             providerToken,
+        },
+    };
+}
+
+export function unlinkProvider(userId, authToken, provider) {
+    return {
+        type: AUTH_UNLINK,
+        payload: {
+            userId,
+            authToken,
+            provider,
         },
     };
 }

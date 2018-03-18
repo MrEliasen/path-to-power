@@ -1,15 +1,27 @@
 import React from 'react';
+import {connect} from 'react-redux';
+import {bindActionCreators} from 'redux';
+import {withRouter} from 'react-router-dom';
 
 // UI
 import {Card, CardHeader, CardBody, Table} from 'reactstrap';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+
+// Actions
+import {getStrategies, unlinkProvider} from '../auth/actions';
 
 class AccountConnections extends React.Component {
     constructor(props) {
         super(props);
     }
 
+    componentWillMount() {
+        this.props.getStrategies();
+    }
+
     render() {
+        let authOther = this.props.strategies.filter((strat) => strat.provider !== 'local');
+
         return (
             <Card>
                 <CardHeader>Connections</CardHeader>
@@ -24,24 +36,37 @@ class AccountConnections extends React.Component {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td width="50"><FontAwesomeIcon icon={['fab', 'facebook']} size="2x" /></td>
-                                <td>Facebook</td>
-                                <td></td>
-                                <td className="text-right"><a href="#" className="btn btn-link btn-sm">Disconnect</a></td>
-                            </tr>
-                            <tr>
-                                <td><FontAwesomeIcon icon={['fab', 'twitter']} size="2x" /></td>
-                                <td>Twitter</td>
-                                <td></td>
-                                <td className="text-right"><a href="#" className="btn btn-link btn-sm">Disconnect</a></td>
-                            </tr>
-                            <tr>
-                                <td><FontAwesomeIcon icon={['fab', 'google-plus']} size="2x" /></td>
-                                <td>Google+</td>
-                                <td></td>
-                                <td className="text-right"><a href="#" className="btn btn-primary btn-sm">Connect</a></td>
-                            </tr>
+                            {
+                                authOther && authOther.length > 0 &&
+                                authOther.map((strat) => {
+                                    const isLinked = this.props.user.identities.find((obj) => obj.provider === strat.provider);
+                                    return <tr key={strat.provider}>
+                                        <td width="50"><FontAwesomeIcon icon={['fab', strat.provider]} size="2x" /></td>
+                                        <td>{strat.name}</td>
+                                        <td></td>
+                                        <td className="text-right">
+                                            {
+                                                isLinked &&
+                                                <a
+                                                    href="#"
+                                                    onClick={() => this.props.unlinkProvider(
+                                                        this.props.user._id,
+                                                        this.props.authToken,
+                                                        strat.provider
+                                                    )}
+                                                    className="btn btn-link btn-sm"
+                                                >
+                                                    Disconnect
+                                                </a>
+                                            }
+                                            {
+                                                !isLinked &&
+                                                <a href={strat.authUrl} className="btn btn-primary btn-sm">Connect</a>
+                                            }
+                                        </td>
+                                    </tr>;
+                                })
+                            }
                         </tbody>
                     </Table>
                 </CardBody>
@@ -50,4 +75,19 @@ class AccountConnections extends React.Component {
     }
 }
 
-export default AccountConnections;
+function mapStateToProps(state) {
+    return {
+        strategies: state.auth.strategies || [],
+        user: state.account.user,
+        authToken: state.account.authToken,
+    };
+}
+
+function mapDispatchToProps(dispatch) {
+    return bindActionCreators({
+        getStrategies,
+        unlinkProvider,
+    }, dispatch);
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(AccountConnections));

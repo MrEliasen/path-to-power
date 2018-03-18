@@ -1,5 +1,4 @@
 import {eventChannel} from 'redux-saga';
-import jwt from 'jsonwebtoken';
 import {put, call, all, take, takeLatest, race} from 'redux-saga/effects';
 
 // methods
@@ -28,6 +27,7 @@ import {
     AUTH_STRATEGIES_GET,
     AUTH_PASSWORD_RESET,
     AUTH_LINK,
+    AUTH_UNLINK,
 } from './components/auth/types';
 import {
     ACCOUNT_AUTHENTICATE_SAVE,
@@ -332,6 +332,20 @@ function* linkProviderToAccount(action) {
     }
 }
 
+function* unlinkProviderFromAccount(action) {
+    const response = yield call(doAPICall, 'auth/unlink', {
+        provider: action.payload.provider,
+    }, 'post', {
+        Authorization: `Bearer ${action.payload.authToken}`,
+    });
+
+    if (!response) {
+        return;
+    }
+
+    yield getUserDetails(action);
+}
+
 function* onAuthAttempt() {
     yield takeLatest(USER_AUTHENTICATE, checkLocalAuth);
 }
@@ -376,6 +390,10 @@ function* onLinkProvider() {
     yield takeLatest(AUTH_LINK, linkProviderToAccount);
 }
 
+function* onUnlinkProvider() {
+    yield takeLatest(AUTH_UNLINK, unlinkProviderFromAccount);
+}
+
 /* ** ** ** ** **  ** ** ** ** ** ** */
 
 function* routeChanged() {
@@ -404,6 +422,7 @@ function* Sagas() {
         onUpdateUserDetails(),
         onLinkProvider(),
         onProviderAuthAttempt(),
+        onUnlinkProvider(),
     ]);
 }
 

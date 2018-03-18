@@ -337,12 +337,15 @@ export function isAuthenticated(req, res, next) {
             });
         }
 
-        // check the token is for the user we are altering.
-        if (!req.params.userId || req.params.userId !== decoded._id) {
-            return res.status(401).json({
-                status: 401,
-                message: 'Invalid authorisation token.',
-            });
+        // check the token is for the user we are altering, if it is set
+        // This could be removed, and simply rely on the auth token.
+        if (req.params.userId) {
+            if (req.params.userId !== decoded._id) {
+                return res.status(401).json({
+                    status: 401,
+                    message: 'Invalid authorisation token.',
+                });
+            }
         }
 
         UserModel.findOne(
@@ -427,6 +430,49 @@ export function linkProvider(req, res) {
                         message: 'Your account was linked!',
                     });
                 });
+            });
+        });
+    });
+}
+
+/**
+ * Unlinks a provider from an account
+ * @param  {Express Request} req
+ * @param  {Express Response} res
+ */
+export function unlinkProvider(req, res) {
+    if (!req.body.provider) {
+        return res.status(400).json({
+            status: 400,
+            error: 'Invalid provider',
+        });
+    }
+
+    IdentityModel.findOne({provider: req.body.provider, userId: req.user._id}, (err, identity) => {
+        if (err) {
+            return res.status(500).json({
+                status: 500,
+                error: 'Something went wrong. Please try again in a moment.',
+            });
+        }
+
+        if (!identity) {
+            return res.status(400).json({
+                status: 400,
+                error: 'Provider is not linked to your account.',
+            });
+        }
+
+        identity.remove((err) => {
+            if (err) {
+                return res.status(500).json({
+                    status: 500,
+                    error: 'Something went wrong. Please try again in a moment.',
+                });
+            }
+
+            return res.json({
+                status: 200,
             });
         });
     });

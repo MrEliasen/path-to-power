@@ -1,6 +1,7 @@
 import React from 'react';
 import {withRouter, Route, Switch, NavLink} from 'react-router-dom';
 import {connect} from 'react-redux';
+import {bindActionCreators} from 'redux';
 
 // Components
 import AccountOverview from './overview';
@@ -13,6 +14,9 @@ import AccountNotifications from './notifications';
 // UI
 import {Row, Col, Card, CardHeader, ListGroup} from 'reactstrap';
 
+// Actions
+import {getUserDetails} from './actions';
+
 class Account extends React.Component {
     constructor(props) {
         super(props);
@@ -22,6 +26,8 @@ class Account extends React.Component {
         if (!this.props.loggedIn) {
             return this.props.history.push('/auth');
         }
+
+        this.props.getUserDetails(this.props.user._id, this.props.authToken);
     }
 
     render() {
@@ -57,8 +63,16 @@ class Account extends React.Component {
 
 function mapStateToProps(state) {
     return {
+        user: state.account.user,
+        authToken: state.account.authToken,
         loggedIn: state.account.loggedIn,
     };
 }
 
-export default withRouter(connect(mapStateToProps)(Account));
+function mapDispatchToProps(dispatch) {
+    return bindActionCreators({
+        getUserDetails,
+    }, dispatch);
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Account));
