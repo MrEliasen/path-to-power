@@ -153,6 +153,14 @@ function* saveAuthDetails(action) {
     ]);
 
     if (result[0]) {
+        yield put({
+            type: NOTIFICATION_SET,
+            payload: {
+                message: result[0].payload,
+                type: 'error',
+            },
+        });
+        yield logoutAccount();
         return result[0];
     }
 
@@ -168,13 +176,18 @@ function* saveAuthDetails(action) {
     yield put(push('/account'));
 }
 
-function* logoutAccount(action) {
-    yield put({
-        type: SOCKET_SEND,
-        payload: action,
-    });
-    yield put(push('/auth/logout'));
-    return action;
+function* logoutAccount(action = null) {
+    localStorage.removeItem('authToken');
+
+    if (action) {
+        yield put({
+            type: SOCKET_SEND,
+            payload: action,
+        });
+
+        yield put(push('/auth/logout'));
+        return action;
+    }
 }
 
 function* logoutGame(action) {

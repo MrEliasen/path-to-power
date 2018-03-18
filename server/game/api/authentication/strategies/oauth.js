@@ -41,12 +41,6 @@ function Auth(accessToken, refreshToken, profile, cb) {
         }
 
         if (!identity.userId) {
-            /*const newUser = await createNewUser(identity);
-
-            if (!newUser) {
-                return cb('Something went wrong, please try again in a moment.');
-            }*/
-
             return cb(null, {
                 identity,
                 user: {},

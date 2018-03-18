@@ -11,7 +11,6 @@ import {
     authenticate,
     getAuthList,
     activateUser,
-    onAuth,
     isAuthenticated,
     resetPassword,
     resetConfirm,
@@ -105,7 +104,7 @@ export default function(app, config) {
     routes.route('/auth/provider/:provider')
         .get(authenticate);
     routes.route('/auth/provider/:provider/callback')
-        .get(authenticate, onAuth);
+        .get(authenticate);
 
     // register the routes to the /api prefix
     app.use('/api', routes);

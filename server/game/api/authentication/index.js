@@ -226,7 +226,8 @@ export function authenticate(req, res, next) {
     }
 
     // continue with account authentication
-    const method = req.body.method || req.params.provider;
+    let method = req.body.method || req.params.provider;
+    method = method.toString().toLowerCase();
 
     if (!method) {
         return res.status(400).json({
@@ -235,7 +236,21 @@ export function authenticate(req, res, next) {
         });
     }
 
+    if (!Object.keys(req.app.get('config').api.authentication.providers).includes(method)) {
+        return res.status(400).json({
+            status: 400,
+            error: 'Invalid authentication method.',
+        });
+    }
+
     return passport.authenticate(method, {session: false}, (err, userDetails, info, status) => {
+        if (err) {
+            return res.status(400).json({
+                status: 400,
+                error: 'Invalid authentication method.',
+            });
+        }
+
         if (userDetails) {
             return onAuth(req, res, userDetails, method !== 'local');
         }
