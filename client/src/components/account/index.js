@@ -16,6 +16,7 @@ import {Row, Col, Card, CardHeader, ListGroup} from 'reactstrap';
 
 // Actions
 import {getUserDetails} from './actions';
+import {getStrategies} from '../auth/actions';
 
 class Account extends React.Component {
     constructor(props) {
@@ -27,6 +28,7 @@ class Account extends React.Component {
             return this.props.history.push('/auth');
         }
 
+        this.props.getStrategies();
         this.props.getUserDetails(this.props.user._id, this.props.authToken);
     }
 
@@ -41,7 +43,10 @@ class Account extends React.Component {
                             <NavLink exact to="/account/profile" className="list-group-item">Profile</NavLink>
                             <NavLink exact to="/account/settings" className="list-group-item">Settings</NavLink>
                             <NavLink exact to="/account/security" className="list-group-item">Login and Security</NavLink>
-                            <NavLink exact to="/account/connections" className="list-group-item">Connections</NavLink>
+                            {
+                                this.props.strategies.find((obj) => obj.provider !== 'local') &&
+                                <NavLink exact to="/account/connections" className="list-group-item">Connections</NavLink>
+                            }
                             <NavLink exact to="/account/notifications" className="list-group-item">Notifications</NavLink>
                         </ListGroup>
                     </Card>
@@ -63,6 +68,7 @@ class Account extends React.Component {
 
 function mapStateToProps(state) {
     return {
+        strategies: state.auth.strategies || [],
         user: state.account.user,
         authToken: state.account.authToken,
         loggedIn: state.account.loggedIn,
@@ -72,6 +78,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         getUserDetails,
+        getStrategies,
     }, dispatch);
 }
 
