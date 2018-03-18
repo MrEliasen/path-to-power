@@ -34,6 +34,14 @@ class AccountSecurity extends React.Component {
         this.props.getStrategies();
     }
 
+    componentDidMount() {
+        if (this.props.user && this.props.user.email) {
+            this.setState({
+                email: this.props.user.email,
+            });
+        }
+    }
+
     componentWillReceiveProps(nextProps) {
         const email = this.props.user ? this.props.user.email : '';
 
