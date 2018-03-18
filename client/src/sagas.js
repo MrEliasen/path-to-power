@@ -6,9 +6,9 @@ import {push} from 'react-router-redux';
 import axios from 'axios';
 
 // actions
-import {authLogin, saveUserDetails} from './components/account/actions';
+import {saveUserDetails} from './components/account/actions';
 import {setConnectionStatus} from './components/app/actions';
-import {saveStrategies} from './components/auth/actions';
+import {authLogin, saveStrategies} from './components/auth/actions';
 
 // types
 import {
@@ -28,13 +28,13 @@ import {
     AUTH_PASSWORD_RESET,
     AUTH_LINK,
     AUTH_UNLINK,
+    AUTH_SIGNUP,
+    AUTH_PROVIDER,
+    AUTH_SAVE,
 } from './components/auth/types';
 import {
-    ACCOUNT_AUTHENTICATE_SAVE,
-    USER_SIGNUP,
     USER_DETAILS_GET,
     USER_DETAILS_UPDATE,
-    USER_AUTHENTICATE_PROVIDER,
 } from './components/account/types';
 
 // misc
@@ -351,7 +351,7 @@ function* onAuthAttempt() {
 }
 
 function* onProviderAuthAttempt() {
-    yield takeLatest(USER_AUTHENTICATE_PROVIDER, checkProviderAuth);
+    yield takeLatest(AUTH_PROVIDER, checkProviderAuth);
 }
 
 function* onGameLogout() {
@@ -363,11 +363,11 @@ function* onAccountLogout() {
 }
 
 function* onAuthSuccess() {
-    yield takeLatest(ACCOUNT_AUTHENTICATE_SAVE, saveAuthDetails);
+    yield takeLatest(AUTH_SAVE, saveAuthDetails);
 }
 
 function* onSignUpAttempt() {
-    yield takeLatest(USER_SIGNUP, signUpUser);
+    yield takeLatest(AUTH_SIGNUP, signUpUser);
 }
 
 function* onFetchStrategies() {

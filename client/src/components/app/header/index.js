@@ -4,7 +4,7 @@ import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
 // Redux
-import {authLogout} from '../../account/actions';
+import {authLogout} from '../../auth/actions';
 
 // UI
 import {Container, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav} from 'reactstrap';

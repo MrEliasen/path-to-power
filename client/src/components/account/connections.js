@@ -8,15 +8,11 @@ import {Card, CardHeader, CardBody, Table} from 'reactstrap';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 // Actions
-import {getStrategies, unlinkProvider} from '../auth/actions';
+import {unlinkProvider} from '../auth/actions';
 
 class AccountConnections extends React.Component {
     constructor(props) {
         super(props);
-    }
-
-    componentWillMount() {
-        this.props.getStrategies();
     }
 
     render() {
@@ -85,7 +81,6 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-        getStrategies,
         unlinkProvider,
     }, dispatch);
 }

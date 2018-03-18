@@ -9,8 +9,7 @@ import {Card, CardHeader, CardBody, Input, Button, Form, FormGroup} from 'reacts
 import Notification from '../ui/notification';
 
 // Actions
-import {authLogin, authLocal, authProvider} from '../account/actions';
-import {getStrategies, linkProvider} from './actions';
+import {authLocal, authProvider, authLogin, getStrategies, linkProvider} from './actions';
 
 class AuthLogin extends React.Component {
     constructor(props) {

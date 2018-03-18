@@ -6,8 +6,7 @@ import {connect} from 'react-redux';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import {Card, CardHeader, CardBody, Input, Button, Form, FormGroup} from 'reactstrap';
 import Notification from '../ui/notification';
-import {userSignUp} from '../account/actions';
-import {getStrategies} from '../auth/actions';
+import {userSignUp, getStrategies} from '../auth/actions';
 
 class AuthRegister extends React.Component {
     constructor(props) {
