@@ -52,7 +52,6 @@ export default class UserManager {
 
         jwt.verify(action.payload, this.Game.config.api.signingKey, async (err, decoded) => {
             if (err) {
-                debugger;
                 return this.Game.socketManager.dispatchToSocket(socket, {
                     type: USER_AUTHENTICATE_ERROR,
                     payload: 'Invalid authentication token. Please try again.',
@@ -66,7 +65,6 @@ export default class UserManager {
                 user = await UserModel.findOneAsync({_id: escape(decoded._id), session_token: escape(decoded.session_token)}, {_id: 1});
 
                 if (!user) {
-                    debugger;
                     return this.Game.socketManager.dispatchToSocket(socket, {
                         type: USER_AUTHENTICATE_ERROR,
                         payload: 'Invalid authentication token. Please try again.',

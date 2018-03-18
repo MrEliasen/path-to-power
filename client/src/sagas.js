@@ -309,7 +309,6 @@ function* getUserDetails(action) {
 }
 
 function* linkProviderToAccount(action) {
-    debugger;
     const response = yield call(doAPICall, 'auth/link', {
         provider: action.payload.providerToken,
         authToken: action.payload.authToken,

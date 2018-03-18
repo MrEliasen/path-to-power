@@ -204,7 +204,6 @@ function authenticateProvider(req, res) {
                     });
                 }
 
-
                 onAuth(req, res, {
                     user: user.toObject(),
                     identity,
@@ -325,7 +324,6 @@ export function isAuthenticated(req, res, next) {
 
         // check the token is for the user we are altering.
         if (!req.params.userId || req.params.userId !== decoded._id) {
-            debugger;
             return res.status(401).json({
                 status: 401,
                 message: 'Invalid authorisation token.',
