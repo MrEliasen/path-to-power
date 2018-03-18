@@ -15,7 +15,7 @@ import {
 } from 'reactstrap';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import {getStrategies} from '../auth/actions';
-import {getUserDetails, updateAccount} from './actions'
+import {getUserDetails, updateAccount} from './actions';
 import Notification from '../ui/notification';
 
 class AccountSecurity extends React.Component {
