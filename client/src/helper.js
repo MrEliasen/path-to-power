@@ -1,3 +1,5 @@
+import config from './config';
+
 /**
  * Generate a "random" number between a min and max
  * @param  {Number} min Min value
@@ -73,6 +75,9 @@ export function cacheGet(key) {
  * @param  {Number} expire (Optional) how long the cache should remain valid (seconds)
  */
 export function cacheSet(key, data, expire = null) {
+    // set the cache expiry based on the key, if defined
+    expire = config.cache[key] || expire;
+
     let storeValue = {
         expire: expire ? ((new Date().getTime() / 1000) + expire) : null,
         data,

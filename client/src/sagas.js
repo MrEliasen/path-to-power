@@ -262,7 +262,7 @@ function* getAuthStrategies(action) {
         }
 
         authList = response.data.authlist;
-        cacheSet('strategies', authList, 600);
+        cacheSet('strategies', authList);
     }
 
     yield put(saveStrategies(authList));

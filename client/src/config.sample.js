@@ -5,6 +5,9 @@ const Config = {
     api: {
         host: 'http://localhost:8087',
     },
+    caching: { // in seconds
+        strategies: 300,
+    },
 };
 
 export default Config;
