@@ -296,14 +296,14 @@ function* updateUserDetails(action) {
     }
 
     yield put(saveUserDetails({
-        hasPassword: action.payload.details.password ? true : false,
-        email: action.payload.details.email || '',
+        hasPassword: response.data.hasPassword,
+        email: response.data.email,
     }));
 
     yield put({
         type: NOTIFICATION_SET,
         payload: {
-            message: response.data ? response.data.message : 'Your details has been updated!',
+            message: response.data.message || 'Your details has been updated!',
             type: 'success',
         },
     });

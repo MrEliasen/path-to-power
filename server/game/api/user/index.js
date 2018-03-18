@@ -83,7 +83,7 @@ export function updateUser(req, res) {
             if (req.body.password.length < minLen) {
                 return res.status(400).json({
                     status: 400,
-                    error: `Your password much be at least ${minLen} characters long.`,
+                    error: `Your password must be at least ${minLen} characters long.`,
                 });
             }
 
@@ -147,7 +147,10 @@ export function updateUser(req, res) {
                 });
             }
 
-            return res.status(204).end();
+            return res.status(200).json({
+                email: user.email || '',
+                hasPassword: user.password ? true : false,
+            });
         });
     });
 }
@@ -224,7 +227,7 @@ export function createUser(req, res) {
     if (req.body.password.length < minLen) {
         return res.status(400).json({
             status: 400,
-            error: `Your password much be at least ${minLen} characters long.`,
+            error: `Your password must be at least ${minLen} characters long.`,
         });
     }
 
