@@ -40,16 +40,17 @@ function Auth(accessToken, refreshToken, profile, cb) {
             }
         }
 
-        // if the identity have no user associated with it, create a new user.
-        // If the userId is not a valid objectId, mongoose will throw a cast error.
         if (!identity.userId) {
-            const newUser = await createNewUser(identity);
+            /*const newUser = await createNewUser(identity);
 
             if (!newUser) {
                 return cb('Something went wrong, please try again in a moment.');
-            }
+            }*/
 
-            return cb(null, newUser.toObject());
+            return cb(null, {
+                identity,
+                user: {},
+            });
         }
 
         // load the user data, associated with the identity
@@ -68,7 +69,10 @@ function Auth(accessToken, refreshToken, profile, cb) {
                 }
             }
 
-            return cb(null, user.toObject());
+            return cb(null, {
+                identity,
+                user: user.toObject(),
+            });
         });
     });
 }

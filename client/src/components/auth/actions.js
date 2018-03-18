@@ -1,4 +1,9 @@
-import {AUTH_STRATEGIES_SAVE, AUTH_STRATEGIES_GET, AUTH_PASSWORD_RESET} from './types';
+import {
+    AUTH_STRATEGIES_SAVE,
+    AUTH_STRATEGIES_GET,
+    AUTH_PASSWORD_RESET,
+    AUTH_LINK,
+} from './types';
 
 export function saveStrategies(strategies) {
     return {
@@ -14,10 +19,19 @@ export function getStrategies() {
     };
 }
 
-
 export function resetPassword(email) {
     return {
         type: AUTH_PASSWORD_RESET,
         payload: email,
+    };
+}
+
+export function linkProvider(authToken, providerToken) {
+    return {
+        type: AUTH_LINK,
+        payload: {
+            authToken,
+            providerToken,
+        },
     };
 }

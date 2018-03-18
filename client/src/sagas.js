@@ -1,4 +1,5 @@
 import {eventChannel} from 'redux-saga';
+import jwt from 'jsonwebtoken';
 import {put, call, all, take, takeLatest, race} from 'redux-saga/effects';
 
 // methods
@@ -6,8 +7,9 @@ import {push} from 'react-router-redux';
 import axios from 'axios';
 
 // actions
-import {authLogin} from './components/account/actions';
+import {authLogin, saveUserDetails} from './components/account/actions';
 import {setConnectionStatus} from './components/app/actions';
+import {saveStrategies} from './components/auth/actions';
 
 // types
 import {
@@ -22,24 +24,38 @@ import {
     NOTIFICATION_SET,
     NOTIFICATION_CLEAR,
 } from './components/app/types';
-import {saveStrategies} from './components/auth/actions';
-import {AUTH_STRATEGIES_GET, AUTH_PASSWORD_RESET} from './components/auth/types';
-import {ACCOUNT_AUTHENTICATE_SAVE, USER_SIGNUP} from './components/account/types';
+import {
+    AUTH_STRATEGIES_GET,
+    AUTH_PASSWORD_RESET,
+    AUTH_LINK,
+} from './components/auth/types';
+import {
+    ACCOUNT_AUTHENTICATE_SAVE,
+    USER_SIGNUP,
+    USER_DETAILS_GET,
+    USER_DETAILS_UPDATE,
+    USER_AUTHENTICATE_PROVIDER,
+} from './components/account/types';
 
 // misc
 import config from './config';
 import {cacheGet, cacheSet} from './helper';
 
-function* doAPICall(endpoint, data, method = 'get') {
+function* doAPICall(endpoint, data, method = 'get', additionalHeaders = null) {
     try {
         yield put({
             type: NOTIFICATION_CLEAR,
             payload: null,
         });
 
-        return yield call(axios[method], `${config.api.host}/api/${endpoint}`, data);
+        const request = axios.create({
+            baseURL: `${config.api.host}/api/`,
+            timeout: 10000,
+            headers: additionalHeaders,
+        });
+
+        return yield call(request[method], `${endpoint}`, data);
     } catch (err) {
-        console.log(err);
         let errorMsg = 'Something went wrong. Please try again in a moment.';
 
         if (err.response) {
@@ -140,6 +156,8 @@ function* saveAuthDetails(action) {
         return result[0];
     }
 
+    localStorage.setItem('authToken', action.payload);
+
     yield put.resolve({
         ...result[1],
         payload: {
@@ -172,6 +190,20 @@ function* checkLocalAuth(action) {
         email: action.payload.email,
         password: action.payload.password,
         method: 'local',
+    };
+
+    const response = yield call(doAPICall, 'auth', data, 'post');
+
+    if (!response) {
+        return;
+    }
+
+    yield put(authLogin(response.data.authToken));
+}
+
+function* checkProviderAuth(action) {
+    const data = {
+        providerToken: action.payload.providerToken,
     };
 
     const response = yield call(doAPICall, 'auth', data, 'post');
@@ -241,8 +273,59 @@ function* resetPassword(action) {
     });
 }
 
+function* updateUserDetails(action) {
+    const response = yield call(doAPICall, `users/${action.payload.userId}`, action.payload.details, 'patch', {
+        Authorization: `Bearer ${action.payload.authToken}`,
+    });
+
+    if (!response) {
+        return;
+    }
+
+    yield put(saveUserDetails({
+        hasPassword: action.payload.details.password ? true : false,
+        email: action.payload.details.email || '',
+    }));
+
+    yield put({
+        type: NOTIFICATION_SET,
+        payload: {
+            message: response.data ? response.data.message : 'Your details has been updated!',
+            type: 'success',
+        },
+    });
+}
+
+function* getUserDetails(action) {
+    const response = yield call(doAPICall, `users/${action.payload.userId}`, null, 'get', {
+        Authorization: `Bearer ${action.payload.authToken}`,
+    });
+
+    if (!response) {
+        return;
+    }
+
+    yield put(saveUserDetails(response.data.user));
+}
+
+function* linkProviderToAccount(action) {
+    debugger;
+    const response = yield call(doAPICall, 'auth/link', {
+        provider: action.payload.providerToken,
+        authToken: action.payload.authToken,
+    }, 'post');
+
+    if (!response) {
+        return;
+    }
+}
+
 function* onAuthAttempt() {
     yield takeLatest(USER_AUTHENTICATE, checkLocalAuth);
+}
+
+function* onProviderAuthAttempt() {
+    yield takeLatest(USER_AUTHENTICATE_PROVIDER, checkProviderAuth);
 }
 
 function* onGameLogout() {
@@ -269,6 +352,18 @@ function* onResetPassword() {
     yield takeLatest(AUTH_PASSWORD_RESET, resetPassword);
 }
 
+function* onFetchUserDetails() {
+    yield takeLatest(USER_DETAILS_GET, getUserDetails);
+}
+
+function* onUpdateUserDetails() {
+    yield takeLatest(USER_DETAILS_UPDATE, updateUserDetails);
+}
+
+function* onLinkProvider() {
+    yield takeLatest(AUTH_LINK, linkProviderToAccount);
+}
+
 /* ** ** ** ** **  ** ** ** ** ** ** */
 
 function* routeChanged() {
@@ -293,6 +388,10 @@ function* Sagas() {
         onRouteChange(),
         onFetchStrategies(),
         onResetPassword(),
+        onFetchUserDetails(),
+        onUpdateUserDetails(),
+        onLinkProvider(),
+        onProviderAuthAttempt(),
     ]);
 }
 

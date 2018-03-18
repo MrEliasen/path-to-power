@@ -15,6 +15,7 @@ import {
 } from 'reactstrap';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import {getStrategies} from '../auth/actions';
+import {getUserDetails, updateAccount} from './actions'
 import Notification from '../ui/notification';
 
 class AccountSecurity extends React.Component {
@@ -22,19 +23,43 @@ class AccountSecurity extends React.Component {
         super(props);
 
         this.state = {
+            email: '',
             password: '',
             passwordConfirm: '',
+            currentPassword: '',
         };
+
+        this.updateDetails = this.updateDetails.bind(this);
     }
 
     componentWillMount() {
         if (!this.props.loggedIn) {
             return this.props.history.push('/auth');
         }
+        this.props.getStrategies();
+        this.props.getUserDetails(this.props.user._id, this.props.authToken);
+    }
 
-        if (!this.props.strategies) {
-            this.props.getStrategies();
+    componentWillReceiveProps(nextProps) {
+        const email = this.props.user ? this.props.user.email : '';
+
+        if (nextProps.user && nextProps.user.email !== email) {
+            this.setState({
+                email: nextProps.user.email,
+            });
         }
+
+        if (nextProps.notification && nextProps.notification.type !== 'error') {
+            this.setState({
+                password: '',
+                passwordConfirm: '',
+                currentPassword: '',
+            });
+        }
+    }
+
+    updateDetails() {
+        this.props.updateAccount(this.props.user._id, this.props.authToken, {...this.state});
     }
 
     render() {
@@ -56,25 +81,44 @@ class AccountSecurity extends React.Component {
                             <CardBody className="text-center">
                                 <Form>
                                     <Notification />
+                                    <FormGroup>
+                                        <Input
+                                            type="email"
+                                            name="email"
+                                            placeholder="Account Email"
+                                            autoComplete="email"
+                                            onChange={(e) => {
+                                                this.setState({
+                                                    email: e.target.value,
+                                                });
+                                            }}
+                                            value={this.state.email}
+                                        />
+                                    </FormGroup>
+                                    <hr/>
                                     {
-                                        1 == 2 &&
+                                        this.props.user.hasPassword &&
                                         <FormGroup>
                                             <Input
                                                 type="password"
+                                                name="password"
                                                 placeholder="Current Password"
+                                                autoComplete="current-password"
                                                 onChange={(e) => {
                                                     this.setState({
-                                                        password: e.target.value,
+                                                        currentPassword: e.target.value,
                                                     });
                                                 }}
-                                                value={this.state.password}
+                                                value={this.state.currentPassword}
                                             />
                                         </FormGroup>
                                     }
                                     <FormGroup>
                                         <Input
                                             type="password"
+                                            name="new-password"
                                             placeholder="New Password"
+                                            autoComplete="new-password"
                                             onChange={(e) => {
                                                 this.setState({
                                                     password: e.target.value,
@@ -86,6 +130,7 @@ class AccountSecurity extends React.Component {
                                     <FormGroup>
                                         <Input
                                             type="password"
+                                            name="confirm-password"
                                             placeholder="Confirm New Password"
                                             onChange={(e) => {
                                                 this.setState({
@@ -95,7 +140,7 @@ class AccountSecurity extends React.Component {
                                             value={this.state.passwordConfirm}
                                         />
                                     </FormGroup>
-                                    <Button onClick={() => {}} block={true} color="primary">Update</Button>
+                                    <Button onClick={this.updateDetails} block={true} color="primary">Update</Button>
                                 </Form>
                             </CardBody>
                         </Card>
@@ -111,7 +156,13 @@ class AccountSecurity extends React.Component {
                                 {
 
                                     authOther.map((strat) => {
-                                        return <a key={strat.provider} className={`btn btn-block btn-primary btn-brand-${strat.provider}`} href={strat.authUrl}>
+                                        const isLinked = this.props.user.identities.find((obj) => obj.provider === strat.provider);
+
+                                        return <a
+                                            key={strat.provider}
+                                            className={`btn btn-block btn-brand-${strat.provider} ${isLinked ? 'btn-success' : 'btn-primary'}`}
+                                            href={strat.authUrl}
+                                        >
                                             <FontAwesomeIcon icon={['fab', strat.provider]} /> Link {strat.name}
                                         </a>;
                                     })
@@ -129,12 +180,17 @@ function mapStateToProps(state) {
     return {
         loggedIn: state.account.loggedIn,
         strategies: state.auth.strategies,
+        user: state.account.user,
+        authToken: state.account.authToken,
+        notification: state.app.notification,
     };
 }
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         getStrategies,
+        getUserDetails,
+        updateAccount,
     }, dispatch);
 }
 

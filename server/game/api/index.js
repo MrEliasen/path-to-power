@@ -8,18 +8,23 @@ import nodemailer from 'nodemailer';
 // API Route/enpoint controllers
 import {
     loadStrategies,
-    createUser,
-    updateUser,
-    deleteUser,
-    getUser,
-    activateUser,
     authenticate,
     getAuthList,
+    activateUser,
     onAuth,
     isAuthenticated,
     resetPassword,
     resetConfirm,
+    linkProvider,
 } from './authentication';
+
+import {
+    createUser,
+    updateUser,
+    deleteUser,
+    getUser,
+    verifyEmail,
+} from './user';
 
 /**
  * Setup the API endpoints
@@ -75,10 +80,12 @@ export default function(app, config) {
         .post(createUser);
     routes.route('/users/:userId')
         .get(isAuthenticated, getUser)
-        .delete(deleteUser)
-        .patch(updateUser);
+        .delete(isAuthenticated, deleteUser)
+        .patch(isAuthenticated, updateUser);
     routes.route('/users/:userId/activate')
         .get(activateUser);
+    routes.route('/users/:userId/verify')
+        .get(verifyEmail);
 
     // Authentication Routes
     // user/password authentication
@@ -91,6 +98,8 @@ export default function(app, config) {
         .post(resetPassword);
     routes.route('/auth/reset/:userId')
         .get(resetConfirm);
+    routes.route('/auth/link')
+        .post(linkProvider);
 
     // OAuth
     routes.route('/auth/provider/:provider')

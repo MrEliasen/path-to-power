@@ -46,11 +46,6 @@ export function loadStrategies(passport, logger) {
 }
 
 /**
- * Handle local auth sign up
- */
-export const createUser = localAuth.signup;
-
-/**
  * Handle local auth password reset requests
  */
 export const resetPassword = localAuth.passwordReset;
@@ -60,52 +55,6 @@ export const resetPassword = localAuth.passwordReset;
  */
 export const resetConfirm = localAuth.resetConfirm;
 
-/**
- * Handles updates to a user
- * @param  {Express Request} req
- * @param  {Express Response} res
- */
-export function updateUser(req, res) {
-
-}
-
-/**
- * Handles user deletions
- * @param  {Express Request} req
- * @param  {Express Response} res
- */
-export function deleteUser(req, res) {
-
-}
-
-/**
- * Handles user fetch
- * @param  {Express Request} req
- * @param  {Express Response} res
- */
-export async function getUser(req, res) {
-    try {
-        const identities = await IdentityModel.findAsync(
-            {userId: req.user._id},
-            {_id: 0, provider: 1, date_added: 1}
-        );
-
-        res.json({
-            status: 200,
-            user: {
-                ...req.user,
-                identities,
-            },
-        });
-    } catch (err) {
-        logger.error(err);
-
-        return res.status(500).json({
-            status: 500,
-            error: 'Something went wrong. Please try again in a moment.',
-        });
-    }
-}
 
 /**
  * Handles user activation requests
@@ -138,7 +87,7 @@ export function activateUser(req, res) {
         if (!user) {
             return res.status(400).json({
                 status: 400,
-                error: 'Invalid activation token.2',
+                error: 'Invalid activation token.',
             });
         }
 
@@ -163,12 +112,121 @@ export function activateUser(req, res) {
 }
 
 /**
+ * Creates a new user for the identity, and link it to the identity
+ * @param  {Express Request} req
+ * @param  {Express Response} res
+ * @param  {Identity} identity
+ */
+function linkNewUser(req, res, identity) {
+    const newUser = new UserModel({
+        activated: true,
+    });
+
+    newUser.save((err) => {
+        if (err) {
+            return res.status(500).json({
+                status: 500,
+                message: 'Something went wrong. Please try again in a moment.',
+            });
+        }
+
+        identity.userId = newUser._id.toString();
+
+        identity.save((err) => {
+            if (err) {
+                return res.status(500).json({
+                    status: 500,
+                    message: 'Something went wrong. Please try again in a moment.',
+                });
+            }
+
+            onAuth(req, res, {
+                user: newUser.toObject(),
+                identity,
+            }, false);
+        });
+    });
+}
+
+/**
+ * Authenticates a OAuth provider token, logging in to the attached account
+ * Or creates a new account is none is linked.
+ * @param  {Express Request} req
+ * @param  {Express Request} res
+ */
+function authenticateProvider(req, res) {
+    const providerToken = req.body.providerToken;
+
+    jwt.verify(providerToken, req.app.get('config').api.signingKey, (err, decoded) => {
+        if (err) {
+            return res.status(401).json({
+                status: 401,
+                message: 'Invalid authorisation token.',
+            });
+        }
+
+        IdentityModel.findOne({_id: decoded.identity}, (err, identity) => {
+            if (err) {
+                return res.status(500).json({
+                    status: 500,
+                    message: 'Something went wrong. Please try again in a moment.',
+                });
+            }
+
+            if (!identity) {
+                return res.status(401).json({
+                    status: 401,
+                    message: 'Invalid authorisation token.',
+                });
+            }
+
+            // if the identity is not linked to an account, create one.
+            if (!identity.userId) {
+                return linkNewUser(req, res, identity);
+            }
+
+            // convert mongoose object to plain object.
+            identity = identity.toObject();
+
+            // fetch the user details, and send back a user-jwt token
+            UserModel.findOne({_id: identity.userId}, (err, user) => {
+                if (err) {
+                    return res.status(500).json({
+                        status: 500,
+                        message: 'Something went wrong. Please try again in a moment.',
+                    });
+                }
+
+                if (!user) {
+                    return res.status(401).json({
+                        status: 401,
+                        message: 'Invalid authorisation token.',
+                    });
+                }
+
+
+                onAuth(req, res, {
+                    user: user.toObject(),
+                    identity,
+                }, false);
+            });
+        });
+    });
+}
+
+/**
  * Handles authentication requests
  * @param  {Express Request} req
  * @param  {Express Response} res
  * @return {Function}
  */
 export function authenticate(req, res, next) {
+    // check if we are authenticating a provider token
+    if (req.body.providerToken) {
+        return authenticateProvider(req, res);
+    }
+
+    // continue with account authentication
     const method = req.body.method || req.params.provider;
 
     if (!method) {
@@ -178,11 +236,10 @@ export function authenticate(req, res, next) {
         });
     }
 
-    return passport.authenticate(method, {session: false}, (err, success, info, status) => {
-        if (success) {
-            return onAuth(req, res, success, method !== 'local');
+    return passport.authenticate(method, {session: false}, (err, userDetails, info, status) => {
+        if (userDetails) {
+            return onAuth(req, res, userDetails, method !== 'local');
         }
-
 
         res.status(status || 400).json({
             status: status || 400,
@@ -198,9 +255,10 @@ export function authenticate(req, res, next) {
  */
 export function onAuth(req, res, data, redirect) {
     const token = jwt.sign({
-        _id: data._id,
-        session_token: data.session_token,
-    }, req.app.get('config').api.signingKey, {expiresIn: '7d'});
+        _id: data.user._id || null,
+        session_token: data.user.session_token || null,
+        identity: data.identity._id || null,
+    }, req.app.get('config').api.signingKey, {expiresIn: '1h'});
 
     if (redirect) {
         return res.redirect(`${req.app.get('config').clientUrl}/auth?token=${token}`);
@@ -267,6 +325,7 @@ export function isAuthenticated(req, res, next) {
 
         // check the token is for the user we are altering.
         if (!req.params.userId || req.params.userId !== decoded._id) {
+            debugger;
             return res.status(401).json({
                 status: 401,
                 message: 'Invalid authorisation token.',
@@ -275,7 +334,7 @@ export function isAuthenticated(req, res, next) {
 
         UserModel.findOne(
             {_id: decoded._id, session_token: decoded.session_token},
-            {_id: 1, session_token: 1, activated: 1, date_added: 1, password: 1},
+            {_id: 1, email: 1, session_token: 1, activated: 1, date_added: 1, password: 1},
             (err, user) => {
                 if (err || !user) {
                     return res.status(401).json({
@@ -284,12 +343,78 @@ export function isAuthenticated(req, res, next) {
                     });
                 }
 
-                // check if the user has set a password (have local auth enabled)
-                user.password = user.password ? true : false;
+                const userDetails = user.toObject();
 
-                req.user = user.toObject();
+                // check if the user has set a password (have local auth enabled)
+                userDetails.password = userDetails.password ? true : false;
+
+                req.user = userDetails;
                 next();
             }
         );
+    });
+}
+
+/**
+ * Links a provider to an account
+ * @param  {Express Request} req
+ * @param  {Express Response} res
+ */
+export function linkProvider(req, res) {
+    if (!req.body.provider || !req.body.authToken) {
+        return res.status(400).json({
+            status: 400,
+            error: 'Invalid provider token',
+        });
+    }
+
+    jwt.verify(req.body.authToken, req.app.get('config').api.signingKey, (err, authTokenDecoded) => {
+        if (err) {
+            return res.status(400).json({
+                status: 400,
+                error: 'Invalid provider token',
+            });
+        }
+
+        jwt.verify(req.body.provider, req.app.get('config').api.signingKey, (err, decoded) => {
+            if (err) {
+                return res.status(400).json({
+                    status: 400,
+                    error: 'Invalid provider token',
+                });
+            }
+
+            IdentityModel.findOne({_id: decoded.identity}, (err, identity) => {
+                if (err) {
+                    return res.status(500).json({
+                        status: 500,
+                        error: 'Something went wrong. Please try again in a moment.',
+                    });
+                }
+
+                if (!identity) {
+                    return res.status(400).json({
+                        status: 400,
+                        error: 'Invalid provider token',
+                    });
+                }
+
+                identity.userId = authTokenDecoded._id;
+
+                identity.save((err) => {
+                    if (err) {
+                        return res.status(500).json({
+                            status: 500,
+                            error: 'Something went wrong. Please try again in a moment.',
+                        });
+                    }
+
+                    return res.json({
+                        status: 200,
+                        message: 'Your account was linked!',
+                    });
+                });
+            });
+        });
     });
 }

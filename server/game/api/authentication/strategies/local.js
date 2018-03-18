@@ -1,6 +1,5 @@
 import LocalStrategy from 'passport-local';
 import UserModel from '../../models/user';
-import activationEmail from '../../../data/emails/activation.js';
 import passwordResetEmail from '../../../data/emails/passwordReset.js';
 import newPasswordEmail from '../../../data/emails/passwordNew.js';
 import uuid from 'uuid/v4';
@@ -55,7 +54,10 @@ function Auth(email, password, done) {
                 return done('Invalid email and password combination.');
             }
 
-            return done(null, user.toObject());
+            return done(null, {
+                user: user.toObject(),
+                identity: {},
+            });
         }
     );
 }
@@ -231,122 +233,4 @@ export function passwordReset(req, res) {
             });
         }
     );
-}
-
-/**
- * Handles user creation with this strategy
- * @param  {Express Request} req
- * @param  {Express Response} res
- */
-export function signup(req, res) {
-    if (!req.body.email) {
-        return res.status(400).json({
-            status: 400,
-            error: 'You must supply an email.',
-        });
-    }
-
-    if (!req.body.password) {
-        return res.status(400).json({
-            status: 400,
-            error: 'Please choose a password',
-        });
-    }
-
-    if (req.body.password !== req.body.passwordConfirm) {
-        return res.status(400).json({
-            status: 400,
-            error: 'Your passwords did not seem to match.',
-        });
-    }
-
-    if (req.body.password.length < req.app.get('config').api.authentication.password.minlen) {
-        return res.status(400).json({
-            status: 400,
-            error: 'Your password much be at least 8 characters long.',
-        });
-    }
-
-    if (!req.body.email.includes('@')) {
-        return res.status(400).json({
-            status: 400,
-            error: 'Please enter a valid email address',
-        });
-    }
-
-    UserModel.findOne({email: escape(req.body.email)}, (err, user) => {
-        if (err) {
-            logger.error(err);
-            return res.status(500).json({
-                status: 500,
-                error: 'Something went wrong while trying to process your request. Please try again in a moment.',
-                err: err,
-            });
-        }
-
-        // Email already in use
-        if (user) {
-            return res.status(409).json({
-                status: 409,
-                error: 'An account is already signed up using that email.',
-            });
-        }
-
-        const requireActivation = req.app.get('config').api.authentication.providers.local.activationLink;
-        let newUser;
-        let token;
-
-        if (requireActivation) {
-            // create activation key
-            token = crypto.createHmac('sha256', req.app.get('config').api.signingKey);
-            token.update(uuid());
-        }
-
-        newUser = new UserModel({
-            email: req.body.email,
-            password: req.body.password,
-            activationToken: requireActivation ? token.digest('hex') : '',
-        });
-
-        newUser.save((err) => {
-            if (err) {
-                logger.error(err);
-                return res.status(500).json({
-                    status: 500,
-                    error: 'Something went wrong while trying to process your request. Please try again in a moment.',
-                    err: err,
-                });
-            }
-
-            if (!requireActivation) {
-                return res.status(203).json({
-                    status: 203,
-                    message: 'Your account has been created!',
-                });
-            }
-
-            const mailer = req.app.get('mailer');
-            const link = `http${req.secure ? 's' : ''}//${req.headers.host}/api/users/${newUser._id.toString()}/activate?token=${newUser.activationToken}`;
-
-             // setup email data with unicode symbols
-            let mailOptions = {
-                from: req.app.get('config').mailserver.sender,
-                to: newUser.email,
-                subject: 'PTP | Account Activation',
-                html: activationEmail(link),
-            };
-
-            // send mail with defined transport object
-            mailer.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    return logger.error(error);
-                }
-
-                res.status(203).json({
-                    status: 203,
-                    message: 'Your account has been created! To activate your acount, please click the activation link sent to your email address.',
-                });
-            });
-        });
-    });
 }

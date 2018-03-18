@@ -9,8 +9,8 @@ import {Card, CardHeader, CardBody, Input, Button, Form, FormGroup} from 'reacts
 import Notification from '../ui/notification';
 
 // Actions
-import {authLogin, authLocal} from '../account/actions';
-import {getStrategies} from '../auth/actions';
+import {authLogin, authLocal, authProvider} from '../account/actions';
+import {getStrategies, linkProvider} from './actions';
 
 class AuthLogin extends React.Component {
     constructor(props) {
@@ -32,23 +32,23 @@ class AuthLogin extends React.Component {
 
     autoLogin() {
         const GETtoken = window.location.search.replace('?token=', '');
-
-        if (GETtoken) {
-            return this.saveAuthToken(GETtoken);
-        }
-
         let authToken = localStorage.getItem('authToken');
 
-        if (!authToken) {
-            return this.props.getStrategies();
+        if (authToken) {
+            // if we have a GETtoken as well, link the provider (GETtoken) with
+            // the account we are already logged into.
+            if (GETtoken) {
+                this.props.linkProvider(authToken, GETtoken);
+            }
+
+            return this.props.authLogin(authToken);
         }
 
-        this.props.authLogin(authToken);
-    }
+        if (GETtoken) {
+            return this.props.authProvider(GETtoken);
+        }
 
-    saveAuthToken(authToken) {
-        localStorage.setItem('authToken', authToken);
-        this.props.authLogin(authToken);
+        return this.props.getStrategies();
     }
 
     authenticate() {
@@ -153,6 +153,8 @@ function mapDispatchToProps(dispatch) {
         authLogin,
         authLocal,
         getStrategies,
+        linkProvider,
+        authProvider,
     }, dispatch);
 }
 
