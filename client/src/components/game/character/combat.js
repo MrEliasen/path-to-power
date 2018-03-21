@@ -21,6 +21,12 @@ class CombatMenu extends React.Component {
     }
 
     render() {
+        const target = this.props.character.target;
+
+        if (!target) {
+            return null;
+        }
+
         return (
             <Card className="menu menu-combat">
                 <a href="#" onClick={(e) => this.sendCommand(e, '/punch')}><FontAwesomeIcon icon="hand-rock" /> Punch</a>

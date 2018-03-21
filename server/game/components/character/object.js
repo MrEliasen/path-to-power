@@ -169,7 +169,32 @@ export default class Character {
             faction: this.faction ? this.faction.toObject(true) : null,
             skills: this.exportSkills(true),
             location: this.location,
+            target: this.getTargetDetails(),
         };
+    }
+
+    /**
+     * Get details about the current target, if any
+     * @return {Object|null}
+     */
+    getTargetDetails() {
+        const target = this.target;
+
+        if (!target) {
+            return null;
+        }
+
+        const details = {
+            name: target.name,
+            isNPC: false,
+        };
+
+        if (target.npc_id) {
+            details.type = target.type;
+            details.isNPC = true;
+        };
+
+        return details;
     }
 
     /**
@@ -183,6 +208,8 @@ export default class Character {
         this.target = target;
         // and gridlock them
         this.target.gridLock(this);
+        // update the character target on the client
+        this.Game.characterManager.updateClient(this.user_id);
     }
 
     /**
@@ -229,6 +256,9 @@ export default class Character {
         }
 
         this.targetedBy.splice(characterIndex, 1);
+
+        // update the character target on the client
+        this.Game.characterManager.updateClient(this.user_id);
     }
 
     /**
