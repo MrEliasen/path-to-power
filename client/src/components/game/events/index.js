@@ -109,6 +109,10 @@ class Events extends React.Component {
         let events = [];
 
         this.props.events.forEach((event, index) => {
+            events.push({
+                type: 'separator',
+            });
+
             switch (event.type) {
                 case 'structure-info':
                     this.buildingInfo(event).forEach((line) => {

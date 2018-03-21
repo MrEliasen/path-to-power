@@ -69,6 +69,11 @@
             list-style: none;
 
             li {
+                &.chat-separator {
+                    border-bottom: 1px solid #eaeaea;
+                    margin: 5px 0px;
+                }
+
                 span {
                     margin-right: 2px;
 
@@ -118,18 +123,26 @@
     }
 
     .middle {
-
         .menu {
             display: flex;
             flex-direction: row;
 
             &.menu-combat {
-                margin-left: 20%;
-                margin-right: 20%;
+                //margin-left: 10%;
+                //margin-right: 10%;
                 background: $red;
                 color: $white;
-                a:hover {
-                    background-color: rgba(255, 255, 255, .1);
+                a {
+                    flex: initial;
+                    width: 120px;
+                    &:hover {
+                        background-color: rgba(255, 255, 255, .1);
+                    }
+                }
+                span {
+                    &:hover {
+                        background-color: inherit;
+                    }
                 }
             }
 
@@ -154,6 +167,10 @@
     .card {
         .card-body {
             padding: 10px 15px;
+        }
+
+        &.cluster {
+            margin: 0px 0px 10px;
         }
     }
 

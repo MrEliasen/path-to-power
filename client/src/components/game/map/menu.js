@@ -25,7 +25,9 @@ class MapMenu extends React.Component {
     }
 
     // TODO: Modal?
-    showStructureInfo(structure) {
+    showStructureInfo(e, structure) {
+        e.preventDefault();
+
         this.props.newEvent({
             type: 'structure-info',
             structure: structure,
@@ -117,7 +119,7 @@ class MapMenu extends React.Component {
             <React.Fragment>
                 {this.renderModals()}
                 <div className="text-center">
-                    <Card className="menu menu-map">
+                    <Card className="menu menu-map cluster">
                         {
                             this.props.map.structures.length > 0 &&
                             this.props.map.structures.map((structure, index) => {
@@ -125,25 +127,31 @@ class MapMenu extends React.Component {
                                     key={index}
                                     href="#"
                                     style={{color: structure.colour}}
-                                    onClick={() => this.showStructureInfo(structure)}
+                                    onClick={(e) => this.showStructureInfo(e, structure)}
                                 >
                                     <FontAwesomeIcon icon="building" /> {structure.name}
                                 </a>;
                             })
                         }
-                        {
-                            this.props.map.items.length > 0 &&
-                            <a href="#" onClick={this.toggleItems}><FontAwesomeIcon icon="shield" /> Items ({this.props.map.items.length})</a>
-                        }
-                        {
-                            this.props.map.players.length > 0 &&
-                            <a href="#" onClick={this.togglePlayers}><FontAwesomeIcon icon="user-secret" /> Players ({this.props.map.players.length})</a>
-                        }
-                        {
-                            this.props.map.npcs.length > 0 &&
-                            <a href="#" onClick={this.toggleNPCs}><FontAwesomeIcon icon="user-secret" /> NPCs ({this.props.map.npcs.length})</a>
-                        }
                     </Card>
+                    {
+                        this.props.map.items.length > 0 &&
+                        <Card className="menu menu-map cluster">
+                            <a href="#" onClick={this.toggleItems}><FontAwesomeIcon icon="shield" /> Items ({this.props.map.items.length})</a>
+                        </Card>
+                    }
+                    {
+                        this.props.map.players.length > 0 &&
+                        <Card className="menu menu-map cluster">
+                            <a href="#" onClick={this.togglePlayers}><FontAwesomeIcon icon="user-secret" /> Players ({this.props.map.players.length})</a>
+                        </Card>
+                    }
+                    {
+                        this.props.map.npcs.length > 0 &&
+                        <Card className="menu menu-map cluster">
+                            <a href="#" onClick={this.toggleNPCs}><FontAwesomeIcon icon="user-secret" /> NPCs ({this.props.map.npcs.length})</a>
+                        </Card>
+                    }
                 </div>
             </React.Fragment>
         );

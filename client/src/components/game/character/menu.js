@@ -105,7 +105,7 @@ class CharacterMenu extends React.Component {
                 <Card className="menu menu-character">
                     <a href="#" onClick={this.toggleEquipment}><FontAwesomeIcon icon="shield-alt" /> Equipment ({this.props.character.inventory.length}/{this.props.character.stats.inventorySize})</a>
                     <a href="#" onClick={this.toggleStats}><FontAwesomeIcon icon="chart-bar" /> Stats</a>
-                    <a href="#" onClick={this.toggleQuests}><FontAwesomeIcon icon="tasks" /> Quests (?)</a>
+                    {/* <a href="#" onClick={this.toggleQuests}><FontAwesomeIcon icon="tasks" /> Quests (?)</a> */}
                     <a href="#" onClick={this.togglePlayers}><FontAwesomeIcon icon="user-secret" /> Players ({this.props.players.length})</a>
                     {/* <a href="#" onClick={this.mapSearch}><FontAwesomeIcon icon="map-marker-alt" /> Map</a> */}
                 </Card>

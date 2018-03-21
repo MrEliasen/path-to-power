@@ -15,16 +15,18 @@ class CombatMenu extends React.Component {
         super(props);
     }
 
-    sendCommand(command = null) {
+    sendCommand(e, command = null) {
+        e.preventDefault();
         this.props.newCommand(command);
     }
 
     render() {
         return (
             <Card className="menu menu-combat">
-                <a href="#" onClick={() => this.sendCommand('/punch')}><FontAwesomeIcon icon="hand-rock" /> Punch</a>
-                <a href="#" onClick={() => this.sendCommand('/strike')}><FontAwesomeIcon icon="hand-paper" /> Strike</a>
-                <a href="#" onClick={() => this.sendCommand('/shoot')}><FontAwesomeIcon icon="hand-point-left" /> Shoot</a>
+                <a href="#" onClick={(e) => this.sendCommand(e, '/punch')}><FontAwesomeIcon icon="hand-rock" /> Punch</a>
+                <a href="#" onClick={(e) => this.sendCommand(e, '/strike')}><FontAwesomeIcon icon="hand-paper" /> Strike</a>
+                <a href="#" onClick={(e) => this.sendCommand(e, '/shoot')}><FontAwesomeIcon icon="hand-point-left" /> Shoot</a>
+                <span></span>
             </Card>
         );
     }

@@ -210,6 +210,7 @@ class Game extends React.Component {
                     <Col className="left">
                         <CharacterCard character={this.props.character} />
                         <Map />
+                        <MapMenu />
                         {
                             this.props.game.news &&
                             <h3 style={this.props.game.news.colour}>{this.props.game.news.message}</h3>
@@ -222,10 +223,9 @@ class Game extends React.Component {
                     </Col>
                     <Col sm="9" className="middle">
                         <CharacterMenu />
-                        <MapMenu />
-                        <CharacterCombatMenu />
                         <Chat title="Chat" messages={this.props.chat} lines="10" />
                         <Events />
+                        <CharacterCombatMenu />
                         <InputGroup>
                             <Input
                                 id="input-command"

@@ -52,6 +52,10 @@ class Chat extends React.Component {
         //     sender = 'SYSTEM';
         // }
 
+        if (message.type === 'separator') {
+            return <li key={index} className='chat-separator'></li>
+        }
+
         return (
             <li key={index} className={'chat-' + message.type}>
                 {false && <span className="timestamp">{time}</span>}
@@ -81,7 +85,7 @@ class Chat extends React.Component {
                     <ul>
                         {
                             ! this.props.messages.length &&
-                            <li>Nothing yet :(</li>
+                            <li>Nothing has happened yet.</li>
                         }
                         {
                             this.props.messages.length > 0 &&
