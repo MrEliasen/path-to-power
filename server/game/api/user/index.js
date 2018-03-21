@@ -126,8 +126,8 @@ export function updateUser(req, res) {
                 let mailOptions = {
                     from: req.app.get('config').mailserver.sender,
                     to: user.newEmail,
-                    subject: 'PTP | Email Verification',
-                    html: verificationEmail(link),
+                    subject: verificationEmail.title,
+                    html: verificationEmail.body(link),
                 };
 
                 // send mail with defined transport object
@@ -256,7 +256,8 @@ export function createUser(req, res) {
             });
         }
 
-        const requireActivation = req.app.get('config').api.authentication.providers.local.activationLink;
+        const localAuth = req.app.get('config').api.authentication.providers.find((obj) => obj.id === 'local');
+        const requireActivation = localAuth.activationLink;
         let newUser;
         let token;
 
@@ -296,8 +297,8 @@ export function createUser(req, res) {
             let mailOptions = {
                 from: req.app.get('config').mailserver.sender,
                 to: newUser.email,
-                subject: 'PTP | Account Activation',
-                html: activationEmail(link),
+                subject: activationEmail.title,
+                html: activationEmail.body(link),
             };
 
             // send mail with defined transport object

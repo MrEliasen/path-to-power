@@ -138,8 +138,8 @@ export function resetConfirm(req, res) {
             let mailOptions = {
                 from: req.app.get('config').mailserver.sender,
                 to: user.email,
-                subject: 'PTP | New Password',
-                html: newPasswordEmail(newPassword),
+                subject: newPasswordEmail.title,
+                html: newPasswordEmail.body(newPassword),
             };
 
             // send mail with defined transport object
@@ -215,8 +215,8 @@ export function passwordReset(req, res) {
                 let mailOptions = {
                     from: req.app.get('config').mailserver.sender,
                     to: user.email,
-                    subject: 'PTP | Password Reset',
-                    html: passwordResetEmail(link, req.connection.remoteAddress),
+                    subject: passwordResetEmail.title,
+                    html: passwordResetEmail.body(link, req.connection.remoteAddress),
                 };
 
                 // send mail with defined transport object
