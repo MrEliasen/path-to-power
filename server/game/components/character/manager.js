@@ -294,6 +294,9 @@ export default class CharacterManager {
             character.faction.unlinkCharacter(character);
         }
 
+        // set the object as offline, so NPCs drop the target
+        character.offline = true;
+
         this.characters = this.characters.filter((obj) => obj.user_id !== user_id);
         this.dispatchRemoveFromCharacterList(user_id);
     }

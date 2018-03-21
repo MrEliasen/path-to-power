@@ -220,6 +220,10 @@ export default class NPC extends Character {
 
         // check if the NPC has an active target
         if (this.target) {
+            if (this.target.offline) {
+                this.target = null;
+            }
+
             if (this.target.location.map === this.location.map && this.target.location.x === this.location.x && this.target.location.y === this.location.y) {
                 return this.target;
             } else {

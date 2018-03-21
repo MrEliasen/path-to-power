@@ -81,7 +81,7 @@ export default class SocketManager extends EventEmitter {
      * @param  {String} user_id The user_id of the user to logout
      * @return {promise}
      */
-    logoutOutSession(newSocket, user_id) {
+    async logoutOutSession(newSocket, user_id) {
         let socket;
 
         try {
@@ -90,17 +90,11 @@ export default class SocketManager extends EventEmitter {
             return;
         }
 
-        if (newSocket.user && socket.user && newSocket.user.user_id === socket.user.user_id) {
-            return;
-        }
-
-        this.onDisconnect(socket, true, false);
+        await this.onDisconnect(socket, true);
 
         this.dispatchToSocket(socket, {
             type: CHARACTER_REMOTE_LOGOUT,
-            payload: {
-                routeTo: '/',
-            },
+            payload: {},
         });
     }
 

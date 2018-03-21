@@ -32,7 +32,9 @@ class CombatMenu extends React.Component {
                 <a href="#" onClick={(e) => this.sendCommand(e, '/punch')}><FontAwesomeIcon icon="hand-rock" /> Punch</a>
                 <a href="#" onClick={(e) => this.sendCommand(e, '/strike')}><FontAwesomeIcon icon="hand-paper" /> Strike</a>
                 <a href="#" onClick={(e) => this.sendCommand(e, '/shoot')}><FontAwesomeIcon icon="hand-point-left" /> Shoot</a>
-                <span></span>
+                <span>
+                    {target.name} {target.type ? `the ${target.type}` : ''}
+                </span>
             </Card>
         );
     }

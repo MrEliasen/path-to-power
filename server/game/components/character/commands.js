@@ -395,6 +395,8 @@ async function cmdCharacterCreate(socket, character, command, params, cmdObject,
 async function cmdCharacterSelect(socket, character, command, params, cmdObject, Game) {
     const characterToLoad = params[0];
 
+    await Game.socketManager.logoutOutSession(socket, socket.user.user_id);
+
     try {
         // Login the character
         await Game.characterManager.manage(characterToLoad);
