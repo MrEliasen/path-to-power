@@ -65,11 +65,7 @@ class AccountSecurity extends React.Component {
     }
 
     render() {
-        if (! this.props.strategies) {
-            return '';
-        }
-
-        let authLocal = this.props.strategies.find((strat) => strat.provider === 'local');
+        let authLocal = this.props.strategies.find((strat) => strat.id === 'local');
 
         return (
             <Card>
@@ -169,7 +165,7 @@ class AccountSecurity extends React.Component {
 function mapStateToProps(state) {
     return {
         loggedIn: state.account.loggedIn,
-        strategies: state.auth.strategies,
+        strategies: state.auth.strategies || [],
         user: state.account.user,
         authToken: state.account.authToken,
         notification: state.app.notification,

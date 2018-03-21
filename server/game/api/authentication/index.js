@@ -13,27 +13,20 @@ import oauthSetup from './strategies/oauth';
  * @param  {Express} app
  */
 export function loadStrategies(passport, logger) {
-    const providers = config.api.authentication.providers;
+    config.api.authentication.providers.forEach((provider) => {
+        let callbackUrl = `${config.api.domain}${[80, 443].includes(config.api.post) ? '' : `:${config.api.port}`}/api/auth/provider/${provider.id}/callback`;
 
-    for (let provider in providers) {
-        if (providers.hasOwnProperty(provider)) {
-            if (!providers[provider].enabled) {
-                continue;
-            }
-
-            let callbackUrl = `${config.api.domain}${[80, 443].includes(config.api.post) ? '' : `:${config.api.port}`}/api/auth/provider/${providers[provider].id}/callback`;
-
+        if (provider.enabled) {
             // if its the local auth provider, we have to use a separate strategy from OAuth.
-            if (provider === 'local') {
-                localAuth.setup(passport, logger);
-                continue;
+            if (provider.id === 'local') {
+                return localAuth.setup(passport, logger);
             }
 
             try {
                 oauthSetup(
                     passport,
                     {
-                        ...providers[provider],
+                        ...provider,
                         callbackUrl,
                     },
                     logger
@@ -42,7 +35,7 @@ export function loadStrategies(passport, logger) {
                 logger.error(err);
             }
         }
-    };
+    });
 }
 
 /**
@@ -226,8 +219,7 @@ export function authenticate(req, res, next) {
     }
 
     // continue with account authentication
-    let method = req.body.method || req.params.provider;
-    method = method.toString().toLowerCase();
+    let method = (req.body.method || req.params.provider) + ''.toLowerCase();
 
     if (!method) {
         return res.status(400).json({
@@ -236,15 +228,18 @@ export function authenticate(req, res, next) {
         });
     }
 
-    if (!Object.keys(req.app.get('config').api.authentication.providers).includes(method)) {
+    const provider = req.app.get('config').api.authentication.providers.find((obj) => obj.id === method);
+
+    if (!provider) {
         return res.status(400).json({
             status: 400,
             error: 'Invalid authentication method.',
         });
     }
 
-    return passport.authenticate(method, {session: false}, (err, userDetails, info, status) => {
+    return passport.authenticate(provider.id, Object.assign({session: false}, {scope: provider.scope || null}), (err, userDetails, info, status) => {
         if (err) {
+            req.app.get('logger').error(err);
             return res.status(400).json({
                 status: 400,
                 error: 'Invalid authentication method.',
@@ -290,22 +285,14 @@ export function onAuth(req, res, data, redirect) {
  * @param  {Express} app
  */
 export function getAuthList(req, res) {
-    const providers = config.api.authentication.providers;
-    const authlist = [];
-
-    for (let provider in providers) {
-        if (providers.hasOwnProperty(provider)) {
-            if (!providers[provider].enabled) {
-                continue;
-            }
-
-            authlist.push({
-                provider,
-                name: providers[provider].name,
-                authUrl: `${config.api.domain}${[80, 443].includes(config.api.post) ? '' : `:${config.api.port}`}/api/auth/provider/${providers[provider].id}`,
-            });
-        }
-    };
+    const providers = config.api.authentication.providers.filter((provider) => provider.enabled);
+    const authlist = providers.map((provider) => {
+        return {
+            id: provider.id,
+            name: provider.name,
+            authUrl: `${config.api.domain}${[80, 443].includes(config.api.post) ? '' : `:${config.api.port}`}/api/auth/provider/${provider.id}`,
+        };
+    });
 
     res.json({
         status: 200,

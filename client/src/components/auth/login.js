@@ -16,7 +16,6 @@ class AuthLogin extends React.Component {
         super(props);
 
         this.state = {
-            strategies: null,
             email: '',
             password: '',
             error: '',
@@ -75,12 +74,12 @@ class AuthLogin extends React.Component {
             <Card className="card-small">
                 <CardHeader>Let's do this!</CardHeader>
                 {
-                    this.props.strategies &&
+                    this.props.strategies.length > 0 &&
                     <CardBody className="text-center">
                         {this.showStatus()}
                         {
                             // if local authentication strategy is enabled
-                            this.props.strategies.find((auth) => auth.provider === 'local') &&
+                            this.props.strategies.find((auth) => auth.id === 'local') &&
                             <Form>
                                 <Notification />
                                 <FormGroup>
@@ -119,12 +118,12 @@ class AuthLogin extends React.Component {
                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, laboriosam!</p>
                         {
                             this.props.strategies.map((strat) => {
-                                if (strat.provider === 'local') {
+                                if (strat.id === 'local') {
                                     return null;
                                 }
 
-                                return <a key={strat.provider} className={`btn btn-block btn-primary btn-brand-${strat.provider}`} href={strat.authUrl}>
-                                    <FontAwesomeIcon icon={['fab', strat.provider]} /> Login with {strat.name}
+                                return <a key={strat.id} className={`btn btn-block btn-primary btn-brand-${strat.id}`} href={strat.authUrl}>
+                                    <FontAwesomeIcon icon={['fab', strat.id]} /> Login with {strat.name}
                                 </a>;
                             })
                         }
@@ -143,7 +142,7 @@ function mapStateToProps(state) {
     return {
         authToken: state.account.authToken,
         loggedIn: state.account.loggedIn,
-        strategies: state.auth.strategies,
+        strategies: state.auth.strategies || [],
     };
 }
 

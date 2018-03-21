@@ -40,12 +40,12 @@ class AuthRegister extends React.Component {
             <Card className="card-small">
                 <CardHeader>Welcome to the party!</CardHeader>
                 {
-                    this.props.strategies &&
+                    this.props.strategies.length > 0 &&
                     <CardBody className="text-center">
                         <Notification />
                         {
                             // if local authentication strategy is enabled
-                            this.props.strategies.find((auth) => auth.provider === 'local') &&
+                            this.props.strategies.find((auth) => auth.id === 'local') &&
                             <Form>
                                 <FormGroup>
                                     <Input
@@ -99,12 +99,12 @@ class AuthRegister extends React.Component {
                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, laboriosam!</p>
                         {
                             this.props.strategies.map((strat) => {
-                                if (strat.provider === 'local') {
+                                if (strat.id === 'local') {
                                     return null;
                                 }
 
-                                return <a key={strat.provider} className={`btn btn-block btn-primary btn-brand-${strat.provider}`} href={this.state.sending ? '#' : strat.authUrl}>
-                                    <FontAwesomeIcon icon={['fab', strat.provider]} /> Sign up with {strat.name}
+                                return <a key={strat.id} className={`btn btn-block btn-primary btn-brand-${strat.id}`} href={this.state.sending ? '#' : strat.authUrl}>
+                                    <FontAwesomeIcon icon={['fab', strat.id]} /> Sign up with {strat.name}
                                 </a>;
                             })
                         }
@@ -117,7 +117,7 @@ class AuthRegister extends React.Component {
 
 function mapStateToProps(state) {
     return {
-        strategies: state.auth.strategies,
+        strategies: state.auth.strategies || [],
     };
 }
 

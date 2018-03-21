@@ -25,18 +25,23 @@
                 "rounds": 11,
                 "minlen": 8
             },
-            "providers": {
-                "local": {
-                    "enabled": true,
-                    "activationLink": true
-                },
-                "github": {
+            "providers": [
+                {
+                    "id": "passport-strategy-name",
+                    "package": "<passport-strategy-package-name>",
                     "enabled": false,
                     "clientID": "",
                     "clientSecret": "",
-                    "name": "GitHub"
+                    "name": "Template",
+                    "scope": []
+                },
+                {
+                    "id": "local",
+                    "package": "local",
+                    "enabled": true,
+                    "activationLink": true
                 }
-            }
+            ]
         }
     },
     "game": {

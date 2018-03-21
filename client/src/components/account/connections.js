@@ -16,7 +16,7 @@ class AccountConnections extends React.Component {
     }
 
     render() {
-        let authOther = this.props.strategies.filter((strat) => strat.provider !== 'local');
+        let authOther = this.props.strategies.filter((strat) => strat.id !== 'local');
 
         return (
             <Card>
@@ -35,9 +35,9 @@ class AccountConnections extends React.Component {
                             {
                                 authOther && authOther.length > 0 &&
                                 authOther.map((strat) => {
-                                    const isLinked = this.props.user.identities.find((obj) => obj.provider === strat.provider);
+                                    const isLinked = this.props.user.identities.find((obj) => obj.provider === strat.id);
                                     return <tr key={strat.provider}>
-                                        <td width="50"><FontAwesomeIcon icon={['fab', strat.provider]} size="2x" /></td>
+                                        <td width="50"><FontAwesomeIcon icon={['fab', strat.id]} size="2x" /></td>
                                         <td>{strat.name}</td>
                                         <td></td>
                                         <td className="text-right">
@@ -48,7 +48,7 @@ class AccountConnections extends React.Component {
                                                     onClick={() => this.props.unlinkProvider(
                                                         this.props.user._id,
                                                         this.props.authToken,
-                                                        strat.provider
+                                                        strat.id
                                                     )}
                                                     className="btn btn-link btn-sm"
                                                 >

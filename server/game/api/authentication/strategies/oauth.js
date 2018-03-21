@@ -11,7 +11,7 @@ let logger;
  */
 export default function setup(passport, details, loggerObj) {
     logger = loggerObj;
-    const Strategy = require(`passport-${details.id}`).Strategy;
+    const Strategy = require(`passport-${details.package}`).Strategy;
 
     //setup the stategies we want
     passport.use(new Strategy({
