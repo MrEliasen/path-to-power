@@ -294,9 +294,6 @@ export default class CharacterManager {
             character.faction.unlinkCharacter(character);
         }
 
-        // set the object as offline, so NPCs drop the target
-        character.offline = true;
-
         this.characters = this.characters.filter((obj) => obj.user_id !== user_id);
         this.dispatchRemoveFromCharacterList(user_id);
     }
@@ -736,13 +733,16 @@ export default class CharacterManager {
         const cashReward = Math.floor(droppedLoot.cash / droppedLoot.targetedBy.length);
         const expReward = Math.floor(droppedLoot.exp / droppedLoot.targetedBy.length);
         droppedLoot.targetedBy.forEach((char) => {
+            // get the character/npc
+            const character = char.npc_id ? this.Game.npcManager.get(char.id) : this.get(char.user_id);
+
             // give them an equal amount of cash and exp, from the dropped loot
-            char.updateCash(cashReward);
+            character.updateCash(cashReward);
 
             // make sure its a player
             if (char.user_id) {
-                char.updateExp(expReward);
-                this.updateClient(char.user_id);
+                character.updateExp(expReward);
+                this.updateClient(character.user_id);
             }
         });
 

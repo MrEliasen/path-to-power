@@ -103,7 +103,7 @@ function cmdFlee(socket, character, command, params, cmdObject, Game) {
     }
 
     // remove gridlock from the character's target
-    if (character.target) {
+    if (character.currentTarget()) {
         character.releaseTarget();
     }
 

@@ -101,7 +101,7 @@ function cmdGive(socket, character, command, params, cmdObject, Game) {
  * @param  {Game} Game                  The main Game object
  */
 function cmdPunch(socket, character, command, params, cmdObject, Game) {
-    const target = character.target;
+    const target = character.currentTarget();
 
     // check if they have a target
     if (!target) {
@@ -109,7 +109,7 @@ function cmdPunch(socket, character, command, params, cmdObject, Game) {
     }
 
     // check the target is gridlocked by the player
-    if (!target.isTargetedBy(character.user_id)) {
+    if (!target.isTargetedBy(character.id)) {
         return Game.eventToSocket(socket, 'error', 'You do not have a target.');
     }
 
@@ -167,23 +167,23 @@ function cmdPunch(socket, character, command, params, cmdObject, Game) {
  * @param  {Game} Game                  The main Game object
  */
 function cmdRelease(socket, character, command, params, cmdObject, Game) {
+    const currentTarget = character.currentTarget();
+
     // if they do not have a target, simply ignore the command
-    if (!character.target) {
+    if (!currentTarget) {
         return Game.eventToSocket(socket, 'info', 'You do not have a target.');
     }
 
-    const target = {
-        user_id: character.target.user_id,
-        name: character.target.name,
-    };
-
     // release the gridlock from the target
     character.releaseTarget();
-
     // let the client know they removed their target
-    Game.eventToSocket(socket, 'info', `You no longer have ${target.name} as your target.`);
-    // get the target know they are no longer aimed at
-    Game.eventToUser(target.user_id, 'info', `${character.name} releases you from their aim.`);
+    Game.eventToSocket(socket, 'info', `You no longer have ${currentTarget.name} as your target.`);
+
+    // if the target is a user, only then do we send a message to the target
+    if (currentTarget.user_id) {
+        // get the target know they are no longer aimed at
+        Game.eventToUser(currentTarget.user_id, 'info', `${character.name} releases you from their aim.`);
+    }
 }
 
 /**
@@ -196,7 +196,7 @@ function cmdRelease(socket, character, command, params, cmdObject, Game) {
  * @param  {Game} Game                  The main Game object
  */
 function cmdShoot(socket, character, command, params, cmdObject, Game) {
-    const target = character.target;
+    const target = character.currentTarget();
 
     // check if they have a target
     if (!target) {
@@ -204,7 +204,7 @@ function cmdShoot(socket, character, command, params, cmdObject, Game) {
     }
 
     // check the target is gridlocked by the player
-    if (!target.isTargetedBy(character.user_id)) {
+    if (!target.isTargetedBy(character.id)) {
         return Game.eventToSocket(socket, 'error', 'You do not have a target.');
     }
 
@@ -282,7 +282,7 @@ function cmdShoot(socket, character, command, params, cmdObject, Game) {
  * @param  {Game} Game                  The main Game object
  */
 function cmdStrike(socket, character, command, params, cmdObject, Game) {
-    const target = character.target;
+    const target = character.currentTarget();
 
     // check if they have a target
     if (!target) {
@@ -290,7 +290,7 @@ function cmdStrike(socket, character, command, params, cmdObject, Game) {
     }
 
     // check the target is gridlocked by the player
-    if (!target.isTargetedBy(character.user_id)) {
+    if (!target.isTargetedBy(character.id)) {
         return Game.eventToSocket(socket, 'error', 'You do not have a target.');
     }
 

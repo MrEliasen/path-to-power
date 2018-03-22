@@ -1,3 +1,5 @@
+import uuid from 'uuid/v4';
+
 /**
  * Character class
  */
@@ -9,6 +11,9 @@ export default class Character {
      */
     constructor(Game, character) {
         this.Game = Game;
+        // generate a unique identifier for this logged in character
+        // Kinda of a "there i fixed it" for targets/targetedBy filters, but it works.. Kappa
+        this.id = uuid();
         // the character objest of the characters who are currently aiming at this character
         this.targetedBy = [];
         // the character object of the current targed character
@@ -124,6 +129,37 @@ export default class Character {
     }
 
     /**
+     * Get the current target, if available
+     * @return {NPC|Character}
+     */
+    currentTarget() {
+        if (!this.target) {
+            return null;
+        }
+
+        let target;
+        if (this.target.npc_id) {
+            target = this.Game.npcManager.get(this.target.id);
+        } else {
+            target = this.Game.characterManager.get(this.target.user_id);
+        }
+
+        // if the target is no longer in the game
+        if (!target) {
+            return null;
+        }
+
+        // make sure the target is at the same location
+        const {map, x, y} = target.location;
+        if (map !== this.location.map || x !== this.location.x || y !== this.location.y) {
+            this.target = null;
+            return null;
+        }
+
+        return target;
+    }
+
+    /**
      * generates the grid "room" ID of the characters currect location
      * @return {String}
      */
@@ -178,7 +214,7 @@ export default class Character {
      * @return {Object|null}
      */
     getTargetDetails() {
-        const target = this.target;
+        const target = this.currentTarget();
 
         if (!target) {
             return null;
@@ -205,9 +241,13 @@ export default class Character {
         // release the gridlock of the current target, if set
         this.releaseTarget();
         // set the new target
-        this.target = target;
+        this.target = {
+            id: target.id,
+            npc_id: target.npc_id,
+            user_id: target.user_id,
+        };
         // and gridlock them
-        this.target.gridLock(this);
+        target.gridLock(this);
         // update the character target on the client
         this.Game.characterManager.updateClient(this.user_id);
     }
@@ -217,21 +257,27 @@ export default class Character {
      * @return {[type]} [description]
      */
     releaseTarget() {
+        const target = this.currentTarget();
+
         // release the gridlock of the current target, if set
-        if (this.target) {
-            this.target.gridRelease(this.user_id);
+        if (target) {
+            target.gridRelease({
+                id: target.id,
+                npc_id: target.npc_id,
+                user_id: target.user_id,
+            });
         }
 
         this.target = null;
     }
 
     /**
-     * Checks if the user is targeted by the user specified
-     * @param  {String}  user_id user id
+     * Checks if the character is targeted by the character specified
+     * @param  {String}  characterId Character unique id (character and NPC)
      * @return {Boolean}
      */
-    isTargetedBy(user_id) {
-        return this.targetedBy.find((user) => user.user_id === user_id) ? true : false;
+    isTargetedBy(characterId) {
+        return this.targetedBy.find((character) => character.id === characterId) ? true : false;
     }
 
     /**
@@ -239,17 +285,24 @@ export default class Character {
      * @param  {Character Obj} character  the character objest of the character gridlocking the character.
      */
     gridLock(character) {
-        if (this.targetedBy.findIndex((obj) => obj.user_id === character.user_id) === -1) {
-            this.targetedBy.push(character);
+        const found = this.targetedBy.findIndex((obj) => obj.id === character.id);
+
+        if (found === -1) {
+            this.targetedBy.push({
+                id: character.id,
+                npc_id: character.npc_id,
+                user_id: character.user_id,
+                name: `${character.name}${character.npc_id ? ' ' + character.type : ''}`,
+            });
         }
     }
 
     /**
      * Removes a player from the gridlock, from when they have used /aim
-     * @param  {String} user_id User ID
+     * @param  {Object} target Plain object with the id, npc_id and user_id of the target
      */
-    gridRelease(user_id) {
-        const characterIndex = this.targetedBy.findIndex((obj) => obj.user_id === user_id);
+    gridRelease(target) {
+        const characterIndex = this.targetedBy.findIndex((obj) => obj.id === target.id);
 
         if (characterIndex === -1) {
             return;
