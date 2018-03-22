@@ -90,6 +90,13 @@ export default class CommandManager {
             return;
         }
 
+        // Check to see if it's an object and if it's empty as well
+        // This bug happens when a player sends an empty string as a command
+        // and the socket manager converting empty strings into an empty object: socket/manager.js:161
+        if (action.payload.constructor === Object && Object.keys(action.payload).length === 0) {
+            return;
+        }
+
         const payload = action.payload.toString().trim();
 
         if (!payload[0]) {
