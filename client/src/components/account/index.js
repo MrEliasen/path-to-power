@@ -44,7 +44,7 @@ class Account extends React.Component {
                             <NavLink exact to="/account/settings" className="list-group-item">Settings</NavLink>
                             <NavLink exact to="/account/security" className="list-group-item">Login and Security</NavLink>
                             {
-                                this.props.strategies.find((obj) => obj.provider !== 'local') &&
+                                this.props.strategies.find((strategy) => strategy.id !== 'local') &&
                                 <NavLink exact to="/account/connections" className="list-group-item">Connections</NavLink>
                             }
                             <NavLink exact to="/account/notifications" className="list-group-item">Notifications</NavLink>
