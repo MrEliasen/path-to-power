@@ -16,7 +16,7 @@ import {moveCharacter} from './character/actions';
 import {socketSend} from '../app/actions';
 
 // Components
-import {Container, Row, Col, Input, Modal, ModalHeader, ModalBody, InputGroup, InputGroupAddon, Button} from 'reactstrap';
+import {Container, Row, Col, Input, Modal, ModalHeader, ModalBody, InputGroup, InputGroupAddon, Button, Form} from 'reactstrap';
 import Chat from './chat';
 import Inventory from './inventory';
 import Character from './character';
@@ -42,6 +42,7 @@ class Game extends React.Component {
         this.sendCommand = this.sendCommand.bind(this);
         this.setCommand = this.setCommand.bind(this);
         this.sendAction = this.sendAction.bind(this);
+        this.onSubmit = this.onSubmit.bind(this);
 
         this.toggleShop = this.toggleShop.bind(this);
     }
@@ -170,6 +171,12 @@ class Game extends React.Component {
         }, 250);
     }
 
+    onSubmit(e) {
+        e.preventDefault();
+        this.sendCommand();
+        document.querySelector('#input-command').focus();
+    }
+
     toggleShop() {
         this.setState({modalShop: !this.state.modalShop});
     }
@@ -226,24 +233,21 @@ class Game extends React.Component {
                         <Chat title="Chat" messages={this.props.chat} lines="10" />
                         <Events />
                         <CharacterCombatMenu />
-                        <InputGroup>
-                            <Input
-                                id="input-command"
-                                onKeyPress={(e) => {
-                                    if (e.key && e.key == 'Enter') {
-                                        this.sendCommand();
-                                    }
-                                }}
-                                onChange={(e) => {
-                                    this.setState({command: e.target.value});
-                                }}
-                                value={this.state.command}
-                                placeholder="Type your commands here, and hit Enter."
-                                type="input"
-                                name="input"
-                            />
-                            <InputGroupAddon addonType="append"><Button color="primary">Send</Button></InputGroupAddon>
-                        </InputGroup>
+                        <Form onSubmit={this.onSubmit}>
+                            <InputGroup>
+                                <Input
+                                    id="input-command"
+                                    onChange={(e) => {
+                                        this.setState({command: e.target.value});
+                                    }}
+                                    value={this.state.command}
+                                    placeholder="Type your commands here, and hit Enter."
+                                    type="input"
+                                    name="input"
+                                />
+                                <InputGroupAddon addonType="append"><Button color="primary">Send</Button></InputGroupAddon>
+                            </InputGroup>
+                        </Form>
                     </Col>
                 </Row>
                 </Container>
