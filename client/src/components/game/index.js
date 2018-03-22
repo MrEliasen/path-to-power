@@ -149,7 +149,9 @@ class Game extends React.Component {
     sendCommand(command = null) {
         command = command || {...this.state}.command;
 
-        if (command.toLowerCase() === '/clear') {
+        if (command.length === 0) {
+            this.props.newEvent('Please enter a command!');
+        } else if (command.toLowerCase() === '/clear') {
             this.props.clearEvents();
         } else if (['/commandlist', '/commands'].includes(command.toLowerCase())) {
             this.props.newEvent({
