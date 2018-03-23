@@ -47,12 +47,12 @@ class AuthLogin extends React.Component {
                     this.props.strategies &&
                     <CardBody className="text-center">
                         {
-                            !this.props.strategies.find((auth) => auth.provider === 'local') &&
+                            !this.props.strategies.find((auth) => auth.id === 'local') &&
                             <p>You cannot reset your password as local authentication is disabled.</p>
                         }
                         {
                             // if local authentication strategy is enabled
-                            this.props.strategies.find((auth) => auth.provider === 'local') &&
+                            this.props.strategies.find((auth) => auth.id === 'local') &&
                             <React.Fragment>
                                 <Notification />
                                 <FormGroup>
