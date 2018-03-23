@@ -25,25 +25,34 @@ class AuthLogin extends React.Component {
     }
 
     componentDidMount() {
-        this.autoLogin();
+        const url = new URL(document.location);
+        const error = url.searchParams.get('error');
+
+        this.setState({
+            error: error || null,
+        });
+
+        this.autoLogin(error ? false : true);
     }
 
-    autoLogin() {
+    autoLogin(doLogin = true) {
         const GETtoken = window.location.search.replace('?token=', '');
         let authToken = localStorage.getItem('authToken');
 
-        if (authToken) {
-            // if we have a GETtoken as well, link the provider (GETtoken) with
-            // the account we are already logged into.
-            if (GETtoken) {
-                this.props.linkProvider(authToken, GETtoken);
+        if (doLogin) {
+            if (authToken) {
+                // if we have a GETtoken as well, link the provider (GETtoken) with
+                // the account we are already logged into.
+                if (GETtoken) {
+                    this.props.linkProvider(authToken, GETtoken);
+                }
+
+                return this.props.authLogin(authToken);
             }
 
-            return this.props.authLogin(authToken);
-        }
-
-        if (GETtoken) {
-            return this.props.authProvider(GETtoken);
+            if (GETtoken) {
+                return this.props.authProvider(GETtoken);
+            }
         }
 
         return this.props.getStrategies();
@@ -116,6 +125,12 @@ class AuthLogin extends React.Component {
                             </Form>
                         }
                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, laboriosam!</p>
+                        {
+                            this.state.error &&
+                            <p className="alert alert-danger">
+                                {this.state.error}
+                            </p>
+                        }
                         {
                             this.props.strategies.map((strat) => {
                                 if (strat.id === 'local') {
