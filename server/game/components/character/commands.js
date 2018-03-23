@@ -409,6 +409,8 @@ async function cmdCharacterSelect(socket, character, command, params, cmdObject,
             },
         });
 
+        // join the game channel to get server-wide events
+        socket.join('game');
         // send the grid details of the current location
         Game.mapManager.updateClient(characterToLoad.user_id);
 

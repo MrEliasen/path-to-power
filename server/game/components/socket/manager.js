@@ -142,6 +142,9 @@ export default class SocketManager extends EventEmitter {
         if (user) {
             this.Game.logger.info('Socket disconnected', user);
 
+            // leave the game channel for server-wide events
+            socket.leave('game');
+
             if (accountLogout) {
                 socket.user = null;
             }

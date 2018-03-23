@@ -153,7 +153,7 @@ export default class CharacterManager {
         }
 
         // update the clients online player list
-        this.Game.socketManager.dispatchToServer({
+        this.Game.socketManager.dispatchToRoom('game', {
             type: CHARACTER_ONLINE_ADD,
             payload: {
                 user_id: character.user_id,
@@ -174,7 +174,7 @@ export default class CharacterManager {
      */
     dispatchRemoveFromCharacterList(user_id) {
         // update the clients online player list
-        this.Game.socketManager.dispatchToServer({
+        this.Game.socketManager.dispatchToRoom('game', {
             type: CHARACTER_ONLINE_REMOVE,
             payload: {
                 user_id,

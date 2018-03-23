@@ -107,7 +107,7 @@ class Game {
             case 'newday':
                 // NOTE: if you want to add anything to the "new day" timer, do it here
                 await this.shopManager.resupplyAll();
-                this.socketManager.dispatchToServer(addNews('The sun rises once again, and wave of new drugs flood the streets.'));
+                this.socketManager.dispatchToRoom('game', addNews('The sun rises once again, and wave of new drugs flood the streets.'));
        }
     }
 
@@ -203,7 +203,7 @@ class Game {
      */
     eventToServer(type, message, ignore) {
         this.logger.debug('Server Event', {type, message, ignore});
-        this.socketManager.dispatchToServer(newEvent(type, message, ignore));
+        this.socketManager.dispatchToRoom('game', newEvent(type, message, ignore));
     }
 
     /**

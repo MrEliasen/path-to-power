@@ -40,7 +40,7 @@ function cmdGlobal(socket, character, command, params, cmdObject, Game) {
 
     // check for cooldowns
     checkChatCooldown(character, Game, () => {
-        Game.socketManager.dispatchToServer({
+        Game.socketManager.dispatchToRoom('game', {
             type: COMMAND_CHAT_MESSAGE,
             payload: {
                 user_id: character.user_id,
