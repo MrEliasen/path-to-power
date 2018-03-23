@@ -4,6 +4,7 @@ import {
 } from 'shared/actionTypes';
 
 import React from 'react';
+import {withRouter} from 'react-router-dom';
 import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
 import {CardDeck, Card, CardTitle, CardBody, Button, FormGroup, Input} from 'reactstrap';
@@ -23,6 +24,12 @@ class Character extends React.Component {
 
         this.selectCharacter = this.selectCharacter.bind(this);
         this.createCharacter = this.createCharacter.bind(this);
+    }
+
+    componentWillMount() {
+        if (!this.props.loggedIn) {
+            return this.props.history.push('/auth');
+        }
     }
 
     componentDidMount() {
@@ -116,7 +123,8 @@ function mapStateToProps(state) {
         socket: state.app.socket,
         character: state.character.selected,
         characterList: state.character.list,
+        loggedIn: state.account.loggedIn,
     };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Character);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Character));
