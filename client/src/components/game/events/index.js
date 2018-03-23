@@ -107,8 +107,11 @@ class Events extends React.Component {
 
     renderEvents() {
         let events = [];
-
         this.props.events.forEach((event, index) => {
+            if (event.ignore && event.ignore.includes(this.props.user_id)) {
+                return;
+            }
+
             events.push({
                 type: 'separator',
             });
@@ -165,6 +168,7 @@ class Events extends React.Component {
 
 function mapStateToProps(state) {
     return {
+        user_id: state.account.user._id,
         events: [...state.events],
         maps: {...state.game.maps},
         commandlist: {...state.game.commands},
