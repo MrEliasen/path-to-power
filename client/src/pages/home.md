@@ -1,5 +1,6 @@
 ---
 title: 'Home'
+showInNav: true
 path: ''
 ---
 # Path to Power

@@ -1,5 +1,6 @@
 ---
 title: 'About'
+showInNav: true
 path: 'about'
 ---
 

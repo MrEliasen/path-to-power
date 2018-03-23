@@ -61,6 +61,10 @@ class Header extends React.Component {
                             {
                                 this.props.pages && this.props.pages.length > 0 &&
                                 this.props.pages.map((page, index) => {
+                                    if (!page.meta.showInNav) {
+                                        return null;
+                                    }
+
                                     return <NavLink className="nav-link" key={index} exact to={'/' + page.meta.path}>{page.meta.title}</NavLink>;
                                 })
                             }

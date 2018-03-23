@@ -1,5 +1,6 @@
 ---
 title: 'Contact us'
+showInNav: true
 path: 'contact'
 ---
 
