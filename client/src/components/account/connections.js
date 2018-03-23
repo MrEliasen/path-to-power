@@ -36,7 +36,7 @@ class AccountConnections extends React.Component {
                                 authOther && authOther.length > 0 &&
                                 authOther.map((strat) => {
                                     const isLinked = this.props.user.identities.find((obj) => obj.provider === strat.id);
-                                    return <tr key={strat.provider}>
+                                    return <tr key={strat.id}>
                                         <td width="50"><FontAwesomeIcon icon={['fab', strat.id]} size="2x" /></td>
                                         <td>{strat.name}</td>
                                         <td></td>
