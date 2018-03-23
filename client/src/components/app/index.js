@@ -43,25 +43,6 @@ class App extends React.Component {
         }
     }
 
-    onDispatch(data) {
-        console.log(data);
-
-        // if the dispatch has an ignore tag, and the user is defined within this tag, ignore the dispatch
-        if (data.payload && data.payload.ignore) {
-            if (this.props.character && data.payload.ignore.includes(this.props.character.user_id)) {
-                return;
-            }
-        }
-
-        // dispatch the action to redux store.
-        this.props.dispatchServerAction(data);
-
-        // if the request is a route change, do so here (temp. fix until we implement redux-router)
-        if (data.payload.routeTo) {
-            this.props.history.push(data.payload.routeTo);
-        }
-    }
-
     parsePageMeta(str) {
         if (str.slice(0, 3) !== '---') return;
 
