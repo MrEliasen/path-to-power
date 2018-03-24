@@ -55,7 +55,11 @@ class MapMenu extends React.Component {
                         {
                             this.props.map.items.map((item, index) => {
                                 if (item) {
-                                    const itemObj = this.props.itemlist[item.id];
+                                    const itemObj = this.props.itemList[item.id];
+
+                                    if (!itemObj) {
+                                        return null;
+                                    }
 
                                     return <React.Fragment key={index}>
                                         {
@@ -169,6 +173,7 @@ function mapStateToProps(state) {
         map: {...state.map},
         maps: {...state.game.maps},
         character: state.character.selected,
+        itemList: state.game.items || {},
     };
 }
 
