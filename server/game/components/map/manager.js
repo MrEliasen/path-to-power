@@ -107,6 +107,11 @@ export default class MapManager {
         this.Game.socketManager.dispatchToUser(user_id, {
             type: MAP_GRID_DETAILS,
             payload: {
+                location: {
+                    map: character.location.map,
+                    x: character.location.x,
+                    y: character.location.y,
+                },
                 description: this.generateDescription(),
                 players: this.Game.characterManager.getLocationList(...location, character.user_id, true),
                 npcs: this.Game.npcManager.getLocationList(...location, true),

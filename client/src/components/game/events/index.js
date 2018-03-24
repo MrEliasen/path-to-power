@@ -45,8 +45,7 @@ class Events extends React.Component {
             </React.Fragment>
         );
 
-
-        if (event.structure.commands) {
+        if (event.structure.commands && Object.keys(event.structure.commands).length) {
             lines.push(
                 <React.Fragment>
                     <strong>Commands</strong>
@@ -62,7 +61,7 @@ class Events extends React.Component {
             });
         }
 
-        if (event.structure.shops) {
+        if (event.structure.shops && event.structure.shops.length) {
             lines.push(
                 <React.Fragment>
                     <strong>Shops</strong>
@@ -153,6 +152,61 @@ class Events extends React.Component {
                         });
                     });
                     break;
+                case 'grid-details':
+                    events.push({
+                        message: <strong>Location:</strong>,
+                    });
+                    events.push({
+                        message: `N${event.location.y} E${event.location.x}`,
+                    });
+
+                    if (event.players.length) {
+                        let playerlist = [];
+                        events.push({
+                            message: <strong>Players:</strong>,
+                        });
+
+                        event.players.forEach((player) => {
+                            playerlist.push(player.name);
+                        });
+
+                        events.push({
+                            message: playerlist.join(', '),
+                        });
+                    }
+
+                    if (event.npcs.length) {
+                        let npclist = [];
+                        events.push({
+                            message: <strong>NPCs:</strong>,
+                        });
+
+                        event.npcs.forEach((npc) => {
+                            npclist.push(`${npc.name} the ${npc.type}`);
+                        });
+
+                        events.push({
+                            message: npclist.join(', '),
+                        });
+                    }
+
+                    if (event.items.length) {
+                        let items = [];
+                        events.push({
+                            message: <strong>Items:</strong>,
+                        });
+
+                        event.items.forEach((item) => {
+                            const itemObj = this.props.itemList[item.id];
+                            items.push(`${(itemObj.stats.stackable ? `(${item.durability}) ` : '')}${itemObj.name}`);
+                        });
+
+                        events.push({
+                            message: items.join(', '),
+                        });
+                    }
+
+                    break;
                 default:
                     events.push(event);
             }
@@ -171,6 +225,8 @@ function mapStateToProps(state) {
         user_id: state.account.user._id,
         events: [...state.events],
         maps: {...state.game.maps},
+        itemList: {...state.game.items},
+        location: {...state.character.selected.location},
         commandlist: {...state.game.commands},
     };
 }

@@ -17,6 +17,8 @@ import {
     USER_AUTHENTICATE_SUCCESS,
     USER_LOGOUT,
     CHARACTER_LOGOUT,
+    MAP_GRID_DETAILS,
+    GAME_EVENT,
 } from 'shared/actionTypes';
 import {
     SOCKET_SEND,
@@ -36,6 +38,9 @@ import {
     USER_DETAILS_GET,
     USER_DETAILS_UPDATE,
 } from './components/account/types';
+import {
+    GRID_DETAILS,
+} from './components/game/events/types';
 
 // misc
 import config from './config';
@@ -127,9 +132,34 @@ function* internalListener(socket) {
     }
 }
 
+function gridDetails(action) {
+    const {players, npcs, items, location} = action.payload;
+
+    return {
+        type: GAME_EVENT,
+        payload: {
+            type: 'grid-details',
+            players,
+            npcs,
+            items,
+            location,
+        },
+    };
+}
+
 function* externalListener(channel) {
     while (true) {
         let action = yield take(channel);
+
+        if (action.type === MAP_GRID_DETAILS) {
+            const {players, npcs, items} = action.payload;
+
+            // if the grid has any items, players or NPCS, show them once in the events.
+            if ((players && players.length) || (npcs && npcs.length) || (items && items.length)) {
+                yield put(gridDetails(action));
+            }
+        }
+
         yield put(action);
     }
 }
