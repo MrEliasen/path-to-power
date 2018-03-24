@@ -413,6 +413,20 @@ export default class CommandManager {
                             }
                             break;
 
+                        case 'slot':
+                            // make sure the target inventory slot is not another equipment slot
+                            if (!['body', 'ranged', 'melee', 'ammo'].includes(msgParam)) {
+                                // make sure the target inventory slot is within the inventory size range
+                                const inventoryNumber = parseInt(msgParam.replace('inv-', ''), 10);
+
+                                if (isNaN(inventoryNumber) || inventoryNumber < 0 || inventoryNumber >= this.stats.inventorySize) {
+                                    return `The ${param.name} is not a valid inventory slot.`;
+                                }
+                            }
+
+                            value = msgParam;
+                            break;
+
                         case 'shop':
                             if (!character) {
                                 return 'Unable to perform command. It requires you to be logged into a character.';

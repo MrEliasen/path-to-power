@@ -7,6 +7,7 @@ import {
     CHARACTER_UPDATE,
     CHARACTER_EQUIP_ITEM,
     CHARACTER_UNEQUIP_ITEM,
+    CHARACTER_MOVE_ITEM,
     CHARACTER_LEFT_GRID,
     CHARACTER_MOVE,
     CHARACTERS_GET_LIST,
@@ -57,9 +58,11 @@ export default class CharacterManager {
     onDispatch(socket, action) {
         switch (action.type) {
             case CHARACTER_UNEQUIP_ITEM:
-                return this.onUnEquip(socket, action);
+                return this.onItemUnEquip(socket, action);
             case CHARACTER_EQUIP_ITEM:
-                return this.onEquip(socket, action);
+                return this.onItemEquip(socket, action);
+            case CHARACTER_MOVE_ITEM:
+                return this.onItemMove(socket, action);
             case CHARACTER_MOVE:
                 return this.move(socket, action);
             case CHARACTERS_GET_LIST:
@@ -74,10 +77,10 @@ export default class CharacterManager {
      * @param  {Socket.io Socket} socket The socket the action was dispatched from
      * @param  {Object}           action Redux action object
      */
-    onUnEquip(socket, action) {
+    onItemUnEquip(socket, action) {
         try {
             const character = this.get(socket.user.user_id);
-            character.unEquip(action.payload);
+            character.unEquip(action.payload.inventorySlot, action.payload.targetSlot);
         } catch (err) {
             this.Game.onError(err, socket);
         }
@@ -88,10 +91,24 @@ export default class CharacterManager {
      * @param  {Socket.io Socket} socket The socket the action was dispatched from
      * @param  {Object}           action Redux action object
      */
-    onEquip(socket, action) {
+    onItemEquip(socket, action) {
         try {
             const character = this.get(socket.user.user_id);
-            character.equip(action.payload);
+            character.equip(action.payload.inventorySlot, action.payload.targetSlot);
+        } catch (err) {
+            this.Game.onError(err, socket);
+        }
+    }
+
+    /**
+     * Handles moving inventory item requests from the client.
+     * @param  {Socket.io Socket} socket The socket the action was dispatched from
+     * @param  {Object}           action Redux action object
+     */
+    onItemMove(socket, action) {
+        try {
+            const character = this.get(socket.user.user_id);
+            character.moveItem(action.payload.inventorySlot, action.payload.targetSlot);
         } catch (err) {
             this.Game.onError(err, socket);
         }
@@ -320,7 +337,7 @@ export default class CharacterManager {
         if (items) {
             newCharacter.setInventory(items);
             items.map((item, index) => {
-                if (item.equipped_slot) {
+                if (item.inventorySlot) {
                     newCharacter.equip(index);
                 }
             });

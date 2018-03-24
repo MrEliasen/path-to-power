@@ -91,11 +91,11 @@ export default class NPCManager {
         if (items && items.length) {
             newNPC.setInventory(items);
 
-            items.map((item, index) => {
-                if (item.equipped_slot) {
+            /*items.map((item, index) => {
+                if (item.inventorySlot) {
                     newNPC.equip(index);
                 }
-            });
+            });*/
         }
 
         // add the NPC to the managed list of npcs
@@ -161,11 +161,11 @@ export default class NPCManager {
         if (items && items.length) {
             NPC.setInventory(items);
 
-            items.map((item, index) => {
+            /*items.map((item, index) => {
                 if (item.equipped_slot) {
                     NPC.equip(index);
                 }
-            });
+            });*/
         }
 
         // dispatch join event to grid
@@ -425,7 +425,7 @@ export default class NPCManager {
         }
 
         // add NPC equipment, if anything
-        const equipped = npcObject.inventory.filter((obj) => obj.equipped_slot);
+        const equipped = npcObject.inventory.filter((obj) => ['ranged', 'melee', 'ammo', 'body'].includes(obj.inventorySlot));
         if (equipped.length) {
             message.push('Equipment:');
             message = message.concat(equipped.map((obj) => {

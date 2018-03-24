@@ -449,39 +449,68 @@ export default class Character {
      * @return {Promise}
      */
     getEquipped(slot = null) {
-        // if no slot if specified, return all equipped items
-        if (!slot) {
-            return this.inventory.filter((obj) => obj.equipped_slot);
-        }
+        return this.inventory.find((obj) => obj.inventorySlot === slot) || null;
+    }
 
-        return this.inventory.find((obj) => obj.equipped_slot === slot);
+    /**
+     * Moves an item from one inventory slot to another
+     * @param  {String} slotId      The equipped slot to move
+     * @param  {String} targetSlot  The slot to move the item to
+     */
+    moveItem(slotId, targetSlot) {
+        return this.unEquip(slotId, targetSlot);
     }
 
     /**
      * Unequips slotted item, and adds it to the inventory
-     * @param  {String} slot  The equipped slot to unequip
+     * @param  {String} slotId      The equipped slot to unequip
+     * @param  {String} targetSlot  The slot to move the item to
      */
-    async unEquip(slot) {
-        if (!slot) {
+    unEquip(slotId, targetSlot) {
+        if (!slotId || !targetSlot) {
             return false;
         }
 
-        const item = this.getEquipped(slot);
-
-        if (!item) {
-            return;
+        // make sure the target inventory slot is not another equipment slot
+        if (['body', 'ranged', 'melee', 'ammo'].includes(targetSlot)) {
+            return false;
         }
 
-        item.equipped_slot = null;
+        // make sure the target inventory slot is within the inventory size range
+        const inventoryNumber = parseInt(targetSlot.replace('inv-', ''), 10);
+
+        if (isNaN(inventoryNumber) || inventoryNumber < 0 || inventoryNumber >= this.stats.inventorySize) {
+            return false;
+        }
+
+        const item = this.getEquipped(slotId);
+
+        if (!item) {
+            return false;
+        }
+
+        const targetSlotItem = this.inventory.find((obj) => obj.inventorySlot === targetSlot);
+
+        // if there is already an item at the target slot, ignore the action
+        if (targetSlotItem) {
+            return false;
+        }
+
+        item.inventorySlot = targetSlot;
         this.Game.characterManager.updateClient(this.user_id);
     }
 
     /**
      * Equips selected item from inventory, moving the other item (if any) to the inventory.
-     * @param  {Number} inventoryIndex The inventory array index of the item to equip
+     * @param  {String} slotId      The inventory slotId containing the items to equip
+     * @param  {String} targetSlot  The slot to equip the item into
      */
-    equip(inventoryIndex) {
-        const item = this.inventory[inventoryIndex];
+    equip(slotId, targetSlot) {
+        if (!slotId || !targetSlot) {
+            return false;
+        }
+
+        const item = this.inventory.find((obj) => obj.inventorySlot === slotId);
 
         if (!item) {
             return false;
@@ -515,14 +544,19 @@ export default class Character {
                 return false;
         }
 
+        // check if the target slot matches the slot the item can be equipped in
+        if (targetSlot !== slot) {
+            return false;
+        }
+
         let equippedItem = this.getEquipped(slot);
 
         if (equippedItem) {
-            delete equippedItem.equipped_slot;
+            equippedItem.inventorySlot = slotId;
         }
 
         // equip the item
-        item.equipped_slot = slot;
+        item.inventorySlot = slot;
         this.Game.characterManager.updateClient(this.user_id);
     }
 
@@ -651,6 +685,20 @@ export default class Character {
      * @param  {Number} amount       The number of a given item to give to the player (non-stackable as well)
      */
     giveItem(itemObj, amount = null) {
+        let gotSpace = false;
+        for (let i = 0; i < this.stats.inventorySize; i++) {
+            const found = this.inventory.find((obj) => {
+                let f = obj.inventorySlot === `inv-${i}`;
+                return f;
+            });
+
+            if (!found) {
+                itemObj.inventorySlot = `inv-${i}`;
+                gotSpace = true;
+                break;
+            }
+        }
+
         // check if item is stackable, and if so, see if we have that item in the inventory already
         if (itemObj.stats.stackable) {
             amount = amount || itemObj.stats.durability;
@@ -660,11 +708,19 @@ export default class Character {
             if (inventoryItem) {
                 inventoryItem.addDurability(amount);
             } else {
+                if (!gotSpace) {
+                    return;
+                }
+
                 // set the amount of the item to the correct amount, before adding to the inventory
                 itemObj.setDurability(amount);
                 this.inventory.push(itemObj);
             }
         } else {
+            if (!gotSpace) {
+                return;
+            }
+
             this.inventory.push(itemObj);
 
             // if we just added one, kill it here.

@@ -1,29 +1,20 @@
 import React from 'react';
 import {connect} from 'react-redux';
-// import {bindActionCreators} from 'redux';
 import {DropTarget as dropTarget} from 'react-dnd';
 import Item from '../item';
 
 class ItemSlot extends React.Component {
     constructor(props) {
         super(props);
-
-        // Find an item to show on this itemslot
-        this.item = this.props.inventory.find((item, index) => {
-            // Since the items in the inventory currently don't have a slotId property,
-            // we just use the index of the item within the inventory and fake the slotId
-            if (! item.slotId) {
-                item.slotId = 'inv-' + index;
-            }
-            return item.slotId == this.props.slotId;
-        });
     }
 
     render() {
+        const item = this.props.inventory.find((item) => item.inventorySlot == this.props.inventorySlot);
         const {isOver, canDrop, connectDropTarget} = this.props;
+
         return connectDropTarget(
             <div className="item-slot">
-                {this.item && <Item item={this.item} />}
+                {item && <Item item={item} />}
                 {isOver && canDrop && <div className="layer green" />}
                 {!isOver && canDrop && <div className="layer yellow" />}
                 {isOver && !canDrop && <div className="layer red" />}
@@ -36,7 +27,7 @@ class ItemSlot extends React.Component {
 const itemSlotTarget = {
     canDrop(props, monitor) {
         // const draggedItem = monitor.getItem();
-        return ! this.item;
+        return !this.item;
     },
 
     hover(props, monitor, component) {
@@ -55,7 +46,7 @@ const itemSlotTarget = {
         // const item = monitor.getItem();
 
         // Returns data for monitor.getDropResult() for the source's endDrag() method
-        return {slotId: props.slotId, dropped: true};
+        return {inventorySlot: props.inventorySlot, dropped: true};
     },
 };
 

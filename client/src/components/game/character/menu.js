@@ -67,7 +67,10 @@ class CharacterMenu extends React.Component {
                         <Row>
                             <Col xs="6">
                                 <div id="equipment">
-                                    <ItemSlot slotId="head" />
+                                    <ItemSlot inventorySlot="ranged" />
+                                    <ItemSlot inventorySlot="melee" />
+                                    <ItemSlot inventorySlot="armor" />
+                                    <ItemSlot inventorySlot="ammo" />
                                 </div>
                             </Col>
                             <Col xs="6">

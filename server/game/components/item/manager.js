@@ -96,7 +96,7 @@ export default class ItemManager {
             }
         } else {
             // reset their dropped status, in case its due to dying the items are dropped.
-            itemObject.equipped_slot = null;
+            itemObject.inventorySlot = null;
         }
 
         // add item to the dropped items array, if the item was not stacked or if its
@@ -279,7 +279,7 @@ export default class ItemManager {
 
         const inventory = NPC.inventory.map((item) => {
             let newItem = this.add(item.item_id, item.modifiers, null);
-            newItem.equipped_slot = item.equipped_slot;
+            newItem.inventorySlot = item.inventorySlot;
 
             return newItem;
         });
@@ -293,11 +293,11 @@ export default class ItemManager {
      * @return {Promise}
      */
     async loadCharacterInventory(character) {
-        const items = await ItemModel.findAsync({user_id: character.user_id}, {_id: 1, item_id: 1, modifiers: 1, equipped_slot: 1});
+        const items = await ItemModel.findAsync({user_id: character.user_id}, {_id: 1, item_id: 1, modifiers: 1, inventorySlot: 1});
 
         return items.map((item) => {
             let newItem = this.add(item.item_id, item.modifiers, item._id);
-            newItem.equipped_slot = item.equipped_slot;
+            newItem.inventorySlot = item.inventorySlot;
 
             return newItem;
         });
@@ -355,7 +355,7 @@ export default class ItemManager {
             user_id,
             item_id: item.id,
             modifiers: item.getModifiers(),
-            equipped_slot: item.equipped_slot,
+            inventorySlot: item.inventorySlot,
         });
 
         await newItem.saveAsync();
@@ -384,7 +384,7 @@ export default class ItemManager {
         }
 
         loadedItem.modifiers = item.getModifiers();
-        loadedItem.equipped_slot = item.equipped_slot;
+        loadedItem.inventorySlot = item.inventorySlot;
 
         await loadedItem.saveAsync();
         return loadedItem;

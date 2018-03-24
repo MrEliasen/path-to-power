@@ -12,22 +12,22 @@
         "skills" : {},
         "inventory": [
             {
-                "equipped_slot": "ranged",
+                "inventorySlot": "ranged",
                 "item_id": "glock17",
                 "modifiers": {}
             },
             {
-                "equipped_slot": "melee",
+                "inventorySlot": "melee",
                 "item_id": "police-baton",
                 "modifiers": {}
             },
             {
-                "equipped_slot": "armor",
+                "inventorySlot": "armor",
                 "item_id": "kevlarvest",
                 "modifiers": {}
             },
             {
-                "equipped_slot": "ammo",
+                "inventorySlot": "ammo",
                 "item_id": "ammobasic",
                 "modifiers": {}
             },
@@ -58,17 +58,17 @@
         "skills" : {},
         "inventory": [
             {
-                "equipped_slot": "ranged",
+                "inventorySlot": "ranged",
                 "item_id": "ak47",
                 "modifiers": {}
             },
             {
-                "equipped_slot": "armor",
+                "inventorySlot": "armor",
                 "item_id": "kevlarvest",
                 "modifiers": {}
             },
             {
-                "equipped_slot": "ammo",
+                "inventorySlot": "ammo",
                 "item_id": "ammohp",
                 "modifiers": {}
             },
@@ -100,12 +100,12 @@
         "skills" : {},
         "inventory": [
             {
-                "equipped_slot": "armor",
+                "inventorySlot": "armor",
                 "item_id": "thickleathercoat",
                 "modifiers": {}
             },
             {
-                "equipped_slot": "melee",
+                "inventorySlot": "melee",
                 "item_id": "switchblade",
                 "modifiers": {}
             }
@@ -133,7 +133,7 @@
         "skills" : {},
         "inventory": [
             {
-                "equipped_slot": "melee",
+                "inventorySlot": "melee",
                 "item_id": "brokenbottle",
                 "modifiers": {}
             },
@@ -166,7 +166,7 @@
         "skills" : {},
         "inventory": [
             {
-                "equipped_slot": "melee",
+                "inventorySlot": "melee",
                 "item_id": "briefcase",
                 "modifiers": {}
             },
@@ -197,7 +197,7 @@
         "skills" : {},
         "inventory": [
             {
-                "equipped_slot": "melee",
+                "inventorySlot": "melee",
                 "item_id": "brassknuckle",
                 "modifiers": {}
             },
@@ -228,7 +228,7 @@
         "skills" : {},
         "inventory": [
             {
-                "equipped_slot": "melee",
+                "inventorySlot": "melee",
                 "item_id": "stapon",
                 "modifiers": {}
             },
@@ -259,22 +259,22 @@
         "skills" : {},
         "inventory": [
             {
-                "equipped_slot": "ranged",
+                "inventorySlot": "ranged",
                 "item_id": "85ss2fs",
                 "modifiers": {}
             },
             {
-                "equipped_slot": "armor",
+                "inventorySlot": "armor",
                 "item_id": "m3armor",
                 "modifiers": {}
             },
             {
-                "equipped_slot": "ammo",
+                "inventorySlot": "ammo",
                 "item_id": "ammobasic",
                 "modifiers": {}
             },
             {
-                "equipped_slot": "ammo",
+                "inventorySlot": "ammo",
                 "item_id": "ammobasic",
                 "modifiers": {}
             },
@@ -305,22 +305,22 @@
         "skills" : {},
         "inventory": [
             {
-                "equipped_slot": "ranged",
+                "inventorySlot": "ranged",
                 "item_id": "m1911",
                 "modifiers": {}
             },
             {
-                "equipped_slot": "armor",
+                "inventorySlot": "armor",
                 "item_id": "kevlarvest",
                 "modifiers": {}
             },
             {
-                "equipped_slot": "ammo",
+                "inventorySlot": "ammo",
                 "item_id": "ammohp",
                 "modifiers": {}
             },
             {
-                "equipped_slot": "ammo",
+                "inventorySlot": "ammo",
                 "item_id": "ammohp",
                 "modifiers": {}
             }

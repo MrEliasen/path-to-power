@@ -15,7 +15,7 @@ const ItemSchema = new mongoose.Schema({
     modifiers: {
         type: {},
     },
-    equipped_slot: {
+    inventorySlot: {
         type: String,
     },
     date_added: String,
