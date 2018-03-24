@@ -2,106 +2,17 @@ import React from 'react';
 import {connect} from 'react-redux';
 import Chat from '../chat';
 
+// event types
+import StructureInfo from './eventtypes/structureinfo';
+import CommandError from './eventtypes/commanderror';
+import SystemEvent from './eventtypes/systemevent';
+import CommandList from './eventtypes/commandlist';
+import Multiline from './eventtypes/multiline';
+import GridDetails from './eventtypes/griddetails';
+
 class Events extends React.Component {
     constructor(props) {
         super(props);
-    }
-
-    generateDescription(command, modOverwrites) {
-        let description = this.props.commandlist[command].description || '';
-        let modifiers = this.props.commandlist[command].modifiers || {};
-        Object.assign(modifiers, modOverwrites);
-
-        switch (command) {
-            case '/travel':
-                const destinations = Object.keys(modifiers.destinations).map((mapId) => {
-                    return `${this.props.maps[mapId].name} (${modifiers.destinations[mapId].cost})`;
-                });
-
-                description = `${description} Available destinations: ${destinations.join(', ')}`;
-                break;
-
-            default:
-                Object.keys(modifiers).map((key) => {
-                    const exp = new RegExp(`({${key}})+`, 'gi');
-                    description = description.replace(exp, modifiers[key]);
-                });
-                break;
-        }
-
-        return description;
-    }
-
-    buildingInfo(event) {
-        const lines = [];
-
-        if (! event.structure) {
-            return lines;
-        }
-
-        lines.push(
-            <React.Fragment>
-                The following is available in the <span style={{color: event.structure.colour}}>[{ event.structure.name }]</span>:
-            </React.Fragment>
-        );
-
-        if (event.structure.commands && Object.keys(event.structure.commands).length) {
-            lines.push(
-                <React.Fragment>
-                    <strong>Commands</strong>
-                </React.Fragment>
-            );
-
-            Object.keys(event.structure.commands).forEach((command) => {
-                lines.push(
-                    <React.Fragment>
-                        <i>{command}</i>: {this.generateDescription(command, event.structure.commands[command])}
-                    </React.Fragment>
-                );
-            });
-        }
-
-        if (event.structure.shops && event.structure.shops.length) {
-            lines.push(
-                <React.Fragment>
-                    <strong>Shops</strong>
-                </React.Fragment>
-            );
-
-            event.structure.shops.forEach((shop) => {
-                lines.push(
-                    <React.Fragment>
-                        /shop <i>{shop.name}</i>: {shop.description}
-                    </React.Fragment>
-                );
-            });
-        }
-
-        return lines;
-    }
-
-    generateCommandList() {
-        let lines = [];
-
-        Object.keys(this.props.commandlist).sort().map((command) => {
-            let commandObj = this.props.commandlist[command];
-
-            lines.push(
-                <React.Fragment>
-                    <strong>{command}</strong>:&nbsp;{commandObj.description}&nbsp;
-                </React.Fragment>
-            );
-
-            if (commandObj.aliases && commandObj.aliases.length > 0) {
-                lines.push(
-                    <React.Fragment>
-                        <strong>(aliases: {commandObj.aliases.join(', ')})</strong>
-                    </React.Fragment>
-                );
-            }
-        });
-
-        return lines;
     }
 
     renderEvents() {
@@ -117,95 +28,27 @@ class Events extends React.Component {
 
             switch (event.type) {
                 case 'structure-info':
-                    this.buildingInfo(event).forEach((line) => {
-                        events.push({
-                            ...event,
-                            message: line,
-                        });
-                    });
+                    events = events.concat(new StructureInfo(event, this.props.commandlist, this.props.maps).parse());
                     break;
+
                 case 'command-error':
-                    events.push({
-                        ...event,
-                        message: <span className="alert-danger">{event.message}</span>,
-                    });
+                    events = events.concat(new CommandError(event).parse());
                     break;
+
                 case 'system':
-                    events.push({
-                        ...event,
-                        message: <span className="alert-warning">{event.message}</span>,
-                    });
+                    events = events.concat(new SystemEvent(event).parse());
                     break;
+
                 case 'commandlist':
-                    this.generateCommandList().forEach((line) => {
-                        events.push({
-                            ...event,
-                            message: line,
-                        });
-                    });
+                    events = events.concat(new CommandList(event, this.props.commandlist).parse());
                     break;
+
                 case 'multiline':
-                    [...event.message].forEach((line) => {
-                        events.push({
-                            ...event,
-                            message: line,
-                        });
-                    });
+                    events = events.concat(new Multiline(event).parse());
                     break;
+
                 case 'grid-details':
-                    events.push({
-                        message: <strong>Location:</strong>,
-                    });
-                    events.push({
-                        message: `N${event.location.y} E${event.location.x}`,
-                    });
-
-                    if (event.players.length) {
-                        let playerlist = [];
-                        events.push({
-                            message: <strong>Players:</strong>,
-                        });
-
-                        event.players.forEach((player) => {
-                            playerlist.push(player.name);
-                        });
-
-                        events.push({
-                            message: playerlist.join(', '),
-                        });
-                    }
-
-                    if (event.npcs.length) {
-                        let npclist = [];
-                        events.push({
-                            message: <strong>NPCs:</strong>,
-                        });
-
-                        event.npcs.forEach((npc) => {
-                            npclist.push(`${npc.name} the ${npc.type}`);
-                        });
-
-                        events.push({
-                            message: npclist.join(', '),
-                        });
-                    }
-
-                    if (event.items.length) {
-                        let items = [];
-                        events.push({
-                            message: <strong>Items:</strong>,
-                        });
-
-                        event.items.forEach((item) => {
-                            const itemObj = this.props.itemList[item.id];
-                            items.push(`${(itemObj.stats.stackable ? `(${item.durability}) ` : '')}${itemObj.name}`);
-                        });
-
-                        events.push({
-                            message: items.join(', '),
-                        });
-                    }
-
+                    events = events.concat(new GridDetails(event, this.props.itemList).parse());
                     break;
                 default:
                     events.push(event);
