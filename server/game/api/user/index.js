@@ -62,7 +62,7 @@ export function updateUser(req, res) {
                     });
                 }
 
-                const token = crypto.createHmac('sha256', req.app.get('config').api.signingKey);
+                const token = crypto.createHmac('sha256', process.env.SIGNING_SECRET);
                 token.update(uuid());
 
                 user.newEmail = req.body.email;
@@ -263,7 +263,7 @@ export function createUser(req, res) {
 
         if (requireActivation) {
             // create activation key
-            token = crypto.createHmac('sha256', req.app.get('config').api.signingKey);
+            token = crypto.createHmac('sha256', process.env.SIGNING_SECRET);
             token.update(uuid());
         }
 

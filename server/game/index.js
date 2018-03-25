@@ -1,6 +1,7 @@
 // Required for compiling
 require('babel-core/register');
 require('babel-polyfill');
+require('dotenv').config();
 
 // native modules
 import fs from 'fs';

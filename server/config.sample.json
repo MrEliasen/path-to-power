@@ -12,13 +12,10 @@
     "mailserver": {
         "host": "smtp.mailserver.tld",
         "port": 587,
-        "username": "",
-        "password": "",
-        "sender": ""
+        "sender": "Name <email@address>"
     },
     "api": {
         "domain": "http://localhost",
-        "signingKey": "",
         "port": 8087,
         "authentication": {
             "password": {
@@ -31,7 +28,6 @@
                     "package": "<passport-strategy-package-name>",
                     "enabled": false,
                     "clientID": "",
-                    "clientSecret": "",
                     "name": "Template",
                     "scope": []
                 },

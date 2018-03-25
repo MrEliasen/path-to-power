@@ -197,7 +197,7 @@ export function passwordReset(req, res) {
             }
 
             // generate the password reset token
-            let token = crypto.createHmac('sha256', req.app.get('config').api.signingKey);
+            let token = crypto.createHmac('sha256', process.env.SIGNING_SECRET);
             token.update(uuid());
 
             // create the password reset object, store in the user model.

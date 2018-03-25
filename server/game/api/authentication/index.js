@@ -167,7 +167,7 @@ function linkNewUser(req, res, identity) {
 function authenticateProvider(req, res) {
     const providerToken = req.body.providerToken;
 
-    jwt.verify(providerToken, req.app.get('config').api.signingKey, (err, decoded) => {
+    jwt.verify(providerToken, process.env.SIGNING_SECRET, (err, decoded) => {
         if (err) {
             return output(req, res, {
                 status: 401,
@@ -285,7 +285,7 @@ export function onAuth(req, res, data, redirect) {
         _id: data.user._id || null,
         session_token: data.user.session_token || null,
         identity: data.identity._id || null,
-    }, req.app.get('config').api.signingKey, {expiresIn: '1h'});
+    }, process.env.SIGNING_SECRET, {expiresIn: '1h'});
 
     if (redirect) {
         return res.redirect(`${req.app.get('config').clientUrl}/auth?token=${token}`);
@@ -334,7 +334,7 @@ export function isAuthenticated(req, res, next) {
         });
     }
 
-    jwt.verify(token.replace('Bearer ', ''), req.app.get('config').api.signingKey, (err, decoded) => {
+    jwt.verify(token.replace('Bearer ', ''), process.env.SIGNING_SECRET, (err, decoded) => {
         if (err) {
             return output(req, res, {
                 status: 401,
@@ -389,7 +389,7 @@ export function linkProvider(req, res) {
         });
     }
 
-    jwt.verify(req.body.authToken, req.app.get('config').api.signingKey, (err, authTokenDecoded) => {
+    jwt.verify(req.body.authToken, process.env.SIGNING_SECRET, (err, authTokenDecoded) => {
         if (err) {
             return output(req, res, {
                 status: 400,
@@ -397,7 +397,7 @@ export function linkProvider(req, res) {
             });
         }
 
-        jwt.verify(req.body.provider, req.app.get('config').api.signingKey, (err, decoded) => {
+        jwt.verify(req.body.provider, process.env.SIGNING_SECRET, (err, decoded) => {
             if (err) {
                 return output(req, res, {
                     status: 400,

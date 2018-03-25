@@ -50,7 +50,7 @@ export default class UserManager {
             return;
         }
 
-        jwt.verify(action.payload, this.Game.config.api.signingKey, async (err, decoded) => {
+        jwt.verify(action.payload, process.env.SIGNING_SECRET, async (err, decoded) => {
             if (err) {
                 return this.Game.socketManager.dispatchToSocket(socket, {
                     type: USER_AUTHENTICATE_ERROR,

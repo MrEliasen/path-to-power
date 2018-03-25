@@ -46,8 +46,8 @@ export default function(app, config) {
             host: config.mailserver.host,
             port: config.mailserver.port,
             auth: {
-                user: config.mailserver.username,
-                pass: config.mailserver.password,
+                user: process.env.MAILER_USER,
+                pass: process.env.MAILER_PASSWORD,
             },
         })
     );
