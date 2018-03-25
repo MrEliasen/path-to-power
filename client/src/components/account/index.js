@@ -40,14 +40,14 @@ class Account extends React.Component {
                         <CardHeader>Account</CardHeader>
                         <ListGroup flush>
                             <NavLink exact to="/account" className="list-group-item">Overview</NavLink>
-                            <NavLink exact to="/account/profile" className="list-group-item">Profile</NavLink>
-                            <NavLink exact to="/account/settings" className="list-group-item">Settings</NavLink>
+                            {/* <NavLink exact to="/account/profile" className="list-group-item">Profile</NavLink>
+                            <NavLink exact to="/account/settings" className="list-group-item">Settings</NavLink> */}
                             <NavLink exact to="/account/security" className="list-group-item">Login and Security</NavLink>
                             {
                                 this.props.strategies.find((strategy) => strategy.id !== 'local') &&
                                 <NavLink exact to="/account/connections" className="list-group-item">Connections</NavLink>
                             }
-                            <NavLink exact to="/account/notifications" className="list-group-item">Notifications</NavLink>
+                            {/* <NavLink exact to="/account/notifications" className="list-group-item">Notifications</NavLink> */}
                         </ListGroup>
                     </Card>
                 </Col>
