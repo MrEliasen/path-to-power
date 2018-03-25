@@ -13,7 +13,7 @@ export default class Character {
         this.Game = Game;
         // generate a unique identifier for this logged in character
         // Kinda of a "there i fixed it" for targets/targetedBy filters, but it works.. Kappa
-        this.id = uuid();
+        this.id = uuid(); 
         // the character objest of the characters who are currently aiming at this character
         this.targetedBy = [];
         // the character object of the current targed character

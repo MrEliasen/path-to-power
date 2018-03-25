@@ -27,8 +27,18 @@ class ItemSlot extends React.Component {
 // Contract for the dropTarget
 const itemSlotTarget = {
     canDrop(props, monitor) {
-        // const draggedItem = monitor.getItem();
-        return !this.item;
+        const item = monitor.getItem();
+
+        if (props.inventorySlot.indexOf('inv-') === 0) {
+            return true;
+        }
+
+        // if the type is not armor and the subtype matches the slot name
+        if (props.inventorySlot === `${item.itemType}-${item.itemSubtype}`) {
+            return true;
+        }
+
+        return false;
     },
 
     hover(props, monitor, component) {
