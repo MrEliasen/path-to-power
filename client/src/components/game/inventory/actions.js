@@ -2,9 +2,11 @@ import {
     CHARACTER_EQUIP_ITEM,
     CHARACTER_UNEQUIP_ITEM,
     CHARACTER_MOVE_ITEM,
+    CHARACTER_DROP_ITEM,
 } from 'shared/actionTypes';
 
 import {socketSend} from '../../app/actions';
+import {newCommand} from '../actions';
 
 export function equipItem(inventorySlot, targetSlot) {
     return socketSend({
@@ -34,4 +36,8 @@ export function moveItem(inventorySlot, targetSlot) {
             targetSlot,
         },
     });
+}
+
+export function dropItem(inventorySlot) {
+    return newCommand(`/dropslot ${inventorySlot}`);
 }

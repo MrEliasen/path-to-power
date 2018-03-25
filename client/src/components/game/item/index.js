@@ -5,7 +5,7 @@ import {DragSource as dragSource} from 'react-dnd';
 import ItemTooltip from './tooltip';
 
 // actions
-import {equipItem, unequipItem, moveItem} from '../inventory/actions';
+import {equipItem, unequipItem, moveItem, dropItem} from '../inventory/actions';
 
 class Item extends React.Component {
     constructor(props) {
@@ -81,6 +81,11 @@ const itemSource = {
 
         if (dropResult && dropResult.inventorySlot) {
             // if the item we are moving is equipped, we unequip it
+            if (dropResult.inventorySlot === 'dropGround') {
+                return props.dropItem(item.inventorySlot);
+            }
+
+            // if the item we are moving is equipped, we unequip it
             if (item.inventorySlot.indexOf('inv-') === -1) {
                 return props.unequipItem(item.inventorySlot, dropResult.inventorySlot);
             }
@@ -108,6 +113,7 @@ function mapDispatchToProps(dispatch) {
         equipItem,
         unequipItem,
         moveItem,
+        dropItem,
     }, dispatch);
 }
 

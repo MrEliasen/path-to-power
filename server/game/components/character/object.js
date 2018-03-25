@@ -615,6 +615,22 @@ export default class Character {
     }
 
     /**
+     * Remove an item from the specific inventory slot.
+     * @param  {Mixed}   slotId    The name of the inventory slot
+     * @return {Object}            The item (with amount if stackable) which has been removed from the inventory.
+     */
+    dropSlotItem(slotId) {
+        const itemIndex = this.inventory.findIndex((obj) => obj.inventorySlot === slotId);
+
+        // If the inventory slot is empty, do nothing
+        if (itemIndex === -1) {
+            return null;
+        }
+
+        return this.inventory.splice(itemIndex, 1)[0];
+    }
+
+    /**
      * Remove the first occurance of a given item from the inventory, based on name.
      * @param  {Mixed}   item      The name or inventory index of the item to drop
      * @param  {Number}  amount    The number of a given item to drop (stackable items only)

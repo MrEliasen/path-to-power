@@ -1,6 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import ItemSlot from '../item/slot';
+import DropSlot from './drop';
 
 class Inventory extends React.Component {
     constructor(props) {
@@ -17,6 +18,7 @@ class Inventory extends React.Component {
                         return <ItemSlot key={index} inventorySlot={'inv-' + inventorySlot} />;
                     })
                 }
+                <DropSlot />
             </div>
         );
     }
