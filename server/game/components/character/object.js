@@ -360,8 +360,8 @@ export default class Character {
      * @return {Object}          the damage, -1 if the weapon cannot be fired.
      */
     async fireRangedWeapon() {
-        const damage = this.getWeaponDamage('ranged');
-        const ammo = this.getEquipped('ammo');
+        const damage = this.getWeaponDamage('weapon-ranged');
+        const ammo = this.getEquipped('weapon-ammo');
 
         if (damage === null) {
             return null;
@@ -391,7 +391,7 @@ export default class Character {
      * @return {Boolean}
      */
     hasAmmo() {
-        const equippedAmmo = this.getEquipped('ammo');
+        const equippedAmmo = this.getEquipped('weapon-ammo');
 
         if (!equippedAmmo) {
             return false;
@@ -413,7 +413,7 @@ export default class Character {
             return null;
         }
 
-        const item = this.getEquipped('ammo');
+        const item = this.getEquipped('weapon-ammo');
 
         if (!item) {
             return null;
@@ -436,7 +436,7 @@ export default class Character {
             return reject(new Error(`No item equipped in slot ${slot}`));
         }
 
-        if (slot === 'ranged') {
+        if (slot === 'weapon-ranged') {
             bonusDamage = this.getAmmoDamage();
         }
 
@@ -472,7 +472,7 @@ export default class Character {
         }
 
         // make sure the target inventory slot is not another equipment slot
-        if (['body', 'ranged', 'melee', 'ammo'].includes(targetSlot)) {
+        if (['armour-body', 'weapon-ranged', 'weapon-melee', 'weapon-ammo'].includes(targetSlot)) {
             return false;
         }
 
@@ -520,10 +520,10 @@ export default class Character {
             return false;
         }
 
+        let slot = `${item.type}-${item.subtype}`;
         // NOTE: change this line of code, should you wish to update which items can be equipped
         // Check which slot the item will be equipped into
-        let slot;
-        switch (item.subtype) {
+        /*switch (item.subtype) {
             case 'ranged':
                 slot = 'ranged';
                 break;
@@ -542,7 +542,7 @@ export default class Character {
 
             default:
                 return false;
-        }
+        }*/
 
         // check if the target slot matches the slot the item can be equipped in
         if (targetSlot !== slot) {
@@ -755,7 +755,7 @@ export default class Character {
         let durability = 0;
         let health = this.stats.health;
         let armorRuined = false;
-        const armorItem = this.getEquipped('armor');
+        const armorItem = this.getEquipped('armor-body');
 
         if (!ignoreArmor && armorItem) {
             durability = armorItem.durability;

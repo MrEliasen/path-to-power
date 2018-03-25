@@ -209,7 +209,7 @@ function cmdShoot(socket, character, command, params, cmdObject, Game) {
     }
 
     // check if they have a melee weapon equipped
-    if (!character.getEquipped('ranged')) {
+    if (!character.getEquipped('weapon-ranged')) {
         return Game.eventToSocket(socket, 'error', 'You do not have a ranged weapon equipped.');
     }
 
@@ -220,7 +220,7 @@ function cmdShoot(socket, character, command, params, cmdObject, Game) {
 
     // check if there is a cooldown
     checkAttackCooldown(character, Game, async () => {
-        const weapon = character.getEquipped('ranged').name;
+        const weapon = character.getEquipped('weapon-ranged').name;
         // Discharge the firearm, to consume a bullet, regardless if they hit or not
         const damage = await character.fireRangedWeapon();
 
@@ -295,13 +295,13 @@ function cmdStrike(socket, character, command, params, cmdObject, Game) {
     }
 
     // check if they have a melee weapon equipped
-    if (!character.getEquipped('melee')) {
+    if (!character.getEquipped('weapon-melee')) {
         return Game.eventToSocket(socket, 'error', 'You do not have a melee weapon equipped.');
     }
 
     // check if there is a cooldown
     checkAttackCooldown(character, Game, async () => {
-        const weapon = character.getEquipped('melee').name;
+        const weapon = character.getEquipped('weapon-melee').name;
 
         // check if the attack will hit
         if (!character.attackHit()) {
@@ -314,7 +314,7 @@ function cmdStrike(socket, character, command, params, cmdObject, Game) {
         }
 
         // deal damage to the target
-        const damage = character.getWeaponDamage('melee');
+        const damage = character.getWeaponDamage('weapon-melee');
         const attack = target.dealDamage(damage, true);
 
         // if the target died

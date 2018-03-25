@@ -425,7 +425,7 @@ export default class NPCManager {
         }
 
         // add NPC equipment, if anything
-        const equipped = npcObject.inventory.filter((obj) => ['ranged', 'melee', 'ammo', 'body'].includes(obj.inventorySlot));
+        const equipped = npcObject.inventory.filter((obj) => ['weapon-ranged', 'weapon-melee', 'weapon-ammo', 'armour-body'].includes(obj.inventorySlot));
         if (equipped.length) {
             message.push('Equipment:');
             message = message.concat(equipped.map((obj) => {

@@ -49,7 +49,8 @@ class Item extends React.Component {
                 onMouseMove={this.onMouseMove}
             >
                 {
-                    ! isDragging && this.state.showTooltip && <ItemTooltip item={this.props.item} coords={this.state.mousePosition} />
+                    !isDragging && this.state.showTooltip &&
+                    <ItemTooltip item={this.props.item} coords={this.state.mousePosition} />
                 }
                 <div className="item-layer item-name"><span>{this.props.item.name}</span></div>
                 {
@@ -64,6 +65,8 @@ const itemSource = {
     beginDrag(props) {
         return {
             inventorySlot: props.item.inventorySlot,
+            itemType: props.item.type,
+            itemSubtype: props.item.subtype,
         };
     },
 

@@ -15,6 +15,7 @@ class ItemSlot extends React.Component {
         return connectDropTarget(
             <div className="item-slot">
                 {item && <Item item={item} />}
+                {!item && this.props.title && <span>{this.props.title}</span>}
                 {isOver && canDrop && <div className="layer green" />}
                 {!isOver && canDrop && <div className="layer yellow" />}
                 {isOver && !canDrop && <div className="layer red" />}

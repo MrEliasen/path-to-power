@@ -38,9 +38,6 @@ import {
     USER_DETAILS_GET,
     USER_DETAILS_UPDATE,
 } from './components/account/types';
-import {
-    GRID_DETAILS,
-} from './components/game/events/types';
 
 // misc
 import config from './config';

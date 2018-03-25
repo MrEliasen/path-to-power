@@ -415,11 +415,11 @@ export default class CommandManager {
 
                         case 'slot':
                             // make sure the target inventory slot is not another equipment slot
-                            if (!['body', 'ranged', 'melee', 'ammo'].includes(msgParam)) {
+                            if (!['armour-body', 'weapon-ranged', 'weapon-melee', 'weapon-ammo'].includes(msgParam)) {
                                 // make sure the target inventory slot is within the inventory size range
                                 const inventoryNumber = parseInt(msgParam.replace('inv-', ''), 10);
 
-                                if (isNaN(inventoryNumber) || inventoryNumber < 0 || inventoryNumber >= this.stats.inventorySize) {
+                                if (isNaN(inventoryNumber) || inventoryNumber < 0 || inventoryNumber >= character.stats.inventorySize) {
                                     return `The ${param.name} is not a valid inventory slot.`;
                                 }
                             }

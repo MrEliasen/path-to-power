@@ -336,15 +336,15 @@ export default class NPC extends Character {
             return;
         }
 
-        const ammo = this.getEquipped('ammo');
-        let weapon = this.getEquipped('ranged');
+        const ammo = this.getEquipped('weapon-ammo');
+        let weapon = this.getEquipped('weapon-ranged');
 
         // if they have a ranged weapon equipped and ammo, used it
         if (weapon && ammo) {
             return this.attackShoot();
         }
 
-        weapon = this.getEquipped('melee');
+        weapon = this.getEquipped('weapon-melee');
 
         // if they have a melee weapon equipped, used it
         if (weapon) {
@@ -402,7 +402,7 @@ export default class NPC extends Character {
      * Attacks the current target with their ranged weapon
      */
     async attackShoot() {
-        const weapon = this.getEquipped('ranged').name;
+        const weapon = this.getEquipped('weapon-ranged').name;
         const target = this.currentTarget();
 
         if (!target) {
@@ -452,7 +452,7 @@ export default class NPC extends Character {
      * Attacks the current target with their melee weapon
      */
     attackStrike() {
-        const weapon = this.getEquipped('melee').name;
+        const weapon = this.getEquipped('weapon-melee').name;
         const target = this.currentTarget();
 
         if (!target) {
@@ -467,7 +467,7 @@ export default class NPC extends Character {
             return this.Game.eventToRoom(this.getLocationId(), 'info', `You see ${this.name} the ${this.type} swing their ${weapon} at ${target.name}, but missing.`, [target.user_id]);
         }
 
-        const damage = this.getWeaponDamage('melee');
+        const damage = this.getWeaponDamage('weapon-melee');
 
         if (damage === null) {
             return;
