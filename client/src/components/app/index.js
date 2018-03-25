@@ -41,6 +41,11 @@ class App extends React.Component {
         if (nextProps.character && !this.props.character) {
             this.generateIssueLink();
         }
+
+        // if the user is logged in, and the socket reconnected, re-authticate..
+        if (this.props.loggedIn && !this.props.isConnected && nextProps.isConnected) {
+            this.props.history.push('/auth');
+        }
     }
 
     parsePageMeta(str) {
@@ -150,6 +155,7 @@ function mapDispatchToProps(dispatch) {
 function mapStateToProps(state) {
     return {
         isConnected: state.app.connected,
+        loggedIn: state.account.loggedIn || false,
         character: state.character.selected,
     };
 }
