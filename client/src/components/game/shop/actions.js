@@ -1,3 +1,11 @@
+import {newCommand} from '../actions';
+
+export function openShop(shopName) {
+    return newCommand(`/shop "${shopName}"`);
+}
+
+
+/* OLD CODE */
 import {
     SHOP_SELL,
     SHOP_BUY,

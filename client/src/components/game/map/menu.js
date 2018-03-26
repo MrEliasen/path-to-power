@@ -2,11 +2,20 @@ import React from 'react';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
+// actions
 import {newEvent} from '../events/actions';
 
 // UI
-import {Card, Modal, ModalHeader, ModalBody} from 'reactstrap';
+import {
+    Card,
+    Modal,
+    ModalHeader,
+    ModalBody,
+} from 'reactstrap';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+
+// components
+import Structure from './structure';
 
 class MapMenu extends React.Component {
     constructor(props) {
@@ -18,20 +27,9 @@ class MapMenu extends React.Component {
             modalNPCs: false,
         };
 
-        this.showStructureInfo = this.showStructureInfo.bind(this);
         this.toggleItems = this.toggleItems.bind(this);
         this.togglePlayers = this.togglePlayers.bind(this);
         this.toggleNPCs = this.toggleNPCs.bind(this);
-    }
-
-    // TODO: Modal?
-    showStructureInfo(e, structure) {
-        e.preventDefault();
-
-        this.props.newEvent({
-            type: 'structure-info',
-            structure: structure,
-        });
     }
 
     toggleItems() {
@@ -122,19 +120,13 @@ class MapMenu extends React.Component {
         return (
             <React.Fragment>
                 {this.renderModals()}
+
                 <div className="text-center">
                     <Card className="menu menu-map cluster">
                         {
                             this.props.map.structures.length > 0 &&
                             this.props.map.structures.map((structure, index) => {
-                                return <a
-                                    key={index}
-                                    href="#"
-                                    style={{color: structure.colour}}
-                                    onClick={(e) => this.showStructureInfo(e, structure)}
-                                >
-                                    <FontAwesomeIcon icon="building" /> {structure.name}
-                                </a>;
+                                return <Structure key={index} structure={structure} />;
                             })
                         }
                     </Card>
