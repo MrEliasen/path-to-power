@@ -2,7 +2,6 @@ import {
     CHARACTER_EQUIP_ITEM,
     CHARACTER_UNEQUIP_ITEM,
     CHARACTER_MOVE_ITEM,
-    CHARACTER_DROP_ITEM,
 } from 'shared/actionTypes';
 
 import {socketSend} from '../../app/actions';
