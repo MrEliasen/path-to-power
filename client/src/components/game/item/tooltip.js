@@ -41,6 +41,7 @@ class ItemTooltip extends React.Component {
                 <div className="description">{this.generateDescription(this.props.item)}</div>
                 <div className="stats">
                     {
+                        this.props.item.stats &&
                         Object.keys(this.props.item.stats).map((key, index) => {
                             if (typeof this.props.item.stats[key] !== 'object') {
                                 return <div key={index}>{key}: {this.props.item.stats[key]}</div>;

@@ -8,7 +8,6 @@ import {DragDropContext as dragDropContext} from 'react-dnd';
 import Events from './events';
 import Map from './map';
 import MapMenu from './map/menu';
-// import Shop from './shop';
 
 import {clearEvents, newEvent} from './events/actions';
 import {newCommand, gameLogout} from './actions';
@@ -16,13 +15,13 @@ import {moveCharacter} from './character/actions';
 import {socketSend} from '../app/actions';
 
 // Components
-import {Container, Row, Col, Input, Modal, ModalHeader, ModalBody, InputGroup, InputGroupAddon, Button, Form} from 'reactstrap';
+import {Container, Row, Col, Input, InputGroup, InputGroupAddon, Button, Form} from 'reactstrap';
 import Chat from './chat';
-import Inventory from './inventory';
 import Character from './character';
 import CharacterCard from './character/card';
 import CharacterMenu from './character/menu';
 import CharacterCombatMenu from './character/combat';
+import Shop from './shop';
 
 class Game extends React.Component {
     constructor(props) {
@@ -34,8 +33,6 @@ class Game extends React.Component {
             modalShow: false,
             modalData: null,
             autoscroll: true,
-
-            modalShop: false,
         };
 
         this.isActiveTab = this.isActiveTab.bind(this);
@@ -43,8 +40,6 @@ class Game extends React.Component {
         this.setCommand = this.setCommand.bind(this);
         this.sendAction = this.sendAction.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
-
-        this.toggleShop = this.toggleShop.bind(this);
     }
 
     componentWillMount() {
@@ -179,32 +174,6 @@ class Game extends React.Component {
         document.querySelector('#input-command').focus();
     }
 
-    toggleShop() {
-        this.setState({modalShop: !this.state.modalShop});
-    }
-
-    renderModals() {
-        return (
-            <React.Fragment>
-                <Modal isOpen={this.state.modalShop} toggle={this.toggleShop} size="lg">
-                    <ModalHeader toggle={this.toggleShop}>Shop</ModalHeader>
-                    <ModalBody>
-                        <Row>
-                            <Col xs="6">
-                                <div id="shop">
-                                    Shop slots...
-                                </div>
-                            </Col>
-                            <Col xs="6">
-                                <Inventory />
-                            </Col>
-                        </Row>
-                    </ModalBody>
-                </Modal>
-            </React.Fragment>
-        );
-    }
-
     renderUI() {
         // If the user hasn't selected a player, show the character screen
         if (!this.props.character) {
@@ -261,10 +230,9 @@ class Game extends React.Component {
         return (
             <React.Fragment>
                 <div id="game">
-                    {this.renderModals()}
                     {this.renderUI()}
+                    <Shop />
                 </div>
-                {/* <Shop sendAction={this.sendAction} /> --- OLD SHOP */}
             </React.Fragment>
         );
     }

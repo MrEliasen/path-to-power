@@ -1,28 +1,34 @@
+import {SHOP_BUY} from 'shared/actionTypes';
+import {SHOP_CLOSE} from './types';
 import {newCommand} from '../actions';
 
 export function openShop(shopName) {
     return newCommand(`/shop "${shopName}"`);
 }
 
+export function shopClose() {
+    return {
+        type: SHOP_CLOSE,
+        payload: null,
+    };
+}
 
-/* OLD CODE */
-import {
-    SHOP_SELL,
-    SHOP_BUY,
-    SHOP_GET_PRICE,
-} from 'shared/actionTypes';
-import {SHOP_CLOSE} from './types';
-
-export function shopBuy(itemId, index, shopFingerprint) {
+export function buyItem(itemId, shopFingerprint) {
     return {
         type: SHOP_BUY,
         payload: {
             item: itemId,
             shop: shopFingerprint,
-            index: index,
         },
     };
 }
+
+/*
+import {
+    SHOP_SELL,
+    SHOP_BUY,
+    SHOP_GET_PRICE,
+} from 'shared/actionTypes';
 
 export function shopSell(itemFingerprint, shopFingerprint) {
     return {
@@ -43,11 +49,4 @@ export function getItemDetails(itemId, shopFingerprint, priceType) {
             priceType: priceType,
         },
     };
-}
-
-export function shopClose() {
-    return {
-        type: SHOP_CLOSE,
-        payload: null,
-    };
-}
+}*/
