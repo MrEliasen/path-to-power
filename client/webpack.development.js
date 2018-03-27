@@ -14,21 +14,30 @@ module.exports = {
         'webpack-dev-server/client',
         './src/index.js',
     ],
-
+    mode: 'development',
     target: 'web',
+    devtool: '#inline-source-map',
     devServer: {
             historyApiFallback: true,
             contentBase: './',
     },
-
     output: {
         path: path.resolve(__dirname, '/'),
         publicPath: '/',
         filename: '[name].js',
     },
-
-    devtool: '#inline-source-map',
-
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                commons: {
+                    chunks: 'initial',
+                    minChunks: 3,
+                    name: 'commons',
+                    enforce: true,
+                },
+            },
+        },
+    },
     resolve: {
         alias: {
             react: path.resolve(__dirname, './node_modules/react'),
@@ -36,7 +45,6 @@ module.exports = {
             shared: path.resolve(__dirname, '../server/shared'),
         },
     },
-
     module: {
         rules: [
             {
@@ -73,20 +81,14 @@ module.exports = {
             },
         ],
     },
-
     plugins: [
-        new webpack.HotModuleReplacementPlugin(),
         // enable HMR globally
-        new webpack.NamedModulesPlugin(),
-        // prints more readable module names in the
+        new webpack.HotModuleReplacementPlugin(),
         // browser console on HMR updates
         new webpack.NoEmitOnErrorsPlugin(),
         new webpack.LoaderOptionsPlugin({
             debug: true,
             minimize: false,
-        }),
-        new webpack.optimize.CommonsChunkPlugin({
-            name: 'vendor',
         }),
         new HTMLWebpackPlugin({
             template: 'index.html',

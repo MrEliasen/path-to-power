@@ -14,7 +14,8 @@ module.exports = {
         'babel-polyfill',
         './src/index.js',
     ],
-
+    mode: 'production',
+    devtool: '#inline-source-map',
     output: {
         // the output bundle
         path: path.resolve(__dirname, 'dist'),
@@ -22,7 +23,6 @@ module.exports = {
         chunkFilename: '[id].[hash].bundle.js',
         publicPath: '/',
     },
-
     resolve: {
         alias: {
             react: path.resolve(__dirname, './node_modules/react'),
@@ -30,9 +30,6 @@ module.exports = {
             shared: path.resolve(__dirname, '../server/shared'),
         },
     },
-
-    devtool: '#inline-source-map',
-
     module: {
         rules: [
             {
@@ -118,12 +115,7 @@ module.exports = {
             },
         ],
     },
-
     plugins: [
-        new webpack.optimize.UglifyJsPlugin({
-            sourceMap: false,
-            comments: false,
-        }),
         new webpack.LoaderOptionsPlugin({
             debug: false,
             minimize: true,
@@ -135,11 +127,6 @@ module.exports = {
         new HTMLWebpackPlugin({
                 template: 'index.html',
                 inject: true,
-        }),
-        new webpack.DefinePlugin({
-            'process.env': {
-                NODE_ENV: JSON.stringify('production'),
-            },
         }),
     ],
 };
