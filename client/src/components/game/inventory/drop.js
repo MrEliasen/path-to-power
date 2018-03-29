@@ -11,6 +11,7 @@ class DropSlot extends React.Component {
 
         return connectDropTarget(
             <div className="item-slot --drop">
+                {!isOver && !canDrop && <div className="layer">Drop Item</div>}
                 {isOver && canDrop && <div className="layer green">Drop Item</div>}
                 {!isOver && canDrop && <div className="layer yellow">Drop Item</div>}
                 {isOver && !canDrop && <div className="layer red" />}

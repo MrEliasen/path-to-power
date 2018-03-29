@@ -78,9 +78,9 @@ const itemSource = {
 
         const item = monitor.getItem();
         const dropResult = monitor.getDropResult();
-        console.log(item);
+        /*console.log(item);
         console.log(dropResult);
-        console.log(props);
+        console.log(props);*/
 
         if (dropResult && dropResult.inventorySlot) {
             // if the item we are moving is equipped, we unequip it
