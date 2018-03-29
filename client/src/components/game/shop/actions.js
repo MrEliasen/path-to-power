@@ -1,4 +1,4 @@
-import {SHOP_BUY} from 'shared/actionTypes';
+import {SHOP_BUY, SHOP_SELL} from 'shared/actionTypes';
 import {SHOP_CLOSE} from './types';
 import {newCommand} from '../actions';
 import {socketSend} from '../../app/actions';
@@ -25,22 +25,20 @@ export function buyItem(itemFingerprint, shopFingerprint, targetSlot) {
     });
 }
 
-/*
-import {
-    SHOP_SELL,
-    SHOP_BUY,
-    SHOP_GET_PRICE,
-} from 'shared/actionTypes';
-
-export function shopSell(itemFingerprint, shopFingerprint) {
-    return {
+export function shopSell(inventorySlot, shopFingerprint) {
+    return socketSend({
         type: SHOP_SELL,
         payload: {
-            item: itemFingerprint,
+            item: inventorySlot,
             shop: shopFingerprint,
         },
-    };
+    });
 }
+
+/*
+import {
+    SHOP_GET_PRICE,
+} from 'shared/actionTypes';
 
 export function getItemDetails(itemId, shopFingerprint, priceType) {
     return {

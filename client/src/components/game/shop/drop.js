@@ -10,10 +10,11 @@ class DropSlot extends React.Component {
         const {isOver, canDrop, connectDropTarget} = this.props;
 
         return connectDropTarget(
-            <div className="item-slot --drop">
-                {isOver && canDrop && <div className="layer green">Drop Item</div>}
-                {!isOver && canDrop && <div className="layer yellow">Drop Item</div>}
-                {isOver && !canDrop && <div className="layer red" />}
+            <div className="item-slot --drop" style={{textAlign: 'center'}}>
+                {!isOver && !canDrop && <div className="layer">SELL ITEM</div>}
+                {isOver && canDrop && <div className="layer green">SELL ITEM</div>}
+                {!isOver && canDrop && <div className="layer yellow">SELL ITEM</div>}
+                {isOver && !canDrop && <div className="layer red">THE SHOP WONT<br/>BUY THIS ITEM</div>}
             </div>
         );
     }
@@ -41,7 +42,7 @@ const DropSlotTarget = {
         // const item = monitor.getItem();
 
         // Returns data for monitor.getDropResult() for the source's endDrag() method
-        return {inventorySlot: 'dropGround', dropped: true};
+        return {inventorySlot: 'dropSell', dropped: true};
     },
 };
 

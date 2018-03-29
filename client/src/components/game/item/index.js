@@ -5,6 +5,7 @@ import {DragSource as dragSource} from 'react-dnd';
 import ItemTooltip from './tooltip';
 
 // actions
+import {shopSell} from '../shop/actions';
 import {equipItem, unequipItem, moveItem, dropItem} from '../inventory/actions';
 
 class Item extends React.Component {
@@ -77,12 +78,19 @@ const itemSource = {
 
         const item = monitor.getItem();
         const dropResult = monitor.getDropResult();
-        console.log(item, dropResult);
+        console.log(item);
+        console.log(dropResult);
+        console.log(props);
 
         if (dropResult && dropResult.inventorySlot) {
             // if the item we are moving is equipped, we unequip it
             if (dropResult.inventorySlot === 'dropGround') {
                 return props.dropItem(item.inventorySlot);
+            }
+
+            // if the item we are moving is equipped, we unequip it
+            if (dropResult.inventorySlot === 'dropSell') {
+                return props.shopSell(item.inventorySlot, props.shop.fingerprint);
             }
 
             // if the item we are moving is equipped, we unequip it
@@ -108,13 +116,20 @@ const collect = (connect, monitor) => {
     };
 };
 
+function mapStateToProps(state) {
+    return {
+        shop: state.shop,
+    };
+}
+
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         equipItem,
         unequipItem,
         moveItem,
         dropItem,
+        shopSell,
     }, dispatch);
 }
 
-export default connect(null, mapDispatchToProps)(dragSource('item', itemSource, collect)(Item));
+export default connect(mapStateToProps, mapDispatchToProps)(dragSource('item', itemSource, collect)(Item));

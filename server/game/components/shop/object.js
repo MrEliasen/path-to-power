@@ -140,47 +140,45 @@ export default class Shop {
         }
 
         // get the item from the inventory
-        const index = character.inventory.findIndex((obj) => obj.fingerprint === fingerprint);
+        const index = character.inventory.findIndex((obj) => obj.inventorySlot === fingerprint);
+        const inventoryItem = character.inventory.find((obj) => obj.inventorySlot === fingerprint);
 
         // check if the item exists
         if (index === -1) {
             return this.Game.eventToUser(user_id, 'error', 'Invalid item.');
         }
 
-        // get the Item Object from the inventory
-        const item = character.inventory[index];
-
         // check if the shop is only interested in specific items, and if its on the list
-        if (this.buy.list.length && !this.buy.list.includes(item.id)) {
+        if (this.buy.list.length && !this.buy.list.includes(inventoryItem.id)) {
             return this.Game.eventToUser(user_id, 'error', 'They are not interested in buying that item.');
         }
 
         // check the item is one the shop wants to buy
-        if (this.buy.ignoreType.includes(item.type) || this.buy.ignoreSubtype.includes(item.subtype)) {
+        if (this.buy.ignoreType.includes(inventoryItem.type) || this.buy.ignoreSubtype.includes(inventoryItem.subtype)) {
             return this.Game.eventToUser(user_id, 'error', 'They are not interested in buying this type of item.');
         }
 
         // make sure, if its a stackable item, have enough to sell.
-        if (item.stats.stackable) {
-            if (item.stats.durability < amount) {
+        if (inventoryItem.stats.stackable) {
+            if (inventoryItem.stats.durability < amount) {
                 return this.Game.eventToUser(user_id, 'error', 'You do not have any more of that item.');
             }
         }
 
-        const itemTemplate = this.Game.itemManager.getTemplate(item.id);
+        const itemTemplate = this.Game.itemManager.getTemplate(inventoryItem.id);
 
         // will hold the item, which was sold
         let soldItem;
         let pricePerUnit = itemTemplate.stats.price * this.buy.priceMultiplier;
 
         // remove item from inventory/reduce amount
-        if (item.stats.stackable) {
-            soldItem = this.Game.itemManager.add(item.id, {durability: amount});
-            item.removeDurability(amount);
+        if (inventoryItem.stats.stackable) {
+            soldItem = this.Game.itemManager.add(inventoryItem.id, {durability: amount});
+            inventoryItem.removeDurability(amount);
 
             // if the item has 0 durability, remove it
-            if (item.stats.durability <= 0) {
-                this.Game.itemManager.remove(character, item);
+            if (inventoryItem.stats.durability <= 0) {
+                this.Game.itemManager.remove(character, inventoryItem);
             }
         } else {
             soldItem = character.inventory.splice(index, 1)[0];
@@ -201,19 +199,21 @@ export default class Shop {
         }
 
         // let the player know they sold the item
-        this.Game.eventToUser(user_id, 'success', `You sold 1x ${soldItem.name} for ${(amount * pricePerUnit)}`);
+        this.Game.eventToUser(user_id, 'success', `You sold ${amount}x ${soldItem.name} for ${(amount * pricePerUnit)}`);
 
         // update client character object
         this.Game.characterManager.updateClient(character.user_id);
 
-        // update grid, with the shop update
-        this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-            type: SHOP_UPDATE,
-            payload: {
-                shopId: this.id,
-                inventory: this.getSellList(true),
-            },
-        });
+        // update grid, with the shop update, but only if reselling is enabled
+        if (this.buy.resell) {
+            this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
+                type: SHOP_UPDATE,
+                payload: {
+                    shopId: this.id,
+                    inventory: this.getSellList(true),
+                },
+            });
+        }
     }
 
     /**
