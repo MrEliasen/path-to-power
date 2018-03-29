@@ -462,6 +462,11 @@ export default class Character {
             return false;
         }
 
+        // make sure we are not moving and dropping into the same slot
+        if (slotId === targetSlot) {
+            return false;
+        }
+
         // check if there is an item at the source inventory slot,
         // which we want to move.
         const movedItem = this.getEquipped(slotId);
@@ -483,6 +488,11 @@ export default class Character {
 
         const targetSlotItem = this.inventory.find((obj) => obj.inventorySlot === inventorySlot);
         let stacked = false;
+
+        // make sure the moved item and the target item is not the same one (due to eg. lag)
+        if (targetSlotItem && targetSlotItem.fingerprint === movedItem.fingerprint) {
+            return false;
+        }
 
         // if there is already an item at the target slot, swap them around or stack them
         // if the item is the same and stackable
