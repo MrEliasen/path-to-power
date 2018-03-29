@@ -458,7 +458,52 @@ export default class Character {
      * @param  {String} targetSlot  The slot to move the item to
      */
     moveItem(slotId, targetSlot) {
-        return this.unEquip(slotId, targetSlot);
+        if (!slotId || !targetSlot) {
+            return false;
+        }
+
+        // check if there is an item at the source inventory slot,
+        // which we want to move.
+        const movedItem = this.getEquipped(slotId);
+
+        if (!movedItem) {
+            return false;
+        }
+
+        let inventorySlot = targetSlot;
+
+        if (!['armour-body', 'weapon-ranged', 'weapon-melee', 'weapon-ammo'].includes(inventorySlot)) {
+            // make sure the target inventory slot is within the inventory size range
+            const inventoryNumber = parseInt(targetSlot.replace('inv-', ''), 10);
+
+            if (isNaN(inventoryNumber) || inventoryNumber < 0 || inventoryNumber >= this.stats.inventorySize) {
+                return false;
+            }
+        }
+
+        const targetSlotItem = this.inventory.find((obj) => obj.inventorySlot === inventorySlot);
+        let stacked = false;
+
+        // if there is already an item at the target slot, swap them around or stack them
+        // if the item is the same and stackable
+        if (targetSlotItem) {
+            // if the item is the same, and is stackable, stack them!
+            if (targetSlotItem.stats.stackable && targetSlotItem.id === movedItem.id) {
+                targetSlotItem.addDurability(movedItem.stats.durability);
+                this.Game.itemManager.remove(this, movedItem);
+                stacked = true;
+            } else {
+                // otherwise, swap the items.
+                targetSlotItem.inventorySlot = slotId;
+            }
+        }
+
+        // if the item was not stacked into the other item
+        if (!stacked) {
+            movedItem.inventorySlot = inventorySlot;
+        }
+
+        this.Game.characterManager.updateClient(this.user_id);
     }
 
     /**
