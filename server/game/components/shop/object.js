@@ -230,12 +230,14 @@ export default class Shop {
 
             inventoryItem = this.sell.list.find((obj) => obj.id === itemObj.id);
 
-            if (inventoryItem) {
-                inventoryItem.shopQuantity = inventoryItem.shopQuantity + amount;
-            } else {
-                // set the amount of the item to the correct amount, before adding to the inventory
-                itemObj.shopQuantity = amount;
-                this.sell.list.push(itemObj);
+            if (inventoryItem.shopQuantity !== -1) {
+                if (inventoryItem) {
+                    inventoryItem.shopQuantity = inventoryItem.shopQuantity + amount;
+                } else {
+                    // set the amount of the item to the correct amount, before adding to the inventory
+                    itemObj.shopQuantity = amount;
+                    this.sell.list.push(itemObj);
+                }
             }
         } else {
             // check if the item is already sold as a unlimited quantity item.
