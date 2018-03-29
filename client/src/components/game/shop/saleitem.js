@@ -11,7 +11,7 @@ class SaleItem extends React.Component {
     }
 
     render() {
-        const {shopItem} = this.props;
+        const {shopItem, shopFingerprint} = this.props;
         const itemObj = this.props.itemList[shopItem.id];
 
         // if the item is no longer available in the game, ignore it.
@@ -21,7 +21,10 @@ class SaleItem extends React.Component {
 
         return (
             <Card className="sale-item">
-                <Item shopItem={shopItem} />
+                <Item
+                    shopItem={shopItem}
+                    shopFingerprint={shopFingerprint}
+                    itemObj={itemObj} />
                 <div>
                     {shopItem.name}<br/>
                     Cost: {shopItem.price}

@@ -741,35 +741,46 @@ export default class Character {
     }
 
     /**
-     * Gives an item to the character
-     * @param  {Item Object} itemObj The item object for the item which will be given to the character
-     * @param  {Number} amount       The number of a given item to give to the player (non-stackable as well)
+     * Get the first available inventory slot ID
+     * @return {String|null} The slot ID or null if none found
      */
-    giveItem(itemObj, amount = null) {
-        let gotSpace = false;
+    findEmptyInventorySlot() {
         for (let i = 0; i < this.stats.inventorySize; i++) {
             const found = this.inventory.find((obj) => {
-                let f = obj.inventorySlot === `inv-${i}`;
-                return f;
+                return obj.inventorySlot === `inv-${i}`;
             });
 
             if (!found) {
-                itemObj.inventorySlot = `inv-${i}`;
-                gotSpace = true;
-                break;
+                return `inv-${i}`;
             }
         }
+
+        return null;
+    }
+
+    /**
+     * Gives an item to the character
+     * @param  {Item Object} itemObj The item object for the item which will be given to the character
+     * @param  {Number} amount       The number of a given item to give to the player (non-stackable as well)
+     * @param  {string} targetSlot   The preferred inventory slot the item should go, if possible
+     */
+    giveItem(itemObj, amount = null, targetSlot = null) {
+        let inventoryItem = this.getEquipped(targetSlot);
+        let inventoryId = this.findEmptyInventorySlot();
+
+        // set the item inventory slot, where the item is expected to go
+        itemObj.inventorySlot = targetSlot || inventoryId;
 
         // check if item is stackable, and if so, see if we have that item in the inventory already
         if (itemObj.stats.stackable) {
             amount = amount || itemObj.stats.durability;
 
-            const inventoryItem = this.inventory.find((obj) => obj.id === itemObj.id);
-
             if (inventoryItem) {
                 inventoryItem.addDurability(amount);
             } else {
-                if (!gotSpace) {
+                // if there is no item at the given slot, and the targetSlot is not defined
+                // and no empty inventory slot was found, drop the attempt to add the item.
+                if (!targetSlot && !inventoryId) {
                     return;
                 }
 
@@ -778,20 +789,22 @@ export default class Character {
                 this.inventory.push(itemObj);
             }
         } else {
-            if (!gotSpace) {
+            // if there is no item at the given slot, and the targetSlot is not defined
+            // and no empty inventory slot was found, drop the attempt to add the item.
+            if (!targetSlot && !inventoryId) {
                 return;
             }
 
             this.inventory.push(itemObj);
 
             // if we just added one, kill it here.
-            if (!amount) {
+            if (amount <= 1) {
                 return;
             }
 
             // if its non-stackable, we have to create the item several items.
             for (let i = amount - 1; i > 0; i--) {
-                this.giveItem(this.Game.itemManager.add(itemObj.id), 1);
+                this.giveItem(this.Game.itemManager.add(itemObj.id), 1, targetSlot);
             }
         }
     }

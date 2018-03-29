@@ -50,7 +50,7 @@ class Item extends React.Component {
             >
                 {
                     !isDragging && this.state.showTooltip &&
-                    <ItemTooltip item={itemTemplate} coords={this.state.mousePosition} />
+                    <ItemTooltip item={this.props.itemObj} coords={this.state.mousePosition} />
                 }
                 <div className="item-layer item-name"><span>{this.props.shopItem.name}</span></div>
                 {
@@ -64,7 +64,8 @@ class Item extends React.Component {
 const itemSource = {
     beginDrag(props) {
         return {
-            item: props.item,
+            shopItem: props.shopItem,
+            shopFingerprint: props.shopFingerprint,
         };
     },
 
@@ -75,12 +76,11 @@ const itemSource = {
 
         const item = monitor.getItem();
         const dropResult = monitor.getDropResult();
-        console.log(item, dropResult);
 
         if (dropResult && dropResult.inventorySlot) {
             // if the drop target is an equipped slot the character buys the item
             if (dropResult.inventorySlot.startsWith('inv-')) {
-                return; //buyItem(item);
+                return props.buyItem(item.shopItem.fingerprint, item.shopFingerprint, dropResult.inventorySlot);
             }
 
             return;

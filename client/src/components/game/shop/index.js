@@ -28,7 +28,10 @@ class Shop extends React.Component {
                             <div id="shop">
                                 {
                                     this.props.shop && this.props.shop.sell.list.map((shopItem, index) =>
-                                        <SaleItem key={index} shopItem={shopItem} />
+                                        <SaleItem
+                                            key={index}
+                                            shopFingerprint={this.props.shop.fingerprint}
+                                            shopItem={shopItem} />
                                     )
                                 }
                             </div>

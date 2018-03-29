@@ -1,6 +1,7 @@
 import {SHOP_BUY} from 'shared/actionTypes';
 import {SHOP_CLOSE} from './types';
 import {newCommand} from '../actions';
+import {socketSend} from '../../app/actions';
 
 export function openShop(shopName) {
     return newCommand(`/shop "${shopName}"`);
@@ -13,14 +14,15 @@ export function shopClose() {
     };
 }
 
-export function buyItem(itemId, shopFingerprint) {
-    return {
+export function buyItem(itemFingerprint, shopFingerprint, targetSlot) {
+    return socketSend({
         type: SHOP_BUY,
         payload: {
-            item: itemId,
+            item: itemFingerprint,
             shop: shopFingerprint,
+            targetSlot,
         },
-    };
+    });
 }
 
 /*

@@ -72,7 +72,7 @@ export default class ShopManager {
             return;
         }
 
-        shop.buyItem(socket.user.user_id, action.payload.index, action.payload.item);
+        shop.buyItem(socket.user.user_id, action.payload.item, action.payload.targetSlot);
     }
 
     /**

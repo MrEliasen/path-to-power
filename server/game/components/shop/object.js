@@ -42,6 +42,7 @@ export default class Shop {
 
             newItem.shopQuantity = item.shopQuantity;
             newItem.expRequired = item.expRequired || 0;
+            newItem.fingerprint = uuid();
 
             return newItem;
         });
@@ -70,6 +71,7 @@ export default class Shop {
                 quantity: item.shopQuantity,
                 expRequired: item.expRequired,
                 price: itemTemplate.stats.price,
+                fingerprint: item.fingerprint,
             };
         });
     }
@@ -262,11 +264,11 @@ export default class Shop {
 
     /**
      * Purchase an item from the shop, and give it to the character
-     * @param  {String} user_id User ID oh buyer
-     * @param  {Number} index   The array index of the item they want to buy, on the shop selling list
-     * @param  {String} itemId  The item ID to confirm the item is the one they where after
+     * @param  {String} user_id           User ID oh buyer
+     * @param  {string} itemFingerprint   The fingerprint of the sale item
+     * @param  {string} targetSlot        The inventory slot the player wants the item to be added to.
      */
-    buyItem(user_id, index, itemId) {
+    buyItem(user_id, itemFingerprint, targetSlot = null) {
         // get the character of the player
         const character = this.Game.characterManager.get(user_id);
 
@@ -280,15 +282,10 @@ export default class Shop {
         }
 
         // check if the shop has the item
-        const itemIndex = parseInt(index, 10);
-        const item = this.sell.list[itemIndex];
+        const item = this.sell.list.find((obj) => obj.fingerprint === itemFingerprint);
+
         if (!item) {
             return this.Game.eventToUser(user_id, 'error', 'They do not appear to have that item anymore');
-        }
-
-        // make sure the item is what they where afte, in case the array has shifted
-        if (item.id !== itemId) {
-            return this.Game.eventToUser(user_id, 'error', 'The item you where after is no longer available.');
         }
 
         // make sure the player is heigh enough rank/exp
@@ -331,7 +328,7 @@ export default class Shop {
         }
 
         // give item to player
-        character.giveItem(itemToAdd, 1);
+        character.giveItem(itemToAdd, 1, targetSlot);
 
         // update the client player object
         this.Game.characterManager.updateClient(character.user_id);
@@ -341,6 +338,7 @@ export default class Shop {
 
         // remove the item from the shop, us quantity is 0
         if (item.shopQuantity == 0) {
+            const itemIndex = this.sell.list.findIndex((obj) => obj.fingerprint === itemFingerprint);
             this.sell.list.splice(itemIndex, 1);
         }
 
