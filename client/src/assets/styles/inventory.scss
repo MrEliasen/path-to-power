@@ -26,6 +26,7 @@
         background: #666;
         width: 200px;
         height: 100px;
+        text-align: center;
     }
 
     .layer {
@@ -34,12 +35,15 @@
         right: 0;
         bottom: 0;
         left: 0;
-        opacity: .5;
+        opacity: .55;
+        padding: 37px 0px 0px;
+        color: #fff;
     }
 
     .yellow {
         border: 1px yellow solid;
         background-color: yellow;
+        color: #000;
     }
     .red {
         border: 1px red solid;
@@ -94,33 +98,5 @@
         color: #eee;
         justify-content: flex-end;
         align-items: flex-end;
-    }
-}
-
-.item-tooltip {
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: rgba(0, 0, 0, .9);
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, .3);
-    padding: 4px 8px;
-    color: #eee;
-    z-index: 1100;
-    width: auto;
-    min-width: 100px;
-    max-width: 300px;
-    border-radius: 3px;
-
-    .name {
-        font-size: 120%;
-        color: green;
-    }
-    .count {
-        font-size: 90%;
-    }
-
-    .stats {
-        font-size: 70%;
-        padding: 5px 10px;
     }
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import {connect} from 'react-redux';
 import ReactDOM from 'react-dom';
 
 class ItemTooltip extends React.Component {
@@ -31,27 +32,44 @@ class ItemTooltip extends React.Component {
     }
 
     render() {
-        if (! this.props.item) {
-            return '';
+        if (!this.props.item) {
+            return null;
         }
 
+        const {item, shop, coords, isShopItem} = this.props;
+
         return ReactDOM.createPortal(
-            <div className="item-tooltip" style={{top: (this.props.coords.y + 10) + 'px', left: (this.props.coords.x + 10) + 'px'}}>
-                <div className="name">{this.props.item.name}</div>
-                <div className="description">{this.generateDescription(this.props.item)}</div>
+            <div className="item-tooltip" style={{top: (coords.y + 10) + 'px', left: (coords.x + 10) + 'px'}}>
+                <div className="name">{item.name}</div>
+                <div className="description">{this.generateDescription(item)}</div>
                 <div className="stats">
                     {
-                        this.props.item.stats &&
-                        Object.keys(this.props.item.stats).map((key, index) => {
-                            if (typeof this.props.item.stats[key] !== 'object') {
-                                return <div key={index}>{key}: {this.props.item.stats[key]}</div>;
+                        item.stats &&
+                        Object.keys(item.stats).map((key, index) => {
+                            if (typeof item.stats[key] !== 'object') {
+                                // hide the base price of items, as the player cannot depend on this value.
+                                if (key === 'price') {
+                                    return null;
+                                }
+
+                                let value = item.stats[key];
+
+                                if (typeof value === 'boolean') {
+                                    value = value.toString();
+                                }
+
+                                return <div key={index}>{key}: {value}</div>;
                             }
                         })
                     }
                 </div>
                 {
-                    this.props.item.count &&
-                    <div className="count">Count: {this.props.item.count}</div>
+                    item.count &&
+                    <div className="count">Count: {item.count}</div>
+                }
+                {
+                    shop && !isShopItem &&
+                    <div className="sell-price">Sells For: {item.stats.price * shop.buy.priceMultiplier} /ea</div>
                 }
             </div>
             , this.portalElement
@@ -59,4 +77,10 @@ class ItemTooltip extends React.Component {
     }
 }
 
-export default ItemTooltip;
+function mapStateToProps(state) {
+    return {
+        shop: state.shop,
+    };
+}
+
+export default connect(mapStateToProps)(ItemTooltip);

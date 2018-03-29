@@ -50,7 +50,7 @@ class Item extends React.Component {
             >
                 {
                     !isDragging && this.state.showTooltip &&
-                    <ItemTooltip item={this.props.itemObj} coords={this.state.mousePosition} />
+                    <ItemTooltip item={this.props.itemObj} coords={this.state.mousePosition} isShopItem={true} />
                 }
                 <div className="item-layer item-name"><span>{this.props.shopItem.name}</span></div>
                 {

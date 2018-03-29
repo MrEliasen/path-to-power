@@ -1,0 +1,32 @@
+.item-tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, .9);
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, .3);
+    padding: 4px 8px;
+    color: #eee;
+    z-index: 1100;
+    width: auto;
+    min-width: 100px;
+    max-width: 325px;
+    border-radius: 3px;
+
+    .name {
+        font-size: 120%;
+        color: green;
+    }
+    .count {
+        font-size: 90%;
+    }
+
+    .stats {
+        font-size: 70%;
+        padding: 5px 10px;
+    }
+
+    .sell-price {
+        color: yellow;
+        font-size: 85%;
+    }
+}
