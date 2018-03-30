@@ -12,6 +12,7 @@ class SaleItem extends React.Component {
     }
 
     renderNotification(canBuyExp, canBuyMoney) {
+        const {shopItem} = this.props;
         let message = '';
 
         if (canBuyExp && canBuyMoney) {
@@ -38,8 +39,8 @@ class SaleItem extends React.Component {
             return null;
         }
 
-        const canBuyExp = shopItem.expRequired <= character.stats.exp;
-        const canBuyMoney = shopItem.price <= character.stats.money;
+        const canBuyExp = shopItem.expRequired ? shopItem.expRequired <= character.stats.exp : true;
+        const canBuyMoney = (shopItem.price * this.props.priceMultiplier) <= character.stats.money;
 
         return (
             <Card className={'sale-item' + (!canBuyExp || !canBuyMoney ? ' --cant-buy' : '')}>
@@ -63,6 +64,7 @@ class SaleItem extends React.Component {
 
 function mapStateToProps(state) {
     return {
+        priceMultiplier: state.shop ? state.shop.sell.priceMultiplier : 1.0,
         itemList: state.game.items,
         character: state.character.selected,
     };

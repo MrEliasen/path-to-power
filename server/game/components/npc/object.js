@@ -51,6 +51,7 @@ export default class NPC extends Character {
             name: this.name,
             type: this.type,
             health: this.stats.health,
+            hasShop: this.shop ? true : false,
         };
     }
 

@@ -16,6 +16,7 @@ import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 // components
 import Structure from './structure';
+import NPCs from './npcs';
 
 class MapMenu extends React.Component {
     constructor(props) {
@@ -145,7 +146,7 @@ class MapMenu extends React.Component {
                     {
                         this.props.map.npcs.length > 0 &&
                         <Card className="menu menu-map cluster">
-                            <a href="#" onClick={this.toggleNPCs}><FontAwesomeIcon icon="user-secret" /> NPCs ({this.props.map.npcs.length})</a>
+                            <NPCs list={this.props.map.npcs} onClick={this.toggleNPCs} />
                         </Card>
                     }
                 </div>

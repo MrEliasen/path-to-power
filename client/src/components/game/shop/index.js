@@ -40,7 +40,8 @@ class Shop extends React.Component {
     }
 
     render() {
-        const slots = Array.from(Array(this.props.inventorySize).keys());
+        const {shop, inventorySize} = this.props;
+        const slots = Array.from(Array(inventorySize).keys());
 
         return (
             <Modal isOpen={this.props.isOpen} toggle={this.props.shopClose} size="lg">
@@ -51,12 +52,16 @@ class Shop extends React.Component {
                         <Col xs="6">
                             <div id="shop">
                                 {
-                                    this.props.shop && this.props.shop.sell.list.map((shopItem, index) =>
+                                    shop && shop.sell.list.map((shopItem, index) =>
                                         <SaleItem
                                             key={index}
-                                            shopFingerprint={this.props.shop.fingerprint}
+                                            shopFingerprint={shop.fingerprint}
                                             shopItem={shopItem} />
                                     )
+                                }
+                                {
+                                    shop && !shop.sell.enabled &&
+                                    <p>No selling anything.</p>
                                 }
                             </div>
                         </Col>
