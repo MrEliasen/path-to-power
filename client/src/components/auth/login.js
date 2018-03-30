@@ -32,6 +32,7 @@ class AuthLogin extends React.Component {
             error: error || null,
         });
 
+        this.props.getStrategies();
         this.autoLogin(error ? false : true);
     }
 
@@ -54,8 +55,6 @@ class AuthLogin extends React.Component {
                 return this.props.authProvider(GETtoken);
             }
         }
-
-        return this.props.getStrategies();
     }
 
     authenticate() {
