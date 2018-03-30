@@ -1,6 +1,6 @@
 import uuid from 'uuid/v4';
 import {SHOP_UPDATE} from 'shared/actionTypes';
-import {dice} from '../../helper';
+import {dice, formatNumberDecimal} from '../../helper';
 
 /**
  * Shop object class
@@ -199,7 +199,7 @@ export default class Shop {
         }
 
         // let the player know they sold the item
-        this.Game.shopManager.eventToUser(user_id, 'success', `You sold ${amount}x ${soldItem.name} for ${(amount * pricePerUnit)}`);
+        this.Game.shopManager.eventToUser(user_id, 'success', `You sold ${amount}x ${soldItem.name} for ${formatNumberDecimal(amount * pricePerUnit)}`);
 
         // update client character object
         this.Game.characterManager.updateClient(character.user_id);

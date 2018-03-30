@@ -1,6 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import Item from './item';
+import {formatNumberDecimal} from '../../../helper';
 
 // UI
 import {Card} from 'reactstrap';
@@ -52,7 +53,7 @@ class SaleItem extends React.Component {
                         itemObj={itemObj} />
                     <div>
                         {shopItem.name}<br/>
-                        Cost: {shopItem.price}
+                        Price: {formatNumberDecimal(shopItem.price * this.props.priceMultiplier)}
                     </div>
                 </div>
             </Card>

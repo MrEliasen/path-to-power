@@ -85,3 +85,12 @@ export function cacheSet(key, data, expire = null) {
 
     window.localStorage.setItem(key, JSON.stringify(storeValue));
 }
+
+/**
+ * Formats a number to 2 decimal points
+ * @param  {Number} number The number to format
+ * @return {Number}
+ */
+export function formatNumberDecimal(number) {
+    return Math.max(0, Math.round(number * 100) / 100);
+}

@@ -1,6 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import ReactDOM from 'react-dom';
+import {formatNumberDecimal} from '../../../helper';
 
 class ItemTooltip extends React.Component {
     constructor(props) {
@@ -69,7 +70,7 @@ class ItemTooltip extends React.Component {
                 }
                 {
                     shop && !isShopItem &&
-                    <div className="sell-price">Sells For: {item.stats.price * shop.buy.priceMultiplier} /ea</div>
+                    <div className="sell-price">Sells For: {formatNumberDecimal(item.stats.price * shop.buy.priceMultiplier)} /ea</div>
                 }
             </div>
             , this.portalElement
