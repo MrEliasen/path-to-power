@@ -136,7 +136,7 @@ export default class Shop {
 
         // check if shop is buying anything
         if (!this.buy.enabled) {
-            return this.Game.eventToUser(user_id, 'error', 'They are not interested in buying anything.');
+            return this.Game.shopManager.eventToUser(user_id, 'error', 'They are not interested in buying anything.');
         }
 
         // get the item from the inventory
@@ -145,23 +145,23 @@ export default class Shop {
 
         // check if the item exists
         if (index === -1) {
-            return this.Game.eventToUser(user_id, 'error', 'Invalid item.');
+            return this.Game.shopManager.eventToUser(user_id, 'error', 'Invalid item.');
         }
 
         // check if the shop is only interested in specific items, and if its on the list
         if (this.buy.list.length && !this.buy.list.includes(inventoryItem.id)) {
-            return this.Game.eventToUser(user_id, 'error', 'They are not interested in buying that item.');
+            return this.Game.shopManager.eventToUser(user_id, 'error', 'They are not interested in buying that item.');
         }
 
         // check the item is one the shop wants to buy
         if (this.buy.ignoreType.includes(inventoryItem.type) || this.buy.ignoreSubtype.includes(inventoryItem.subtype)) {
-            return this.Game.eventToUser(user_id, 'error', 'They are not interested in buying this type of item.');
+            return this.Game.shopManager.eventToUser(user_id, 'error', 'They are not interested in buying this type of item.');
         }
 
         // make sure, if its a stackable item, have enough to sell.
         if (inventoryItem.stats.stackable) {
             if (inventoryItem.stats.durability < amount) {
-                return this.Game.eventToUser(user_id, 'error', 'You do not have any more of that item.');
+                return this.Game.shopManager.eventToUser(user_id, 'error', 'You do not have any more of that item.');
             }
         }
 
@@ -199,7 +199,7 @@ export default class Shop {
         }
 
         // let the player know they sold the item
-        this.Game.eventToUser(user_id, 'success', `You sold ${amount}x ${soldItem.name} for ${(amount * pricePerUnit)}`);
+        this.Game.shopManager.eventToUser(user_id, 'success', `You sold ${amount}x ${soldItem.name} for ${(amount * pricePerUnit)}`);
 
         // update client character object
         this.Game.characterManager.updateClient(character.user_id);
@@ -280,45 +280,45 @@ export default class Shop {
 
         // check if shop is selling anything
         if (!this.sell.enabled) {
-            return this.Game.eventToUser(user_id, 'error', 'They are not selling anything.');
+            return this.Game.shopManager.eventToUser(user_id, 'error', 'They are not selling anything.');
         }
 
         // check if the shop has the item
         const item = this.sell.list.find((obj) => obj.fingerprint === itemFingerprint);
 
         if (!item) {
-            return this.Game.eventToUser(user_id, 'error', 'They do not appear to have that item anymore');
+            return this.Game.shopManager.eventToUser(user_id, 'error', 'They do not appear to have that item anymore');
         }
 
         // make sure the player is heigh enough rank/exp
         if (character.stats.exp < item.expRequired) {
-            return this.Game.eventToUser(user_id, 'error', 'You do not have a heigh enough rank to purchase this item.');
+            return this.Game.shopManager.eventToUser(user_id, 'error', 'You do not have a heigh enough rank to purchase this item.');
         }
 
         const itemTemplate = this.Game.itemManager.getTemplate(item.id);
 
         // Check the template exists
         if (!itemTemplate) {
-            return this.Game.eventToUser(user_id, 'error', 'Invalid item. The item might no longer be available.');
+            return this.Game.shopManager.eventToUser(user_id, 'error', 'Invalid item. The item might no longer be available.');
         }
 
         const price = (itemTemplate.stats.price * this.sell.priceMultiplier);
 
         // check if the character has enough money
         if (character.stats.money < price) {
-            return this.Game.eventToUser(user_id, 'error', 'You do not have enough money.');
+            return this.Game.shopManager.eventToUser(user_id, 'error', 'You do not have enough money.');
         }
 
         // check if the item is limited stock/has enough quantity
         if (item.shopQuantity < 1 && item.shopQuantity !== -1) {
-            return this.Game.eventToUser(user_id, 'error', 'They do not appear to have that item anymore');
+            return this.Game.shopManager.eventToUser(user_id, 'error', 'They do not appear to have that item anymore');
         }
 
         const itemToAdd = this.Game.itemManager.add(item.id);
 
         // make sure the character has room
         if (!character.hasRoomForItem(itemToAdd)) {
-            return this.Game.eventToUser(user_id, 'error', 'You do not have enough inventory space for that item.');
+            return this.Game.shopManager.eventToUser(user_id, 'error', 'You do not have enough inventory space for that item.');
         }
 
         // remove money from player
@@ -336,7 +336,7 @@ export default class Shop {
         this.Game.characterManager.updateClient(character.user_id);
 
         // send event to client
-        this.Game.eventToUser(character.user_id, 'success', `You have purchased 1x ${itemTemplate.name} for ${price}`);
+        this.Game.shopManager.eventToUser(character.user_id, 'success', `You have purchased 1x ${itemTemplate.name} for ${price}`);
 
         // remove the item from the shop, us quantity is 0
         if (item.shopQuantity == 0) {

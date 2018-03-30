@@ -8,6 +8,7 @@ import {
     SHOP_SELL,
     SHOP_ITEM_PRICE,
     SHOP_GET_PRICE,
+    SHOP_EVENT,
 } from 'shared/actionTypes';
 
 /**
@@ -157,6 +158,23 @@ export default class ShopManager {
         // resupply all the shops
         this.shops.forEach((shop) => {
             shop.resupply();
+        });
+    }
+
+    /**
+     * dispatch a shop event to a specific user
+     * @param  {Socket.IO Socket} user_id  User ID of the player who should receive the event
+     * @param  {String}           type     Event type
+     * @param  {String}           message  Event message
+     */
+    eventToUser(user_id, type, message) {
+        this.Game.logger.debug('Shop Event', {user_id, type, message});
+        this.Game.socketManager.dispatchToUser(user_id, {
+            type: SHOP_EVENT,
+            payload: {
+                type,
+                message,
+            },
         });
     }
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
-import {Row, Col, Modal, ModalHeader, ModalBody} from 'reactstrap';
+import {Alert, Row, Col, Modal, ModalHeader, ModalBody} from 'reactstrap';
 
 // components
 import ItemSlot from '../item/slot';
@@ -16,6 +16,29 @@ class Shop extends React.Component {
         super(props);
     }
 
+    renderNotification() {
+        if (!this.props.shop || !this.props.shop.notification) {
+            return null;
+        }
+
+        const {type, message} = this.props.shop.notification;
+        let color = 'danger';
+
+        switch (type) {
+            case 'success':
+                color = 'success';
+                break;
+
+            case 'info':
+                color = 'info';
+                break;
+        }
+
+        return <Alert color={color}>
+            {message}
+        </Alert>;
+    }
+
     render() {
         const slots = Array.from(Array(this.props.inventorySize).keys());
 
@@ -23,6 +46,7 @@ class Shop extends React.Component {
             <Modal isOpen={this.props.isOpen} toggle={this.props.shopClose} size="lg">
                 <ModalHeader toggle={this.props.shopClose}>Shop</ModalHeader>
                 <ModalBody>
+                    {this.renderNotification()}
                     <Row>
                         <Col xs="6">
                             <div id="shop">

@@ -40,6 +40,7 @@ export const SHOP_SELL = 'SHOP_SELL';
 export const SHOP_BUY = 'SHOP_BUY';
 export const SHOP_LOAD = 'SHOP_LOAD';
 export const SHOP_UPDATE = 'SHOP_UPDATE';
+export const SHOP_EVENT = 'SHOP_EVENT';
 
 // USER
 export const USER_AUTHENTICATE = 'USER_AUTHENTICATE'; // ACCOUNT_AUTHENTICATE

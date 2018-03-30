@@ -4,6 +4,7 @@ import {
     SHOP_UPDATE,
     SHOP_ITEM_PRICE,
     CHARACTER_LOGOUT,
+    SHOP_EVENT,
 } from 'shared/actionTypes';
 import {SHOP_CLOSE} from './types';
 
@@ -40,6 +41,12 @@ export default function(state = null, action) {
             return {
                 ...state,
                 details: action.payload,
+            };
+
+        case SHOP_EVENT:
+            return {
+                ...state,
+                notification: action.payload,
             };
 
         case CHARACTER_REMOTE_LOGOUT:
