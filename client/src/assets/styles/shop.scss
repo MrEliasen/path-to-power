@@ -25,12 +25,14 @@
 
         .notification {
             position: absolute;
-            top: calc(50% - 14px);
+            top: calc(50% - 5px);
             left: 0px;
             text-align: center;
-            background: #6d6d6d;
+            background: #3e3e3e;
             color: #ffffff;
             width: 100%;
+            font-size: 14px;
+            padding: 2px 0px;
         }
 
         .item {
