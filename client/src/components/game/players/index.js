@@ -28,10 +28,8 @@ class Players extends React.Component {
                     <tr>
                         <th>Player</th>
                         <th>Faction</th>
-                        <th>-</th>
-                        <th>-</th>
-                        <th>-</th>
                         <th></th>
+                        <th className="text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,10 +43,8 @@ class Players extends React.Component {
                                             {player.name}
                                         </div>
                                     </td>
-                                    <td>{player.faction && player.faction.name || '-'}</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>-</td>
+                                    <td>{player.faction && `[${player.faction.tag}] ${player.faction.name}` || ''}</td>
+                                    <td></td>
                                     <td className="text-right">
                                         <Button color="primary" size="sm" onClick={() => this.doAction(`/whisper ${player.name} `, true)}>Whisper</Button>
                                         {
@@ -58,7 +54,7 @@ class Players extends React.Component {
                                             this.props.character.faction &&
                                             // Character is the faction leader
                                             this.props.character.faction.leader_id === this.props.character.user_id &&
-                                            <Button color="primary" size="sm" onClick={() => this.doAction(`/factioninvite ${player.name}`)}>Invite</Button>
+                                            <Button color="primary" size="sm" onClick={() => this.doAction(`/factioninvite ${player.name}`)}>Faction Invite</Button>
                                         }
                                         {
                                             // Player isn't the character playing
@@ -72,8 +68,8 @@ class Players extends React.Component {
                                             // Character is the faction leader
                                             this.props.character.faction.leader_id === this.props.character.user_id &&
                                             <React.Fragment>
-                                                <Button color="primary" size="sm" onClick={() => this.doAction(`/factionkick ${player.name}`)}>Kick</Button>
-                                                <Button color="primary" size="sm" onClick={() => this.doAction(`/factionpromote ${player.name}`)}>Promote</Button>
+                                                <Button color="primary" size="sm" onClick={() => this.doAction(`/factionkick ${player.name}`)}>Faction Kick</Button>
+                                                <Button color="primary" size="sm" onClick={() => this.doAction(`/factionpromote ${player.name}`)}>Faction Promote</Button>
                                             </React.Fragment>
                                         }
                                     </td>

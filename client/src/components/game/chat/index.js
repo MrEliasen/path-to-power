@@ -34,10 +34,10 @@ class Chat extends React.Component {
                 prefix = '[Global]';
                 break;
             case 'whisper-in':
-                prefix = ' tells you';
+                prefix = '[Whisper] from ';
                 break;
             case 'whisper-out':
-                prefix = 'You tell';
+                prefix = '[Whisper] to ';
                 break;
             case 'local':
                 prefix = '[Local]';
@@ -53,14 +53,22 @@ class Chat extends React.Component {
         // }
 
         if (message.type === 'separator') {
-            return <li key={index} className='chat-separator'></li>
+            return <li key={index} className='chat-separator'></li>;
         }
 
         return (
             <li key={index} className={'chat-' + message.type}>
                 {false && <span className="timestamp">{time}</span>}
                 <span className="prefix">{prefix}</span>
-                {message.name && <span className="name">{message.name}:</span>}
+                {
+                    message.name &&
+                    <span
+                        className="name"
+                        onClick={() => this.props.setCommand(`/whisper ${message.name} `)}
+                    >
+                        {message.name}:
+                    </span>
+                }
                 <span className="message">{message.message}</span>
             </li>
         );

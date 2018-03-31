@@ -200,8 +200,8 @@ class Game extends React.Component {
                         </div>
                     </Col>
                     <Col sm="9" className="middle">
-                        <CharacterMenu />
-                        <Chat title="Chat" messages={this.props.chat} lines="10" />
+                        <CharacterMenu setCommand={this.setCommand} sendCommand={this.sendCommand} />
+                        <Chat setCommand={this.setCommand} title="Chat" messages={this.props.chat} lines="10" />
                         <Events />
                         <CharacterCombatMenu />
                         <Form onSubmit={this.onSubmit}>

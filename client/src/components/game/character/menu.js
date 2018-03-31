@@ -94,7 +94,7 @@ class CharacterMenu extends React.Component {
                 <Modal isOpen={this.state.modalPlayers} toggle={this.togglePlayers} size="lg">
                     <ModalHeader toggle={this.togglePlayers}>Players Online</ModalHeader>
                     <ModalBody>
-                        <Players />
+                        <Players setCommand={this.props.setCommand} sendCommand={this.props.sendCommand} />
                     </ModalBody>
                 </Modal>
             </React.Fragment>
