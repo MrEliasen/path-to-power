@@ -6,7 +6,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import {DragDropContext as dragDropContext} from 'react-dnd';
 
 import Events from './events';
-import Map from './map';
+import GameMap from './map';
 import MapMenu from './map/menu';
 
 import {clearEvents, newEvent} from './events/actions';
@@ -187,7 +187,7 @@ class Game extends React.Component {
                 <Row>
                     <Col className="left">
                         <CharacterCard character={this.props.character} />
-                        <Map />
+                        <GameMap />
                         <MapMenu />
                         {
                             this.props.game.news &&
