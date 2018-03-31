@@ -55,46 +55,6 @@ class Shop extends React.Component {
         </Alert>;
     }
 
-    renderItemTypes() {
-        const {shop, itemList} = this.props;
-        let types = [];
-        let options = [];
-
-        shop.sell.list.forEach((shopItem) => {
-            const item = itemList[shopItem.id];
-
-            if (item && !types.includes(item.type)) {
-                types.push(item.type);
-                options.push(<option key={item.type} value={item.type}>{item.type}</option>);
-            }
-        });
-
-        return options;
-    }
-
-    renderItemSubTypes() {
-        const {itemType} = this.state;
-
-        if (itemType === '') {
-            return null;
-        }
-
-        const {shop, itemList} = this.props;
-        let types = [];
-        let options = [];
-
-        shop.sell.list.forEach((shopItem) => {
-            const item = itemList[shopItem.id];
-
-            if (item && !types.includes(item.subtype) && item.type === itemType) {
-                types.push(item.subtype);
-                options.push(<option key={item.subtype} value={item.subtype}>{item.subtype}</option>);
-            }
-        });
-
-        return options;
-    }
-
     renderShopList() {
         const {shop} = this.props;
         let {itemType, itemSubType, sortBy} = this.state;
@@ -154,8 +114,28 @@ class Shop extends React.Component {
     }
 
     render() {
-        const {shop, inventorySize} = this.props;
+        const {shop, inventorySize, itemList} = this.props;
         const slots = Array.from(Array(inventorySize).keys());
+
+        if (!shop) {
+            return null;
+        }
+
+        // get the list of item objects the shop is selling
+        const shopItems = shop.sell.list
+            .map((item) => itemList[item.id])
+            .filter((item) => item != null);
+
+        // get the list of item types the shop is selling.
+        const itemTypeOptions = shopItems
+            .map((item) => item.type)
+            .reduce((types, type) => types.includes(type) ? types : [...types, type], []);
+
+        // get the list of item sub-types the shop is selling.
+        const itemSubTypeOptions = shopItems
+            .filter((item) => item.type === this.state.itemType)
+            .map((item) => item.subtype)
+            .reduce((types, subtype) => types.includes(subtype) ? types : [...types, subtype], []);
 
         return (
             <Modal isOpen={this.props.isOpen} toggle={this.props.shopClose} size="lg">
@@ -178,7 +158,11 @@ class Shop extends React.Component {
                                             onChange={(e) => this.setState({itemType: e.target.value, itemSubType: ''})}
                                         >
                                             <option value="" defaultValue hidden>Item Type</option>
-                                            {this.renderItemTypes()}
+                                            {
+                                                itemTypeOptions.map((type, index) => (
+                                                    <option key={type} value={type}>{type}</option>
+                                                ))
+                                            }
                                         </Input>
                                     </FormGroup>
                                 </Col>
@@ -191,7 +175,11 @@ class Shop extends React.Component {
                                             onChange={(e) => this.setState({itemSubType: e.target.value})}
                                         >
                                             <option value="" defaultValue hidden>Item Sub-Type</option>
-                                            {this.renderItemSubTypes()}
+                                            {
+                                                itemSubTypeOptions.map((type, index) => (
+                                                    <option key={type} value={type}>{type}</option>
+                                                ))
+                                            }
                                         </Input>
                                     </FormGroup>
                                 </Col>
