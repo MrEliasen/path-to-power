@@ -9,6 +9,7 @@ import SystemEvent from './eventtypes/systemevent';
 import CommandList from './eventtypes/commandlist';
 import Multiline from './eventtypes/multiline';
 import GridDetails from './eventtypes/griddetails';
+import GameNews from './eventtypes/gamenews';
 
 class Events extends React.Component {
     constructor(props) {
@@ -37,6 +38,10 @@ class Events extends React.Component {
 
                 case 'system':
                     events = events.concat(new SystemEvent(event).parse());
+                    break;
+
+                case 'game-news':
+                    events = events.concat(new GameNews(event).parse());
                     break;
 
                 case 'commandlist':

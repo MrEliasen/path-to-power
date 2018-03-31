@@ -2,8 +2,10 @@ import {
     GAME_EVENT,
     CHARACTER_LOGOUT,
     CHARACTER_REMOTE_LOGOUT,
+    GAME_NEWS,
 } from 'shared/actionTypes';
 
+import {getRandomColour} from '../../../helper';
 import {COMMAND_ERROR, CLEAR_EVENTS} from './types';
 
 export default function(state = [], action) {
@@ -23,6 +25,17 @@ export default function(state = [], action) {
             }
 
             events.push(action.payload);
+            return events.reverse().splice(0, 150).reverse();
+
+        case GAME_NEWS:
+            events = [...state];
+
+            events.push({
+                type: 'game-news',
+                message: action.payload,
+                colour: getRandomColour(),
+            });
+
             return events.reverse().splice(0, 150).reverse();
 
         case COMMAND_ERROR:

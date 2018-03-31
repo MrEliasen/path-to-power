@@ -5,16 +5,12 @@ import {
     COMMAND_CHAT_MESSAGE,
     MAP_LIST,
     USER_AUTHENTICATE_SUCCESS,
-    GAME_NEWS,
     CHARACTER_LOGOUT,
     CHARACTER_REMOTE_LOGOUT,
 } from 'shared/actionTypes';
 
-import {getRandomColour} from '../../helper';
-
 const defaultState = {
     players: [],
-    news: null,
     maps: {},
     chat: [],
     items: {},
@@ -25,15 +21,6 @@ export default function(state = defaultState, action) {
     let players;
 
     switch (action.type) {
-        case GAME_NEWS:
-            return {
-                ...state,
-                news: {
-                    message: action.payload,
-                    colour: getRandomColour(),
-                },
-            };
-
         case MAP_LIST:
             return {
                 ...state,

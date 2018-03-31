@@ -189,10 +189,6 @@ class Game extends React.Component {
                         <CharacterCard character={this.props.character} />
                         <GameMap />
                         <MapMenu />
-                        {
-                            this.props.game.news &&
-                            <h3 style={this.props.game.news.colour}>{this.props.game.news.message}</h3>
-                        }
                         <div style={{textAlign: 'center'}}>
                             {this.props.connection.lastEvent}<br />
                             {!this.props.connection.isConnected}
