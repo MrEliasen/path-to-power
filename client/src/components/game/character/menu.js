@@ -5,7 +5,7 @@ import {connect} from 'react-redux';
 import Inventory from '../inventory';
 import Stats from './stats';
 import Players from '../players';
-import ItemSlot from '../item/slot';
+import EquippedSlot from '../item/equippedslot';
 
 // UI
 import {Card, Modal, ModalHeader, ModalBody, Row, Col} from 'reactstrap';
@@ -67,10 +67,10 @@ class CharacterMenu extends React.Component {
                         <Row>
                             <Col xs="6">
                                 <div id="equipment">
-                                    <ItemSlot inventorySlot="weapon-ranged" title="Ranged" />
-                                    <ItemSlot inventorySlot="weapon-melee" title="Melee" />
-                                    <ItemSlot inventorySlot="armour-body" title="Armor" />
-                                    <ItemSlot inventorySlot="weapon-ammo" title="Ammo" />
+                                    <EquippedSlot inventorySlot="weapon-ranged" title="Ranged Weapon" />
+                                    <EquippedSlot inventorySlot="weapon-melee" title="Melee Weapon" />
+                                    <EquippedSlot inventorySlot="armour-body" title="Body Armour" />
+                                    <EquippedSlot inventorySlot="weapon-ammo" title="Ammunition" />
                                 </div>
                             </Col>
                             <Col xs="6">
