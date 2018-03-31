@@ -30,9 +30,9 @@ class Map extends React.Component {
             buildings[building.location.x + '-' + building.location.y] = building.colour;
         });
 
-        for (let y = 0; y < map.gridSize.y; y++) {
+        for (let y = 0; y <= map.gridSize.y; y++) {
             let cells = [];
-            for (let x = 0; x < map.gridSize.x; x++) {
+            for (let x = 0; x <= map.gridSize.x; x++) {
                 let cellId = x + '-' + y;
                 let classes = ['x'];
                 let styles = {};
