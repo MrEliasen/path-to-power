@@ -2,6 +2,7 @@ import {
     USER_DETAILS,
     USER_DETAILS_GET,
     USER_DETAILS_UPDATE,
+    USER_DELETE,
 } from './types';
 
 export function getUserDetails(userId, authToken) {
@@ -28,6 +29,16 @@ export function updateAccount(userId, authToken, details) {
             authToken,
             userId,
             details,
+        },
+    };
+}
+
+export function deleteAccount(userId, authToken) {
+    return {
+        type: USER_DELETE,
+        payload: {
+            authToken,
+            userId,
         },
     };
 }

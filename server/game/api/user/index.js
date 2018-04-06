@@ -173,7 +173,7 @@ export async function getUser(req, res) {
     try {
         const identities = await IdentityModel.findAsync(
             {userId: req.user._id},
-            {_id: 0, provider: 1, date_added: 1}
+            { _id: 0, provider: 1, providerId: 1, date_added: 1}
         );
 
         res.json({

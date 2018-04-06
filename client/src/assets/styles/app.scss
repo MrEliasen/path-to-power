@@ -37,3 +37,24 @@ button .svg-inline--fa,
     vertical-align: middle;
     font-size: 130%;
 }
+
+.dangerzone {
+    text-align: center;
+    background: repeating-linear-gradient(
+        45deg, 
+        #e0d906, 
+        #e0d906 10px,
+        #000000 10px,
+        #484848 20px
+    );
+
+    p {
+        background: #000;
+        color: #fff;
+        padding: 3px 5px;
+    }
+
+    button {
+        margin-bottom: 1rem;
+    }
+}

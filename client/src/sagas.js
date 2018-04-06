@@ -373,6 +373,18 @@ function* unlinkProviderFromAccount(action) {
     yield getUserDetails(action);
 }
 
+function* deleteUserAccount(action) {
+    const response = yield call(doAPICall, `users/${action.payload.userId}`, null, 'delete', {
+        Authorization: `Bearer ${action.payload.authToken}`,
+    });
+
+    if (!response) {
+        return;
+    }
+
+    yield put(response);
+}
+
 function* onAuthAttempt() {
     yield takeLatest(USER_AUTHENTICATE, checkLocalAuth);
 }
@@ -421,6 +433,10 @@ function* onUnlinkProvider() {
     yield takeLatest(AUTH_UNLINK, unlinkProviderFromAccount);
 }
 
+function* onAccountDelete() {
+    yield takeLatest(USER_DELETE, deleteUserAccount);
+}
+
 /* ** ** ** ** **  ** ** ** ** ** ** */
 
 function* routeChanged() {
@@ -450,6 +466,7 @@ function* Sagas() {
         onLinkProvider(),
         onProviderAuthAttempt(),
         onUnlinkProvider(),
+        onAccountDelete(),
     ]);
 }
 
