@@ -1,6 +1,12 @@
 {
     "presets": [
-        "env",
+        ["env", {
+            "targets": {
+                "browsers": [
+                    "last 2 Chrome versions"
+                ]
+            }
+        }],
         "stage-2"
     ],
     "plugins": [
