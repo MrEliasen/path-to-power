@@ -19,6 +19,7 @@ import Loading from '../ui/loading';
 
 // Redux
 import {socketConnect} from './actions';
+import Verified from '../verified';
 
 class App extends React.Component {
     constructor(props) {
@@ -135,6 +136,7 @@ class App extends React.Component {
                                 })
                             }
                             <Route path="/auth" render={() => this.renderGameRoute(<AuthContainer/>)} />
+                            <Route path="/verified" component={Verified} />
                             <Route path="/game" render={() => this.renderGameRoute(<GameContainer/>)} />
                             <Route path="/account" render={() => this.renderGameRoute(<AccountContainer/>)} />
                             <Route component={PageNotFound} />

@@ -366,51 +366,35 @@ export function createUser(req, res) {
  * @param  {Express Response} res
  */
 export function verifyEmail(req, res) {
+    const redirectUrl = `${req.app.get('config').clientUrl}/verified`;
+
     if (!req.query.token || !req.query.token.length) {
-        return res.status(400).json({
-            status: 400,
-            error: 'Missing verification token.',
-        });
+        return res.redirect(`${redirectUrl}?error=Missing verification token`);
     }
 
     if (req.query.token.length !== 64) {
-        return res.status(400).json({
-            status: 400,
-            error: 'Invalid verification token.',
-        });
+        return res.redirect(`${redirectUrl}?error=Invalid verification token`);
     }
 
     UserModel.findOne({_id: escape(req.params.userId), activationToken: escape(req.query.token)}, async (err, user) => {
         if (err) {
-            return res.status(500).json({
-                status: 500,
-                error: 'Something went wrong. Please try again in a moment.',
-            });
+            return res.redirect(`${redirectUrl}?error=Something went wrong. Please try again in a moment`);
         }
 
         if (!user || !user.newEmail) {
-            return res.status(400).json({
-                status: 400,
-                error: 'Invalid verification token.',
-            });
+            return res.redirect(`${redirectUrl}?error=Invalid verification token`);
         }
 
         const conflict = await checkEmailExists(user.newEmail, req.app.get('logger'));
 
         // check if an error occured
         if (conflict === 500) {
-            return res.status(500).json({
-                status: 500,
-                error: 'Something went wrong. Please try again in a moment.',
-            });
+            return res.redirect(`${redirectUrl}?error=Something went wrong. Please try again in a moment`);
         }
 
         // If the email was already in use
         if (conflict) {
-            return res.status(409).json({
-                status: 409,
-                error: 'An account is already signed up using that email.',
-            });
+            return res.redirect(`${redirectUrl}?error=An account is already signed up using that email`);
         }
 
         // activate the user and remove the token
@@ -420,10 +404,7 @@ export function verifyEmail(req, res) {
 
         user.save((err) => {
             if (err) {
-                return res.status(500).json({
-                    status: 500,
-                    error: 'Sometihng went wrong. Please try again in a moment.',
-                });
+                return res.redirect(`${redirectUrl}?error=Sometihng went wrong. Please try again in a moment`);
             }
 
             res.redirect(`${req.app.get('config').clientUrl}/verified`);
