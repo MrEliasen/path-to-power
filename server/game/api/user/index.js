@@ -2,6 +2,8 @@ import activationEmail from '../../data/emails/activation.js';
 import verificationEmail from '../../data/emails/verification.js';
 import IdentityModel from '../models/identity';
 import UserModel from '../models/user';
+import CharacterModel from '../../components/character/model';
+import FactionModel from '../../components/faction/model';
 import uuid from 'uuid/v4';
 import crypto from 'crypto';
 
@@ -160,8 +162,50 @@ export function updateUser(req, res) {
  * @param  {Express Request} req
  * @param  {Express Response} res
  */
-export function deleteUser(req, res) {
+export async function deleteUser(req, res) {
+    try {
+        const user = await UserModel.findOneAsync({ _id: req.user._id });
 
+        if (!user) {
+            return res.status(401).json({
+                status: 401,
+                error: 'Invalid authentication token.',
+            });
+        }
+
+        const characters = await CharacterModel.findAsync({user_id: user._id.toString()});
+
+        if (characters) {
+            const characterIDs = characters.map((obj) => {
+                return obj._id.toString();
+            });
+
+            const factions = await FactionModel.findAsync({leader_id: {$in: characterIDs}});
+
+            if (factions && factions.length > 0) {
+                return res.status(400).json({
+                    status: 400,
+                    error: 'You cannot delete your account while one or more of your characters are the leader of a faction.',
+                });
+            }
+
+            await Promise.all(characters.map((obj) => obj.removeAsync()));
+        }
+
+        await IdentityModel.deleteManyAsync({userId: user._id});
+        await user.removeAsync();
+
+        return res.json({
+            status: 200,
+        });
+    } catch (err) {
+        req.app.get('logger').error(err);
+
+        return res.status(500).json({
+            status: 500,
+            error: 'Something went wrong. Please try again in a moment.',
+        });
+    }
 }
 
 /**

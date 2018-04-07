@@ -37,6 +37,7 @@ import {
 import {
     USER_DETAILS_GET,
     USER_DETAILS_UPDATE,
+    USER_DELETE,
 } from './components/account/types';
 
 // misc
@@ -382,7 +383,10 @@ function* deleteUserAccount(action) {
         return;
     }
 
-    yield put(response);
+    yield put({
+        type: USER_LOGOUT,
+        payload: null,
+    });
 }
 
 function* onAuthAttempt() {

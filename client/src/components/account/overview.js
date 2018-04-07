@@ -13,9 +13,11 @@ import {
     PopoverHeader,
     PopoverBody,
 } from 'reactstrap';
+import Notification from '../ui/notification';
 
 // actions
 import {deleteAccount} from './actions';
+import {setLoading} from '../app/actions';
 
 class AccountDetails extends React.Component {
     constructor(props) {
@@ -23,6 +25,7 @@ class AccountDetails extends React.Component {
 
         this.state ={
             popoverOpen: false,
+            deleting: false,
         };
 
         this.togglePopover = this.togglePopover.bind(this);
@@ -36,6 +39,8 @@ class AccountDetails extends React.Component {
     }
 
     doDelete() {
+        this.togglePopover();
+        this.props.setLoading('Processing your request, one moment..');
         this.props.deleteAccount(this.props.userId, this.props.authToken);
     }
 
@@ -87,8 +92,9 @@ class AccountDetails extends React.Component {
                             }
                         </tbody>
                     </Table>
+                    <Notification />
                     <div className="dangerzone">
-                        <p>If you would like to permanently delete your account you can here. This is an irreversible action!</p>
+                        <p>This is where you can permanently delete your account. This is an irreversible action!</p>
                         <Button id="delete-account" onClick={this.togglePopover} color="danger">Delete Account</Button>
                         <Popover
                             placement="bottom-start"
@@ -127,6 +133,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
         return bindActionCreators({
             deleteAccount,
+            setLoading,
         }, dispatch);
 }
 
