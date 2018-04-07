@@ -1,4 +1,10 @@
-import {CONNECTION_STATUS, SOCKET_CONNECT, SOCKET_SEND} from './types';
+import {
+    CONNECTION_STATUS,
+    SOCKET_CONNECT,
+    SOCKET_SEND,
+    LOADING_SET,
+    LOADING_CLEAR,
+} from './types';
 
 export function setConnectionStatus(connected, connectedEvent) {
     return {
@@ -17,10 +23,25 @@ export function socketConnect() {
     };
 }
 
-
 export function socketSend(action) {
     return {
         type: SOCKET_SEND,
         payload: action,
+    };
+}
+
+export function setLoading(loadingMessage) {
+    return {
+        type: LOADING_SET,
+        payload: {
+            message: loadingMessage,
+        },
+    };
+}
+
+export function clearLoading() {
+    return {
+        type: LOADING_CLEAR,
+        payload: null,
     };
 }

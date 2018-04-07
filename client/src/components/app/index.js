@@ -15,6 +15,7 @@ import Header from './header';
 // UI
 import {Container} from 'reactstrap';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import Loading from '../ui/loading';
 
 // Redux
 import {socketConnect} from './actions';
@@ -141,6 +142,7 @@ class App extends React.Component {
                     </Container>
                 </main>
                 <a href={this.state.issueUrl} target="_blank" className="btn btn-primary" id="bug"><FontAwesomeIcon icon="bug" />Found a bug?</a>
+                <Loading />
             </React.Fragment>
         );
     }

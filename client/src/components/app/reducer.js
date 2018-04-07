@@ -3,12 +3,18 @@ import {
     CONNECTION_SOCKET,
     NOTIFICATION_SET,
     NOTIFICATION_CLEAR,
+    LOADING_SET,
+    LOADING_CLEAR,
 } from './types';
+
+import {USER_LOGOUT} from 'shared/actionTypes';
 
 const defaultState = {
     connected: false,
     connectedEvent: false,
     socket: null,
+    loading: null,
+    notification: null,
 };
 
 export default function(state = defaultState, action) {
@@ -27,11 +33,23 @@ export default function(state = defaultState, action) {
             return {
                 ...state,
                 notification: action.payload,
+                loading: null,
             };
         case NOTIFICATION_CLEAR:
             return {
                 ...state,
                 notification: null,
+            };
+        case LOADING_SET:
+            return {
+                ...state,
+                loading: action.payload,
+            };
+        case USER_LOGOUT:
+        case LOADING_CLEAR:
+            return {
+                ...state,
+                loading: null,
             };
     }
 
