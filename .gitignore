@@ -4,3 +4,6 @@
 
 # extension files
 .todo
+
+# OS files
+.DS_STORE
