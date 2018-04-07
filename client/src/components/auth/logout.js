@@ -10,9 +10,9 @@ class AuthLogout extends React.Component {
     render() {
         return (
             <Card className="card-small">
-                <CardHeader>You are now logged out :(</CardHeader>
+                <CardHeader>You have been logged out</CardHeader>
                 <CardBody>
-                    <p>Sad to see you go. Please come back!</p>
+                    <p>Sad to see you go, but hope to see you again some other time!</p>
                 </CardBody>
             </Card>
         );
