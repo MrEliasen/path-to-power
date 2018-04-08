@@ -3,6 +3,7 @@ import verificationEmail from '../../data/emails/verification.js';
 import IdentityModel from '../models/identity';
 import UserModel from '../models/user';
 import CharacterModel from '../../components/character/model';
+import ItemModel from '../../components/item/model';
 import FactionModel from '../../components/faction/model';
 import uuid from 'uuid/v4';
 import crypto from 'crypto';
@@ -189,10 +190,11 @@ export async function deleteUser(req, res) {
                 });
             }
 
+            await ItemModel.deleteManyAsync({ character_id: { $in: characterIDs } });
             await Promise.all(characters.map((obj) => obj.removeAsync()));
         }
 
-        await IdentityModel.deleteManyAsync({userId: user._id});
+        await IdentityModel.deleteManyAsync({ userId: user._id });
         await user.removeAsync();
 
         return res.json({
