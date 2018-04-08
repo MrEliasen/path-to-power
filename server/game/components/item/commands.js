@@ -295,7 +295,7 @@ module.exports = [
         description: 'Pickup an item from the ground. If the name is omitted, the first item will be picked up.',
         method: cmdPickup,
     },
-    {
+    /*{
         command: '/giveitem',
         aliases: [],
         params: [
@@ -312,5 +312,5 @@ module.exports = [
         ],
         description: 'Gives an item to the player.',
         method: cmdGiveItem,
-    },
+    },*/
 ];
