@@ -35,7 +35,7 @@ import {
  * @param  {HTTP/S}  webserver The HTTP/s webserver
  * @param  {Express} app       Express app
  */
-export default function(app, config) {
+export default function(app, webServer, config) {
     app.set('config', config);
     app.use(bodyParser.json());
     app.use(helmet());
@@ -139,6 +139,6 @@ export default function(app, config) {
     app.use('/api', routes);
 
     // listen on port 80
-    app.listen(config.api.port);
+    webServer.listen(config.api.port);
     console.log(`API listening on port ${config.api.port}`);
 };

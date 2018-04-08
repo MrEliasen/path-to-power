@@ -73,7 +73,7 @@ mongoose.connect(config.mongo_db).then(
 
         const GameServer = new Game(webServer, config, logger);
         // eslint-disable-next-line
-        const RestServer = API(app, config);
+        const RestServer = API(app, webServer, config);
 
         // On shutdown signal, gracefully shutdown the game server.
         process.on('SIGTERM', async function() {
