@@ -46,15 +46,36 @@ export default function(app, config) {
     app.use(contentFilter({
         methodList: ['GET', 'POST'],
     }));
-    app.set('mailer', nodemailer.createTransport({
-            host: config.mailserver.host,
-            port: config.mailserver.port,
-            auth: {
-                user: process.env.MAILER_USER,
-                pass: process.env.MAILER_PASSWORD,
-            },
-        })
-    );
+
+    // setup mailer service
+    let mailerTransport;
+
+    switch (config.mailserver.transport) {
+        case 'sendgrid':
+            const sgTransport = require('nodemailer-sendgrid-transport');
+
+            mailerTransport = sgTransport({
+                service: 'SendGrid',
+                auth: {
+                    api_user: process.env.MAILER_USER,
+                    api_key: process.env.MAILER_PASSWORD,
+                }
+            });
+            break;
+
+        default:
+            mailerTransport = {
+                host: config.mailserver.host,
+                port: config.mailserver.port,
+                auth: {
+                    user: process.env.MAILER_USER,
+                    pass: process.env.MAILER_PASSWORD,
+                },
+            };
+            break;
+    }
+
+    app.set('mailer', nodemailer.createTransport(mailerTransport));
 
     // Set needed headers for the application.
     app.use(function(req, res, next) {

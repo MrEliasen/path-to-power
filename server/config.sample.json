@@ -10,6 +10,7 @@
         }
     },
     "mailserver": {
+        "transport": "smtp",
         "host": "smtp.mailserver.tld",
         "port": 587,
         "sender": "Name <email@address>"
