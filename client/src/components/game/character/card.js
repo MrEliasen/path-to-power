@@ -27,7 +27,7 @@ class CharacterCard extends React.Component {
                     <Progress color="info" value={1} max={1}>Reputation: {this.props.character.stats.exp || 0}</Progress>
 
                     <Progress multi>
-                        <Progress bar color="danger" value="50">Cash: {this.props.character.stats.cash || 0}</Progress>
+                        <Progress bar color="danger" value="50">Cash: {this.props.character.stats.money || 0}</Progress>
                         <Progress bar color="danger" value="50">Bank: {this.props.character.stats.bank || 0}</Progress>
                     </Progress>
                     {
