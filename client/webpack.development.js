@@ -15,7 +15,6 @@ module.exports = {
         './src/index.js',
     ],
     mode: 'development',
-    target: 'web',
     devtool: '#inline-source-map',
     devServer: {
             historyApiFallback: true,

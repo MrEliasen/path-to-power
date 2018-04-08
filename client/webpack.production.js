@@ -8,6 +8,7 @@ const path = require('path');
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
+// const Visualizer = require('webpack-visualizer-plugin');
 
 module.exports = {
     entry: [
@@ -15,7 +16,7 @@ module.exports = {
         './src/index.js',
     ],
     mode: 'production',
-    devtool: '#inline-source-map',
+    devtool: 'cheap-module-source-map',
     output: {
         // the output bundle
         path: path.resolve(__dirname, 'dist'),
@@ -115,6 +116,17 @@ module.exports = {
             },
         ],
     },
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                commons: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: 'vendors',
+                    chunks: 'all',
+                },
+            },
+        },
+    },
     plugins: [
         new webpack.LoaderOptionsPlugin({
             debug: false,
@@ -125,8 +137,11 @@ module.exports = {
             allChunks: true,
         }),
         new HTMLWebpackPlugin({
-                template: 'index.html',
-                inject: true,
+            template: 'index.html',
+            inject: true,
         }),
+        // new Visualizer({
+        //     filename: './statistics.html',
+        // }),
     ],
 };
