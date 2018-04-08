@@ -189,7 +189,7 @@ export function passwordReset(req, res) {
             }
 
             // check if we already sent an email in the last 15 mins
-            if (user.passwordReset && user.passwordRset.created > new Date().getTime() - (15 * 60 * 1000)) {
+            if (user.passwordReset && user.passwordReset.created > new Date().getTime() - (15 * 60 * 1000)) {
                 return res.json({
                     status: 200,
                     message: 'If the email you entered was valid, you should receive a reset link momentarily!',
