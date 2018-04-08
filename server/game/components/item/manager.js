@@ -293,7 +293,7 @@ export default class ItemManager {
      * @return {Promise}
      */
     async loadCharacterInventory(character) {
-        const items = await ItemModel.findAsync({user_id: character.user_id}, {_id: 1, item_id: 1, modifiers: 1, inventorySlot: 1});
+        const items = await ItemModel.findAsync({character_id: character._id.toString()}, {_id: 1, item_id: 1, modifiers: 1, inventorySlot: 1});
 
         return items.map((item) => {
             let newItem = this.add(item.item_id, item.modifiers, item._id);
@@ -313,7 +313,7 @@ export default class ItemManager {
         if (character.inventory.length) {
             await Promise.all(character.inventory.map(async (item) => {
                 try {
-                    return await this.dbSave(character.user_id, item);
+                    return await this.dbSave(character._id, item);
                 } catch (err) {
                     this.Game.onError(err);
                 }
@@ -340,19 +340,19 @@ export default class ItemManager {
             }
         });
 
-        return ItemModel.deleteManyAsync({user_id: character.user_id, _id: {$nin: itemDbIds}});
+        return ItemModel.deleteManyAsync({character_id: character._id.toString(), _id: {$nin: itemDbIds}});
     }
 
     /**
      * Saves the item in the databse
-     * @param  {String} user_id the user id of the owner
+     * @param  {String} character_id the charcter id of the owner
      * @param  {Item Object} item the Item object to save
      * @return {Mongoose Object}      The mongoose object of the newly saved item
      */
-    async dbCreate(user_id, item) {
+    async dbCreate(character_id, item) {
         // create a new item model
         const newItem = new ItemModel({
-            user_id,
+            character_id,
             item_id: item.id,
             modifiers: item.getModifiers(),
             inventorySlot: item.inventorySlot,
@@ -367,20 +367,20 @@ export default class ItemManager {
 
     /**
      * Saves an Item Object in the DB, creates a new entry if no existing is found for the item.
-     * @param  {String} user_id  User ID of the item owner
+     * @param  {String} character_id  Character ID of the item owner
      * @param  {Item Object} item
      * @return {[type]}         [description]
      */
-    async dbSave(user_id, item) {
-        if (!user_id) {
-            return reject(new Error('Missing user_id'));
+    async dbSave(character_id, item) {
+        if (!character_id) {
+            return reject(new Error('Missing character_id'));
         }
 
         // retrive item from database if it has a "_id", so we can update it.
         const loadedItem = await this.dbLoad(item);
 
         if (!loadedItem) {
-            return await this.dbCreate(user_id, item);
+            return await this.dbCreate(character_id, item);
         }
 
         loadedItem.modifiers = item.getModifiers();

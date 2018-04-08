@@ -4,7 +4,7 @@ import moment from 'moment';
 
 // Define our product schema
 const ItemSchema = new mongoose.Schema({
-    user_id: {
+    character_id: {
         type: String,
         required: true,
     },
