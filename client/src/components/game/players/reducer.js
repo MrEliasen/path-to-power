@@ -1,6 +1,5 @@
 import {PLAYERS_MENU_TOGGLE} from './types';
 import {INVENTORY_MENU_TOGGLE} from '../inventory-menu/types';
-import {STATS_MENU_TOGGLE} from './types';
 import {CHARACTER_REMOTE_LOGOUT} from 'shared/actionTypes';
 
 const defaultState = {
@@ -15,7 +14,6 @@ export default function(state = defaultState, action) {
             };
 
         case INVENTORY_MENU_TOGGLE:
-        case STATS_MENU_TOGGLE:
             return {
                 open: false,
             };
