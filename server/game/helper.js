@@ -67,3 +67,12 @@ export function findObjectInArray(list, compareProperty = 'name', searchString) 
         return obj[compareProperty].toLowerCase().indexOf(searchString) === 0;
     });
 }
+
+/**
+ * Formats a number to 2 decimal points
+ * @param  {Number} number The number to format
+ * @return {Number}
+ */
+export function formatNumberDecimal(number) {
+    return Math.max(0, Math.round(number * 100) / 100);
+}

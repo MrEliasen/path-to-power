@@ -1,3 +1,9 @@
 # floobits
 .floo
 .flooignore
+
+# extension files
+.todo
+
+# OS files
+.DS_STORE

@@ -1,4 +1,4 @@
-import {CHAT_MESSAGE} from './types';
+import {COMMAND_CHAT_MESSAGE} from 'shared/actionTypes';
 
 /**
  * Check if there is an active cooldown or not, for chatting
@@ -40,8 +40,8 @@ function cmdGlobal(socket, character, command, params, cmdObject, Game) {
 
     // check for cooldowns
     checkChatCooldown(character, Game, () => {
-        Game.socketManager.dispatchToServer({
-            type: CHAT_MESSAGE,
+        Game.socketManager.dispatchToRoom('game', {
+            type: COMMAND_CHAT_MESSAGE,
             payload: {
                 user_id: character.user_id,
                 name: character.name,
@@ -72,7 +72,7 @@ function cmdSay(socket, character, command, params, cmdObject, Game) {
     // check for cooldowns
     checkChatCooldown(character, Game, () => {
         Game.socketManager.dispatchToRoom(`${character.location.map}_${character.location.y}_${character.location.x}`, {
-            type: CHAT_MESSAGE,
+            type: COMMAND_CHAT_MESSAGE,
             payload: {
                 user_id: character.user_id,
                 name: character.name,
@@ -100,7 +100,7 @@ function cmdWhisper(socket, character, command, params, cmdObject, Game) {
 
         // send message to the socket
         Game.socketManager.dispatchToSocket(socket, {
-            type: CHAT_MESSAGE,
+            type: COMMAND_CHAT_MESSAGE,
             payload: {
                 type: 'whisper-out',
                 user_id: whisperTarget.user_id,
@@ -110,7 +110,7 @@ function cmdWhisper(socket, character, command, params, cmdObject, Game) {
         });
         // send message to the target user
         Game.socketManager.dispatchToUser(whisperTarget.user_id, {
-            type: CHAT_MESSAGE,
+            type: COMMAND_CHAT_MESSAGE,
             payload: {
                 type: 'whisper-in',
                 user_id: character.user_id,

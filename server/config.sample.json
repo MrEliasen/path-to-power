@@ -1,9 +1,6 @@
 {
     "mongo_db": "mongodb://localhost:27017/ptp",
-    "redis_server": "//localhost:6379",
-    "twitch": {
-        "clientId": ""
-    },
+    "clientUrl": "http://localhost:8080",
     "server": {
         "port": 8086,
         "certificate": {
@@ -12,8 +9,39 @@
             "ca": ""
         }
     },
+    "mailserver": {
+        "host": "smtp.mailserver.tld",
+        "port": 587,
+        "sender": "Name <email@address>"
+    },
+    "api": {
+        "domain": "http://localhost",
+        "port": 8087,
+        "authentication": {
+            "password": {
+                "rounds": 11,
+                "minlen": 8
+            },
+            "providers": [
+                {
+                    "id": "passport-strategy-name",
+                    "package": "<passport-strategy-package-name>",
+                    "enabled": false,
+                    "clientID": "",
+                    "name": "Template",
+                    "scope": []
+                },
+                {
+                    "id": "local",
+                    "package": "local",
+                    "enabled": true,
+                    "activationLink": true
+                }
+            ]
+        }
+    },
     "game": {
-        "logout_timer": 5000,
+        "logout_timer": 10000,
         "defaultStats": {
             "health_max": 100,
             "money": 300,
@@ -31,7 +59,7 @@
                 "interval": 1800000
             }
         ],
-        "playerCooldowns":  {
+        "cooldowns":  {
             "move": 0.3,
             "attack": 2.0,
             "aim": 1.0,

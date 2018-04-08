@@ -1,4 +1,4 @@
-import {JOINED_GRID} from './types';
+import {CHARACTER_JOINED_GRID} from 'shared/actionTypes';
 
 /**
  * Redux action creator
@@ -7,7 +7,7 @@ import {JOINED_GRID} from './types';
  */
 export function joinedGrid(character) {
     return {
-        type: JOINED_GRID,
+        type: CHARACTER_JOINED_GRID,
         payload: character,
     };
 }

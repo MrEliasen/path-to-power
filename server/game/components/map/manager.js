@@ -1,10 +1,14 @@
 import fs from 'fs';
-import Promise from 'bluebird';
 
 // manager specific imports
+import {
+    MAP_GRID_DETAILS,
+    MAP_GET_LIST,
+    MAP_LIST,
+} from 'shared/actionTypes';
+
 import GameMap from './object';
 import descriptionList from '../../data/descriptions.json';
-import {JOIN_GRID} from './types';
 import mapCommands from './commands';
 
 /**
@@ -19,6 +23,8 @@ export default class MapManager {
         this.Game = Game;
         // the list of maps to manage
         this.maps = {};
+        // listen for dispatches from the socket manager
+        this.Game.socketManager.on('dispatch', this.onDispatch.bind(this));
     }
 
     /**
@@ -42,6 +48,33 @@ export default class MapManager {
         });
 
         console.log('MAP MANAGER LOADED');
+    }
+
+    /**
+     * checks for dispatches, and reacts only if the type is listend to
+     * @param  {Socket.IO Socket} socket Client who dispatched the action
+     * @param  {Object} action The redux action
+     */
+    onDispatch(socket, action) {
+        switch (action.type) {
+            case MAP_GET_LIST:
+                return this.sendMapList(socket, action);
+        }
+
+        return null;
+    }
+
+    /**
+     * Dispatches the list of available maps to the client
+     * @param  {Socket.io Socket} socket The socket the request is from
+     */
+    sendMapList(socket) {
+        const list = this.getList();
+
+        this.Game.socketManager.dispatchToSocket(socket, {
+            type: MAP_LIST,
+            payload: list,
+        });
     }
 
     /**
@@ -72,8 +105,13 @@ export default class MapManager {
 
         // dispatch to client
         this.Game.socketManager.dispatchToUser(user_id, {
-            type: JOIN_GRID,
+            type: MAP_GRID_DETAILS,
             payload: {
+                location: {
+                    map: character.location.map,
+                    x: character.location.x,
+                    y: character.location.y,
+                },
                 description: this.generateDescription(),
                 players: this.Game.characterManager.getLocationList(...location, character.user_id, true),
                 npcs: this.Game.npcManager.getLocationList(...location, true),
@@ -127,6 +165,7 @@ export default class MapManager {
             list[mapId] = {
                 name: this.maps[mapId].name,
                 buildings: this.Game.structureManager.getMapData(mapId),
+                gridSize: this.maps[mapId].gridSize,
             };
         });
 

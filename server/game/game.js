@@ -1,9 +1,8 @@
 import Promise from 'bluebird';
 import child_process from 'child_process';
-import Logger from './components/logger';
 
 // component manager
-import AccountManager from './components/account/manager';
+import UserManager from './components/user/manager';
 import CharacterManager from './components/character/manager';
 import SocketManager from './components/socket/manager';
 import MapManager from './components/map/manager';
@@ -29,11 +28,17 @@ class Game {
      * @param  {Express} server Express/http server object
      * @param  {Object}  config The server config file object
      */
-    constructor(server, config, autoInit = true) {
+    constructor(server, config, logger, autoInit = true) {
         this.config = config;
 
+        // if we are not in a production environment, add console logging as well
+        if (process.env.NODE_ENV === 'development') {
+            // enable long stack traces to promises, while in dev
+            Promise.longStackTraces();
+        }
+
         // setup the winston logger
-        this.setupLogger();
+        this.logger = logger;
 
         // will hold the latest commit ID of the server
         this.version = '';
@@ -43,7 +48,7 @@ class Game {
 
         // Manager placeholders
         this.socketManager = new SocketManager(this, server);
-        this.accountManager = new AccountManager(this);
+        this.userManager = new UserManager(this);
         this.characterManager = new CharacterManager(this);
         this.mapManager = new MapManager(this);
         this.structureManager = new StructureManager(this);
@@ -61,27 +66,6 @@ class Game {
             // load game data
             this.init();
         }
-    }
-
-    /**
-     * Creates our logger we will be using throughout
-     */
-    setupLogger() {
-        this.logger = new Logger({
-            level: (process.env.NODE_ENV === 'development' ? 'info' : 'error'),
-            debugFile: './game.debug.log',
-            infoFile: './game.info.log',
-            warnFile: './game.warn.log',
-            errorFile: './game.error.log',
-        });
-
-        // if we are not in a production environment, add console logging as well
-        if (process.env.NODE_ENV === 'development') {
-            // enable long stack traces to promises, while in dev
-            Promise.longStackTraces();
-        }
-
-        this.logger.info('Logger initiated.');
     }
 
     /**
@@ -123,7 +107,7 @@ class Game {
             case 'newday':
                 // NOTE: if you want to add anything to the "new day" timer, do it here
                 await this.shopManager.resupplyAll();
-                this.socketManager.dispatchToServer(addNews('The sun rises once again, and wave of new drugs flood the streets.'));
+                this.socketManager.dispatchToRoom('game', addNews('The sun rises once again, and wave of new drugs flood the streets.'));
        }
     }
 
@@ -164,15 +148,12 @@ class Game {
      */
     sendMotdToSocket(socket) {
         this.eventToSocket(socket, 'multiline', [
-            ' ██▓███   ▄▄▄     ▄▄▄█████▓ ██░ ██    ▄▄▄█████▓ ▒█████      ██▓███   ▒█████   █     █░▓█████  ██▀███  ',
-            '▓██░  ██▒▒████▄   ▓  ██▒ ▓▒▓██░ ██▒   ▓  ██▒ ▓▒▒██▒  ██▒   ▓██░  ██▒▒██▒  ██▒▓█░ █ ░█░▓█   ▀ ▓██ ▒ ██▒',
-            '▓██░ ██▓▒▒██  ▀█▄ ▒ ▓██░ ▒░▒██▀▀██░   ▒ ▓██░ ▒░▒██░  ██▒   ▓██░ ██▓▒▒██░  ██▒▒█░ █ ░█ ▒███   ▓██ ░▄█ ▒',
-            '▒██▄█▓▒ ▒░██▄▄▄▄██░ ▓██▓ ░ ░▓█ ░██    ░ ▓██▓ ░ ▒██   ██░   ▒██▄█▓▒ ▒▒██   ██░░█░ █ ░█ ▒▓█  ▄ ▒██▀▀█▄  ',
-            '▒██▒ ░  ░ ▓█   ▓██▒ ▒██▒ ░ ░▓█▒░██▓     ▒██▒ ░ ░ ████▓▒░   ▒██▒ ░  ░░ ████▓▒░░░██▒██▓ ░▒████▒░██▓ ▒██▒',
-            '▒▓▒░ ░  ░ ▒▒   ▓▒█░ ▒ ░░    ▒ ░░▒░▒     ▒ ░░   ░ ▒░▒░▒░    ▒▓▒░ ░  ░░ ▒░▒░▒░ ░ ▓░▒ ▒  ░░ ▒░ ░░ ▒▓ ░▒▓░',
-            '░▒ ░       ▒   ▒▒ ░   ░     ▒ ░▒░ ░       ░      ░ ▒ ▒░    ░▒ ░       ░ ▒ ▒░   ▒ ░ ░   ░ ░  ░  ░▒ ░ ▒░',
-            '░░         ░   ▒    ░       ░  ░░ ░     ░      ░ ░ ░ ▒     ░░       ░ ░ ░ ▒    ░   ░     ░     ░░   ░ ',
-            `Revision: ${this.version.toUpperCase()}           ░  ░  ░                ░ ░                  ░ ░      ░       ░  ░   ░     `,
+            ' _____      _   _       _______      _____',
+            `|  __ \\    | | | |     |__   __|    |  __ \\ Revision: ${this.version.toUpperCase()}`,
+            '| |__) |_ _| |_| |__      | | ___   | |__) |____      _____ _ __ ',
+            '|  ___/ _` | __| \'_ \\     | |/ _ \\  |  ___/ _ \\ \\ /\\ / / _ \\ \'__|',
+            '| |  | (_| | |_| | | |    | | (_) | | |  | (_) \\ V  V /  __/ |',
+            '|_|   \\__,_|\\__|_| |_|    |_|\\___/  |_|   \\___/ \\_/\\_/ \\___|_|',
             'OPEN SOURCE: https://github.com/MrEliasen/path-to-power',
             'HOW TO PLAY: Click the menu in the top-right.',
             'IN-GAME HELP: If you want get help without leading the game, type: /help',
@@ -222,7 +203,7 @@ class Game {
      */
     eventToServer(type, message, ignore) {
         this.logger.debug('Server Event', {type, message, ignore});
-        this.socketManager.dispatchToServer(newEvent(type, message, ignore));
+        this.socketManager.dispatchToRoom('game', newEvent(type, message, ignore));
     }
 
     /**

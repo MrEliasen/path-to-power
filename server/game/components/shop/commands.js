@@ -1,4 +1,4 @@
-import {SHOP_LOAD} from '../../../shared/types';
+import {SHOP_LOAD} from 'shared/actionTypes';
 
 /**
  * shop command logic
@@ -65,7 +65,10 @@ function cmdBuy(socket, character, command, params, cmdObject, Game) {
     if (!npcName) {
         NPC = NPCs[0];
     } else {
-        NPC = NPCs.find((obj) => obj.name.toLowerCase().indexOf(npcName.toLowerCase()) === 0);
+        NPC = NPCs.find((obj) => {
+            const name = `${obj.name} the ${obj.type}`.toLowerCase();
+            return name.indexOf(npcName.toLowerCase()) === 0;
+        });
     }
 
     // if there are no NPC with that name, let them know

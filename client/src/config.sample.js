@@ -2,12 +2,11 @@ const Config = {
     socket: {
         host: 'http://localhost:8086',
     },
-    twitch: {
-        callbackUrl: 'http://localhost:8080/auth',
-        clientId: '',
-        scope: [
-            'user_read',
-        ],
+    api: {
+        host: 'http://localhost:8087',
+    },
+    caching: { // in seconds
+        strategies: 300,
     },
 };
 

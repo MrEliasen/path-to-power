@@ -1,6 +1,5 @@
-import Promise from 'bluebird';
 import escapeStringRegex from 'escape-string-regexp';
-import {GAME_COMMAND} from './types';
+import {COMMAND_CHAT_COMMAND} from 'shared/actionTypes';
 import commandCommands from './commands';
 import {deepCopyObject} from '../../helper';
 
@@ -82,12 +81,19 @@ export default class CommandManager {
      * @param  {Socket.IO Socket} socket Client who dispatched the action
      * @param  {Object}           action The redux action
      */
-    onDispatch(socket, action) {
-        if (action.type !== GAME_COMMAND) {
+    async onDispatch(socket, action) {
+        if (action.type !== COMMAND_CHAT_COMMAND) {
             return;
         }
 
         if (!action.payload) {
+            return;
+        }
+
+        // Check to see if it's an object and if it's empty as well
+        // This bug happens when a player sends an empty string as a command
+        // and the socket manager converting empty strings into an empty object: socket/manager.js:161
+        if (action.payload.constructor === Object && Object.keys(action.payload).length === 0) {
             return;
         }
 
@@ -105,13 +111,15 @@ export default class CommandManager {
         }
 
         const character = this.Game.characterManager.get(socket.user.user_id);
+        // true by default, as we assume all commands are only meant for in-game use; unless explicitly told otherwise
+        const inGameCommand = typeof this.commands[command].inGameCommand === 'undefined' ? true : this.commands[command].inGameCommand;
 
-        if (!character) {
+        if (!character && inGameCommand) {
             return;
         }
 
         try {
-            const parsedParams = this.validate(character, params, this.commands[command].params);
+            const parsedParams = await this.validate(character, params, this.commands[command].params, socket);
 
             // If the params is a string and not an array, something went wrong
             if (typeof parsedParams === 'string') {
@@ -193,24 +201,24 @@ export default class CommandManager {
      * @param  {Object}   location      A character/npc location object
      * @param  {Bool}     ignoreNPCs    Whether to include NPCs or not
      * @param  {Bool}     ignorePlayers Whether to include players or not
-     * @param  {String}   playerId      Player who we should exclude from the list
+     * @param  {String}   user_id       The character ID of the user who we should exclude from the list
      */
-    findAtLocation(findName, location, ignoreNPCs = false, ignorePlayers = false, playerId = null) {
+    findAtLocation(findName, location, ignoreNPCs = false, ignoreCharacters = false, user_id = null) {
         // get he list of players and NPCS at the grid
-        const playersAtGrid = this.Game.characterManager.getLocationList(location.map, location.x, location.y);
+        const charactersAtGrid = this.Game.characterManager.getLocationList(location.map, location.x, location.y);
         const NPCsAtGrid = this.Game.npcManager.getLocationList(location.map, location.x, location.y);
         let characters = [];
 
-        if (!ignorePlayers) {
+        if (!ignoreCharacters) {
             // Find target matching the name exactly
-            characters = playersAtGrid.filter((user) => {
-                return user.name_lowercase === findName && !user.hidden && user.user_id !== playerId;
+            characters = charactersAtGrid.filter((user) => {
+                return user.name_lowercase === findName && !user.hidden && user.user_id !== user_id;
             });
 
             if (!characters.length) {
                 // Otherwise find target matching the beginning of the name
-                characters = playersAtGrid.filter((user) => {
-                    return user.name_lowercase.indexOf(findName) === 0 && !user.hidden && user.user_id !== playerId;
+                characters = charactersAtGrid.filter((user) => {
+                    return user.name_lowercase.indexOf(findName) === 0 && !user.hidden && user.user_id !== user_id;
                 });
             }
         }
@@ -283,12 +291,13 @@ export default class CommandManager {
 
     /**
      * Validates a command's params
-     * @param  {Character} player The character object of the player executing the command
-     * @param  {array}     params Params from the client commandnt command
-     * @param  {array}     rules  Param rules for the command
+     * @param  {Character}        character The character object of the player executing the command
+     * @param  {array}            params    Params from the client commandnt command
+     * @param  {array}            rules     Param rules for the command
+     * @param  {Socket.io Socket} socket    Param rules for the command
      * @return {Promise}
      */
-    validate(player, msgParams, cmdParams) {
+    async validate(character, msgParams, cmdParams, socket) {
         // check if there are any params defined for the command at all
         if (!cmdParams) {
             return [];
@@ -404,8 +413,26 @@ export default class CommandManager {
                             }
                             break;
 
+                        case 'slot':
+                            // make sure the target inventory slot is not another equipment slot
+                            if (!['armour-body', 'weapon-ranged', 'weapon-melee', 'weapon-ammo'].includes(msgParam)) {
+                                // make sure the target inventory slot is within the inventory size range
+                                const inventoryNumber = parseInt(msgParam.replace('inv-', ''), 10);
+
+                                if (isNaN(inventoryNumber) || inventoryNumber < 0 || inventoryNumber >= character.stats.inventorySize) {
+                                    return `The ${param.name} is not a valid inventory slot.`;
+                                }
+                            }
+
+                            value = msgParam;
+                            break;
+
                         case 'shop':
-                            value = this.Game.structureManager.getWithShop(player.location.map, player.location.x, player.location.y);
+                            if (!character) {
+                                return 'Unable to perform command. It requires you to be logged into a character.';
+                            }
+
+                            value = this.Game.structureManager.getWithShop(character.location.map, character.location.x, character.location.y);
 
                             if (value) {
                                 return `The ${param.name} is not a valid shop, at your current location.`;
@@ -434,9 +461,22 @@ export default class CommandManager {
                             }
                             break;
 
+                        case 'character':
+                            value = await this.Game.characterManager.load(socket.user.user_id, msgParam.toLowerCase());
+
+                            // no item found by name or ID
+                            if (!value) {
+                                return `You do not have a character named ${param.name}.`;
+                            }
+                            break;
+
                         case 'player':
                         case 'target':
                         case 'npc':
+                            if (!character) {
+                                return 'Unable to perform command. It requires you to be logged into a character.';
+                            }
+
                             // if there is no rule modifiers, assume no location restrictions
                             // and player (since actions towards NPCs are inherently restricted to grid)
                             if (!rule[1]) {
@@ -450,7 +490,7 @@ export default class CommandManager {
 
                             // assume we will search in the grid by detault
                             let location = {
-                                ...player.location,
+                                ...character.location,
                             };
 
                             // if rule modifier is set to map, null out the x an y so
@@ -465,7 +505,7 @@ export default class CommandManager {
                                 location,
                                 rule[0] === 'player',
                                 rule[0] === 'npc',
-                                player.user_id,
+                                character.user_id,
                             );
 
                             if (typeof value === 'string') {

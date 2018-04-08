@@ -3,27 +3,27 @@ import {routerReducer} from 'react-router-redux';
 
 import AppReducer from './components/app/reducer';
 import AuthReducer from './components/auth/reducer';
-import CharacterReducer from './components/character/reducer';
+import AccountReducer from './components/account/reducer';
+import CharacterReducer from './components/game/character/reducer';
 import GameReducer from './components/game/reducer';
-import EventsReducer from './components/events/reducer';
-import LocationReducer from './components/location/reducer';
-import ShopReducer from './components/shop/reducer';
+import EventsReducer from './components/game/events/reducer';
+import MapReducer from './components/game/map/reducer';
+import ShopReducer from './components/game/shop/reducer';
 
 // refactored reducers
-import InventoryReducer from './components/inventory-menu/reducer';
-import PlayersReducer from './components/players-menu/reducer';
-import StatsReducer from './components/stats-menu/reducer';
+import InventoryReducer from './components/game/inventory-menu/reducer';
+import PlayersReducer from './components/game/players/reducer';
 
 const rootReducer = combineReducers({
     app: AppReducer,
+    auth: AuthReducer,
+    account: AccountReducer,
     inventorymenu: InventoryReducer,
     playersmenu: PlayersReducer,
-    statsmenu: StatsReducer,
-    auth: AuthReducer,
     game: GameReducer,
     character: CharacterReducer,
     events: EventsReducer,
-    location: LocationReducer,
+    map: MapReducer,
     shop: ShopReducer,
     router: routerReducer,
 });

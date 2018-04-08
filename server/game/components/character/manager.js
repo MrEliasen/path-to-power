@@ -2,15 +2,18 @@ import Promise from 'bluebird';
 
 // Manager specific imports
 import {
-    ADD_ONLINE_PLAYER,
-    REMOVE_ONLINE_PLAYER,
-    EQUIP_ITEM,
-    UNEQUIP_ITEM,
-    UPDATE_CHARACTER,
-    MOVE_CHARACTER,
-    LEFT_GRID,
-} from './types';
-import {UPDATE_GROUND_ITEMS} from '../item/types';
+    CHARACTER_ONLINE_ADD,
+    CHARACTER_ONLINE_REMOVE,
+    CHARACTER_UPDATE,
+    CHARACTER_EQUIP_ITEM,
+    CHARACTER_UNEQUIP_ITEM,
+    CHARACTER_MOVE_ITEM,
+    CHARACTER_LEFT_GRID,
+    CHARACTER_MOVE,
+    CHARACTERS_GET_LIST,
+    CHARACTERS_LIST,
+    ITEM_GROUND_ITEMS,
+} from 'shared/actionTypes';
 import Character from './object';
 import CharacterModel from './model';
 import characterCommands from './commands';
@@ -54,12 +57,16 @@ export default class CharacterManager {
      */
     onDispatch(socket, action) {
         switch (action.type) {
-            case UNEQUIP_ITEM:
-                return this.onUnEquip(socket, action);
-            case EQUIP_ITEM:
-                return this.onEquip(socket, action);
-            case MOVE_CHARACTER:
+            case CHARACTER_UNEQUIP_ITEM:
+                return this.onItemUnEquip(socket, action);
+            case CHARACTER_EQUIP_ITEM:
+                return this.onItemEquip(socket, action);
+            case CHARACTER_MOVE_ITEM:
+                return this.onItemMove(socket, action);
+            case CHARACTER_MOVE:
                 return this.move(socket, action);
+            case CHARACTERS_GET_LIST:
+                return this.getCharacterList(socket, action);
         }
 
         return null;
@@ -70,10 +77,10 @@ export default class CharacterManager {
      * @param  {Socket.io Socket} socket The socket the action was dispatched from
      * @param  {Object}           action Redux action object
      */
-    onUnEquip(socket, action) {
+    onItemUnEquip(socket, action) {
         try {
             const character = this.get(socket.user.user_id);
-            character.unEquip(action.payload);
+            character.unEquip(action.payload.inventorySlot, action.payload.targetSlot);
         } catch (err) {
             this.Game.onError(err, socket);
         }
@@ -84,10 +91,24 @@ export default class CharacterManager {
      * @param  {Socket.io Socket} socket The socket the action was dispatched from
      * @param  {Object}           action Redux action object
      */
-    onEquip(socket, action) {
+    onItemEquip(socket, action) {
         try {
             const character = this.get(socket.user.user_id);
-            character.equip(action.payload);
+            character.equip(action.payload.inventorySlot, action.payload.targetSlot);
+        } catch (err) {
+            this.Game.onError(err, socket);
+        }
+    }
+
+    /**
+     * Handles moving inventory item requests from the client.
+     * @param  {Socket.io Socket} socket The socket the action was dispatched from
+     * @param  {Object}           action Redux action object
+     */
+    onItemMove(socket, action) {
+        try {
+            const character = this.get(socket.user.user_id);
+            character.moveItem(action.payload.inventorySlot, action.payload.targetSlot);
         } catch (err) {
             this.Game.onError(err, socket);
         }
@@ -108,7 +129,7 @@ export default class CharacterManager {
         const characterData = character.exportToClient();
 
         this.Game.socketManager.dispatchToUser(user_id, {
-            type: UPDATE_CHARACTER,
+            type: CHARACTER_UPDATE,
             payload: property ? {[property]: characterData[property]} : characterData,
         });
     }
@@ -141,7 +162,7 @@ export default class CharacterManager {
      * @param  {String} user_id The user ID
      * @param  {String} name    Name of the character
      */
-    dispatchUpdatePlayerList(user_id) {
+    dispatchUpdateCharacterList(user_id) {
         const character = this.get(user_id);
 
         if (!character) {
@@ -149,8 +170,8 @@ export default class CharacterManager {
         }
 
         // update the clients online player list
-        this.Game.socketManager.dispatchToServer({
-            type: ADD_ONLINE_PLAYER,
+        this.Game.socketManager.dispatchToRoom('game', {
+            type: CHARACTER_ONLINE_ADD,
             payload: {
                 user_id: character.user_id,
                 name: character.name,
@@ -168,14 +189,40 @@ export default class CharacterManager {
      * Dispatches an event to all sockets, removing a player tfrom the playerlist
      * @param  {String} user_id The user ID
      */
-    dispatchRemoveFromPlayerList(user_id) {
+    dispatchRemoveFromCharacterList(user_id) {
         // update the clients online player list
-        this.Game.socketManager.dispatchToServer({
-            type: REMOVE_ONLINE_PLAYER,
+        this.Game.socketManager.dispatchToRoom('game', {
+            type: CHARACTER_ONLINE_REMOVE,
             payload: {
                 user_id,
             },
         });
+    }
+
+    /**
+     * Fetches a list of all characters for the account
+     * @param  {Socket.io Socket} socket The requesting socket
+     * @param  {Object}           action Redux action object
+     */
+    async getCharacterList(socket, action) {
+        try {
+            const characters = await CharacterModel.findAsync({user_id: socket.user.user_id});
+
+            this.Game.socketManager.dispatchToSocket(socket, {
+                type: CHARACTERS_LIST,
+                payload: characters.map((obj) => {
+                    return {
+                        name: obj.name,
+                        stats: obj.stats,
+                        abilities: obj.abilities,
+                        location: obj.location,
+                        skills: obj.skills,
+                    };
+                }),
+            });
+        } catch (err) {
+            this.Game.onError(err, socket);
+        }
     }
 
     /**
@@ -214,7 +261,7 @@ export default class CharacterManager {
 
         // add the character object to the managed list of characters
         this.characters.push(character);
-        this.dispatchUpdatePlayerList(character.user_id);
+        this.dispatchUpdateCharacterList(character.user_id);
 
         const socket = this.Game.socketManager.get(character.user_id);
 
@@ -223,7 +270,7 @@ export default class CharacterManager {
         // update the grid's player list
         this.Game.socketManager.dispatchToRoom(
             character.getLocationId(),
-            this.Game.characterManager.joinedGrid(character)
+            this.joinedGrid(character)
         );
 
         try {
@@ -256,7 +303,7 @@ export default class CharacterManager {
 
         // remove player from the grid list of players
         this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-            type: LEFT_GRID,
+            type: CHARACTER_LEFT_GRID,
             payload: character.user_id,
         });
 
@@ -265,33 +312,32 @@ export default class CharacterManager {
         }
 
         this.characters = this.characters.filter((obj) => obj.user_id !== user_id);
-        this.dispatchRemoveFromPlayerList(user_id);
+        this.dispatchRemoveFromCharacterList(user_id);
     }
 
     /**
      * loads a character from the mongodb, based on user_id
-     * @param  {Object}   userData  The twitch user data
-     * @param  {Function} callback  Callback function
-     * @return {Object}             Object with the character details.
+     * @param  {String}   user_id        The user ID whos character to load
+     * @param  {String}   characterName  The name of the character to load
+     * @param  {Function} callback       Callback function
+     * @return {Character}
      */
-    async load(userData) {
-        const character = await this.dbLoad(userData.user_id);
+    async load(user_id, characterName) {
+        const character = await this.dbLoad(user_id, characterName);
 
         if (character === null) {
             return null;
         }
 
         const newCharacter = new Character(this.Game, character.toObject());
-        newCharacter.profile_image = userData.profile_image;
-
-        await this.manage(newCharacter);
+        newCharacter.profile_image = '';
 
         const items = await this.Game.itemManager.loadCharacterInventory(newCharacter);
 
         if (items) {
             newCharacter.setInventory(items);
             items.map((item, index) => {
-                if (item.equipped_slot) {
+                if (item.inventorySlot) {
                     newCharacter.equip(index);
                 }
             });
@@ -320,11 +366,12 @@ export default class CharacterManager {
 
     /**
      * database method, attempts to load a character from the database
-     * @param  {String}   user_id  User ID who owns the character
-     * @param  {Function} callback returns error and character object
+     * @param  {String}   user_id        User ID who owns the character
+     * @param  {String}   characterName  The name of the character to load
+     * @param  {Function} callback       Returns async function
      */
-    dbLoad(user_id) {
-        return CharacterModel.findOneAsync({user_id: user_id});
+    dbLoad(user_id, characterName) {
+        return CharacterModel.findOneAsync({name_lowercase: characterName.toLowerCase(), user_id: user_id});
     }
 
     /**
@@ -335,12 +382,11 @@ export default class CharacterManager {
      * @param  {Function} callback Callback function
      * @return {Object}            Object with the character details
      */
-    async create(userData, city) {
-        const character = await this.dbCreate(userData.user_id, userData.display_name, city);
+    async create(user_id, characterName, city) {
+        const character = await this.dbCreate(user_id, characterName, city);
         const newCharacter = new Character(this.Game, character.toObject());
-        newCharacter.profile_image = userData.profile_image;
+        newCharacter.profile_image = '';
 
-        await this.manage(newCharacter);
         return newCharacter;
     }
 
@@ -628,7 +674,7 @@ export default class CharacterManager {
             this.Game.eventToRoom(character.getLocationId(), 'info', `${character.name} leaves to the ${directionOut}`, [character.user_id]);
             // remove player from the grid list of players
             this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                type: LEFT_GRID,
+                type: CHARACTER_LEFT_GRID,
                 payload: character.user_id,
             });
 
@@ -641,7 +687,7 @@ export default class CharacterManager {
             // add player from the grid list of players
             this.Game.socketManager.dispatchToRoom(
                 character.getLocationId(),
-                this.Game.characterManager.joinedGrid(character)
+                this.joinedGrid(character)
             );
 
             // update the socket room
@@ -688,7 +734,7 @@ export default class CharacterManager {
 
         // remove player from the grid list of players
         this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-            type: LEFT_GRID,
+            type: CHARACTER_LEFT_GRID,
             payload: character.user_id,
         });
 
@@ -704,13 +750,16 @@ export default class CharacterManager {
         const cashReward = Math.floor(droppedLoot.cash / droppedLoot.targetedBy.length);
         const expReward = Math.floor(droppedLoot.exp / droppedLoot.targetedBy.length);
         droppedLoot.targetedBy.forEach((char) => {
+            // get the character/npc
+            const character = char.npc_id ? this.Game.npcManager.get(char.id) : this.get(char.user_id);
+
             // give them an equal amount of cash and exp, from the dropped loot
-            char.updateCash(cashReward);
+            character.updateCash(cashReward);
 
             // make sure its a player
             if (char.user_id) {
-                char.updateExp(expReward);
-                this.updateClient(char.user_id);
+                character.updateExp(expReward);
+                this.updateClient(character.user_id);
             }
         });
 
@@ -721,14 +770,14 @@ export default class CharacterManager {
 
         // update the client's ground look at the location
         this.Game.socketManager.dispatchToRoom(oldLocationId, {
-            type: UPDATE_GROUND_ITEMS,
+            type: ITEM_GROUND_ITEMS,
             payload: this.Game.itemManager.getLocationList(oldLocation.map, oldLocation.x, oldLocation.y, true),
         });
 
         // add player from the grid list of players
         this.Game.socketManager.dispatchToRoom(
             character.getLocationId(),
-            this.Game.characterManager.joinedGrid(character)
+            this.joinedGrid(character)
         );
 
         // update the socket room
@@ -741,5 +790,20 @@ export default class CharacterManager {
         this.Game.mapManager.updateClient(character.user_id);
 
         return oldLocationId;
+    }
+
+    /**
+     * Compiles an object containing all relevant game data for the client
+     * @return {[type]} [description]
+     */
+    getGameData() {
+        // game data we will send to the client, with the autentication success
+        return {
+            maps: this.Game.mapManager.getList(),
+            items: this.Game.itemManager.getTemplates(),
+            players: this.getOnline(),
+            commands: this.Game.commandManager.getList(),
+            levels: Levels,
+        };
     }
 }

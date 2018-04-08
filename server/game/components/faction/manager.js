@@ -1,4 +1,3 @@
-import Promise from 'bluebird';
 import uuid from 'uuid/v4';
 import FactionModel from './model';
 import Faction from './object';
@@ -180,6 +179,7 @@ export default class FactionManager {
         const newFaction = this.add({
             faction_id: uuid(),
             name: factionName,
+            name_lowercase: factionName.toLowerCase(),
             tag: factionTag,
             leader_id: user_id.toString(),
         });

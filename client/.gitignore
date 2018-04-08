@@ -12,3 +12,4 @@ yarn-error.log
 #
 dist
 src/config.js
+src/pages

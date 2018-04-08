@@ -1,3 +1,9 @@
+import {
+    CHARACTER_CREATE_SUCCESS,
+    CHARACTER_CREATE_ERROR,
+    CHARACTER_LOGIN,
+} from 'shared/actionTypes';
+
 /**
  * Check attack cooldown ticks of character
  * @param  {Character}   character The character whos cooldown to check
@@ -95,7 +101,7 @@ function cmdGive(socket, character, command, params, cmdObject, Game) {
  * @param  {Game} Game                  The main Game object
  */
 function cmdPunch(socket, character, command, params, cmdObject, Game) {
-    const target = character.target;
+    const target = character.currentTarget();
 
     // check if they have a target
     if (!target) {
@@ -103,7 +109,7 @@ function cmdPunch(socket, character, command, params, cmdObject, Game) {
     }
 
     // check the target is gridlocked by the player
-    if (!target.isTargetedBy(character.user_id)) {
+    if (!target.isTargetedBy(character.id)) {
         return Game.eventToSocket(socket, 'error', 'You do not have a target.');
     }
 
@@ -161,23 +167,23 @@ function cmdPunch(socket, character, command, params, cmdObject, Game) {
  * @param  {Game} Game                  The main Game object
  */
 function cmdRelease(socket, character, command, params, cmdObject, Game) {
+    const currentTarget = character.currentTarget();
+
     // if they do not have a target, simply ignore the command
-    if (!character.target) {
+    if (!currentTarget) {
         return Game.eventToSocket(socket, 'info', 'You do not have a target.');
     }
 
-    const target = {
-        user_id: character.target.user_id,
-        name: character.target.name,
-    };
-
     // release the gridlock from the target
     character.releaseTarget();
-
     // let the client know they removed their target
-    Game.eventToSocket(socket, 'info', `You no longer have ${target.name} as your target.`);
-    // get the target know they are no longer aimed at
-    Game.eventToUser(target.user_id, 'info', `${character.name} releases you from their aim.`);
+    Game.eventToSocket(socket, 'info', `You no longer have ${currentTarget.name} as your target.`);
+
+    // if the target is a user, only then do we send a message to the target
+    if (currentTarget.user_id) {
+        // get the target know they are no longer aimed at
+        Game.eventToUser(currentTarget.user_id, 'info', `${character.name} releases you from their aim.`);
+    }
 }
 
 /**
@@ -190,7 +196,7 @@ function cmdRelease(socket, character, command, params, cmdObject, Game) {
  * @param  {Game} Game                  The main Game object
  */
 function cmdShoot(socket, character, command, params, cmdObject, Game) {
-    const target = character.target;
+    const target = character.currentTarget();
 
     // check if they have a target
     if (!target) {
@@ -198,12 +204,12 @@ function cmdShoot(socket, character, command, params, cmdObject, Game) {
     }
 
     // check the target is gridlocked by the player
-    if (!target.isTargetedBy(character.user_id)) {
+    if (!target.isTargetedBy(character.id)) {
         return Game.eventToSocket(socket, 'error', 'You do not have a target.');
     }
 
     // check if they have a melee weapon equipped
-    if (!character.getEquipped('ranged')) {
+    if (!character.getEquipped('weapon-ranged')) {
         return Game.eventToSocket(socket, 'error', 'You do not have a ranged weapon equipped.');
     }
 
@@ -214,7 +220,7 @@ function cmdShoot(socket, character, command, params, cmdObject, Game) {
 
     // check if there is a cooldown
     checkAttackCooldown(character, Game, async () => {
-        const weapon = character.getEquipped('ranged').name;
+        const weapon = character.getEquipped('weapon-ranged').name;
         // Discharge the firearm, to consume a bullet, regardless if they hit or not
         const damage = await character.fireRangedWeapon();
 
@@ -276,7 +282,7 @@ function cmdShoot(socket, character, command, params, cmdObject, Game) {
  * @param  {Game} Game                  The main Game object
  */
 function cmdStrike(socket, character, command, params, cmdObject, Game) {
-    const target = character.target;
+    const target = character.currentTarget();
 
     // check if they have a target
     if (!target) {
@@ -284,18 +290,18 @@ function cmdStrike(socket, character, command, params, cmdObject, Game) {
     }
 
     // check the target is gridlocked by the player
-    if (!target.isTargetedBy(character.user_id)) {
+    if (!target.isTargetedBy(character.id)) {
         return Game.eventToSocket(socket, 'error', 'You do not have a target.');
     }
 
     // check if they have a melee weapon equipped
-    if (!character.getEquipped('melee')) {
+    if (!character.getEquipped('weapon-melee')) {
         return Game.eventToSocket(socket, 'error', 'You do not have a melee weapon equipped.');
     }
 
     // check if there is a cooldown
     checkAttackCooldown(character, Game, async () => {
-        const weapon = character.getEquipped('melee').name;
+        const weapon = character.getEquipped('weapon-melee').name;
 
         // check if the attack will hit
         if (!character.attackHit()) {
@@ -308,7 +314,7 @@ function cmdStrike(socket, character, command, params, cmdObject, Game) {
         }
 
         // deal damage to the target
-        const damage = character.getWeaponDamage('melee');
+        const damage = character.getWeaponDamage('weapon-melee');
         const attack = target.dealDamage(damage, true);
 
         // if the target died
@@ -338,6 +344,80 @@ function cmdStrike(socket, character, command, params, cmdObject, Game) {
         // send event to the bystanders
         Game.eventToRoom(character.getLocationId(), 'info', `You see ${character.name} strike ${target.name} with a ${weapon}.`, [character.user_id, target.user_id]);
     });
+}
+
+/**
+ * Character creation command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
+async function cmdCharacterCreate(socket, character, command, params, cmdObject, Game) {
+    let name = params[0];
+    let startLocation = params[1];
+
+    try {
+        // create a new character
+        const newCharacter = await Game.characterManager.create(socket.user.user_id, name, startLocation.id);
+
+        Game.socketManager.dispatchToSocket(socket, {
+            type: CHARACTER_CREATE_SUCCESS,
+            payload: {
+                character: newCharacter.exportToClient(),
+            },
+        });
+    } catch (err) {
+        if (err.code === 11000) {
+            return Game.socketManager.dispatchToSocket(socket, {
+                type: CHARACTER_CREATE_ERROR,
+                payload: {
+                    message: 'That character name is already taken.',
+                },
+            });
+        }
+
+        Game.onError(err, socket);
+    }
+}
+
+/**
+ * Character selection command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
+async function cmdCharacterSelect(socket, character, command, params, cmdObject, Game) {
+    const characterToLoad = params[0];
+
+    await Game.socketManager.logoutOutSession(socket, socket.user.user_id);
+
+    try {
+        // Login the character
+        await Game.characterManager.manage(characterToLoad);
+
+        Game.socketManager.dispatchToSocket(socket, {
+            type: CHARACTER_LOGIN,
+            payload: {
+                character: characterToLoad.exportToClient(),
+                gameData: Game.characterManager.getGameData(),
+            },
+        });
+
+        // join the game channel to get server-wide events
+        socket.join('game');
+        // send MOTD after logging in the character
+        Game.sendMotdToSocket(socket);
+        // send the grid details of the current location
+        Game.mapManager.updateClient(characterToLoad.user_id);
+    } catch (err) {
+        Game.onError(err, socket);
+    }
 }
 
 module.exports = [
@@ -397,5 +477,38 @@ module.exports = [
         aliases: [],
         description: 'Attcks a target (/aim) with your equipped melee weapon.',
         method: cmdStrike,
+    },
+    {
+        command: '/characterselect',
+        aliases: [],
+        params: [
+            {
+                name: 'Character Name',
+                desc: 'The name of the character you wish to login as',
+                rules: 'required|character',
+            },
+        ],
+        inGameCommand: false,
+        description: 'Login to the game with the specified character',
+        method: cmdCharacterSelect,
+    },
+    {
+        command: '/charactercreate',
+        aliases: [],
+        params: [
+            {
+                name: 'Name',
+                desc: 'The name of your character',
+                rules: 'required|minlen:2|maxlen:25',
+            },
+            {
+                name: 'Start Location',
+                desc: 'The location you want your character to start at.',
+                rules: 'required|gamemap',
+            },
+        ],
+        inGameCommand: false,
+        description: 'Create a new character. Only possible if you are not already logged in to another account.',
+        method: cmdCharacterCreate,
     },
 ];
