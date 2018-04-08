@@ -46,6 +46,7 @@ Promise.promisifyAll(mongoose);
 mongoose.connect(config.mongo_db).then(
     () => {
         let webServer;
+        let webServerApi;
 
         // if an SSL cert is defined, start a HTTPS server
         if (config.server.certificate.key) {
@@ -56,9 +57,17 @@ mongoose.connect(config.mongo_db).then(
                     fs.readFileSync(config.server.certificate.ca, 'utf8'),
                 ],
             }, app);
+            webServerApi = https.createServer({
+                key: fs.readFileSync(config.server.certificate.key, 'utf8'),
+                cert: fs.readFileSync(config.server.certificate.cert, 'utf8'),
+                ca: [
+                    fs.readFileSync(config.server.certificate.ca, 'utf8'),
+                ],
+            }, app);
         } else {
             // otherwise an HTTP server
             webServer = http.createServer(app);
+            webServerApi = http.createServer(app);
         }
 
         const logger = new Logger({
@@ -73,7 +82,7 @@ mongoose.connect(config.mongo_db).then(
 
         const GameServer = new Game(webServer, config, logger);
         // eslint-disable-next-line
-        const RestServer = API(app, webServer, config);
+        const RestServer = API(app, webServerApi, config);
 
         // On shutdown signal, gracefully shutdown the game server.
         process.on('SIGTERM', async function() {
