@@ -9,7 +9,7 @@ import EquippedSlot from '../item/equippedslot';
 
 // UI
 import {Card, Modal, ModalHeader, ModalBody, Row, Col} from 'reactstrap';
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import Icon from '@fortawesome/react-fontawesome';
 
 class CharacterMenu extends React.Component {
     constructor(props) {
@@ -106,11 +106,11 @@ class CharacterMenu extends React.Component {
             <React.Fragment>
                 {this.renderModals()}
                 <Card className="menu menu-character">
-                    <a href="#" onClick={this.toggleEquipment}><FontAwesomeIcon icon="shield-alt" /> Equipment ({this.props.character.inventory.length}/{this.props.character.stats.inventorySize})</a>
-                    <a href="#" onClick={this.toggleStats}><FontAwesomeIcon icon="chart-bar" /> Stats</a>
-                    {/* <a href="#" onClick={this.toggleQuests}><FontAwesomeIcon icon="tasks" /> Quests (?)</a> */}
-                    <a href="#" onClick={this.togglePlayers}><FontAwesomeIcon icon="user-secret" /> Players ({this.props.players.length})</a>
-                    {/* <a href="#" onClick={this.mapSearch}><FontAwesomeIcon icon="map-marker-alt" /> Map</a> */}
+                    <a href="#" onClick={this.toggleEquipment}><Icon icon="shield-alt" /> Equipment ({this.props.character.inventory.length}/{this.props.character.stats.inventorySize})</a>
+                    <a href="#" onClick={this.toggleStats}><Icon icon="chart-bar" /> Stats</a>
+                    {/* <a href="#" onClick={this.toggleQuests}><Icon icon="tasks" /> Quests (?)</a> */}
+                    <a href="#" onClick={this.togglePlayers}><Icon icon="user-secret" /> Players ({this.props.players.length})</a>
+                    {/* <a href="#" onClick={this.mapSearch}><Icon icon="map-marker-alt" /> Map</a> */}
                 </Card>
             </React.Fragment>
         );

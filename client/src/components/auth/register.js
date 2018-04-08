@@ -2,8 +2,7 @@ import React from 'react';
 import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
 
-
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import Icon from '@fortawesome/react-fontawesome';
 import {Card, CardHeader, CardBody, Input, Button, Form, FormGroup} from 'reactstrap';
 import Notification from '../ui/notification';
 import {userSignUp, getStrategies} from '../auth/actions';
@@ -104,7 +103,7 @@ class AuthRegister extends React.Component {
                                 }
 
                                 return <a key={strat.id} className={`btn btn-block btn-primary btn-brand-${strat.id}`} href={this.state.sending ? '#' : strat.authUrl}>
-                                    <FontAwesomeIcon icon={['fab', strat.id]} /> Sign up with {strat.name}
+                                    <Icon icon={['fab', strat.id]} /> Sign up with {strat.name}
                                 </a>;
                             })
                         }

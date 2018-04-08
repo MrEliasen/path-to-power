@@ -1,7 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {Card, CardHeader} from 'reactstrap';
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import Icon from '@fortawesome/react-fontawesome';
 
 class Chat extends React.Component {
     constructor(props) {
@@ -78,7 +78,7 @@ class Chat extends React.Component {
         return (
             <Card className="card-chat">
                 <CardHeader>
-                    <div className="float-right"><FontAwesomeIcon icon="cog" /></div>
+                    <div className="float-right"><Icon icon="cog" /></div>
                     {this.props.title || 'Chat'}
                 </CardHeader>
                 <div

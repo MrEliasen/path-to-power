@@ -6,7 +6,7 @@ import {bindActionCreators} from 'redux';
 import {newCommand} from '../actions';
 
 // UI
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import Icon from '@fortawesome/react-fontawesome';
 import {Card} from 'reactstrap';
 
 // TODO: Only show this menu if the player is in combat (Targeting or Targeted)
@@ -29,9 +29,9 @@ class CombatMenu extends React.Component {
 
         return (
             <Card className="menu menu-combat">
-                <a href="#" onClick={(e) => this.sendCommand(e, '/punch')}><FontAwesomeIcon icon="hand-rock" /> Punch</a>
-                <a href="#" onClick={(e) => this.sendCommand(e, '/strike')}><FontAwesomeIcon icon="hand-paper" /> Strike</a>
-                <a href="#" onClick={(e) => this.sendCommand(e, '/shoot')}><FontAwesomeIcon icon="hand-point-left" /> Shoot</a>
+                <a href="#" onClick={(e) => this.sendCommand(e, '/punch')}><Icon icon="hand-rock" /> Punch</a>
+                <a href="#" onClick={(e) => this.sendCommand(e, '/strike')}><Icon icon="hand-paper" /> Strike</a>
+                <a href="#" onClick={(e) => this.sendCommand(e, '/shoot')}><Icon icon="hand-point-left" /> Shoot</a>
                 <span>
                     {target.name} {target.type ? `the ${target.type}` : ''}
                 </span>

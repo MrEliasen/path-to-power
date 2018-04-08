@@ -5,7 +5,8 @@ import {withRouter} from 'react-router-dom';
 
 // UI
 import {Card, CardHeader, CardBody, Table} from 'reactstrap';
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+
+import Icon from '@fortawesome/react-fontawesome';
 
 // Actions
 import {unlinkProvider} from '../auth/actions';
@@ -37,7 +38,7 @@ class AccountConnections extends React.Component {
                                 authOther.map((strat) => {
                                     const isLinked = this.props.user.identities.find((obj) => obj.provider === strat.id);
                                     return <tr key={strat.id}>
-                                        <td width="50"><FontAwesomeIcon icon={['fab', strat.id]} size="2x" /></td>
+                                        <td width="50"><Icon icon={['fab', strat.id]} size="2x" /></td>
                                         <td>{strat.name}</td>
                                         <td></td>
                                         <td className="text-right">

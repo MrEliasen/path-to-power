@@ -15,10 +15,34 @@ import App from './components/app';
 import sagas from './sagas';
 
 // FontAwesome Setup
-import FontAwesome from '@fortawesome/fontawesome';
-import FontAwesomeBrands from '@fortawesome/fontawesome-free-brands';
-import FontAwesomeIcons from '@fortawesome/fontawesome-free-solid';
-FontAwesome.library.add(FontAwesomeBrands, FontAwesomeIcons);
+import fontawesome from '@fortawesome/fontawesome';
+// brands
+import faTwitch from '@fortawesome/fontawesome-free-brands/faTwitch';
+import faGithub from '@fortawesome/fontawesome-free-brands/faGithub';
+// general icons
+import faBug from '@fortawesome/fontawesome-free-solid/faBug';
+import faBuilding from '@fortawesome/fontawesome-free-solid/faBuilding';
+import faUserSecret from '@fortawesome/fontawesome-free-solid/faUserSecret';
+import faHandRock from '@fortawesome/fontawesome-free-solid/faHandRock';
+import faHandPaper from '@fortawesome/fontawesome-free-solid/faHandPaper';
+import faHandPointLeft from '@fortawesome/fontawesome-free-solid/faHandPointLeft';
+import faShieldAlt from '@fortawesome/fontawesome-free-solid/faShieldAlt';
+import faChartBar from '@fortawesome/fontawesome-free-solid/faChartBar';
+import faCog from '@fortawesome/fontawesome-free-solid/faCog';
+
+fontawesome.library.add(
+    faBug,
+    faBuilding,
+    faUserSecret,
+    faHandRock,
+    faHandPaper,
+    faHandPointLeft,
+    faShieldAlt,
+    faChartBar,
+    faCog,
+    faGithub,
+    faTwitch
+);
 
 // Styles
 import './assets/styles/all.scss';

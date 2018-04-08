@@ -4,7 +4,7 @@ import {Link} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import Icon from '@fortawesome/react-fontawesome';
 import {Card, CardHeader, CardBody, Input, Button, Form, FormGroup} from 'reactstrap';
 import Notification from '../ui/notification';
 
@@ -137,7 +137,7 @@ class AuthLogin extends React.Component {
                                 }
 
                                 return <a key={strat.id} className={`btn btn-block btn-primary btn-brand-${strat.id}`} href={strat.authUrl}>
-                                    <FontAwesomeIcon icon={['fab', strat.id]} /> Login with {strat.name}
+                                    <Icon icon={['fab', strat.id]} /> Login with {strat.name}
                                 </a>;
                             })
                         }

@@ -10,7 +10,7 @@ import {
     DropdownItem,
     Button,
 } from 'reactstrap';
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import Icon from '@fortawesome/react-fontawesome';
 
 // actions
 import {openNPCShop} from './actions';
@@ -45,7 +45,7 @@ class NPCs extends React.Component {
                     onClick={this.props.onClick}
                     className="structure --block"
                 >
-                    <FontAwesomeIcon icon="user-secret" /> NPCs ({this.props.list.length})
+                    <Icon icon="user-secret" /> NPCs ({this.props.list.length})
                 </Button>
             );
         }
@@ -58,7 +58,7 @@ class NPCs extends React.Component {
                     toggle={this.toggleVisible}
                 >
                     <DropdownToggle style={{color: '#000'}} caret>
-                        <FontAwesomeIcon icon="user-secret" /> NPCs ({this.props.list.length})
+                        <Icon icon="user-secret" /> NPCs ({this.props.list.length})
                     </DropdownToggle>
                     <DropdownMenu>
                         <DropdownItem onClick={this.props.onClick}>View NPC List</DropdownItem>

@@ -12,7 +12,7 @@ import {
     ModalHeader,
     ModalBody,
 } from 'reactstrap';
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import Icon from '@fortawesome/react-fontawesome';
 
 // components
 import Structure from './structure';
@@ -134,13 +134,13 @@ class MapMenu extends React.Component {
                     {
                         this.props.map.items.length > 0 &&
                         <Card className="menu menu-map cluster">
-                            <a href="#" onClick={this.toggleItems}><FontAwesomeIcon icon="shield" /> Items ({this.props.map.items.length})</a>
+                            <a href="#" onClick={this.toggleItems}><Icon icon="shield" /> Items ({this.props.map.items.length})</a>
                         </Card>
                     }
                     {
                         this.props.map.players.length > 0 &&
                         <Card className="menu menu-map cluster">
-                            <a href="#" onClick={this.togglePlayers}><FontAwesomeIcon icon="user-secret" /> Players ({this.props.map.players.length})</a>
+                            <a href="#" onClick={this.togglePlayers}><Icon icon="user-secret" /> Players ({this.props.map.players.length})</a>
                         </Card>
                     }
                     {

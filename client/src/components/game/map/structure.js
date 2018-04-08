@@ -14,7 +14,7 @@ import {
     DropdownItem,
     Button,
 } from 'reactstrap';
-import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import Icon from '@fortawesome/react-fontawesome';
 
 class Structure extends React.Component {
     constructor(props) {
@@ -55,7 +55,7 @@ class Structure extends React.Component {
                     className="structure --block"
                     style={{color: structure.colour}}
                 >
-                    <FontAwesomeIcon icon="building" /> {structure.name}
+                    <Icon icon="building" /> {structure.name}
                 </Button>
             );
         }
@@ -68,7 +68,7 @@ class Structure extends React.Component {
                     toggle={this.toggleVisible}
                 >
                     <DropdownToggle style={{color: structure.colour}} caret>
-                        <FontAwesomeIcon icon="building" /> {structure.name}
+                        <Icon icon="building" /> {structure.name}
                     </DropdownToggle>
                     <DropdownMenu>
                         <DropdownItem onClick={this.structureInfo}>Info</DropdownItem>
