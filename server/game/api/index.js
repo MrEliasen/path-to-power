@@ -7,7 +7,7 @@ import bodyParser from 'body-parser';
 import contentFilter from 'content-filter';
 import passport from 'passport';
 import express from 'express';
-import nodemailer from 'nodemailer';
+import mailer from './mailer';
 
 // API Route/enpoint controllers
 import {
@@ -47,35 +47,7 @@ export default function(app, webServer, config) {
         methodList: ['GET', 'POST'],
     }));
 
-    // setup mailer service
-    let mailerTransport;
-
-    switch (config.mailserver.transport) {
-        case 'sendgrid':
-            const sgTransport = require('nodemailer-sendgrid-transport');
-
-            mailerTransport = sgTransport({
-                service: 'SendGrid',
-                auth: {
-                    api_user: process.env.MAILER_USER,
-                    api_key: process.env.MAILER_PASSWORD,
-                }
-            });
-            break;
-
-        default:
-            mailerTransport = {
-                host: config.mailserver.host,
-                port: config.mailserver.port,
-                auth: {
-                    user: process.env.MAILER_USER,
-                    pass: process.env.MAILER_PASSWORD,
-                },
-            };
-            break;
-    }
-
-    app.set('mailer', nodemailer.createTransport(mailerTransport));
+    app.set('mailer', mailer(config));
 
     // Set needed headers for the application.
     app.use(function(req, res, next) {
