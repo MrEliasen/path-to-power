@@ -1,4 +1,4 @@
-import {LEFT_GRID} from '../map/types';
+import {CHARACTER_LEFT_GRID} from 'shared/actionTypes';
 
 /**
  * Heal command logic
@@ -143,7 +143,7 @@ function cmdTravel(socket, character, command, params, cmdObject, Game) {
 
     // remove player from the grid list of players
     Game.socketManager.dispatchToRoom(character.getLocationId(), {
-        type: LEFT_GRID,
+        type: CHARACTER_LEFT_GRID,
         payload: character.user_id,
     });
 

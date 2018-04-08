@@ -1,4 +1,49 @@
-import {UPDATE_GROUND_ITEMS} from './types';
+import {ITEM_GROUND_ITEMS} from 'shared/actionTypes';
+
+/**
+ * Drop an item in a specific inventory slot
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game}   Game                The main Game object
+ */
+function cmdDropSlot(socket, character, command, params, cmdObject, Game) {
+    let slotId = params[0];
+
+    // drop the item from the inventory, should it exist
+    let droppedItem = character.dropSlotItem(slotId);
+
+    if (!droppedItem) {
+        return Game.eventToSocket(socket, 'error', 'You do not have any items in this inventory slot.');
+    }
+
+    // add the item to the grid location
+    const items_list = Game.itemManager.drop(character.location.map, character.location.x, character.location.y, droppedItem);
+
+    // holds the items data we will send to the rooms
+    const items_ground = items_list.map((obj) => {
+        return {
+            id: obj.id,
+            ...obj.getModifiers(),
+        };
+    });
+
+    // update the clients character informatiom
+    Game.characterManager.updateClient(character.user_id, 'inventory');
+
+    // send the updated items list to the grid
+    Game.socketManager.dispatchToRoom(character.getLocationId(), {
+        type: ITEM_GROUND_ITEMS,
+        payload: items_ground,
+    });
+
+    // dispatch events to the user
+    Game.eventToSocket(socket, 'info', `You dropped ${(!droppedItem.stats.stackable ? 'a' : `${droppedItem.stats.durability}x`)} ${droppedItem.name} on the ground`);
+    // dispatch events to the grid
+    Game.eventToRoom(character.getLocationId(), 'info', `${character.name} dropped ${(!droppedItem.stats.stackable ? 'a' : `${droppedItem.stats.durability}x`)} ${droppedItem.name} on the ground`, [character.user_id]);
+}
 
 /**
  * Drop item command logic
@@ -40,7 +85,7 @@ function cmdDrop(socket, character, command, params, cmdObject, Game) {
 
     // send the updated items list to the grid
     Game.socketManager.dispatchToRoom(character.getLocationId(), {
-        type: UPDATE_GROUND_ITEMS,
+        type: ITEM_GROUND_ITEMS,
         payload: items_ground,
     });
 
@@ -85,7 +130,7 @@ function cmdDropByIndex(socket, character, command, params, cmdObject, Game) {
 
     // send the updated items list to the grid
     Game.socketManager.dispatchToRoom(character.getLocationId(), {
-        type: UPDATE_GROUND_ITEMS,
+        type: ITEM_GROUND_ITEMS,
         payload: items_ground,
     });
 
@@ -154,7 +199,7 @@ function cmdPickup(socket, character, command, params, cmdObject, Game) {
     Game.characterManager.updateClient(character.user_id);
     // update the grid item list for the clients
     Game.socketManager.dispatchToRoom(character.getLocationId(), {
-        type: UPDATE_GROUND_ITEMS,
+        type: ITEM_GROUND_ITEMS,
         payload: Game.itemManager.getLocationList(...location, true),
     });
 
@@ -218,17 +263,17 @@ module.exports = [
         method: cmdDrop,
     },
     {
-        command: '/dropbyindex',
+        command: '/dropslot',
         aliases: [],
         params: [
             {
-                name: 'Index',
-                desc: 'The item\'s index in your inventory.',
-                rules: 'required|integer|min:0',
+                name: 'Inventory Slot',
+                desc: 'The name of the inventory slot which has the item you want to drop on the ground.',
+                rules: 'required|slot',
             },
         ],
-        description: 'Drop an item, based on the item\'s inventory index, on the ground.',
-        method: cmdDropByIndex,
+        description: 'Drop an item on the ground.',
+        method: cmdDropSlot,
     },
     {
         command: '/pickup',

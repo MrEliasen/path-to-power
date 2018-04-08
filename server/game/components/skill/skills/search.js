@@ -1,6 +1,6 @@
 import {
-    JOINED_GRID,
-} from '../../character/types';
+    CHARACTER_JOINED_GRID,
+} from 'shared/actionTypes';
 
 /**
  * Search Skill logic
@@ -39,15 +39,15 @@ export default class SkillSearch {
     use(character) {
         this.Game.characterManager
             .getLocationList(character.location.map, character.location.x, character.location.y, character.user_id, true)
-                .then((playerList) => {
+                .then((characterList) => {
                     let found = 0;
 
-                    playerList.forEach((player) => {
-                        if (!player.hidden) {
+                    characterList.forEach((characterObj) => {
+                        if (!characterObj.hidden) {
                             return;
                         }
 
-                        const hidingSkill = player.skills.find((obj) => obj.id === 'hide').value;
+                        const hidingSkill = characterObj.skills.find((obj) => obj.id === 'hide').value;
                         // 50% chance by default
                         const baseChance = 0.5;
                         // Each point heigher search than hide is an additional 25% chance to find them.
@@ -64,18 +64,18 @@ export default class SkillSearch {
                         found++;
 
                         // yank the player out of hiding
-                        player.hidden = false;
+                        characterObj.hidden = false;
 
                         this.Game.eventToUser(character.user_id, 'success', `You spot ${character.name} hidding in a nearby alley.`);
-                        this.Game.eventToUser(player.user_id, 'info', `Despite your efforts, ${character.name} found your hiding spot. You are no longer hidden.`);
-                        this.Game.eventToRoom(character.getLocationId(), 'info', `You hear ${character.name} shout they found ${player.name}.`, [character.user_id, player.user_id]);
+                        this.Game.eventToUser(characterObj.user_id, 'info', `Despite your efforts, ${character.name} found your hiding spot. You are no longer hidden.`);
+                        this.Game.eventToRoom(character.getLocationId(), 'info', `You hear ${character.name} shout they found ${characterObj.name}.`, [character.user_id, characterObj.user_id]);
 
                         // re-add the character to the grid player list
                         this.Game.socketManager.dispatchToRoom(character.getLocationId(), {
-                            type: JOINED_GRID,
+                            type: CHARACTER_JOINED_GRID,
                             payload: {
-                                name: player.name,
-                                user_id: player.user_id,
+                                name: characterObj.name,
+                                user_id: characterObj.user_id,
                             },
                         });
 

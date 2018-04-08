@@ -1,5 +1,3 @@
-import Promise from 'bluebird';
-
 // manager specific imports
 import Abilities from './abilities';
 

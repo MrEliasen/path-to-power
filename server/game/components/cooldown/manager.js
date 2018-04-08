@@ -23,8 +23,8 @@ export default class CooldownManager {
     add(character, action, duration = null, autostart = false) {
         if (!duration) {
             // if no duration is specified, load the default from the config (if its not an NPC)
-            if (this.Game.config.game.playerCooldowns[action]) {
-                duration = this.Game.config.game.playerCooldowns[action];
+            if (this.Game.config.game.cooldowns[action]) {
+                duration = this.Game.config.game.cooldowns[action];
             }
         }
 

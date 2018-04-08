@@ -43,5 +43,5 @@ jspm_packages
 # Live Game files
 config.json
 game/data
-Superseded
 dist
+.env

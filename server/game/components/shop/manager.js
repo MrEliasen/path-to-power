@@ -1,5 +1,3 @@
-import Promise from 'bluebird';
-
 // manager specific imports
 import shopCommands from './commands';
 import ShopList from '../../data/shops.json';
@@ -10,7 +8,8 @@ import {
     SHOP_SELL,
     SHOP_ITEM_PRICE,
     SHOP_GET_PRICE,
-} from '../../../shared/types';
+    SHOP_EVENT,
+} from 'shared/actionTypes';
 
 /**
  * Shop Manager
@@ -57,7 +56,7 @@ export default class ShopManager {
                 break;
 
             case SHOP_GET_PRICE:
-                return this.onGetPrice(socket, action)
+                return this.onGetPrice(socket, action);
                 break;
         }
     }
@@ -74,7 +73,7 @@ export default class ShopManager {
             return;
         }
 
-        shop.buyItem(socket.user.user_id, action.payload.index, action.payload.item);
+        shop.buyItem(socket.user.user_id, action.payload.item, action.payload.targetSlot);
     }
 
     /**
@@ -159,6 +158,23 @@ export default class ShopManager {
         // resupply all the shops
         this.shops.forEach((shop) => {
             shop.resupply();
+        });
+    }
+
+    /**
+     * dispatch a shop event to a specific user
+     * @param  {Socket.IO Socket} user_id  User ID of the player who should receive the event
+     * @param  {String}           type     Event type
+     * @param  {String}           message  Event message
+     */
+    eventToUser(user_id, type, message) {
+        this.Game.logger.debug('Shop Event', {user_id, type, message});
+        this.Game.socketManager.dispatchToUser(user_id, {
+            type: SHOP_EVENT,
+            payload: {
+                type,
+                message,
+            },
         });
     }
 }

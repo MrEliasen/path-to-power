@@ -1,6 +1,7 @@
 // Required for compiling
 require('babel-core/register');
 require('babel-polyfill');
+require('dotenv').config();
 
 // native modules
 import fs from 'fs';
@@ -11,6 +12,10 @@ import https from 'https';
 import express from 'express';
 import mongoose from 'mongoose';
 import Promise from 'bluebird';
+
+// Custom
+import API from './api';
+import Logger from './components/logger';
 
 /************************************
  *            FILE CHECK            *
@@ -28,10 +33,6 @@ if (!fs.existsSync(`${__dirname}/../config.json`)) {
 }
 
 let config = require(`${__dirname}/../config.json`);
-if (!config.twitch.clientId || config.twitch.clientId === '') {
-    console.error('ERROR: You must provide a Twitch Application ID for the server to work.');
-    process.exit();
-}
 
 /************************************
  *          INITIALISATION          *
@@ -60,7 +61,19 @@ mongoose.connect(config.mongo_db).then(
             webServer = http.createServer(app);
         }
 
-        const GameServer = new Game(webServer, config);
+        const logger = new Logger({
+            level: (process.env.NODE_ENV === 'development' ? 'info' : 'error'),
+            debugFile: './game.debug.log',
+            infoFile: './game.info.log',
+            warnFile: './game.warn.log',
+            errorFile: './game.error.log',
+        });
+
+        app.set('logger', logger);
+
+        const GameServer = new Game(webServer, config, logger);
+        // eslint-disable-next-line
+        const RestServer = API(app, config);
 
         // On shutdown signal, gracefully shutdown the game server.
         process.on('SIGTERM', async function() {

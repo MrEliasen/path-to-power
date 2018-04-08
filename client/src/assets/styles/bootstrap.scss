@@ -1,0 +1,49 @@
+// Customize Bootstrap Variables
+// Source: https://raw.githubusercontent.com/twbs/bootstrap/v4-dev/scss/_variables.scss
+
+$body-bg:                   $gray-100;
+$input-bg:                  $gray-100;
+$primary:                   #4b488e;
+$primary-dark:              #2b284e;
+$link-color:                $primary;
+
+$font-family-sans-serif:    'Roboto', sans-serif;
+$link-hover-decoration:     none;
+$navbar-nav-link-padding-x: .8rem;
+$list-group-active-bg:       $primary;
+$list-group-active-border-color: $list-group-active-bg;
+
+$progress-height:           1.5rem;
+
+$card-border-width:         0;
+$card-cap-bg:               $primary-dark;
+
+// Rebuild some maps/loops
+// Documentation:   https://getbootstrap.com/docs/4.0/getting-started/theming/#maps-and-loops
+
+$theme-colors: (
+    "primary": $primary,
+    "primary-dark": $primary-dark,
+);
+
+// Customize Bootstrap Components
+// Source:          https://github.com/twbs/bootstrap/tree/v4-dev/scss
+// Documentation:   https://getbootstrap.com/docs/4.0/components/
+
+.card {
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, .2);
+    margin-bottom: $grid-gutter-width;
+
+    .card-header {
+        color: $white;
+    }
+}
+
+.progress {
+    margin-bottom: .5rem;
+}
+
+.btn:hover {
+    transition: transform 100ms linear;
+    // transform: translateY(-2px);
+}

@@ -1,4 +1,4 @@
-import Promise from 'bluebird';
+import uuid from 'uuid/v4';
 
 /**
  * Character class
@@ -11,6 +11,9 @@ export default class Character {
      */
     constructor(Game, character) {
         this.Game = Game;
+        // generate a unique identifier for this logged in character
+        // Kinda of a "there i fixed it" for targets/targetedBy filters, but it works.. Kappa
+        this.id = uuid(); 
         // the character objest of the characters who are currently aiming at this character
         this.targetedBy = [];
         // the character object of the current targed character
@@ -126,6 +129,37 @@ export default class Character {
     }
 
     /**
+     * Get the current target, if available
+     * @return {NPC|Character}
+     */
+    currentTarget() {
+        if (!this.target) {
+            return null;
+        }
+
+        let target;
+        if (this.target.npc_id) {
+            target = this.Game.npcManager.get(this.target.id);
+        } else {
+            target = this.Game.characterManager.get(this.target.user_id);
+        }
+
+        // if the target is no longer in the game
+        if (!target) {
+            return null;
+        }
+
+        // make sure the target is at the same location
+        const {map, x, y} = target.location;
+        if (map !== this.location.map || x !== this.location.x || y !== this.location.y) {
+            this.target = null;
+            return null;
+        }
+
+        return target;
+    }
+
+    /**
      * generates the grid "room" ID of the characters currect location
      * @return {String}
      */
@@ -171,7 +205,32 @@ export default class Character {
             faction: this.faction ? this.faction.toObject(true) : null,
             skills: this.exportSkills(true),
             location: this.location,
+            target: this.getTargetDetails(),
         };
+    }
+
+    /**
+     * Get details about the current target, if any
+     * @return {Object|null}
+     */
+    getTargetDetails() {
+        const target = this.currentTarget();
+
+        if (!target) {
+            return null;
+        }
+
+        const details = {
+            name: target.name,
+            isNPC: false,
+        };
+
+        if (target.npc_id) {
+            details.type = target.type;
+            details.isNPC = true;
+        };
+
+        return details;
     }
 
     /**
@@ -182,9 +241,15 @@ export default class Character {
         // release the gridlock of the current target, if set
         this.releaseTarget();
         // set the new target
-        this.target = target;
+        this.target = {
+            id: target.id,
+            npc_id: target.npc_id,
+            user_id: target.user_id,
+        };
         // and gridlock them
-        this.target.gridLock(this);
+        target.gridLock(this);
+        // update the character target on the client
+        this.Game.characterManager.updateClient(this.user_id);
     }
 
     /**
@@ -192,21 +257,27 @@ export default class Character {
      * @return {[type]} [description]
      */
     releaseTarget() {
+        const target = this.currentTarget();
+
         // release the gridlock of the current target, if set
-        if (this.target) {
-            this.target.gridRelease(this.user_id);
+        if (target) {
+            target.gridRelease({
+                id: target.id,
+                npc_id: target.npc_id,
+                user_id: target.user_id,
+            });
         }
 
         this.target = null;
     }
 
     /**
-     * Checks if the user is targeted by the user specified
-     * @param  {String}  user_id user id
+     * Checks if the character is targeted by the character specified
+     * @param  {String}  characterId Character unique id (character and NPC)
      * @return {Boolean}
      */
-    isTargetedBy(user_id) {
-        return this.targetedBy.find((user) => user.user_id === user_id) ? true : false;
+    isTargetedBy(characterId) {
+        return this.targetedBy.find((character) => character.id === characterId) ? true : false;
     }
 
     /**
@@ -214,23 +285,33 @@ export default class Character {
      * @param  {Character Obj} character  the character objest of the character gridlocking the character.
      */
     gridLock(character) {
-        if (this.targetedBy.findIndex((obj) => obj.user_id === character.user_id) === -1) {
-            this.targetedBy.push(character);
+        const found = this.targetedBy.findIndex((obj) => obj.id === character.id);
+
+        if (found === -1) {
+            this.targetedBy.push({
+                id: character.id,
+                npc_id: character.npc_id,
+                user_id: character.user_id,
+                name: `${character.name}${character.npc_id ? ' ' + character.type : ''}`,
+            });
         }
     }
 
     /**
      * Removes a player from the gridlock, from when they have used /aim
-     * @param  {String} user_id User ID
+     * @param  {Object} target Plain object with the id, npc_id and user_id of the target
      */
-    gridRelease(user_id) {
-        const playerIndex = this.targetedBy.findIndex((obj) => obj.user_id === user_id);
+    gridRelease(target) {
+        const characterIndex = this.targetedBy.findIndex((obj) => obj.id === target.id);
 
-        if (playerIndex === -1) {
+        if (characterIndex === -1) {
             return;
         }
 
-        this.targetedBy.splice(playerIndex, 1);
+        this.targetedBy.splice(characterIndex, 1);
+
+        // update the character target on the client
+        this.Game.characterManager.updateClient(this.user_id);
     }
 
     /**
@@ -279,8 +360,8 @@ export default class Character {
      * @return {Object}          the damage, -1 if the weapon cannot be fired.
      */
     async fireRangedWeapon() {
-        const damage = this.getWeaponDamage('ranged');
-        const ammo = this.getEquipped('ammo');
+        const damage = this.getWeaponDamage('weapon-ranged');
+        const ammo = this.getEquipped('weapon-ammo');
 
         if (damage === null) {
             return null;
@@ -310,7 +391,7 @@ export default class Character {
      * @return {Boolean}
      */
     hasAmmo() {
-        const equippedAmmo = this.getEquipped('ammo');
+        const equippedAmmo = this.getEquipped('weapon-ammo');
 
         if (!equippedAmmo) {
             return false;
@@ -332,7 +413,7 @@ export default class Character {
             return null;
         }
 
-        const item = this.getEquipped('ammo');
+        const item = this.getEquipped('weapon-ammo');
 
         if (!item) {
             return null;
@@ -355,7 +436,7 @@ export default class Character {
             return reject(new Error(`No item equipped in slot ${slot}`));
         }
 
-        if (slot === 'ranged') {
+        if (slot === 'weapon-ranged') {
             bonusDamage = this.getAmmoDamage();
         }
 
@@ -368,39 +449,123 @@ export default class Character {
      * @return {Promise}
      */
     getEquipped(slot = null) {
-        // if no slot if specified, return all equipped items
-        if (!slot) {
-            return this.inventory.filter((obj) => obj.equipped_slot);
+        return this.inventory.find((obj) => obj.inventorySlot === slot) || null;
+    }
+
+    /**
+     * Moves an item from one inventory slot to another
+     * @param  {String} slotId      The equipped slot to move
+     * @param  {String} targetSlot  The slot to move the item to
+     */
+    moveItem(slotId, targetSlot) {
+        if (!slotId || !targetSlot) {
+            return false;
         }
 
-        return this.inventory.find((obj) => obj.equipped_slot === slot);
+        // make sure we are not moving and dropping into the same slot
+        if (slotId === targetSlot) {
+            return false;
+        }
+
+        // check if there is an item at the source inventory slot,
+        // which we want to move.
+        const movedItem = this.getEquipped(slotId);
+
+        if (!movedItem) {
+            return false;
+        }
+
+        let inventorySlot = targetSlot;
+
+        if (!['armour-body', 'weapon-ranged', 'weapon-melee', 'weapon-ammo'].includes(inventorySlot)) {
+            // make sure the target inventory slot is within the inventory size range
+            const inventoryNumber = parseInt(targetSlot.replace('inv-', ''), 10);
+
+            if (isNaN(inventoryNumber) || inventoryNumber < 0 || inventoryNumber >= this.stats.inventorySize) {
+                return false;
+            }
+        }
+
+        const targetSlotItem = this.inventory.find((obj) => obj.inventorySlot === inventorySlot);
+        let stacked = false;
+
+        // make sure the moved item and the target item is not the same one (due to eg. lag)
+        if (targetSlotItem && targetSlotItem.fingerprint === movedItem.fingerprint) {
+            return false;
+        }
+
+        // if there is already an item at the target slot, swap them around or stack them
+        // if the item is the same and stackable
+        if (targetSlotItem) {
+            // if the item is the same, and is stackable, stack them!
+            if (targetSlotItem.stats.stackable && targetSlotItem.id === movedItem.id) {
+                targetSlotItem.addDurability(movedItem.stats.durability);
+                this.Game.itemManager.remove(this, movedItem);
+                stacked = true;
+            } else {
+                // otherwise, swap the items.
+                targetSlotItem.inventorySlot = slotId;
+            }
+        }
+
+        // if the item was not stacked into the other item
+        if (!stacked) {
+            movedItem.inventorySlot = inventorySlot;
+        }
+
+        this.Game.characterManager.updateClient(this.user_id);
     }
 
     /**
      * Unequips slotted item, and adds it to the inventory
-     * @param  {String} slot  The equipped slot to unequip
+     * @param  {String} slotId      The equipped slot to unequip
+     * @param  {String} targetSlot  The slot to move the item to
      */
-    async unEquip(slot) {
-        if (!slot) {
+    unEquip(slotId, targetSlot) {
+        if (!slotId || !targetSlot) {
             return false;
         }
 
-        const item = this.getEquipped(slot);
-
-        if (!item) {
-            return;
+        // make sure the target inventory slot is not another equipment slot
+        if (['armour-body', 'weapon-ranged', 'weapon-melee', 'weapon-ammo'].includes(targetSlot)) {
+            return false;
         }
 
-        item.equipped_slot = null;
+        // make sure the target inventory slot is within the inventory size range
+        const inventoryNumber = parseInt(targetSlot.replace('inv-', ''), 10);
+
+        if (isNaN(inventoryNumber) || inventoryNumber < 0 || inventoryNumber >= this.stats.inventorySize) {
+            return false;
+        }
+
+        const item = this.getEquipped(slotId);
+
+        if (!item) {
+            return false;
+        }
+
+        const targetSlotItem = this.inventory.find((obj) => obj.inventorySlot === targetSlot);
+
+        // if there is already an item at the target slot, ignore the action
+        if (targetSlotItem) {
+            return false;
+        }
+
+        item.inventorySlot = targetSlot;
         this.Game.characterManager.updateClient(this.user_id);
     }
 
     /**
      * Equips selected item from inventory, moving the other item (if any) to the inventory.
-     * @param  {Number} inventoryIndex The inventory array index of the item to equip
+     * @param  {String} slotId      The inventory slotId containing the items to equip
+     * @param  {String} targetSlot  The slot to equip the item into
      */
-    equip(inventoryIndex) {
-        const item = this.inventory[inventoryIndex];
+    equip(slotId, targetSlot) {
+        if (!slotId || !targetSlot) {
+            return false;
+        }
+
+        const item = this.inventory.find((obj) => obj.inventorySlot === slotId);
 
         if (!item) {
             return false;
@@ -410,10 +575,10 @@ export default class Character {
             return false;
         }
 
+        let slot = `${item.type}-${item.subtype}`;
         // NOTE: change this line of code, should you wish to update which items can be equipped
         // Check which slot the item will be equipped into
-        let slot;
-        switch (item.subtype) {
+        /*switch (item.subtype) {
             case 'ranged':
                 slot = 'ranged';
                 break;
@@ -432,16 +597,21 @@ export default class Character {
 
             default:
                 return false;
+        }*/
+
+        // check if the target slot matches the slot the item can be equipped in
+        if (targetSlot !== slot) {
+            return false;
         }
 
         let equippedItem = this.getEquipped(slot);
 
         if (equippedItem) {
-            delete equippedItem.equipped_slot;
+            equippedItem.inventorySlot = slotId;
         }
 
         // equip the item
-        item.equipped_slot = slot;
+        item.inventorySlot = slot;
         this.Game.characterManager.updateClient(this.user_id);
     }
 
@@ -497,6 +667,22 @@ export default class Character {
 
         // return the dropped item
         return this.dropItem(item.name.toLowerCase(), 1, true);
+    }
+
+    /**
+     * Remove an item from the specific inventory slot.
+     * @param  {Mixed}   slotId    The name of the inventory slot
+     * @return {Object}            The item (with amount if stackable) which has been removed from the inventory.
+     */
+    dropSlotItem(slotId) {
+        const itemIndex = this.inventory.findIndex((obj) => obj.inventorySlot === slotId);
+
+        // If the inventory slot is empty, do nothing
+        if (itemIndex === -1) {
+            return null;
+        }
+
+        return this.inventory.splice(itemIndex, 1)[0];
     }
 
     /**
@@ -565,35 +751,70 @@ export default class Character {
     }
 
     /**
+     * Get the first available inventory slot ID
+     * @return {String|null} The slot ID or null if none found
+     */
+    findEmptyInventorySlot() {
+        for (let i = 0; i < this.stats.inventorySize; i++) {
+            const found = this.inventory.find((obj) => {
+                return obj.inventorySlot === `inv-${i}`;
+            });
+
+            if (!found) {
+                return `inv-${i}`;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Gives an item to the character
      * @param  {Item Object} itemObj The item object for the item which will be given to the character
      * @param  {Number} amount       The number of a given item to give to the player (non-stackable as well)
+     * @param  {string} targetSlot   The preferred inventory slot the item should go, if possible
      */
-    giveItem(itemObj, amount = null) {
+    giveItem(itemObj, amount = null, targetSlot = null) {
+        let inventoryItem = this.getEquipped(targetSlot);
+        let inventoryId = this.findEmptyInventorySlot();
+
+        // set the item inventory slot, where the item is expected to go
+        itemObj.inventorySlot = targetSlot || inventoryId;
+
         // check if item is stackable, and if so, see if we have that item in the inventory already
         if (itemObj.stats.stackable) {
             amount = amount || itemObj.stats.durability;
 
-            const inventoryItem = this.inventory.find((obj) => obj.id === itemObj.id);
-
             if (inventoryItem) {
                 inventoryItem.addDurability(amount);
             } else {
+                // if there is no item at the given slot, and the targetSlot is not defined
+                // and no empty inventory slot was found, drop the attempt to add the item.
+                if (!targetSlot && !inventoryId) {
+                    return;
+                }
+
                 // set the amount of the item to the correct amount, before adding to the inventory
                 itemObj.setDurability(amount);
                 this.inventory.push(itemObj);
             }
         } else {
+            // if there is no item at the given slot, and the targetSlot is not defined
+            // and no empty inventory slot was found, drop the attempt to add the item.
+            if (!targetSlot && !inventoryId) {
+                return;
+            }
+
             this.inventory.push(itemObj);
 
             // if we just added one, kill it here.
-            if (!amount) {
+            if (amount <= 1) {
                 return;
             }
 
             // if its non-stackable, we have to create the item several items.
             for (let i = amount - 1; i > 0; i--) {
-                this.giveItem(this.Game.itemManager.add(itemObj.id), 1);
+                this.giveItem(this.Game.itemManager.add(itemObj.id), 1, targetSlot);
             }
         }
     }
@@ -618,7 +839,7 @@ export default class Character {
         let durability = 0;
         let health = this.stats.health;
         let armorRuined = false;
-        const armorItem = this.getEquipped('armor');
+        const armorItem = this.getEquipped('armor-body');
 
         if (!ignoreArmor && armorItem) {
             durability = armorItem.durability;

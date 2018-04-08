@@ -1,12 +1,17 @@
-import {ACCOUNT_AUTHENTICATE_ERROR, ACCOUNT_LOGOUT} from './types';
+import {
+    AUTH_STRATEGIES_SAVE,
+} from './types';
 
-export default function(state = null, action) {
+const defaultState = {
+    strategies: null,
+};
+
+export default function(state = defaultState, action) {
     switch (action.type) {
-        case ACCOUNT_LOGOUT:
-            return null;
-
-        case ACCOUNT_AUTHENTICATE_ERROR:
-            return {...action.payload};
+        case AUTH_STRATEGIES_SAVE:
+            return {
+                strategies: action.payload,
+            };
     }
 
     return state;
