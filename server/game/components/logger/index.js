@@ -30,8 +30,8 @@ class Logger {
 
         this.actions = {consoleInfo, consoleDebug, consoleWarn, consoleError, fileInfo, fileDebug, fileWarn, fileError};
 
-        this.debug = run(consoleDebug);
-        this.info = run(consoleInfo);
+        this.debug = run(consoleDebug, fileDebug);
+        this.info = run(consoleInfo, fileInfo);
         this.warn = run(consoleWarn, fileWarn);
         this.error = run(consoleError, fileError);
         this.custom = run;
