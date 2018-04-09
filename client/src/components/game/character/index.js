@@ -11,6 +11,7 @@ import {CardDeck, Card, CardTitle, CardBody, Button, FormGroup, Input} from 'rea
 import {newCommand} from '../actions';
 import {socketSend} from '../../app/actions';
 import CharacterCard from './card';
+import Notification from '../../ui/notification';
 
 class Character extends React.Component {
     constructor(props) {
@@ -67,6 +68,7 @@ class Character extends React.Component {
                     <Card>
                         <CardBody>
                             <CardTitle>Create Character</CardTitle>
+                            <Notification />
                             <FormGroup>
                                 <Input
                                     type="text"

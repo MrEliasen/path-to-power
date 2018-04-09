@@ -1,13 +1,14 @@
 import {
     CONNECTION_STATUS,
     CONNECTION_SOCKET,
-    NOTIFICATION_SET,
     NOTIFICATION_CLEAR,
     LOADING_SET,
     LOADING_CLEAR,
 } from './types';
-
-import {USER_LOGOUT} from 'shared/actionTypes';
+import {
+    USER_LOGOUT,
+    NOTIFICATION_SET,
+} from 'shared/actionTypes';
 
 const defaultState = {
     connected: false,

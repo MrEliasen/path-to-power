@@ -1,7 +1,7 @@
 import {
     CHARACTER_CREATE_SUCCESS,
-    CHARACTER_CREATE_ERROR,
     CHARACTER_LOGIN,
+    NOTIFICATION_SET,
 } from 'shared/actionTypes';
 
 /**
@@ -372,9 +372,10 @@ async function cmdCharacterCreate(socket, character, command, params, cmdObject,
     } catch (err) {
         if (err.code === 11000) {
             return Game.socketManager.dispatchToSocket(socket, {
-                type: CHARACTER_CREATE_ERROR,
+                type: NOTIFICATION_SET,
                 payload: {
                     message: 'That character name is already taken.',
+                    type: 'error',
                 },
             });
         }
