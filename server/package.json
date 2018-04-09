@@ -4,10 +4,10 @@
     "license": "CC-BY-3.0",
     "description": "The server for a simple MUD inspired browser-based multiplayer game.",
     "scripts": {
-        "start": "cross-env NODE_ENV=development nodemon -L ./game --inspect --exec babel-node --presets env,stage-2",
-        "build": "babel game --out-dir dist --source-maps inline --copy-files",
+        "start": "cross-env NODE_ENV=development nodemon -L ./src --inspect --exec babel-node --presets env,stage-2",
+        "build": "babel src --out-dir dist --source-maps inline --copy-files",
         "serve": "cross-env NODE_ENV=production node dist/index.js",
-        "postinstall": "cp -Rn game/data.sample game/data && cp -n config.sample.json config.json && cp -n env.sample .env"
+        "postinstall": "cp -Rn src/data.sample src/data && cp -n config.sample.json config.json && cp -n env.sample .env"
     },
     "engines": {
         "node": ">=8.9.4"

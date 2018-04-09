@@ -16,23 +16,24 @@ import Promise from 'bluebird';
 // Custom
 import API from './api';
 import Logger from './components/logger';
+import configurator from '../utils/configurator';
 
 /************************************
  *            FILE CHECK            *
  ************************************/
 // Check if we have a data directory
 if (!fs.existsSync(`${__dirname}/data`)) {
-    console.error('ERROR: You you do have any game/data directory.');
+    console.error('ERROR: You you do have any src/data directory.');
     process.exit();
 }
 
 // check we have a config
-if (!fs.existsSync(`${__dirname}/../config.json`)) {
-    console.error('ERROR: You do not have a config.json file.');
+if (!process.env.SIGNING_SECRET) {
+    console.error('ERROR: You must specify your SIGNING_SECRET in the .env file.');
     process.exit();
 }
 
-let config = require(`${__dirname}/../config.json`);
+let config = configurator();
 
 /************************************
  *          INITIALISATION          *

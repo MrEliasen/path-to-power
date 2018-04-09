@@ -38,6 +38,6 @@ jspm_packages
 
 # Live Game files
 config.json
-game/data
+src/data
 dist
 .env
