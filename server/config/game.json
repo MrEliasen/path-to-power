@@ -1,0 +1,30 @@
+{
+    "logout_timer": 10000,
+    "defaultStats": {
+        "health_max": 100,
+        "money": 300,
+        "bank": 0
+    },
+    "timers": [
+        {
+            "name": "autosave",
+            "enabled": true,
+            "interval": 10000
+        },
+        {
+            "name": "newday",
+            "enabled": true,
+            "interval": 1800000
+        }
+    ],
+    "cooldowns": {
+        "move": 0.3,
+        "attack": 2.0,
+        "aim": 1.0,
+        "chat": 1.0,
+        "faction_invite": 3.0,
+        "skill_snoop": 10.0,
+        "skill_hide": 30.0,
+        "skill_search": 5.0
+    }
+}

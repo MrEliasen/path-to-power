@@ -1,0 +1,19 @@
+{
+    "driver": "log",
+    "drivers": {
+        "smtp": {
+            "host": "smtp.mailserver.tld",
+            "user": "",
+            "password": "",
+            "port": 587,
+            "sender": "sender@domain.tld"
+        },
+        "sendgrid": {
+            "user": "",
+            "apiKey": ""
+        },
+        "log": {
+            "path": "/logs/mail.log"
+        }
+    }
+}

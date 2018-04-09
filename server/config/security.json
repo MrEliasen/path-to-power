@@ -1,0 +1,12 @@
+{
+    "signingSecret": "",
+    "password": {
+        "rounds": 11,
+        "minlen": 8
+    },
+    "certificate": {
+        "cert": "",
+        "key": "",
+        "ca": ""
+    }
+}
