@@ -3,7 +3,7 @@
 .flooignore
 
 # extension files
-.todo
+*.todo
 
 # OS files
 .DS_STORE
