@@ -72,10 +72,10 @@ mongoose.connect(config.mongo_db).then(
 
         const logger = new Logger({
             level: (process.env.NODE_ENV === 'development' ? 'info' : 'error'),
-            debugFile: './game.debug.log',
-            infoFile: './game.info.log',
-            warnFile: './game.warn.log',
-            errorFile: './game.error.log',
+            debugFile: `${__dirname}/../logs/debug.log`,
+            infoFile: `${__dirname}/../logs/info.log`,
+            warnFile: `${__dirname}/../logs/warn.log`,
+            errorFile: `${__dirname}/../logs/error.log`,
         });
 
         app.set('logger', logger);
