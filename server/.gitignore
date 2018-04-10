@@ -1,5 +1,6 @@
 # Logs
 *.log
+logs/mail
 npm-debug.log*
 .DS_STORE
 

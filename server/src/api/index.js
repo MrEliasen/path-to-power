@@ -47,7 +47,7 @@ export default function(app, webServer, config) {
         methodList: ['GET', 'POST'],
     }));
 
-    app.set('mailer', mailer(config));
+    app.set('mailer', mailer(config, app.get('logger')));
 
     // Set needed headers for the application.
     app.use(function(req, res, next) {

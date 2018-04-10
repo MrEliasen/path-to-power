@@ -1,35 +1,23 @@
-/**
- * Sendgrid mailer class
- */
-class Sendgrid {
-    /**
-     * Setup the mailer
-     */
-    constructor(config) {
-        this.sgMail = require('@sendgrid/mail');
-        this.sgMail.setApiKey(config.mail.drivers.sendgrid.apikey);
-    }
-
-    /**
-     * @param {Object} mailOptions The mail options
-     */
-    sendMail(mailOptions, callback) {
-        this.sgMail.send(mailOptions, callback);
-    }
-}
+import Sendgrid from './sendgrid';
+import MailToLog from './file';
 
 /**
  * @param {Express App} app The main game app
  * @param {http/s} webServer The webserver
  * @param {Object} config The config
+ * @param {Logger} logger The application logger
  */
-export default function(config) {
+export default function(config, logger) {
     // setup mailer service
     let mailer;
 
     switch (config.mail.driver) {
         case 'sendgrid':
             mailer = new Sendgrid(config);
+            break;
+
+        case 'file':
+            mailer = new MailToLog(config, logger);
             break;
 
         default:
