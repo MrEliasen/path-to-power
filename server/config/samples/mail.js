@@ -1,7 +1,7 @@
 import {env} from '../utils/configure';
 
 export default {
-    driver: env('MAIL_DRIVER', 'log'),
+    driver: env('MAIL_DRIVER', 'file'),
     drivers: {
         smtp: {
             host: env('MAIL_DRIVER_HOST', 'smtp.mailserver.tld'),
@@ -13,8 +13,8 @@ export default {
             user: env('MAIL_DRIVER_USER', ''),
             apikey: env('MAIL_DRIVER_PASSWORD', ''),
         },
-        log: {
-            path: env('MAIL_DRIVER_LOG_PATH', '/logs/mail.log'),
+        file: {
+            outputDir: env('MAIL_DRIVER_FILE_PATH', '/logs/mail'),
         },
     },
     sender: env('MAIL_SENDER', 'sender@domain.tld'),
