@@ -11,9 +11,9 @@ export default {
         {
             id: env('AUTH_xxxxx_ID', 'passport-strategy-name'),
             package: env('AUTH_xxxxx_PACKAGE', '<passport-strategy-package-name>'),
-            enabled: env('AUTH_xxxxx_ENABELD', false),
-            client_id: env('AUTH_xxxxx_CLIENT_ID', ''),
-            client_secret: env('AUTH_xxxxx_CLIENT_SECRET', ''),
+            enabled: env('AUTH_xxxxx_ENABLED', false),
+            clientID: env('AUTH_xxxxx_CLIENT_ID', ''),
+            clientSecret: env('AUTH_xxxxx_CLIENT_SECRET', ''),
             name: env('AUTH_xxxxx_NAME', 'Template'),
             scope: env('AUTH_xxxxx_SCOPE', [], ','),
         },

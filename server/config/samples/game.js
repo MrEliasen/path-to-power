@@ -2,7 +2,7 @@ import {env} from '../utils/configure';
 
 export default {
     logout_timer: env('GAME_LOGOUT_TIMER', 10000),
-    default_stats: {
+    defaultstats: {
         health_max: env('GAME_DEFAULT_HEALTH', 100),
         money: env('GAME_DEFAULT_MONEY', 300),
         bank: env('GAME_DEFAULT_BANK', 0),

@@ -29,7 +29,7 @@ const app = express();
 
 // Connect to the MongoDB
 Promise.promisifyAll(mongoose);
-mongoose.connect(config.database.mongodb.host).then(
+mongoose.connect(config.database.drivers.mongodb.host).then(
     () => {
         let webServer;
         let webServerApi;

@@ -1,7 +1,7 @@
 import {env} from '../utils/configure';
 
 export default {
-    signing_secret: env('SECURITY_SIGNING_SECRET', ''),
+    signingSecret: env('SECURITY_SIGNING_SECRET', ''),
     password: {
         rounds: env('SECURITY_PASSWORD_ROUNDS', 11),
         minlen: env('SECURITY_PASSWORD_MINLEN', 8),
