@@ -18,18 +18,18 @@ const logger = new Logger({
  * Copies a sample config file to live
  * @param  {String} name Name of the config file
  */
-function checkConfigFile(name) {
-    if (name[0] === '.') {
-        return;
-    }
+// function checkConfigFile(name) {
+//     if (name[0] === '.') {
+//         return;
+//     }
 
-    if (!fs.existsSync(`${rootPath}/config/${name}`)) {
-        logger.warn(`Missing ${name} config file, generating..`);
-        return execSync(`cp -n ${rootPath}/config/samples/${name} ${rootPath}/config/${name}`);
-    } else {
-        logger.info(`Found ${name} config, skipping..`);
-    }
-}
+//     if (!fs.existsSync(`${rootPath}/config/${name}`)) {
+//         logger.warn(`Missing ${name} config file, generating..`);
+//         return execSync(`cp -n ${rootPath}/config/samples/${name} ${rootPath}/config/${name}`);
+//     } else {
+//         logger.info(`Found ${name} config, skipping..`);
+//     }
+// }
 
 // check if the data directory is missing
 if (!fs.existsSync(`${rootPath}/src/data`)) {
@@ -48,7 +48,7 @@ if (!fs.existsSync(`${rootPath}/.env`)) {
 }
 
 // check if the config directory is setup
-logger.info('Checking for missing config files..');
-fs.readdirSync(`${rootPath}/config/samples/`).forEach((file) => {
-    checkConfigFile(file);
-});
+// logger.info('Checking for missing config files..');
+// fs.readdirSync(`${rootPath}/config/samples/`).forEach((file) => {
+//     checkConfigFile(file);
+// });
