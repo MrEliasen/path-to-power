@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import moment from 'moment';
 import uuid from 'uuid/v4';
 import bcrypt from 'bcrypt';
-import config from '../../../config.json';
+import config from '../../../config/security';
 
 // Define our product schema
 const UserSchema = new mongoose.Schema({
@@ -49,7 +49,7 @@ UserSchema.pre('save', async function(callback) {
     }
 
     if (this.isModified('password')) {
-        this.password = await bcrypt.hash(this.password, config.api.authentication.password.rounds);
+        this.password = await bcrypt.hash(this.password, config.password.rounds);
     }
     callback();
 });

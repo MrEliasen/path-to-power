@@ -113,7 +113,7 @@ export function resetConfirm(req, res) {
         }
 
         // generate the password reset token
-        const passwordLength = req.app.get('config').api.authentication.password.minlen;
+        const passwordLength = req.app.get('config').auth.password.minlen;
         let newPassword = crypto.createHash('sha1');
         newPassword.update(uuid());
         newPassword = newPassword.digest('hex').substr(0, passwordLength);
@@ -136,7 +136,7 @@ export function resetConfirm(req, res) {
 
              // setup email data with unicode symbols
             let mailOptions = {
-                from: req.app.get('config').mailserver.sender,
+                from: req.app.get('config').mail.sender,
                 to: user.email,
                 subject: newPasswordEmail.title,
                 html: newPasswordEmail.body(newPassword),
@@ -197,7 +197,7 @@ export function passwordReset(req, res) {
             }
 
             // generate the password reset token
-            let token = crypto.createHmac('sha256', process.env.SIGNING_SECRET);
+            let token = crypto.createHmac('sha256', req.app.get('config').security.signingSecret);
             token.update(uuid());
 
             // create the password reset object, store in the user model.
@@ -213,7 +213,7 @@ export function passwordReset(req, res) {
 
                  // setup email data with unicode symbols
                 let mailOptions = {
-                    from: req.app.get('config').mailserver.sender,
+                    from: req.app.get('config').mail.sender,
                     to: user.email,
                     subject: passwordResetEmail.title,
                     html: passwordResetEmail.body(link, req.connection.remoteAddress),

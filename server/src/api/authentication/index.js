@@ -16,7 +16,7 @@ import oauthSetup from './strategies/oauth';
  */
 function output(req, res, output) {
     const redirect = req.params.provider ? true : false;
-    const errorUrl = `${req.app.get('config').clientUrl}/auth?error=`;
+    const errorUrl = `${req.app.get('config').app.clientUrl}/auth?error=`;
 
     if (redirect) {
         return res.redirect(`${errorUrl}${output.error || output.message}`);
@@ -30,8 +30,8 @@ function output(req, res, output) {
  * @param  {Express} app
  */
 export function loadStrategies(passport, logger) {
-    config.api.authentication.providers.forEach((provider) => {
-        let callbackUrl = `${config.api.domain}${[80, 443].includes(config.api.post) ? '' : `:${config.api.port}`}/api/auth/provider/${provider.id}/callback`;
+    config.auth.providers.forEach((provider) => {
+        let callbackUrl = `${config.api.url}${[80, 443].includes(config.api.port) ? '' : `:${config.api.port}`}/api/auth/provider/${provider.id}/callback`;
 
         if (provider.enabled) {
             // if its the local auth provider, we have to use a separate strategy from OAuth.
@@ -167,7 +167,7 @@ function linkNewUser(req, res, identity) {
 function authenticateProvider(req, res) {
     const providerToken = req.body.providerToken;
 
-    jwt.verify(providerToken, process.env.SIGNING_SECRET, (err, decoded) => {
+    jwt.verify(providerToken, req.app.get('config').security.signingSecret, (err, decoded) => {
         if (err) {
             return output(req, res, {
                 status: 401,
@@ -245,7 +245,7 @@ export function authenticate(req, res, next) {
         });
     }
 
-    const provider = req.app.get('config').api.authentication.providers.find((obj) => obj.id === method);
+    const provider = req.app.get('config').auth.providers.find((obj) => obj.id === method);
 
     if (!provider) {
         return output(req, res, {
@@ -285,10 +285,10 @@ export function onAuth(req, res, data, redirect) {
         _id: data.user._id || null,
         session_token: data.user.session_token || null,
         identity: data.identity._id || null,
-    }, process.env.SIGNING_SECRET, {expiresIn: '1h'});
+    }, req.app.get('config').security.signingSecret, {expiresIn: '1h'});
 
     if (redirect) {
-        return res.redirect(`${req.app.get('config').clientUrl}/auth?token=${token}`);
+        return res.redirect(`${req.app.get('config').app.clientUrl}/auth?token=${token}`);
     }
 
     // send JWT back to client
@@ -303,12 +303,12 @@ export function onAuth(req, res, data, redirect) {
  * @param  {Express} app
  */
 export function getAuthList(req, res) {
-    const providers = config.api.authentication.providers.filter((provider) => provider.enabled);
+    const providers = config.auth.providers.filter((provider) => provider.enabled);
     const authlist = providers.map((provider) => {
         return {
             id: provider.id,
             name: provider.name,
-            authUrl: `${config.api.domain}${[80, 443].includes(config.api.post) ? '' : `:${config.api.port}`}/api/auth/provider/${provider.id}`,
+            authUrl: `${config.api.url}${[80, 443].includes(config.api.port) ? '' : `:${config.api.port}`}/api/auth/provider/${provider.id}`,
         };
     });
 
@@ -334,7 +334,7 @@ export function isAuthenticated(req, res, next) {
         });
     }
 
-    jwt.verify(token.replace('Bearer ', ''), process.env.SIGNING_SECRET, (err, decoded) => {
+    jwt.verify(token.replace('Bearer ', ''), req.app.get('config').security.signingSecret, (err, decoded) => {
         if (err) {
             return output(req, res, {
                 status: 401,
@@ -389,7 +389,7 @@ export function linkProvider(req, res) {
         });
     }
 
-    jwt.verify(req.body.authToken, process.env.SIGNING_SECRET, (err, authTokenDecoded) => {
+    jwt.verify(req.body.authToken, req.app.get('config').security.signingSecret, (err, authTokenDecoded) => {
         if (err) {
             return output(req, res, {
                 status: 400,
@@ -397,7 +397,7 @@ export function linkProvider(req, res) {
             });
         }
 
-        jwt.verify(req.body.provider, process.env.SIGNING_SECRET, (err, decoded) => {
+        jwt.verify(req.body.provider, req.app.get('config').security.signingSecret, (err, decoded) => {
             if (err) {
                 return output(req, res, {
                     status: 400,

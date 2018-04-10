@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 /**
  * Checks a given config value has an overwrite from .env
  * @param  {String}        key          The .env option key
@@ -11,4 +13,25 @@ export function env(key, defaultValue, split = null) {
     }
 
     return defaultValue;
+}
+
+/**
+ * Loads all config files and compiles them into one object
+ * @return {Object}
+ */
+export function generateConfig() {
+    const configDir = `${__dirname}/../config`;
+    const config = {};
+
+    fs.readdirSync(configDir).forEach((file) => {
+        if (file === 'samples') {
+            return;
+        }
+
+        const configData = require(`${configDir}/${file}`).default();
+        config[file.toLowerCase().replace('.js', '')] = configData;
+    });
+
+
+    return config;
 }

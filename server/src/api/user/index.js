@@ -65,7 +65,7 @@ export function updateUser(req, res) {
                     });
                 }
 
-                const token = crypto.createHmac('sha256', process.env.SIGNING_SECRET);
+                const token = crypto.createHmac('sha256', req.app.get('config').security.signingSecret);
                 token.update(uuid());
 
                 user.newEmail = req.body.email;
@@ -82,7 +82,7 @@ export function updateUser(req, res) {
                 });
             }
 
-            const minLen = req.app.get('config').api.authentication.password.minlen;
+            const minLen = req.app.get('config').security.password.minlen;
             if (req.body.password.length < minLen) {
                 return res.status(400).json({
                     status: 400,
@@ -127,7 +127,7 @@ export function updateUser(req, res) {
 
                  // setup email data with unicode symbols
                 let mailOptions = {
-                    from: req.app.get('config').mailserver.sender,
+                    from: req.app.get('config').mail.sender,
                     to: user.newEmail,
                     subject: verificationEmail.title,
                     html: verificationEmail.body(link),
@@ -269,7 +269,7 @@ export function createUser(req, res) {
         });
     }
 
-    const minLen = req.app.get('config').api.authentication.password.minlen;
+    const minLen = req.app.get('config').security.password.minlen;
     if (req.body.password.length < minLen) {
         return res.status(400).json({
             status: 400,
@@ -302,14 +302,14 @@ export function createUser(req, res) {
             });
         }
 
-        const localAuth = req.app.get('config').api.authentication.providers.find((obj) => obj.id === 'local');
+        const localAuth = req.app.get('config').auth.providers.find((obj) => obj.id === 'local');
         const requireActivation = localAuth.activationLink;
         let newUser;
         let token;
 
         if (requireActivation) {
             // create activation key
-            token = crypto.createHmac('sha256', process.env.SIGNING_SECRET);
+            token = crypto.createHmac('sha256', req.app.get('config').security.signingSecret);
             token.update(uuid());
         }
 
@@ -341,7 +341,7 @@ export function createUser(req, res) {
 
              // setup email data with unicode symbols
             let mailOptions = {
-                from: req.app.get('config').mailserver.sender,
+                from: req.app.get('config').mail.sender,
                 to: newUser.email,
                 subject: activationEmail.title,
                 html: activationEmail.body(link),
@@ -368,7 +368,7 @@ export function createUser(req, res) {
  * @param  {Express Response} res
  */
 export function verifyEmail(req, res) {
-    const redirectUrl = `${req.app.get('config').clientUrl}/verified`;
+    const redirectUrl = `${req.app.get('config').app.clientUrl}/verified`;
 
     if (!req.query.token || !req.query.token.length) {
         return res.redirect(`${redirectUrl}?error=Missing verification token`);
@@ -409,7 +409,7 @@ export function verifyEmail(req, res) {
                 return res.redirect(`${redirectUrl}?error=Sometihng went wrong. Please try again in a moment`);
             }
 
-            res.redirect(`${req.app.get('config').clientUrl}/verified`);
+            res.redirect(`${req.app.get('config').app.clientUrl}/verified`);
         });
     });
 }

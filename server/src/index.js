@@ -16,24 +16,9 @@ import Promise from 'bluebird';
 // Custom
 import API from './api';
 import Logger from './components/logger';
-import configurator from '../utils/configurator';
+import {generate} from '../utils/configure';
 
-/************************************
- *            FILE CHECK            *
- ************************************/
-// Check if we have a data directory
-if (!fs.existsSync(`${__dirname}/data`)) {
-    console.error('ERROR: You you do have any src/data directory.');
-    process.exit();
-}
-
-// check we have a config
-if (!process.env.SIGNING_SECRET) {
-    console.error('ERROR: You must specify your SIGNING_SECRET in the .env file.');
-    process.exit();
-}
-
-let config = configurator();
+let config = generate();
 
 /************************************
  *          INITIALISATION          *
@@ -44,25 +29,25 @@ const app = express();
 
 // Connect to the MongoDB
 Promise.promisifyAll(mongoose);
-mongoose.connect(config.mongo_db).then(
+mongoose.connect(config.database.mongodb.host).then(
     () => {
         let webServer;
         let webServerApi;
 
         // if an SSL cert is defined, start a HTTPS server
-        if (config.server.certificate.key) {
+        if (config.security.certificate.key) {
             webServer = https.createServer({
-                key: fs.readFileSync(config.server.certificate.key, 'utf8'),
-                cert: fs.readFileSync(config.server.certificate.cert, 'utf8'),
+                key: fs.readFileSync(config.security.certificate.key, 'utf8'),
+                cert: fs.readFileSync(config.security.certificate.cert, 'utf8'),
                 ca: [
-                    fs.readFileSync(config.server.certificate.ca, 'utf8'),
+                    fs.readFileSync(config.security.certificate.ca, 'utf8'),
                 ],
             }, app);
             webServerApi = https.createServer({
-                key: fs.readFileSync(config.server.certificate.key, 'utf8'),
-                cert: fs.readFileSync(config.server.certificate.cert, 'utf8'),
+                key: fs.readFileSync(config.security.certificate.key, 'utf8'),
+                cert: fs.readFileSync(config.security.certificate.cert, 'utf8'),
                 ca: [
-                    fs.readFileSync(config.server.certificate.ca, 'utf8'),
+                    fs.readFileSync(config.security.certificate.ca, 'utf8'),
                 ],
             }, app);
         } else {

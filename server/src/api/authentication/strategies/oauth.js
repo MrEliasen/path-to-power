@@ -12,16 +12,15 @@ let logger;
 export default function setup(passport, details, loggerObj) {
     logger = loggerObj;
     const Strategy = require(`passport-${details.package}`).Strategy;
-    const secret = process.env[`${details.id.toUpperCase()}_CLIENT_SECRET`] || null;
 
-    if (!secret) {
+    if (!details.clientSecret) {
         return logger.error(new Error(`The provider ${details.id} does not have a ${details.id.toUpperCase()}_CLIENT_SECRET defined.`));
     }
 
     //setup the stategies we want
     passport.use(new Strategy({
         clientID: details.clientID,
-        clientSecret: secret,
+        clientSecret: details.clientSecret,
         callbackURL: details.callbackUrl,
     }, Auth));
 }

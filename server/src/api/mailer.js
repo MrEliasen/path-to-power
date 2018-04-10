@@ -5,9 +5,9 @@ class Sendgrid {
     /**
      * Setup the mailer
      */
-    constructor() {
+    constructor(config) {
         this.sgMail = require('@sendgrid/mail');
-        this.sgMail.setApiKey(process.env.MAILER_PASSWORD);
+        this.sgMail.setApiKey(config.mail.drivers.sendgrid.apikey);
     }
 
     /**
@@ -27,19 +27,19 @@ export default function(config) {
     // setup mailer service
     let mailer;
 
-    switch (config.mailserver.transport) {
+    switch (config.mail.driver) {
         case 'sendgrid':
-            mailer = new Sendgrid();
+            mailer = new Sendgrid(config);
             break;
 
         default:
             mailer = require('nodemailer');
             mailer.createTransport({
-                host: config.mailserver.host,
-                port: config.mailserver.port,
+                host: config.mail.drivers.smtp.host,
+                port: config.mail.drivers.smtp.port,
                 auth: {
-                    user: process.env.MAILER_USER,
-                    pass: process.env.MAILER_PASSWORD,
+                    user: config.mail.drivers.smtp.user,
+                    pass: config.mail.drivers.smtp.password,
                 },
             });
             break;
