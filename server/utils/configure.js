@@ -19,7 +19,7 @@ export function env(key, defaultValue, split = null) {
  * Loads all config files and compiles them into one object
  * @return {Object}
  */
-export function generateConfig() {
+export function generate() {
     const configDir = `${__dirname}/../config`;
     const config = {};
 
@@ -28,8 +28,12 @@ export function generateConfig() {
             return;
         }
 
-        const configData = require(`${configDir}/${file}`).default();
-        config[file.toLowerCase().replace('.js', '')] = configData;
+        if (file[0] === '.') {
+            return;
+        }
+
+        const configData = require(`${configDir}/${file}`);
+        config[file.toLowerCase().replace('.js', '')] = configData.default;
     });
 
 

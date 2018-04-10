@@ -19,6 +19,10 @@ const logger = new Logger({
  * @param  {String} name Name of the config file
  */
 function checkConfigFile(name) {
+    if (name[0] === '.') {
+        return;
+    }
+
     if (!fs.existsSync(`${rootPath}/config/${name}`)) {
         logger.warn(`Missing ${name} config file, generating..`);
         return execSync(`cp -n ${rootPath}/config/samples/${name} ${rootPath}/config/${name}`);
