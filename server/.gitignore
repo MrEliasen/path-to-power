@@ -36,8 +36,9 @@ jspm_packages
 # Optional REPL history
 .node_repl_history
 
-# Live Game files
-config.json
+# Live files
+config/*.js
+!config/samples/*.js
 src/data
-dist
+build
 .env
