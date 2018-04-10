@@ -40,6 +40,10 @@ export default class MapManager {
 
         // loop each of our mapfiles
         maplist.map((mapname) => {
+            if (mapname[0] === '.') {
+                return;
+            }
+
             let mapData = require(`${__dirname}/../../data/maps/${mapname}`);
             this.maps[mapData.id] = new GameMap(this.Game, mapData);
 
