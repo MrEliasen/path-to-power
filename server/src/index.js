@@ -1,7 +1,6 @@
 // Required for compiling
 require('babel-core/register');
 require('babel-polyfill');
-require('dotenv').config();
 
 // native modules
 import fs from 'fs';
@@ -9,6 +8,7 @@ import http from 'http';
 import https from 'https';
 
 // 3rd party
+import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
 import Promise from 'bluebird';
@@ -17,6 +17,14 @@ import Promise from 'bluebird';
 import API from './api';
 import Logger from './components/logger';
 import {generate} from '../utils/configure';
+
+// load .env file
+const dotloaded = dotenv.config();
+
+if (dotloaded.error) {
+  throw new Error(dotloaded.result.error);
+}
+
 
 let config = generate();
 
