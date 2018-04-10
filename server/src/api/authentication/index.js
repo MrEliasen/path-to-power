@@ -1,5 +1,4 @@
 import passport from 'passport';
-import config from '../../../config.json';
 import UserModel from '../models/user';
 import IdentityModel from '../models/identity';
 import jwt from 'jsonwebtoken';
@@ -29,7 +28,7 @@ function output(req, res, output) {
  * Loads the authentication strategies
  * @param  {Express} app
  */
-export function loadStrategies(passport, logger) {
+export function loadStrategies(passport, logger, config) {
     config.auth.providers.forEach((provider) => {
         let callbackUrl = `${config.api.url}${[80, 443].includes(config.api.port) ? '' : `:${config.api.port}`}/api/auth/provider/${provider.id}/callback`;
 
@@ -303,6 +302,7 @@ export function onAuth(req, res, data, redirect) {
  * @param  {Express} app
  */
 export function getAuthList(req, res) {
+    const config = req.app.get('config');
     const providers = config.auth.providers.filter((provider) => provider.enabled);
     const authlist = providers.map((provider) => {
         return {

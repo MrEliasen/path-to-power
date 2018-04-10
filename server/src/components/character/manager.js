@@ -403,7 +403,7 @@ export default class CharacterManager {
             location: {
                 map: city,
             },
-            stats: {...this.Game.config.game.defaultStats},
+            stats: {...this.Game.config.game.defaultstats},
         });
 
         await newCharacter.saveAsync();
