@@ -38,6 +38,7 @@ jspm_packages
 .node_repl_history
 
 # Live files
-src/data
+config
+!scripts/samples/config
 build
 .env

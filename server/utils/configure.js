@@ -24,11 +24,7 @@ export function generate() {
     const config = {};
 
     fs.readdirSync(configDir).forEach((file) => {
-        if (file === 'samples') {
-            return;
-        }
-
-        if (file[0] === '.') {
+        if (!file.includes('.js')) {
             return;
         }
 
