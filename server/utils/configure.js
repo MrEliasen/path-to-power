@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 
 /**
  * Checks a given config value has an overwrite from .env
@@ -20,7 +21,7 @@ export function env(key, defaultValue, split = null) {
  * @return {Object}
  */
 export function generate() {
-    const configDir = `${__dirname}/../config`;
+    const configDir = path.join(__dirname, '../', 'config');
     const config = {};
 
     fs.readdirSync(configDir).forEach((file) => {

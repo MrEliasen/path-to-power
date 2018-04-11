@@ -1,6 +1,6 @@
 // manager specific imports
 import Structure from './object';
-import structureList from '../../data/structures.json';
+import structureList from 'config/gamedata/structures.json';
 import structureCommands from './commands';
 
 /**

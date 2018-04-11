@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import moment from 'moment';
 import uuid from 'uuid/v4';
 import bcrypt from 'bcrypt';
-import config from '../../../config/security';
+import config from 'config/security';
 
 // Define our product schema
 const UserSchema = new mongoose.Schema({

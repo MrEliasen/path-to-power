@@ -18,7 +18,7 @@ import Character from './object';
 import CharacterModel from './model';
 import characterCommands from './commands';
 import {joinedGrid} from './actions';
-import Levels from '../../data/levels.json';
+import Levels from 'config/gamedata/levels.json';
 import {findObjectInArray} from '../../helper';
 
 /**

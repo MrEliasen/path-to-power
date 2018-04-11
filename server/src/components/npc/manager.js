@@ -6,8 +6,8 @@ import {
 } from 'shared/actionTypes';
 
 import NPC from './object';
-import NPCList from '../../data/npcs.json';
-import namesList from '../../data/names.json';
+import NPCList from 'config/gamedata/npcs.json';
+import namesList from 'config/gamedata/names.json';
 import {deepCopyObject, ucfirst} from '../../helper';
 
 /**

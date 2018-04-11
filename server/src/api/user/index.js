@@ -1,5 +1,5 @@
-import activationEmail from '../../data/emails/activation.js';
-import verificationEmail from '../../data/emails/verification.js';
+import activationEmail from 'config/emails/activation.js';
+import verificationEmail from 'config/emails/verification.js';
 import IdentityModel from '../models/identity';
 import UserModel from '../models/user';
 import CharacterModel from '../../components/character/model';

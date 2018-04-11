@@ -1,6 +1,6 @@
 // manager specific imports
 import shopCommands from './commands';
-import ShopList from '../../data/shops.json';
+import ShopList from 'config/gamedata/shops.json';
 import {deepCopyObject} from '../../helper';
 import Shop from './object';
 import {

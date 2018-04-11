@@ -8,7 +8,7 @@ import {
 } from 'shared/actionTypes';
 
 import GameMap from './object';
-import descriptionList from '../../data/descriptions.json';
+import descriptionList from 'config/gamedata/descriptions.json';
 import mapCommands from './commands';
 
 /**
@@ -36,7 +36,7 @@ export default class MapManager {
         this.Game.commandManager.registerManager(mapCommands);
 
         // get the list of map files in our data maps directory
-        const maplist = fs.readdirSync(`${__dirname}/../../data/maps`);
+        const maplist = fs.readdirSync(`${__dirname}/../../../config/gamedata/maps`);
 
         // loop each of our mapfiles
         maplist.map((mapname) => {
@@ -44,7 +44,7 @@ export default class MapManager {
                 return;
             }
 
-            let mapData = require(`${__dirname}/../../data/maps/${mapname}`);
+            let mapData = require(`${__dirname}/../../../config/gamedata/maps/${mapname}`);
             this.maps[mapData.id] = new GameMap(this.Game, mapData);
 
             // generate the map, and once done, increment the counter and resolve if all maps are done.

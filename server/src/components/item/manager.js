@@ -2,7 +2,7 @@ import Promise from 'bluebird';
 
 // manager specific imports
 import ItemModel from './model';
-import ItemList from '../../data/items.json';
+import ItemList from 'config/gamedata/items.json';
 import Item from './object';
 import ItemCommands from './commands';
 import {ucfirst} from '../../helper';
