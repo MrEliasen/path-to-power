@@ -1,4 +1,4 @@
-import {env} from '../utils/configure';
+import {env} from 'utils/configure';
 
 export default {
     url: env('API_URL', 'http://localhost'),

@@ -1,4 +1,4 @@
-import {env} from '../utils/configure';
+import {env} from 'utils/configure';
 
 export default {
     driver: env('MAIL_DRIVER', 'file'),
