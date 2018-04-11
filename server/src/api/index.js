@@ -1,6 +1,4 @@
 // Required for compiling
-require('babel-core/register');
-require('babel-polyfill');
 
 import helmet from 'helmet';
 import bodyParser from 'body-parser';
