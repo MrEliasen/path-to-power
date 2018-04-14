@@ -255,11 +255,13 @@ export function authenticate(req, res, next) {
 
     return passport.authenticate(provider.id, Object.assign({session: false}, {scope: provider.scope || null}), (err, userDetails, info, status) => {
         if (err) {
-            req.app.get('logger').error(err);
+            if (typeof err !== 'string') { 
+                req.app.get('logger').error(err);
+            }
 
             return output(req, res, {
                 status: 400,
-                error: 'Invalid authentication method.',
+                error: (typeof err === 'string' ? err : 'Invalid authentication method.'),
             });
         }
 
