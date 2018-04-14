@@ -13,11 +13,11 @@ import oauthSetup from './strategies/oauth';
  * @param  {Express Response} res
  * @param  {String|Object}    output
  */
-function output(req, res, output) {
+function output(req, res, output, forceRedirect = false) {
     const redirect = req.params.provider ? true : false;
     const errorUrl = `${req.app.get('config').app.clientUrl}/auth?error=`;
 
-    if (redirect) {
+    if (redirect || forceRedirect) {
         return res.redirect(`${errorUrl}${output.error || output.message}`);
     }
 
