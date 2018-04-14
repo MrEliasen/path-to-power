@@ -66,6 +66,10 @@ class AccountDetails extends React.Component {
                         </tbody>
                     </Table>
 
+                    {
+                        this.props.identities &&
+                        this.props.identities.length > 0 &&
+                        <React.Fragment>
                     <h5>3rd Party Details</h5>
                     <Table striped>
                         <thead>
@@ -76,7 +80,6 @@ class AccountDetails extends React.Component {
                         </thead>
                         <tbody>
                             {
-                                this.props.identities &&
                                 this.props.identities.map((identity, index) => {
                                     const provider = this.props.strategies.find((obj) => obj.id === identity.provider);
 
@@ -92,6 +95,8 @@ class AccountDetails extends React.Component {
                             }
                         </tbody>
                     </Table>
+                        </React.Fragment>
+                    }
                     <Notification />
                     <div className="dangerzone">
                         <p>This is where you can permanently delete your account. This is an irreversible action!</p>
