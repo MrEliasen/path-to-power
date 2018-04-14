@@ -10,6 +10,10 @@ You can try it out the game on the offical website [here](https://pathtopower.on
 
 See the README.md for the server and client for more information.
 
+## Installation Issues
+
+If you are having issues installing the PTP server, please read [this issue](https://github.com/MrEliasen/path-to-power/issues/120).
+
 ## Contributing
 
 If you would would like to contribute, please see [CONTRIBUTING.md](https://github.com/MrEliasen/path-to-power/blob/master/.github/CONTRIBUTING.md). Thank you!
