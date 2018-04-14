@@ -75,14 +75,14 @@ export function activateUser(req, res) {
         return output(req, res, {
             status: 400,
             error: 'Missing activation token.',
-        });
+        }, true);
     }
 
     if (req.query.token.length !== 64) {
         return output(req, res, {
             status: 400,
             error: 'Invalid activation token.',
-        });
+        }, true);
     }
 
     UserModel.findOne({_id: escape(req.params.userId), activationToken: escape(req.query.token)}, (err, user) => {
@@ -90,14 +90,14 @@ export function activateUser(req, res) {
             return output(req, res, {
                 status: 500,
                 error: 'Something went wrong. Please try again in a moment.',
-            });
+            }, true);
         }
 
         if (!user) {
             return output(req, res, {
                 status: 400,
                 error: 'Invalid activation token.',
-            });
+            }, true);
         }
 
         // activate the user and remove the token
@@ -109,13 +109,13 @@ export function activateUser(req, res) {
                 return output(req, res, {
                     status: 500,
                     error: 'Sometihng went wrong. Please try again in a moment.',
-                });
+                }, true);
             }
 
             return output(req, res, {
                 status: 200,
                 message: 'Your account has been activated!',
-            });
+            }, true);
         });
     });
 }
