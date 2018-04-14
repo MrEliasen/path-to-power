@@ -96,7 +96,7 @@ function cmdWhisper(socket, character, command, params, cmdObject, Game) {
     // check for cooldowns
     checkChatCooldown(character, Game, () => {
         const whisperTarget = params[0];
-        const message = params[1];
+        let message = params[1];
 
         // send message to the socket
         Game.socketManager.dispatchToSocket(socket, {
@@ -108,6 +108,11 @@ function cmdWhisper(socket, character, command, params, cmdObject, Game) {
                 message: message,
             },
         });
+
+        if (character.user_id === whisperTarget.user_id) {
+            message = message.split('').reverse().join('');
+        }
+
         // send message to the target user
         Game.socketManager.dispatchToUser(whisperTarget.user_id, {
             type: COMMAND_CHAT_MESSAGE,
