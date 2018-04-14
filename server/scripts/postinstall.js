@@ -1,6 +1,7 @@
 require('babel-core/register');
 require('babel-polyfill');
 
+import crypto from 'crypto';
 import {execSync} from 'child_process';
 import path from 'path';
 import fs from 'fs';
@@ -31,6 +32,20 @@ if (!fs.existsSync(`${rootPath}/config`)) {
 
 try {
     execSync(`cp -Rn ${rootPath}/scripts/samples/config/* ${rootPath}/config`);
+} catch (err) {
+    logger.error(err);
+}
+
+// generate a signing key
+try {
+    logger.warn('Generaing new default signing key..');
+    const configPath = `${rootPath}/config/security.js`;
+    let configData = fs.readFileSync(configPath, {encoding: 'utf8'});
+
+    const newKey = crypto.randomBytes(32).toString('hex');
+    configData = configData.replace('\'SECURITY_SIGNING_SECRET\', \'\'', `\'SECURITY_SIGNING_SECRET\', \'${newKey}\'`);
+
+    fs.writeFileSync(configPath, configData);
 } catch (err) {
     logger.error(err);
 }
