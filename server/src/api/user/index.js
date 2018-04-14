@@ -303,7 +303,7 @@ export function createUser(req, res) {
         }
 
         const localAuth = req.app.get('config').auth.providers.find((obj) => obj.id === 'local');
-        const requireActivation = localAuth.activationLink;
+        const requireActivation = localAuth.activation_link;
         let newUser;
         let token;
 
