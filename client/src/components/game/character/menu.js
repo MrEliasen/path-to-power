@@ -1,11 +1,15 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import {bindActionCreators} from 'redux';
 
 // Components
 import Inventory from '../inventory';
 import Stats from './stats';
 import Players from '../players';
 import EquippedSlot from '../item/equippedslot';
+
+// actions
+import {togglePlayersMenu} from '../players/actions';
 
 // UI
 import {Card, Modal, ModalHeader, ModalBody, Row, Col} from 'reactstrap';
@@ -55,7 +59,7 @@ class CharacterMenu extends React.Component {
     }
 
     togglePlayers() {
-        this.setState({modalPlayers: !this.state.modalPlayers});
+        this.props.togglePlayersMenu();
     }
 
     renderModals() {
@@ -91,7 +95,7 @@ class CharacterMenu extends React.Component {
                         Not yet :(
                     </ModalBody>
                 </Modal>
-                <Modal isOpen={this.state.modalPlayers} toggle={this.togglePlayers} size="lg">
+                <Modal isOpen={this.props.playersMenuOpen} toggle={this.togglePlayers} size="lg">
                     <ModalHeader toggle={this.togglePlayers}>Players Online</ModalHeader>
                     <ModalBody>
                         <Players setCommand={this.props.setCommand} sendCommand={this.props.sendCommand} />
@@ -117,11 +121,18 @@ class CharacterMenu extends React.Component {
     }
 }
 
+function mapDispatchToProps(dispatch) {
+    return bindActionCreators({
+        togglePlayersMenu,
+    }, dispatch);
+}
+
 function mapStateToProps(state) {
     return {
         players: state.game.players,
         character: state.character.selected,
+        playersMenuOpen: state.playersmenu.open,
     };
 }
 
-export default connect(mapStateToProps)(CharacterMenu);
+export default connect(mapStateToProps, mapDispatchToProps)(CharacterMenu);
