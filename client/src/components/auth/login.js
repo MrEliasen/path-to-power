@@ -18,7 +18,8 @@ class AuthLogin extends React.Component {
         this.state = {
             email: '',
             password: '',
-            error: '',
+            error: null,
+            success: null,
         };
 
         this.authenticate = this.authenticate.bind(this);
@@ -27,9 +28,11 @@ class AuthLogin extends React.Component {
     componentDidMount() {
         const url = new URL(document.location);
         const error = url.searchParams.get('error');
+        const success = url.searchParams.get('success');
 
         this.setState({
             error: error || null,
+            success: success || null,
         });
 
         this.props.getStrategies();
@@ -68,12 +71,26 @@ class AuthLogin extends React.Component {
     }
 
     showStatus() {
-        if (!this.state.status) {
+        const state = {...this.state};
+
+        if (state.error) {
+            return <p className="alert alert-danger">
+                {state.error}
+            </p>;
+        }
+
+        if (state.success) {
+            return <p className="alert alert-success">
+                {state.success}
+            </p>;
+        }
+
+        if (!state.status) {
             return null;
         }
 
-        return <p className={`alert alert-${this.state.status.isError ? 'danger' : 'success'}`}>
-            {this.state.status.message}
+        return <p className={`alert alert-${state.status.isError ? 'danger' : 'success'}`}>
+            {state.status.message}
         </p>;
     }
 
@@ -124,12 +141,6 @@ class AuthLogin extends React.Component {
                             </Form>
                         }
                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, laboriosam!</p>
-                        {
-                            this.state.error &&
-                            <p className="alert alert-danger">
-                                {this.state.error}
-                            </p>
-                        }
                         {
                             this.props.strategies.map((strat) => {
                                 if (strat.id === 'local') {
