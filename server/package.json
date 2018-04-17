@@ -4,10 +4,14 @@
     "license": "CC-BY-3.0",
     "description": "The server for a simple MUD inspired browser-based multiplayer game.",
     "scripts": {
-        "start": "cross-env NODE_ENV=development nodemon -L ./game --inspect --exec babel-node --presets env,stage-2",
-        "build": "babel game --out-dir dist --source-maps inline --copy-files",
-        "serve": "cross-env NODE_ENV=production node dist/index.js",
-        "postinstall": "cp -Rn game/data.sample game/data && cp -n config.sample.json config.json && cp -n env.sample .env"
+        "start": "cross-env NODE_ENV=development nodemon -L ./src --inspect --exec babel-node --presets env,stage-2",
+        "build:src": "cross-env NODE_ENV=production babel src --out-dir build --source-maps cheap-module-source-map",
+        "build:config": "babel config --out-dir build/config --copy-files",
+        "build:utils": "babel utils --out-dir build/utils",
+        "build:shared": "babel shared --out-dir build/shared",
+        "build": "npm run build:config && npm run build:utils && npm run build:shared && npm run build:src",
+        "serve": "cross-env NODE_ENV=production node -r dotenv/config build/index.js",
+        "postinstall": "babel-node scripts/postinstall.js --presets env,stage-2"
     },
     "engines": {
         "node": ">=8.9.4"
@@ -31,6 +35,7 @@
     "dependencies": {
         "@sendgrid/mail": "^6.2.1",
         "babel-preset-stage-2": "^6.24.1",
+        "babel-runtime": "^6.26.0",
         "bcrypt": "^1.0.3",
         "bluebird": "^3.5.1",
         "body-parser": "^1.18.2",
@@ -42,6 +47,7 @@
         "express": "^4.16.2",
         "helmet": "^3.11.0",
         "jsonwebtoken": "^8.2.0",
+        "mkdirp": "^0.5.1",
         "moment": "^2.20.1",
         "mongoose": "^5.0.3",
         "nodemailer": "^4.6.0",
@@ -56,6 +62,7 @@
         "babel-cli": "^6.26.0",
         "babel-eslint": "^8.2.2",
         "babel-plugin-module-resolver": "^3.1.0",
+        "babel-plugin-transform-runtime": "^6.23.0",
         "babel-polyfill": "^6.26.0",
         "babel-preset-env": "^1.6.1",
         "cross-env": "^5.1.3",

@@ -5,7 +5,7 @@ import {connect} from 'react-redux';
 import Icon from '@fortawesome/react-fontawesome';
 import {Card, CardHeader, CardBody, Input, Button, Form, FormGroup} from 'reactstrap';
 import Notification from '../ui/notification';
-import {userSignUp, getStrategies} from '../auth/actions';
+import {userSignUp, getStrategies} from './actions';
 
 class AuthRegister extends React.Component {
     constructor(props) {
@@ -24,7 +24,7 @@ class AuthRegister extends React.Component {
     }
 
     componentDidMount() {
-        if (!this.props.strategies) {
+        if (this.props.strategies.length === 0) {
             this.props.getStrategies();
         }
     }

@@ -46,7 +46,14 @@ class Players extends React.Component {
                                     <td>{player.faction && `[${player.faction.tag}] ${player.faction.name}` || ''}</td>
                                     <td></td>
                                     <td className="text-right">
-                                        <Button color="primary" size="sm" onClick={() => this.doAction(`/whisper ${player.name} `, true)}>Whisper</Button>
+                                        <Button
+                                            color="primary"
+                                            size="sm"
+                                            onClick={() => {
+                                                this.doAction(`/whisper ${player.name} `, true);
+                                                this.props.togglePlayersMenu();
+                                            }}
+                                        >Whisper</Button>
                                         {
                                             // Player is not in a faction
                                             !player.faction &&

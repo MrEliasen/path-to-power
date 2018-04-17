@@ -1,20 +1,40 @@
 {
     "presets": [
         ["env", {
-            "targets": {
-                "browsers": [
-                    "last 2 Chrome versions"
-                ]
-            }
+            "modules": "commonjs"
         }],
         "stage-2"
     ],
     "plugins": [
-        ["module-resolver", {
-            "root": ["./"],
-            "alias": {
-                "shared": "./shared"
-            }
+        ["transform-runtime", {
+            "polyfill": false,
+            "regenerator": true
         }]
-    ]
+    ],
+    "env": {
+        "development": {
+            "plugins": [
+                ["module-resolver", {
+                    "root": ["./"],
+                    "alias": {
+                        "shared": "./shared",
+                        "config": "./config",
+                        "utils": "./utils"
+                    }
+                }]
+            ]
+        },
+        "production": {
+            "plugins": [
+                ["module-resolver", {
+                    "root": ["./"],
+                    "alias": {
+                        "shared": "./build/shared",
+                        "config": "./build/config",
+                        "utils": "./build/utils"
+                    }
+                }]
+            ]
+        }
+    }
 }

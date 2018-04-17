@@ -19,10 +19,10 @@ import {
     CHARACTER_LOGOUT,
     MAP_GRID_DETAILS,
     GAME_EVENT,
+    NOTIFICATION_SET,
 } from 'shared/actionTypes';
 import {
     SOCKET_SEND,
-    NOTIFICATION_SET,
     NOTIFICATION_CLEAR,
 } from './components/app/types';
 import {
@@ -201,7 +201,7 @@ function* saveAuthDetails(action) {
             authToken: action.payload,
         },
     });
-    yield put(push('/account'));
+    yield put(push('/game'));
 }
 
 function* logoutAccount(action = null) {

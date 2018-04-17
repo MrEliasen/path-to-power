@@ -1,11 +1,8 @@
 # Logs
-logs
 *.log
+logs/mail
 npm-debug.log*
 .DS_STORE
-error.log
-debug.log
-combined.log
 
 # Runtime data
 pids
@@ -40,8 +37,8 @@ jspm_packages
 # Optional REPL history
 .node_repl_history
 
-# Live Game files
-config.json
-game/data
-dist
+# Live files
+config
+!scripts/samples/config
+build
 .env
