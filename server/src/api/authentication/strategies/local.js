@@ -113,7 +113,7 @@ export function resetConfirm(req, res) {
         }
 
         // generate the password reset token
-        const passwordLength = req.app.get('config').auth.password.minlen;
+        const passwordLength = req.app.get('config').security.password.minlen;
         let newPassword = crypto.createHash('sha1');
         newPassword.update(uuid());
         newPassword = newPassword.digest('hex').substr(0, passwordLength);
