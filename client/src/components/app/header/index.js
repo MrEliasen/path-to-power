@@ -70,6 +70,7 @@ class Header extends React.Component {
                             }
                         </Nav>
                         <Nav className="ml-auto" navbar>
+                            <a className="nav-link" href="https://github.com/MrEliasen/path-to-power/wiki" target="_blank">How To Play</a>
                             {this.renderNavAuth()}
                         </Nav>
                     </Collapse>
