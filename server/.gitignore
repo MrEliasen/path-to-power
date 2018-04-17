@@ -39,6 +39,7 @@ jspm_packages
 
 # Live files
 config
+config.json
 !scripts/samples/config
 build
 .env
