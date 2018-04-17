@@ -50,7 +50,7 @@ export default class SkillSearch {
                         const hidingSkill = characterObj.skills.find((obj) => obj.id === 'hide').value;
                         // 50% chance by default
                         const baseChance = 0.5;
-                        // Each point heigher search than hide is an additional 25% chance to find them.
+                        // Each point higher is an additional 25% chance to find them.
                         // Each point lower reduces the chance by 25%.
                         let bonus = ((this.value - hidingSkill) * 25) / 100;
                         // get the calculated chance to find the player

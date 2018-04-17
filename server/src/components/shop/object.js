@@ -287,12 +287,12 @@ export default class Shop {
         const item = this.sell.list.find((obj) => obj.fingerprint === itemFingerprint);
 
         if (!item) {
-            return this.Game.shopManager.eventToUser(user_id, 'error', 'They do not appear to have that item anymore');
+            return this.Game.shopManager.eventToUser(user_id, 'error', 'They do not appear to have that item anymore.');
         }
 
-        // make sure the player is heigh enough rank/exp
+        // make sure the player is high enough rank/exp
         if (character.stats.exp < item.expRequired) {
-            return this.Game.shopManager.eventToUser(user_id, 'error', 'You do not have a heigh enough rank to purchase this item.');
+            return this.Game.shopManager.eventToUser(user_id, 'error', 'You do not have a high enough rank to purchase this item.');
         }
 
         const itemTemplate = this.Game.itemManager.getTemplate(item.id);
@@ -311,7 +311,7 @@ export default class Shop {
 
         // check if the item is limited stock/has enough quantity
         if (item.shopQuantity < 1 && item.shopQuantity !== -1) {
-            return this.Game.shopManager.eventToUser(user_id, 'error', 'They do not appear to have that item anymore');
+            return this.Game.shopManager.eventToUser(user_id, 'error', 'They do not appear to have that item anymore.');
         }
 
         const itemToAdd = this.Game.itemManager.add(item.id);
