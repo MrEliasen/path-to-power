@@ -1,0 +1,43 @@
+[
+    {
+        "name": "bum",
+        "lootChance": 70,
+        "loot": [
+            {
+                "weight": 3,
+                "id": "cellphone",
+                "amount": 1
+            },
+            {
+                "weight": 3,
+                "id": "switchblade",
+                "amount": 1
+            },
+            {
+                "weight": 12,
+                "id": "hashish",
+                "amount": [2,5]
+            },
+            {
+                "weight": 12,
+                "id": "leatherjacket",
+                "amount": 1
+            },
+            {
+                "weight": 12,
+                "id": "winebottle",
+                "amount": 80
+            },
+            {
+                "weight": 12,
+                "id": "cheapwatch",
+                "amount": 80
+            },
+            {
+                "weight": 12,
+                "id": "brokenbottle",
+                "amount": 80
+            }
+        ]
+    }
+]

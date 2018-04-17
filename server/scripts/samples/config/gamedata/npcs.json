@@ -130,7 +130,8 @@
         "abilities" : {
             "acc" : 20
         },
-        "skills" : {},
+        "skills": {},
+        "loottable": "bum",
         "inventory": [
             {
                 "inventorySlot": "melee",
