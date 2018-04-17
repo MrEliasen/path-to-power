@@ -51,6 +51,7 @@ class Character extends React.Component {
     createCharacter() {
         const {name, location} = this.state;
         this.props.newCommand(`/charactercreate ${name} ${location}`);
+        this.setState({name: '', location: ''});
     }
 
     render() {
@@ -89,6 +90,7 @@ class Character extends React.Component {
                                             location: e.target.value,
                                         });
                                     }}
+                                    value={this.state.location}
                                 >
                                     <option value="" defaultValue hidden>Select Start Location</option>
                                     {
