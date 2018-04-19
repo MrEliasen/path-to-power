@@ -1,42 +1,53 @@
 [
     {
-        "name": "bum",
-        "lootChance": 70,
+        "name": "general",
+        "chance": 65,
+        "drops": [1,3],
         "loot": [
             {
-                "weight": 3,
+                "weight": 5,
                 "id": "cellphone",
                 "amount": 1
             },
             {
-                "weight": 3,
+                "weight": 5,
+                "id": "walther25",
+                "amount": 1
+            },
+            {
+                "weight": 5,
                 "id": "switchblade",
                 "amount": 1
             },
             {
-                "weight": 12,
-                "id": "hashish",
+                "weight": 15,
+                "id": "crack",
                 "amount": [2,5]
             },
             {
-                "weight": 12,
+                "weight": 15,
                 "id": "leatherjacket",
                 "amount": 1
             },
             {
-                "weight": 12,
+                "weight": 25,
+                "id": "briefcase",
+                "amount": 1
+            },
+            {
+                "weight": 80,
                 "id": "winebottle",
-                "amount": 80
+                "amount": 1
             },
             {
-                "weight": 12,
+                "weight": 80,
                 "id": "cheapwatch",
-                "amount": 80
+                "amount": 1
             },
             {
-                "weight": 12,
+                "weight": 80,
                 "id": "brokenbottle",
-                "amount": 80
+                "amount": 1
             }
         ]
     }

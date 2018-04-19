@@ -10,6 +10,8 @@
             "acc" : 50
         },
         "skills" : {},
+        "lootTable": "general",
+        "lootInventory": false,
         "inventory": [
             {
                 "inventorySlot": "ranged",
@@ -56,6 +58,8 @@
             "acc" : 70
         },
         "skills" : {},
+        "lootTable": "general",
+        "lootInventory": false,
         "inventory": [
             {
                 "inventorySlot": "ranged",
@@ -98,6 +102,8 @@
             "acc" : 45
         },
         "skills" : {},
+        "lootTable": "general",
+        "lootInventory": false,
         "inventory": [
             {
                 "inventorySlot": "armor",
@@ -131,7 +137,6 @@
             "acc" : 20
         },
         "skills": {},
-        "loottable": "bum",
         "inventory": [
             {
                 "inventorySlot": "melee",
@@ -165,6 +170,8 @@
             "acc" : 15
         },
         "skills" : {},
+        "lootTable": "general",
+        "lootInventory": false,
         "inventory": [
             {
                 "inventorySlot": "melee",
@@ -196,6 +203,8 @@
             "acc" : 33
         },
         "skills" : {},
+        "lootTable": "general",
+        "lootInventory": false,
         "inventory": [
             {
                 "inventorySlot": "melee",
@@ -227,6 +236,8 @@
             "acc" : 28
         },
         "skills" : {},
+        "lootTable": "general",
+        "lootInventory": false,
         "inventory": [
             {
                 "inventorySlot": "melee",
@@ -258,6 +269,8 @@
             "acc" : 38
         },
         "skills" : {},
+        "lootTable": "general",
+        "lootInventory": false,
         "inventory": [
             {
                 "inventorySlot": "ranged",
@@ -304,6 +317,8 @@
             "acc" : 65
         },
         "skills" : {},
+        "lootTable": "general",
+        "lootInventory": false,
         "inventory": [
             {
                 "inventorySlot": "ranged",
