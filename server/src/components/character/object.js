@@ -262,9 +262,9 @@ export default class Character {
         // release the gridlock of the current target, if set
         if (target) {
             target.gridRelease({
-                id: target.id,
-                npc_id: target.npc_id,
-                user_id: target.user_id,
+                id: this.id,
+                npc_id: this.npc_id,
+                user_id: this.user_id,
             });
         }
 
@@ -299,16 +299,10 @@ export default class Character {
 
     /**
      * Removes a player from the gridlock, from when they have used /aim
-     * @param  {Object} target Plain object with the id, npc_id and user_id of the target
+     * @param  {Object} enemy Plain object with the id, npc_id and user_id of the target
      */
-    gridRelease(target) {
-        const characterIndex = this.targetedBy.findIndex((obj) => obj.id === target.id);
-
-        if (characterIndex === -1) {
-            return;
-        }
-
-        this.targetedBy.splice(characterIndex, 1);
+    gridRelease(enemy) {
+        this.targetedBy = this.targetedBy.filter((obj) => obj.id !== enemy.id);
 
         // update the character target on the client
         this.Game.characterManager.updateClient(this.user_id);
@@ -329,7 +323,7 @@ export default class Character {
         // release the target from the gridlock/aim
         this.releaseTarget();
 
-         // drop all items and cash
+        // drop all items and cash
         const items = this.inventory.splice(0, this.inventory.length);
         const cash = this.stats.money;
         const targetedBy = this.targetedBy;
