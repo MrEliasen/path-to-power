@@ -23,6 +23,7 @@ class AuthLogin extends React.Component {
         };
 
         this.authenticate = this.authenticate.bind(this);
+        this.checkSubmitForm = this.checkSubmitForm.bind(this);
     }
 
     componentDidMount() {
@@ -94,6 +95,15 @@ class AuthLogin extends React.Component {
         </p>;
     }
 
+    checkSubmitForm(e) {
+        if (e.charCode !== 13) {
+            return;
+        }
+
+        this.authenticate();
+    }
+
+
     render() {
         return (
             <Card className="card-small">
@@ -113,6 +123,7 @@ class AuthLogin extends React.Component {
                                         name="email"
                                         placeholder="Email"
                                         autoComplete="email"
+                                        onKeyPress={this.checkSubmitForm}
                                         onChange={(e) => {
                                             this.setState({
                                                 email: e.target.value,
@@ -127,6 +138,7 @@ class AuthLogin extends React.Component {
                                         name="password"
                                         placeholder="Password"
                                         autoComplete="current-password"
+                                        onKeyPress={this.checkSubmitForm}
                                         onChange={(e) => {
                                             this.setState({
                                                 password: e.target.value,

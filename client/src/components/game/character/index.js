@@ -25,6 +25,7 @@ class Character extends React.Component {
 
         this.selectCharacter = this.selectCharacter.bind(this);
         this.createCharacter = this.createCharacter.bind(this);
+        this.checkSubmitForm = this.checkSubmitForm.bind(this);
     }
 
     componentWillMount() {
@@ -54,6 +55,14 @@ class Character extends React.Component {
         this.setState({name: '', location: ''});
     }
 
+    checkSubmitForm(e) {
+        if (e.charCode !== 13) {
+            return;
+        }
+
+        this.createCharacter();
+    }
+
     render() {
         return (
             <React.Fragment>
@@ -74,6 +83,7 @@ class Character extends React.Component {
                                 <Input
                                     type="text"
                                     placeholder="Enter character name"
+                                    onKeyPress={this.checkSubmitForm}
                                     onChange={(e) => {
                                         this.setState({
                                             name: e.target.value,
