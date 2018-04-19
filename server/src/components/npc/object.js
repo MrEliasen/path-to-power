@@ -307,6 +307,11 @@ export default class NPC extends Character {
             loot = {};
         }
 
+        // if the NPC is set to not drop what it is carrying, we remove the items.
+        if (loot.items && !this.lootInventory) {
+            loot.items = [];
+        }
+
         // if the NPC has a shop, drop the items they are selling
         if (this.shop && this.shop.sell.enabled) {
             this.shop.sell.list.forEach((item) => {
@@ -314,11 +319,16 @@ export default class NPC extends Character {
             });
         }
 
+        // If a loot table is specified for the NPC, calculate he loot dropped
         if (this.lootTable && this.lootTable !== '') {
-            const lootDrop = this.Game.lootManager.generate(this.lootTable);
+            const lootDrops = this.Game.lootManager.generate(
+                this.lootTable,
+                this.lootChance || null,
+                this.lootDrops || null
+            );
 
-            if (lootDrop) { 
-                loot.push(lootDrop);
+            if (lootDrops && lootDrops.length) {
+                loot.items = loot.items.concat(lootDrops);
             }
         }
 
