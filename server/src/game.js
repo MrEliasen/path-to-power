@@ -8,6 +8,7 @@ import SocketManager from './components/socket/manager';
 import MapManager from './components/map/manager';
 import StructureManager from './components/structure/manager';
 import ItemManager from './components/item/manager';
+import LootManager from './components/loot/manager';
 import ShopManager from './components/shop/manager';
 import CommandManager from './components/command/manager';
 import FactionManager from './components/faction/manager';
@@ -61,6 +62,7 @@ class Game {
         this.cooldownManager = new CooldownManager(this);
         this.npcManager = new NpcManager(this);
         this.effectManager = new EffectManager(this);
+        this.lootManager = new LootManager(this);
 
         if (autoInit) {
             // load game data
