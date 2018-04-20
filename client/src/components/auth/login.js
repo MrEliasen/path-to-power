@@ -18,18 +18,22 @@ class AuthLogin extends React.Component {
         this.state = {
             email: '',
             password: '',
-            error: '',
+            error: null,
+            success: null,
         };
 
         this.authenticate = this.authenticate.bind(this);
+        this.checkSubmitForm = this.checkSubmitForm.bind(this);
     }
 
     componentDidMount() {
         const url = new URL(document.location);
         const error = url.searchParams.get('error');
+        const success = url.searchParams.get('success');
 
         this.setState({
             error: error || null,
+            success: success || null,
         });
 
         this.props.getStrategies();
@@ -68,14 +72,37 @@ class AuthLogin extends React.Component {
     }
 
     showStatus() {
-        if (!this.state.status) {
+        const state = {...this.state};
+
+        if (state.error) {
+            return <p className="alert alert-danger">
+                {state.error}
+            </p>;
+        }
+
+        if (state.success) {
+            return <p className="alert alert-success">
+                {state.success}
+            </p>;
+        }
+
+        if (!state.status) {
             return null;
         }
 
-        return <p className={`alert alert-${this.state.status.isError ? 'danger' : 'success'}`}>
-            {this.state.status.message}
+        return <p className={`alert alert-${state.status.isError ? 'danger' : 'success'}`}>
+            {state.status.message}
         </p>;
     }
+
+    checkSubmitForm(e) {
+        if (e.charCode !== 13) {
+            return;
+        }
+
+        this.authenticate();
+    }
+
 
     render() {
         return (
@@ -96,6 +123,7 @@ class AuthLogin extends React.Component {
                                         name="email"
                                         placeholder="Email"
                                         autoComplete="email"
+                                        onKeyPress={this.checkSubmitForm}
                                         onChange={(e) => {
                                             this.setState({
                                                 email: e.target.value,
@@ -110,6 +138,7 @@ class AuthLogin extends React.Component {
                                         name="password"
                                         placeholder="Password"
                                         autoComplete="current-password"
+                                        onKeyPress={this.checkSubmitForm}
                                         onChange={(e) => {
                                             this.setState({
                                                 password: e.target.value,
@@ -124,12 +153,6 @@ class AuthLogin extends React.Component {
                             </Form>
                         }
                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, laboriosam!</p>
-                        {
-                            this.state.error &&
-                            <p className="alert alert-danger">
-                                {this.state.error}
-                            </p>
-                        }
                         {
                             this.props.strategies.map((strat) => {
                                 if (strat.id === 'local') {

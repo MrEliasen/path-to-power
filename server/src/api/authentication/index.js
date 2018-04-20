@@ -15,7 +15,7 @@ import oauthSetup from './strategies/oauth';
  */
 function output(req, res, output, forceRedirect = false) {
     const redirect = req.params.provider ? true : false;
-    const errorUrl = `${req.app.get('config').app.clientUrl}/auth?error=`;
+    const errorUrl = `${req.app.get('config').app.clientUrl}/auth?${output.status > 203 ? 'error' : 'success'}=`;
 
     if (redirect || forceRedirect) {
         return res.redirect(`${errorUrl}${output.error || output.message}`);
@@ -255,7 +255,7 @@ export function authenticate(req, res, next) {
 
     return passport.authenticate(provider.id, Object.assign({session: false}, {scope: provider.scope || null}), (err, userDetails, info, status) => {
         if (err) {
-            if (typeof err !== 'string') { 
+            if (typeof err !== 'string') {
                 req.app.get('logger').error(err);
             }
 

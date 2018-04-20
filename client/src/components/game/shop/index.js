@@ -167,21 +167,24 @@ class Shop extends React.Component {
                                     </FormGroup>
                                 </Col>
                                 <Col xs="3">
-                                    <FormGroup>
-                                        <Input
-                                            type="select"
-                                            name="subtype"
-                                            value={this.state.itemSubType}
-                                            onChange={(e) => this.setState({itemSubType: e.target.value})}
-                                        >
-                                            <option value="" defaultValue hidden>Item Sub-Type</option>
-                                            {
-                                                itemSubTypeOptions.map((type, index) => (
-                                                    <option key={type} value={type}>{type}</option>
-                                                ))
-                                            }
-                                        </Input>
-                                    </FormGroup>
+                                    {
+                                        this.state.itemType !== '' &&
+                                        <FormGroup>
+                                            <Input
+                                                type="select"
+                                                name="subtype"
+                                                value={this.state.itemSubType}
+                                                onChange={(e) => this.setState({itemSubType: e.target.value})}
+                                            >
+                                                <option value="" defaultValue hidden>Item Sub-Type</option>
+                                                {
+                                                    itemSubTypeOptions.map((type, index) => (
+                                                        <option key={type} value={type}>{type}</option>
+                                                    ))
+                                                }
+                                            </Input>
+                                        </FormGroup>
+                                    }
                                 </Col>
                                 <Col xs="3">
                                     <FormGroup>

@@ -21,6 +21,7 @@ class AuthRegister extends React.Component {
         };
 
         this.register = this.register.bind(this);
+        this.checkSubmitForm = this.checkSubmitForm.bind(this);
     }
 
     componentDidMount() {
@@ -32,6 +33,14 @@ class AuthRegister extends React.Component {
     register() {
         const state = {...this.state};
         this.props.userSignUp(state.email, state.password, state.passwordConfirm);
+    }
+
+    checkSubmitForm(e) {
+        if (e.charCode !== 13) {
+            return;
+        }
+
+        this.register();
     }
 
     render() {
@@ -53,6 +62,7 @@ class AuthRegister extends React.Component {
                                         placeholder="Email"
                                         autoComplete="email"
                                         disabled={this.state.sending}
+                                        onKeyPress={this.checkSubmitForm}
                                         onChange={(e) => {
                                             this.setState({
                                                 email: e.target.value,
@@ -68,6 +78,7 @@ class AuthRegister extends React.Component {
                                         placeholder="Password"
                                         autoComplete="new-password"
                                         disabled={this.state.sending}
+                                        onKeyPress={this.checkSubmitForm}
                                         onChange={(e) => {
                                             this.setState({
                                                 password: e.target.value,
@@ -83,6 +94,7 @@ class AuthRegister extends React.Component {
                                         placeholder="Password repeat"
                                         autoComplete="new-password"
                                         disabled={this.state.sending}
+                                        onKeyPress={this.checkSubmitForm}
                                         onChange={(e) => {
                                             this.setState({
                                                 passwordConfirm: e.target.value,

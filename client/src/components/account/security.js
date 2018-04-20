@@ -28,6 +28,7 @@ class AccountSecurity extends React.Component {
         };
 
         this.updateDetails = this.updateDetails.bind(this);
+        this.checkSubmitForm = this.checkSubmitForm.bind(this);
     }
 
     componentWillMount() {
@@ -64,6 +65,14 @@ class AccountSecurity extends React.Component {
         this.props.updateAccount(this.props.user._id, this.props.authToken, {...this.state});
     }
 
+    checkSubmitForm(e) {
+        if (e.charCode !== 13) {
+            return;
+        }
+
+        this.updateDetails();
+    }
+
     render() {
         let authLocal = this.props.strategies.find((strat) => strat.id === 'local');
 
@@ -86,6 +95,7 @@ class AccountSecurity extends React.Component {
                                         name="email"
                                         placeholder="Account Email"
                                         autoComplete="email"
+                                        onKeyPress={this.checkSubmitForm}
                                         onChange={(e) => {
                                             this.setState({
                                                 email: e.target.value,
@@ -105,6 +115,7 @@ class AccountSecurity extends React.Component {
                                             name="password"
                                             placeholder="Current Password"
                                             autoComplete="current-password"
+                                            onKeyPress={this.checkSubmitForm}
                                             onChange={(e) => {
                                                 this.setState({
                                                     currentPassword: e.target.value,
@@ -123,6 +134,7 @@ class AccountSecurity extends React.Component {
                                         name="new-password"
                                         placeholder="New Password"
                                         autoComplete="new-password"
+                                        onKeyPress={this.checkSubmitForm}
                                         onChange={(e) => {
                                             this.setState({
                                                 password: e.target.value,
@@ -140,6 +152,7 @@ class AccountSecurity extends React.Component {
                                         name="confirm-password"
                                         autoComplete="new-password"
                                         placeholder="Confirm New Password"
+                                        onKeyPress={this.checkSubmitForm}
                                         onChange={(e) => {
                                             this.setState({
                                                 passwordConfirm: e.target.value,
