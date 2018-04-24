@@ -113,6 +113,8 @@ class Game {
                 // NOTE: if you want to add anything to the "new day" timer, do it here
                 await this.shopManager.resupplyAll();
                 this.socketManager.dispatchToRoom('game', addNews('The sun rises once again, and wave of new drugs flood the streets.'));
+                // update all client's inventories with new prices etc.
+                this.characterManager.updateAllClients('inventory');
        }
     }
 
