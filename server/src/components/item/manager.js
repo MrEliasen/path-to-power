@@ -188,6 +188,11 @@ export default class ItemManager {
         // set the database ID
         NewItem._id = dbId;
 
+        const price = this.getItemPrice(itemId);
+        if (price && price > 0) {
+            NewItem.stats.price = price;
+        }
+
         return NewItem;
     }
 
