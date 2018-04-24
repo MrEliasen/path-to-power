@@ -233,11 +233,11 @@ export default class Shop {
 
             // if the shop does not sell this type of item already, simply push it to the inventory.
             if (!inventoryItem) {
-                    // set the amount of the item to the correct amount, before adding to the inventory
+                // set the amount of the item to the correct amount, before adding to the inventory
                 itemObj.shopQuantity = amount || itemObj.stats.durability;
-                    this.sell.list.push(itemObj);
+                this.sell.list.push(itemObj);
                 return;
-                }
+            }
 
             // only if the item is not a "unlimited quantity item" do we increment the amount in the shop.
             if (inventoryItem.shopQuantity !== -1) {
