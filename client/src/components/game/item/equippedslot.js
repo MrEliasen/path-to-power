@@ -18,7 +18,7 @@ class EquippedSlot extends React.Component {
                 {isOver && canDrop && <div className="layer green" />}
                 {!isOver && canDrop && <div className="layer yellow" />}
                 {isOver && !canDrop && <div className="layer red" />}
-                <span class="slot-title">{this.props.title}</span>
+                <span className="slot-title">{this.props.title}</span>
             </div>
         );
     }
