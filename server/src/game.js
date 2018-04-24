@@ -107,6 +107,9 @@ class Game {
                 return this.characterManager.saveAll();
 
             case 'newday':
+                // update the pricing on items, with the priceRange array defined.
+                // We update the templates as they will be used for the sell and buy prices
+                this.itemManager.updatePrices();
                 // NOTE: if you want to add anything to the "new day" timer, do it here
                 await this.shopManager.resupplyAll();
                 this.socketManager.dispatchToRoom('game', addNews('The sun rises once again, and wave of new drugs flood the streets.'));

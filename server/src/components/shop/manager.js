@@ -151,10 +151,6 @@ export default class ShopManager {
      * @return {Void}
      */
     resupplyAll() {
-        // update the pricing on items, with the priceRange array defined.
-        // We update the templates as they will be used for the sell and buy prices
-        this.Game.itemManager.updatePrices();
-
         // resupply all the shops
         this.shops.forEach((shop) => {
             shop.resupply();
