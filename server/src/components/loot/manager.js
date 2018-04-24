@@ -91,7 +91,7 @@ export default class LootManager {
 
             // if the item is set to drop more than 1, set the amount
             // Only if the item is stackable however.
-            if (Array.isArray(itemDrop.amount) && itemDrop.stats.stackable) {
+            if (Array.isArray(itemDrop.amount) && lootItem.stats.stackable) {
                 lootItem.setDurability(dice(itemDrop.amount[0], itemDrop.amount[1]));
             }
 
