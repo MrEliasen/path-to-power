@@ -625,6 +625,18 @@
         }
     },
     {
+        "id": "rolaxwatch",
+        "name": "Rolax Watch",
+        "description": "An expensive \"Rolax\" watch. Should sell for a nice amount.",
+        "type": "trash",
+        "subtype": "trash",
+        "stats": {
+            "price": 12500,
+            "stackable": false,
+            "durability": 1
+        }
+    },
+    {
         "id": "winebottle",
         "name": "Wine Bottle",
         "description": "(Trash) A cheap wine bottle, unopened.",
@@ -632,6 +644,66 @@
         "subtype": "trash",
         "stats": {
             "price": 25,
+            "stackable": false,
+            "durability": 1
+        }
+    },
+    {
+        "id": "goldtooth",
+        "name": "Gold Tooth",
+        "description": "(Trash) A golden tooth, not very valueable but should still sell for a nice amount.",
+        "type": "trash",
+        "subtype": "trash",
+        "stats": {
+            "price": 850,
+            "stackable": true,
+            "durability": 1
+        }
+    },
+    {
+        "id": "poorshares",
+        "name": "Shares (Poor)",
+        "description": "A share currently worth about {price}.",
+        "type": "trash",
+        "subtype": "trash",
+        "stats": {
+            "price": [150, 100, 500],
+            "stackable": true,
+            "durability": 1
+        }
+    },
+    {
+        "id": "goodshares",
+        "name": "Shares (Good)",
+        "description": "A share currently worth about {price}.",
+        "type": "trash",
+        "subtype": "trash",
+        "stats": {
+            "price": [1500, 1000, 5000],
+            "stackable": true,
+            "durability": 1
+        }
+    },
+    {
+        "id": "greatshares",
+        "name": "Shares (Great)",
+        "description": "A share currently worth about {price}.",
+        "type": "trash",
+        "subtype": "trash",
+        "stats": {
+            "price": [15000, 10000, 50000],
+            "stackable": true,
+            "durability": 1
+        }
+    },
+    {
+        "id": "policebadge",
+        "name": "Police Badge",
+        "description": "Certain individuals would pay nicely for this.",
+        "type": "loot",
+        "subtype": "loot",
+        "stats": {
+            "price": 15000,
             "stackable": false,
             "durability": 1
         }
