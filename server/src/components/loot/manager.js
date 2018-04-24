@@ -89,6 +89,11 @@ export default class LootManager {
 
             const lootItem = this.Game.itemManager.add(itemDrop.id);
 
+            // if the item could not be "created" it might no longer be in the game
+            if (!lootItem) {
+                return null;
+            }
+
             // if the item is set to drop more than 1, set the amount
             // Only if the item is stackable however.
             if (Array.isArray(itemDrop.amount) && lootItem.stats.stackable) {
