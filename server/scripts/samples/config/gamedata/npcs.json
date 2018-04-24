@@ -10,7 +10,7 @@
             "acc" : 50
         },
         "skills" : {},
-        "lootTable": "general",
+        "lootTable": "lawEnforcement",
         "lootInventory": false,
         "inventory": [
             {
@@ -50,7 +50,7 @@
     "drug-dealer" : {
         "type" : "Drug Dealer",
         "stats" : {
-            "health" : 750,
+            "health" : 450,
             "money" : 55330,
             "exp": -1250
         },
@@ -58,8 +58,9 @@
             "acc" : 70
         },
         "skills" : {},
-        "lootTable": "general",
+        "lootTable": "criminal",
         "lootInventory": false,
+        "lootDrops": [3,5],
         "inventory": [
             {
                 "inventorySlot": "ranged",
@@ -102,7 +103,7 @@
             "acc" : 45
         },
         "skills" : {},
-        "lootTable": "general",
+        "lootTable": "criminal",
         "lootInventory": false,
         "inventory": [
             {
@@ -129,14 +130,16 @@
     "bum" : {
         "type" : "Bum",
         "stats" : {
-            "health" : 75,
-            "money" : 45,
+            "health" : 45,
+            "money" : 21,
             "exp": 35
         },
         "abilities" : {
             "acc" : 20
         },
-        "skills": {},
+        "skills" : {},
+        "lootTable": "bum",
+        "lootInventory": false,
         "inventory": [
             {
                 "inventorySlot": "melee",
@@ -162,24 +165,20 @@
     "pedestrian" : {
         "type" : "Pedestrian",
         "stats" : {
-            "health" : 50,
+            "health" : 35,
             "money" : 143,
             "exp": 23
         },
         "abilities" : {
-            "acc" : 15
+            "acc" : 10
         },
         "skills" : {},
         "lootTable": "general",
-        "lootInventory": false,
+        "lootInventory": true,
         "inventory": [
             {
                 "inventorySlot": "melee",
                 "item_id": "briefcase",
-                "modifiers": {}
-            },
-            {
-                "item_id": "cheapwatch",
                 "modifiers": {}
             }
         ],
@@ -200,19 +199,15 @@
             "exp": 65
         },
         "abilities" : {
-            "acc" : 33
+            "acc" : 27.5
         },
         "skills" : {},
         "lootTable": "general",
-        "lootInventory": false,
+        "lootInventory": true,
         "inventory": [
             {
                 "inventorySlot": "melee",
                 "item_id": "brassknuckle",
-                "modifiers": {}
-            },
-            {
-                "item_id": "cheapwatch",
                 "modifiers": {}
             }
         ],
@@ -236,8 +231,6 @@
             "acc" : 28
         },
         "skills" : {},
-        "lootTable": "general",
-        "lootInventory": false,
         "inventory": [
             {
                 "inventorySlot": "melee",
@@ -269,7 +262,7 @@
             "acc" : 38
         },
         "skills" : {},
-        "lootTable": "general",
+        "lootTable": "criminal",
         "lootInventory": false,
         "inventory": [
             {
@@ -317,7 +310,7 @@
             "acc" : 65
         },
         "skills" : {},
-        "lootTable": "general",
+        "lootTable": "lawEnforcement",
         "lootInventory": false,
         "inventory": [
             {
