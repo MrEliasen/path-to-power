@@ -194,7 +194,8 @@ export default class Shop {
         }
 
         // add item to shop inventory (if resell is enabled)
-        if (this.buy.resell) {
+        // However do not resell trash items
+        if (this.buy.resell && soldItem.type !== 'trash') {
             this.addToInventory(soldItem);
         }
 
