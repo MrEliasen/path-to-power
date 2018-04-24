@@ -190,7 +190,7 @@ export default class Shop {
         // if they sold drugs, give them exp
         if (soldItem.subtype === 'drug') {
             // NOTE: EXP is given here, for dealing drugs.
-            character.updateExp(2);
+            character.updateExp(this.Game.config.game.repGains.sellDrugs);
         }
 
         // add item to shop inventory (if resell is enabled)
@@ -331,6 +331,12 @@ export default class Shop {
 
         // give item to player
         character.giveItem(itemToAdd, 1, targetSlot);
+
+        // if they sold drugs, give them exp
+        if (itemToAdd.subtype === 'drug') {
+            // NOTE: EXP is given here, for dealing drugs.
+            character.updateExp(this.Game.config.game.repGains.buyDrugs);
+        }
 
         // update the client player object
         this.Game.characterManager.updateClient(character.user_id);

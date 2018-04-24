@@ -2,6 +2,10 @@ import {env} from 'utils/configure';
 
 export default {
     logout_timer: env('GAME_LOGOUT_TIMER', 10000),
+    repGains: {
+        buyDrugs: env('GAME_REPGAINS_BUYDRUGS', 1),
+        sellDrugs: env('GAME_REPGAINS_SELLDRUGS', 5),
+    },
     defaultstats: {
         health_max: env('GAME_DEFAULT_HEALTH', 100),
         money: env('GAME_DEFAULT_MONEY', 300),
