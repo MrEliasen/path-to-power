@@ -15,23 +15,23 @@
     "npcs": [
         {
             "id": "police-officer",
-            "amount": 2
-        },
-        {
-            "id": "bum",
-            "amount": 2
-        },
-        {
-            "id": "pedestrian",
             "amount": 3
         },
         {
+            "id": "bum",
+            "amount": 4
+        },
+        {
+            "id": "pedestrian",
+            "amount": 8
+        },
+        {
             "id": "bouncer",
-            "amount": 1
+            "amount": 2
         },
         {
             "id": "hooker",
-            "amount": 2
+            "amount": 3
         },
         {
             "id": "loadshark",
@@ -51,7 +51,7 @@
         }
     ],
     "respawn": {
-       "y": 17,
-       "x": 25 
+        "y": 17,
+        "x": 25 
     }
 }
