@@ -663,11 +663,12 @@
     {
         "id": "poorshares",
         "name": "Shares (Poor)",
-        "description": "A share currently worth about {price}.",
+        "description": "A poor quality share. The value fluctuate day to day.",
         "type": "trash",
         "subtype": "trash",
         "stats": {
-            "price": [150, 100, 500],
+            "price": 1,
+            "priceRange": [150, 100, 500],
             "stackable": true,
             "durability": 1
         }
@@ -675,11 +676,12 @@
     {
         "id": "goodshares",
         "name": "Shares (Good)",
-        "description": "A share currently worth about {price}.",
+        "description": "A good quality share. The value fluctuate day to day.",
         "type": "trash",
         "subtype": "trash",
         "stats": {
-            "price": [1500, 1000, 5000],
+            "price": 1,
+            "priceRange": [1500, 1000, 5000],
             "stackable": true,
             "durability": 1
         }
@@ -687,11 +689,12 @@
     {
         "id": "greatshares",
         "name": "Shares (Great)",
-        "description": "A share currently worth about {price}.",
+        "description": "A high quality share. The value fluctuate day to day.",
         "type": "trash",
         "subtype": "trash",
         "stats": {
-            "price": [15000, 10000, 50000],
+            "price": 1,
+            "priceRange": [15000, 10000, 50000],
             "stackable": true,
             "durability": 1
         }
