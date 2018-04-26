@@ -135,6 +135,31 @@ export default class CharacterManager {
     }
 
     /**
+     * Updates all clients character information, in part or in full
+     * @param  {Mixed} property (optional) if only a part of the character needs updating
+     */
+    updateAllClients(property = null) {
+        this.characters.forEach((character) => {
+            const characterData = character.exportToClient();
+
+            characterData.inventory.forEach((item) => {
+                const newPrice = this.Game.itemManager.getItemPrice(item.id);
+
+                if (isNaN(newPrice) || !newPrice) {
+                    return;
+                }
+
+                item.stats.price = newPrice;
+            });
+
+            this.Game.socketManager.dispatchToUser(character.user_id, {
+                type: CHARACTER_UPDATE,
+                payload: property ? {[property]: characterData[property]} : characterData,
+            });
+        });
+    }
+
+    /**
      * Return a player object, matching the name
      * @param  {Strinmg} characterName name or part of name to search for
      * @return {Character Obj}

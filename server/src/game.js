@@ -8,6 +8,7 @@ import SocketManager from './components/socket/manager';
 import MapManager from './components/map/manager';
 import StructureManager from './components/structure/manager';
 import ItemManager from './components/item/manager';
+import LootManager from './components/loot/manager';
 import ShopManager from './components/shop/manager';
 import CommandManager from './components/command/manager';
 import FactionManager from './components/faction/manager';
@@ -61,6 +62,7 @@ class Game {
         this.cooldownManager = new CooldownManager(this);
         this.npcManager = new NpcManager(this);
         this.effectManager = new EffectManager(this);
+        this.lootManager = new LootManager(this);
 
         if (autoInit) {
             // load game data
@@ -105,10 +107,15 @@ class Game {
                 return this.characterManager.saveAll();
 
             case 'newday':
+                // update the pricing on items, with the priceRange array defined.
+                // We update the templates as they will be used for the sell and buy prices
+                this.itemManager.updatePrices();
                 // NOTE: if you want to add anything to the "new day" timer, do it here
                 await this.shopManager.resupplyAll();
                 this.socketManager.dispatchToRoom('game', addNews('The sun rises once again, and wave of new drugs flood the streets.'));
-       }
+                // update all client's inventories with new prices etc.
+                this.characterManager.updateAllClients('inventory');
+        }
     }
 
     /**

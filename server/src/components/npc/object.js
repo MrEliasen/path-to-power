@@ -299,15 +299,37 @@ export default class NPC extends Character {
     die() {
         // set NPC as dead, so it is not included in actions/commands etc.
         this.dead = true;
+        this.clearTimers();
+
         let loot = Character.prototype.die.call(this);
 
-        this.clearTimers();
+        if (!loot) {
+            loot = {};
+        }
+
+        // if the NPC is set to not drop what it is carrying, we remove the items.
+        if (loot.items && !this.lootInventory) {
+            loot.items = [];
+        }
 
         // if the NPC has a shop, drop the items they are selling
         if (this.shop && this.shop.sell.enabled) {
             this.shop.sell.list.forEach((item) => {
                 loot.items.push(this.Game.itemManager.add(item.id));
             });
+        }
+
+        // If a loot table is specified for the NPC, calculate he loot dropped
+        if (this.lootTable && this.lootTable !== '') {
+            const lootDrops = this.Game.lootManager.generate(
+                this.lootTable,
+                this.lootChance || null,
+                this.lootDrops || null
+            );
+
+            if (lootDrops && lootDrops.length) {
+                loot.items = loot.items.concat(lootDrops);
+            }
         }
 
         // Initiates the NPC's respawn timer
@@ -317,10 +339,6 @@ export default class NPC extends Character {
                 this.Game.npcManager.reset(this);
             }, this.logic.respawn * 1000),
         });
-
-        if (!loot) {
-            loot = {};
-        }
 
         loot.exp = this.stats.exp;
         return loot;

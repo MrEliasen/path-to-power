@@ -190,11 +190,12 @@ export default class Shop {
         // if they sold drugs, give them exp
         if (soldItem.subtype === 'drug') {
             // NOTE: EXP is given here, for dealing drugs.
-            character.updateExp(2);
+            character.updateExp(this.Game.config.game.repGains.sellDrugs);
         }
 
         // add item to shop inventory (if resell is enabled)
-        if (this.buy.resell) {
+        // However do not resell trash items
+        if (this.buy.resell && soldItem.type !== 'trash') {
             this.addToInventory(soldItem);
         }
 
@@ -230,14 +231,17 @@ export default class Shop {
 
             inventoryItem = this.sell.list.find((obj) => obj.id === itemObj.id);
 
+            // if the shop does not sell this type of item already, simply push it to the inventory.
+            if (!inventoryItem) {
+                // set the amount of the item to the correct amount, before adding to the inventory
+                itemObj.shopQuantity = amount || itemObj.stats.durability;
+                this.sell.list.push(itemObj);
+                return;
+            }
+
+            // only if the item is not a "unlimited quantity item" do we increment the amount in the shop.
             if (inventoryItem.shopQuantity !== -1) {
-                if (inventoryItem) {
-                    inventoryItem.shopQuantity = inventoryItem.shopQuantity + amount;
-                } else {
-                    // set the amount of the item to the correct amount, before adding to the inventory
-                    itemObj.shopQuantity = amount;
-                    this.sell.list.push(itemObj);
-                }
+                inventoryItem.shopQuantity = inventoryItem.shopQuantity + amount;
             }
         } else {
             // check if the item is already sold as a unlimited quantity item.
@@ -331,6 +335,12 @@ export default class Shop {
 
         // give item to player
         character.giveItem(itemToAdd, 1, targetSlot);
+
+        // if they sold drugs, give them exp
+        if (itemToAdd.subtype === 'drug') {
+            // NOTE: EXP is given here, for dealing drugs.
+            character.updateExp(this.Game.config.game.repGains.buyDrugs);
+        }
 
         // update the client player object
         this.Game.characterManager.updateClient(character.user_id);
