@@ -21,6 +21,7 @@ This project does **not** yet adhere to [Semantic Versioning](http://semver.org/
 - updateAllClients method to character manager.
 - More "trash" items.
 - Add config options for rep gains on buy/sell drugs.
+- Add session TTL configuration option.
 
 
 ### Changed   

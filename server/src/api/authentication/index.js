@@ -282,11 +282,13 @@ export function authenticate(req, res, next) {
  * @param  {Express Reponse} res
  */
 export function onAuth(req, res, data, redirect) {
+    const config = req.app.get('config');
+
     const token = jwt.sign({
         _id: data.user._id || null,
         session_token: data.user.session_token || null,
         identity: data.identity._id || null,
-    }, req.app.get('config').security.signingSecret, {expiresIn: '1h'});
+    }, config.security.signingSecret, {expiresIn: config.auth.sessionTTL});
 
     if (redirect) {
         return res.redirect(`${req.app.get('config').app.clientUrl}/auth?token=${token}`);
