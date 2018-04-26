@@ -18,6 +18,10 @@ This project does **not** yet adhere to [Semantic Versioning](http://semver.org/
 - "How to play" link to top navigation.
 - Forms now submit on "enter" key press.
 - Weighted loot drop system.
+- updateAllClients method to character manager.
+- More "trash" items.
+- Add config options for rep gains on buy/sell drugs.
+
 
 ### Changed   
 - /giveitem command now only works in development.
@@ -31,6 +35,8 @@ This project does **not** yet adhere to [Semantic Versioning](http://semver.org/
 - Server build procedure.
 - Hide 3rd party connections when none are linked from account page.
 - Default redirect to /game instead of /account on login.
+- Move method call to update item prices on "new day", from shop resupply to the actual timer method.
+- Increase default number of spawned NPCs
 
 ### Fixed   
 - API not listening on HTTPs when a certificate is provided.
@@ -47,6 +53,11 @@ This project does **not** yet adhere to [Semantic Versioning](http://semver.org/
 - Registration page not rendering when strategies where not loaded.
 - Account activation success message showing as an error.
 - Character creation form resetting after creating a new character.
+- Prices of items in player's inventory not updating.
+- Adding stackable items to shops throws an error.
+- Trash items being resellable.
+- Fix `releaseTarget` not referencing the correct character/NPC object.
+
 
 ## [0.1.0] - 2018-04-08   
 Initial official release.
