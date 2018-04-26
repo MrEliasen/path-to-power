@@ -105,4 +105,19 @@ export default class SkillManager {
             }
         });
     }
+
+    /**
+     * Get the list of all skills
+     */
+    getSkills() {
+        return Object.values(SkillList).map((Skill) => {
+            debugger;
+            const SkillObj = new Skill();
+
+            return {
+                name: SkillObj.name,
+                tree: SkillObj.getTree(),
+            };
+        });
+    }
 }

@@ -11,7 +11,7 @@ export default class SkillSearch {
      * @param  {Game}   Game      The game object
      * @param  {object} modifiers The skill plain object
      */
-    constructor(Game, modifiers) {
+    constructor(Game, modifiers = {}) {
         this.Game = Game;
         this.id = 'search';
         this.name = 'Search';
@@ -30,6 +30,29 @@ export default class SkillSearch {
         return {
             value: this.value,
         };
+    }
+
+    /**
+     * Returns the skill tree with requirements
+     */
+    getTree() {
+        return [
+            {
+                tier: 1,
+                expCost: 1000,
+                description: 'Search desc 1.',
+            },
+            {
+                tier: 2,
+                expCost: 2000,
+                description: 'Search desc 2.',
+            },
+            {
+                tier: 3,
+                expCost: 5000,
+                description: 'Search desc 3.',
+            },
+        ];
     }
 
     /**

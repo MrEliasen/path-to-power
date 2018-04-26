@@ -8,12 +8,12 @@ export default class SkillSnoop {
      * @param  {Game}   Game      The game object
      * @param  {object} modifiers The skill plain object
      */
-    constructor(Game, modifiers) {
+    constructor(Game, modifiers = {}) {
         this.Game = Game;
         this.id = 'snoop';
         this.name = 'Snooping';
         this.command = '/snoop';
-        this.value = 1;
+        this.value = 0;
         this.improve = true;
 
         Object.assign(this, {...modifiers});
@@ -27,6 +27,29 @@ export default class SkillSnoop {
         return {
             value: this.value,
         };
+    }
+
+    /**
+     * Returns the skill tree with requirements
+     */
+    getTree() {
+        return [
+            {
+                tier: 1,
+                expCost: 1000,
+                description: 'Know which city a target is currently in.',
+            },
+            {
+                tier: 2,
+                expCost: 2000,
+                description: 'Additionally, know which items a target has equipped.',
+            },
+            {
+                tier: 3,
+                expCost: 5000,
+                description: 'Additionally, know a target\'s health and North coordinate..',
+            },
+        ];
     }
 
     /**
@@ -52,7 +75,6 @@ export default class SkillSnoop {
                 equipped: {
                     ...(targetCharacter.getEquipped() || {}),
                 },
-                rank: Game.characterManager.getRank(targetCharacter.stats.exp),
             });
         }
 
@@ -61,7 +83,7 @@ export default class SkillSnoop {
             Object.assign(details, {
                 location: {
                     map: targetCharacter.location.map,
-                    x: targetCharacter.location.x,
+                    y: targetCharacter.location.x,
                 },
                 skills: {
                     ...targetCharacter.exportSkills(true),
