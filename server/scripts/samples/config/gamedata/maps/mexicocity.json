@@ -2,15 +2,15 @@
     "id" : "mexicocity",
     "name": "Mexico City",
     "gridSize": {
-        "y": 30,
-        "x": 30
+        "y": 20,
+        "x": 20
     },
     "structures": [
-        {"id": "hospital", "x": 25, "y": 17},
+        {"id": "hospital", "x": 15, "y": 17},
         {"id": "pawnshop", "x": 2, "y": 8},
         {"id": "bar", "x": 7, "y": 12},
-        {"id": "bank", "x": 29, "y": 13},
-        {"id": "airport", "x": 25, "y": 7}
+        {"id": "bank", "x": 19, "y": 13},
+        {"id": "airport", "x": 15, "y": 7}
     ],
     "npcs": [
         {
@@ -52,6 +52,6 @@
     ],
     "respawn": {
         "y": 17,
-        "x": 25 
+        "x": 15 
     }
 }

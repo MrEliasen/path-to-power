@@ -2,15 +2,15 @@
     "id" : "paris",
     "name": "Paris",
     "gridSize": {
-        "y": 30,
-        "x": 30
+        "y": 20,
+        "x": 20
     },
     "structures": [
-        {"id": "hospital", "x": 13, "y": 25},
-        {"id": "pawnshop", "x": 28, "y": 17},
-        {"id": "bar", "x": 2, "y": 25},
-        {"id": "bank", "x": 29, "y": 8},
-        {"id": "airport", "x": 21, "y": 12}
+        {"id": "hospital", "x": 13, "y": 15},
+        {"id": "pawnshop", "x": 18, "y": 17},
+        {"id": "bar", "x": 2, "y": 15},
+        {"id": "bank", "x": 19, "y": 8},
+        {"id": "airport", "x": 11, "y": 12}
     ],
     "npcs": [
         {
@@ -51,7 +51,7 @@
         }
     ],
     "respawn": {
-        "y": 25,
+        "y": 15,
         "x": 13 
     }
 }

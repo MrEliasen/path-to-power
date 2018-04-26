@@ -2,13 +2,13 @@
     "id" : "tokyo",
     "name": "Tokyo",
     "gridSize": {
-        "y": 30,
-        "x": 30
+        "y": 20,
+        "x": 20
     },
     "structures": [
-        {"id": "hospital", "x": 13, "y": 28},
+        {"id": "hospital", "x": 13, "y": 18},
         {"id": "pawnshop", "x": 4, "y": 7},
-        {"id": "bar", "x": 5, "y": 29},
+        {"id": "bar", "x": 5, "y": 19},
         {"id": "bank", "x": 8, "y": 3},
         {"id": "airport", "x": 11, "y": 16}
     ],
@@ -51,7 +51,7 @@
         }
     ],
     "respawn": {
-        "y": 28,
+        "y": 18,
         "x": 13 
     }
 }

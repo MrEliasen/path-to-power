@@ -2,15 +2,15 @@
     "id" : "moscow",
     "name": "Moscow",
     "gridSize": {
-        "y": 30,
-        "x": 30
+        "y": 20,
+        "x": 20
     },
     "structures": [
         {"id": "hospital", "x": 5, "y": 5},
         {"id": "pawnshop", "x": 4, "y": 4},
-        {"id": "bar", "x": 8, "y": 30},
+        {"id": "bar", "x": 8, "y": 20},
         {"id": "bank", "x": 13, "y": 6},
-        {"id": "airport", "x": 14, "y": 21}
+        {"id": "airport", "x": 14, "y": 11}
     ],
     "npcs": [
         {
@@ -51,7 +51,7 @@
         }
     ],
     "respawn": {
-        "y": 28,
+        "y": 18,
         "x": 13 
     }
 }

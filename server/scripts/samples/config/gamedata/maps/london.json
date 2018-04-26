@@ -2,15 +2,15 @@
     "id" : "london",
     "name": "London",
     "gridSize": {
-        "y": 30,
-        "x": 30
+        "y": 20,
+        "x": 20
     },
     "structures": [
-        {"id": "hospital", "x": 26, "y": 7},
-        {"id": "pawnshop", "x": 1, "y": 22},
-        {"id": "bar", "x": 28, "y": 4},
+        {"id": "hospital", "x": 16, "y": 7},
+        {"id": "pawnshop", "x": 1, "y": 12},
+        {"id": "bar", "x": 18, "y": 4},
         {"id": "bank", "x": 5, "y": 3},
-        {"id": "airport", "x": 30, "y": 29}
+        {"id": "airport", "x": 20, "y": 19}
     ],
     "npcs": [
         {
@@ -52,6 +52,6 @@
     ],
     "respawn": {
         "y": 7,
-        "x": 26 
+        "x": 16 
     }
 }
