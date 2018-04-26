@@ -1,0 +1,61 @@
+.skills {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 20px;
+
+    .skill-tree {
+        text-align: center;
+
+        .skill-name {
+            display: block;
+
+            h3 {
+                font-size: 16px;
+            }
+        }
+
+        .skill-tier {
+            background: rgba(0,0,0,0.05);
+            min-height: 200px;
+            border: 1px dashed #ccc;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            padding: 8px 10px;
+
+            &.--unavailable {
+                opacity: 0.35;
+            }
+
+            &.--purchased {
+                border: 1px solid #ccc;
+                -webkit-box-shadow: 2px 1px 2px 0px rgba(0, 0, 0, 0.2);
+                -moz-box-shadow: 2px 1px 2px 0px rgba(0, 0, 0, 0.2);
+                box-shadow: 2px 1px 2px 0px rgba(0, 0, 0, 0.2);
+
+                .description {
+                    height: 100px;
+                    margin-bottom: 0px;
+                }
+
+                button {
+                    display: none;
+                }
+            }
+
+            .cost {
+                margin: 0px 0px 8px 0px;
+                padding: 0px;
+                font-size: 12px;
+                border-bottom: 1px solid #ccc;
+            }
+
+            .description {
+                margin: 0px;
+                font-size: 14px;
+                height: 63px;
+                margin-bottom: 10px;
+                overflow-y: hidden;
+            }
+        }
+    }
+}

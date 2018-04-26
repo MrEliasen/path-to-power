@@ -7,6 +7,7 @@ import Inventory from '../inventory';
 import Stats from './stats';
 import Players from '../players';
 import EquippedSlot from '../item/equippedslot';
+import SkillsModal from '../skills';
 
 // actions
 import {togglePlayersMenu} from '../players/actions';
@@ -24,6 +25,7 @@ class CharacterMenu extends React.Component {
             modalStats: false,
             modalQuests: false,
             modalPlayers: false,
+            modalSkills: false,
         };
 
         // this.mapSearch = this.mapSearch.bind(this);
@@ -31,6 +33,7 @@ class CharacterMenu extends React.Component {
         this.toggleStats = this.toggleStats.bind(this);
         this.toggleQuests = this.toggleQuests.bind(this);
         this.togglePlayers = this.togglePlayers.bind(this);
+        this.toggleSkills = this.toggleSkills.bind(this);
     }
 
     // TODO: Move this to the map component
@@ -56,6 +59,10 @@ class CharacterMenu extends React.Component {
 
     toggleQuests() {
         this.setState({modalQuests: !this.state.modalQuests});
+    }
+
+    toggleSkills() {
+        this.setState({modalSkills: !this.state.modalSkills});
     }
 
     togglePlayers() {
@@ -101,6 +108,7 @@ class CharacterMenu extends React.Component {
                         <Players setCommand={this.props.setCommand} sendCommand={this.props.sendCommand} />
                     </ModalBody>
                 </Modal>
+                <SkillsModal visible={this.state.modalSkills} toggleMethod={this.toggleSkills} />
             </React.Fragment>
         );
     }
@@ -112,6 +120,7 @@ class CharacterMenu extends React.Component {
                 <Card className="menu menu-character">
                     <a href="#" onClick={this.toggleEquipment}><Icon icon="shield-alt" /> Equipment ({this.props.character.inventory.length}/{this.props.character.stats.inventorySize})</a>
                     <a href="#" onClick={this.toggleStats}><Icon icon="chart-bar" /> Stats</a>
+                    <a href="#" onClick={this.toggleSkills}><Icon icon="chart-bar" /> Skills</a>
                     {/* <a href="#" onClick={this.toggleQuests}><Icon icon="tasks" /> Quests (?)</a> */}
                     <a href="#" onClick={this.togglePlayers}><Icon icon="user-secret" /> Players ({this.props.players.length})</a>
                     {/* <a href="#" onClick={this.mapSearch}><Icon icon="map-marker-alt" /> Map</a> */}
