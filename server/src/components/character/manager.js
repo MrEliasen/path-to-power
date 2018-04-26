@@ -826,6 +826,7 @@ export default class CharacterManager {
         return {
             maps: this.Game.mapManager.getList(),
             items: this.Game.itemManager.getTemplates(),
+            skills: this.Game.skillManager.getSkills(),
             players: this.getOnline(),
             commands: this.Game.commandManager.getList(),
             levels: Levels,
