@@ -22,7 +22,8 @@ This project does **not** yet adhere to [Semantic Versioning](http://semver.org/
 - More "trash" items.
 - Add config options for rep gains on buy/sell drugs.
 - Add session TTL configuration option.
-
+- New progress system
+    - Snoop skill
 
 ### Changed   
 - /giveitem command now only works in development.
