@@ -1,10 +1,17 @@
 import React from 'react';
+import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
 import classNames from 'classnames';
-
 import {Modal, ModalHeader, ModalBody, Button} from 'reactstrap';
 
+// actions
+import {buySkill} from './actions';
+
 class SkillsModal extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
     render() {
         return (
             <Modal isOpen={this.props.visible} toggle={this.props.toggleMethod} size="lg">
@@ -15,10 +22,14 @@ class SkillsModal extends React.Component {
                         this.props.skills &&
                         this.props.skills.map((skill) => {
                             const characterSkill = this.props.character.skills[skill.id];
+                            const characterEXP = this.props.character.stats.exp;
                             const currentLevel = characterSkill ? characterSkill.modifiers.value : 0;
 
                             return (
-                                <div className="skill-tree">
+                                <div
+                                    key={skill.id}
+                                    className="skill-tree"
+                                >
                                     <div className="skill-name">
                                         <h3>{skill.name}</h3>
                                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Facilis placeat ullam eius dolor similique ipsum sunt optio maxime tempore sed.</p>
@@ -38,17 +49,22 @@ class SkillsModal extends React.Component {
 
                                             return (
                                                 <div
+                                                    key={`${skill.id}-${tier.tier}`}
                                                     className={classNames('skill-tier', {
                                                         '--purchased': purchased,
                                                         '--unavailable': !available,
                                                     })}
                                                 >
                                                     <h3>Level {tier.tier}</h3>
-                                                    <p class="cost">Costs {tier.expCost} EXP</p>
-                                                    <p class="description">{tier.description}</p>
-                                                    <Button color="primary" block={true}>
-                                                        Purchase Level
-                                                    </Button>
+                                                    <p className="cost">Costs {tier.expCost} EXP</p>
+                                                    <p className="description">{tier.description}</p>
+                                                    {
+                                                        !purchased &&
+                                                        available &&
+                                                        <Button onClick={() => this.props.buySkill(skill.id, tier.tier)} color="primary" block={true} disabled={characterEXP < tier.expCost}>
+                                                            Purchase Level
+                                                        </Button>
+                                                    }
                                                 </div>
                                             )
                                         })
@@ -63,6 +79,12 @@ class SkillsModal extends React.Component {
     }
 }
 
+function mapDispatchToProps(dispatch) {
+    return bindActionCreators({
+        buySkill,
+    }, dispatch);
+}
+
 function mapStateToProps(state) {
     return {
         skills: state.game.skills,
@@ -70,4 +92,4 @@ function mapStateToProps(state) {
     };
 }
 
-export default connect(mapStateToProps)(SkillsModal);
+export default connect(mapStateToProps, mapDispatchToProps)(SkillsModal);
