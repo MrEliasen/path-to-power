@@ -26,7 +26,7 @@ function cmdSkillSnoop(socket, character, command, params, cmdObject, Game) {
     Game.cooldownManager.add(character, `skill_${skill.id}`, null, true);
 
     const snoopInfo = skill.use(targetCharacter);
-    return Game.eventToSocket(socket, 'success', JSON.stringify(snoopInfo));
+    return Game.eventToSocket(socket, 'multiline', snoopInfo);
 }
 
 /**
