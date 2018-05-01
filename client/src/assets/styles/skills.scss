@@ -16,7 +16,7 @@
 
         .skill-tier {
             background: rgba(0,0,0,0.05);
-            min-height: 200px;
+            min-height: 175px;
             border: 1px dashed #ccc;
             border-radius: 15px;
             margin-bottom: 15px;
@@ -42,17 +42,21 @@
                 }
             }
 
+            h3 {
+                font-size: 1.35rem;
+            }
+
             .cost {
                 margin: 0px 0px 8px 0px;
                 padding: 0px;
-                font-size: 12px;
+                font-size: 13px;
                 border-bottom: 1px solid #ccc;
             }
 
             .description {
                 margin: 0px;
-                font-size: 14px;
-                height: 63px;
+                font-size: 13px;
+                height: 50px;
                 margin-bottom: 10px;
                 overflow-y: hidden;
             }

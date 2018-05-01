@@ -61,7 +61,7 @@ class SkillsModal extends React.Component {
                                                     {
                                                         !purchased &&
                                                         available &&
-                                                        <Button onClick={() => this.props.buySkill(skill.id, tier.tier)} color="primary" block={true} disabled={characterEXP < tier.expCost}>
+                                                        <Button size="sm" onClick={() => this.props.buySkill(skill.id, tier.tier)} color="primary" block={true} disabled={characterEXP < tier.expCost}>
                                                             Purchase Level
                                                         </Button>
                                                     }
