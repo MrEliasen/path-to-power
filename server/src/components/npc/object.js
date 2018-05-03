@@ -12,6 +12,11 @@ export default class NPC extends Character {
      * @param  {String} npcId   The npc template ID
      */
     constructor(Game, npcData, npcId) {
+        // If health is not defined, set it to the current health max of the NPC
+        if (!npcData.stats.health) {
+            npcData.stats.health = npcData.stats.health_max;
+        }
+
         super(Game, npcData);
         // bind the NPC template ID
         this.npc_id = npcId;
