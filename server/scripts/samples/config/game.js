@@ -32,5 +32,6 @@ export default {
         skill_snoop: env('GAME_COOLDOWNS_SKILL_SNOOP', 10.0),
         skill_hide: env('GAME_COOLDOWNS_SKILL_HIDE', 30.0),
         skill_search: env('GAME_COOLDOWNS_SKILL_SEARCH', 5.0),
+        skill_firstaid: env('GAME_COOLDOWNS_SKILL_FIRSTAID', 60.0),
     },
 };

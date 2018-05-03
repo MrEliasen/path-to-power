@@ -45,37 +45,31 @@ function cmdSkillFirstAid(socket, character, command, params, cmdObject, Game) {
         return Game.eventToSocket(socket, 'error', 'You do not have this skill.');
     }
 
-    let targetCharacter;
-
-    // if a target is specified, but not found
-    if (params[0]) {
-        targetCharacter = Game.characterManager.getByName(params[0]);
-
-        if (!targetCharacter) {
-            return Game.eventToSocket(socket, 'error', 'There is noone around by that name.');
-        }
-
-        const sameLocation = Object.keys(targetCharacter.location).reduce((accumilator, key) => {
-            return character.location[key] === targetCharacter.location[key];
-        }, true);
-
-        if (!sameLocation) {
-            return Game.eventToSocket(socket, 'error', 'You are not in the same location as this character..');
-        }
-    }
-
-
-    // check if the character has an existing cooldown for this skill, if they are trying to hide
+    // check if the character has an existing cooldown for this skill
     const ticksLeft = Game.cooldownManager.ticksLeft(character, `skill_${skill.id}`);
 
     if (ticksLeft) {
         return Game.eventToUser(character.user_id, 'error', `You cannot use first aid again so soon. You must wait another ${(ticksLeft / 10)} seconds.`);
     }
+
+    let targetCharacter = params[0] || character;
+    const amountHealed = skill.use(targetCharacter);
+
     // add the search cooldown to the character
     Game.cooldownManager.add(character, `skill_${skill.id}`, null, true);
 
-    //const snoopInfo = skill.use(targetCharacter);
-    //return Game.eventToSocket(socket, 'multiline', snoopInfo);
+    // Make sure the target character is no the character who used the skill
+    if (params[0] && params[0].user_id !== character.user_id) {
+        Game.eventToSocket(socket, 'success', `You healed ${targetCharacter.name}, recovering ${amountHealed} health.`);
+        Game.eventToUser(targetCharacter.user_id, 'success', `${character.name} healed you, recovering ${amountHealed} health.`);
+        // update the target character client
+        Game.characterManager.updateClient(targetCharacter.user_id);
+    } else {
+        Game.eventToSocket(socket, 'success', `You healed yourself, recovering ${amountHealed} health.`);
+    }
+
+    // update the skill users client
+    Game.characterManager.updateClient(character.user_id);
 }
 
 /**
@@ -166,6 +160,13 @@ module.exports = [
         command: '/firstaid',
         aliases: [
             '/aid',
+        ],
+        params: [
+            {
+                name: 'Target',
+                desc: 'The target you wish to heal. If left empty, you target yourself.',
+                rules: 'target:grid',
+            },
         ],
         description: 'Heal yourself or another character for some amount of health.',
         method: cmdSkillFirstAid,

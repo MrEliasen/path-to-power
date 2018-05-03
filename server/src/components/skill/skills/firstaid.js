@@ -2,7 +2,7 @@
 /**
  * Snoop skill logic
  */
-export default class SkillFirstaid {
+export default class SkillFirstAid {
     /**
      * class constructor
      * @param  {Game}   Game      The game object
