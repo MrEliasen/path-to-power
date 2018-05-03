@@ -58,6 +58,14 @@ function cmdSkillFirstAid(socket, character, command, params, cmdObject, Game) {
     // add the search cooldown to the character
     Game.cooldownManager.add(character, `skill_${skill.id}`, null, true);
 
+    const bandage = character.inventory.find((item) => item.id === 'bandage');
+    const amountHealed = skill.use(targetCharacter, bandage || false);
+
+    // if a bandage was found/used, delete it
+    if (bandage) {
+        Game.itemManager.remove(character, bandage);
+    }
+
     // Make sure the target character is no the character who used the skill
     if (params[0] && params[0].user_id !== character.user_id) {
         Game.eventToSocket(socket, 'success', `You healed ${targetCharacter.name}, recovering ${amountHealed} health.`);

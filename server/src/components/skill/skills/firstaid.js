@@ -59,13 +59,17 @@ export default class SkillFirstAid {
     /**
      * Get information on the target character, based on skill level
      * @param  {Character} targetCharacter Target character
+     * @param  {Boolean} hasBandge Whether a bandage is used or not 
      * @return {Object}                    Information from the target character
      */
-    use(targetCharacter) {
+    use(targetCharacter, hasBandage = false) {
         let healAmount = 5 * this.value;
 
-        targetCharacter.updateHealth(healAmount);
+        if (!hasBandage) {
+            healAmount = healAmount * 0.2;
+        }
 
+        targetCharacter.updateHealth(healAmount);
         return healAmount;
     }
 }
