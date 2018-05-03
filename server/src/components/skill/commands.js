@@ -53,7 +53,10 @@ function cmdSkillFirstAid(socket, character, command, params, cmdObject, Game) {
     }
 
     let targetCharacter = params[0] || character;
-    const amountHealed = skill.use(targetCharacter);
+
+    if (targetCharacter.stats.health >= targetCharacter.stats.health_max) {
+        return Game.eventToSocket(socket, 'error', `${params[0] ? targetCharacter.name : 'You'} are already at max health.`);
+    }
 
     // add the search cooldown to the character
     Game.cooldownManager.add(character, `skill_${skill.id}`, null, true);
