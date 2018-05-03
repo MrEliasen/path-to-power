@@ -165,7 +165,7 @@ module.exports = [
             {
                 name: 'Target',
                 desc: 'The target you wish to heal. If left empty, you target yourself.',
-                rules: 'target:grid',
+                rules: 'player:grid',
             },
         ],
         description: 'Heal yourself or another character for some amount of health.',
