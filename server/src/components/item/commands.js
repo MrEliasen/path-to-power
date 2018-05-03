@@ -223,26 +223,25 @@ function cmdPickup(socket, character, command, params, cmdObject, Game) {
  * @param  {Game}   Game                The main Game object
  */
 function cmdUseItem(socket, character, command, params, cmdObject, Game) {
-    const index = params[0];
-    const item = character.inventory[index];
+    const invSlot = params[0];
+    const item = character.getEquipped(invSlot);
 
-    // make sure the item exists
     if (!item) {
         return;
     }
 
-    return item.use(character);
+    item.use(character);
 }
 
 module.exports = [
     {
-        command: '/usebyindex',
+        command: '/useslot',
         aliases: [],
         params: [
             {
-                name: 'Index',
-                desc: 'The item\'s index in your inventory',
-                rules: 'required|integer|min:0',
+                name: 'Slot-ID',
+                desc: 'The inventory slot containing the item to use',
+                rules: 'required|slot',
             },
         ],
         description: 'use an inventory item, based on the item\'s inventory index.',

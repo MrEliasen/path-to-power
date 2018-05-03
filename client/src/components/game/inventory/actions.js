@@ -40,3 +40,7 @@ export function moveItem(inventorySlot, targetSlot) {
 export function dropItem(inventorySlot) {
     return newCommand(`/dropslot ${inventorySlot}`);
 }
+
+export function useItem(inventorySlot) {
+    return newCommand(`/useslot ${inventorySlot}`);
+}
