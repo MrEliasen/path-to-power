@@ -340,6 +340,15 @@ export default class CommandManager {
                             }
                             break;
 
+                        case 'options':
+                            const options = rule[1].split(',');
+                            value = msgParam;
+
+                            if (!options.includes(value.toLowerCase())) {
+                                return `${param.name} must be one of the follow: ${options.join(', ')}.`;
+                            }
+                            break;
+
                         case 'integer':
                             value = parseInt(msgParam, 10);
 
