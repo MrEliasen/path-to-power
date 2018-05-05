@@ -189,12 +189,12 @@ function cmdPickup(socket, character, command, params, cmdObject, Game) {
     const itemObject = Game.itemManager.pickup(...location, item.name, amount);
 
     if (typeof itemObject === 'string') {
-        return Game.eventToUser(user_id, 'error', itemObject);
+        return Game.eventToUser(character.user_id, 'error', itemObject);
     }
 
     // make sure the character has room
     if (!character.hasRoomForItem(itemObject)) {
-        return Game.eventToUser(user_id, 'error', 'You do not have enough inventory space to pickup that item.');
+        return Game.eventToUser(character.user_id, 'error', 'You do not have enough inventory space to pickup that item.');
     }
 
     // add to user inventory
