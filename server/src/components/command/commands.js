@@ -345,6 +345,55 @@ function cmdModifyMoney(socket, character, command, params, cmdObject, Game) {
         Game.eventToSocket(socket, 'success', `You ${moneyAction} ${amount} money ${moneyDirection} ${suffix}.`);
     }
 }
+
+/**
+ * Give/Take Health command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
+function cmdModifyHealth(socket, character, command, params, cmdObject, Game) {
+    if (process.env.NODE_ENV !== 'development') {
+        return;
+    }
+
+    let amount = params[0];
+    const targetCharacter = params[1] || character;
+
+    // update the target's exp
+    targetCharacter.updateHealth(amount);
+
+    // kill the character if the health is less than 1
+    if (targetCharacter.stats.health < 1) {
+        const oldLocationId = targetCharacter.kill(character);
+        amount = Math.abs(amount);
+
+        // send event to the attacker
+        Game.eventToSocket(socket, 'info', `You deal ${amount} damage to ${targetCharacter.name}, killing them where they stand.`);
+        // send event to the target
+        Game.eventToUser(targetCharacter.user_id, 'info', `${character.name} strikes you for ${amount} damage, killing you.`);
+        // send event to the bystanders
+        return Game.eventToRoom(oldLocationId, 'info', `You see ${targetCharacter.name} suddenly drop dead on the ground, dropping everything they carried.`, [targetCharacter.user_id, character.user_id]);
+    }
+
+    // update the client character data
+    Game.characterManager.updateClient(targetCharacter.user_id);
+
+    const healthAction = amount < 0 ? 'damaged' : 'healed';
+    amount = Math.abs(amount);
+
+    // Make sure the target character is no the character who used the skill
+    if (params[1] && params[1].user_id !== character.user_id) {
+        Game.eventToSocket(socket, 'success', `You ${healthAction} ${targetCharacter.name} for ${amount} health.`);
+        Game.eventToUser(targetCharacter.user_id, 'success', `${character.name} ${healthAction} you for ${amount} health.`);
+    } else {
+        Game.eventToSocket(socket, 'success', `You ${healthAction} yourself for ${amount} health.`);
+    }
+}
+
 module.exports = [
     {
         command: '/modexp',
@@ -387,6 +436,25 @@ module.exports = [
         description: 'Give or take exp from a character or yourself..',
         method: cmdModifyMoney,
     },
+    {
+        command: '/modhealth',
+        aliases: [],
+        params: [
+            {
+                name: 'Amount',
+                desc: 'The amount of health to give or take (can be negative or positive).',
+                rules: 'required|integer',
+            },
+            {
+                name: 'Target',
+                desc: 'The name of the character to give or take health from. If left blank, target is yourself.',
+                rules: 'player',
+            },
+        ],
+        description: 'Give or take health from a character or yourself. The target can die from this command.',
+        method: cmdModifyHealth,
+    },
+    {
         command: '/teleport',
         aliases: [
             '/tp',
