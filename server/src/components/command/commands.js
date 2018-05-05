@@ -394,7 +394,36 @@ function cmdModifyHealth(socket, character, command, params, cmdObject, Game) {
     }
 }
 
+/**
+ * show all NPCs for a given map
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
+function cmdNPCList(socket, character, command, params, cmdObject, Game) {
+    if (process.env.NODE_ENV !== 'development') {
+        return;
+    }
+
+    const npcList = Game.npcManager.getLocationList(character.location.map);
+    const messages = npcList.map((npc) => {
+        return `The ${npc.type} called ${npc.name} has ${npc.stats.health}/${npc.stats.health_max} health @ N${npc.location.y}/E${npc.location.x}`;
+    });
+
+    Game.eventToSocket(socket, 'multiline', messages);
+}
+
 module.exports = [
+    {
+        command: '/npclist',
+        aliases: [],
+        params: [],
+        description: 'Show the list of NPCs and their locations of the map your are in.',
+        method: cmdNPCList,
+    },
     {
         command: '/modexp',
         aliases: [],
