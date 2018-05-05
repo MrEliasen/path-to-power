@@ -294,6 +294,57 @@ function cmdModifyExp(socket, character, command, params, cmdObject, Game) {
     }
 }
 
+/**
+ * Give/Take money command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
+function cmdModifyMoney(socket, character, command, params, cmdObject, Game) {
+    if (process.env.NODE_ENV !== 'development') {
+        return;
+    }
+
+    let amount = params[0];
+    const type = params[1].toLowerCase();
+    const targetCharacter = params[2] || character;
+
+    // update the target's Money
+    if (type === 'bank') {
+        targetCharacter.updateBank(amount);
+    } else {
+        targetCharacter.updateCash(amount);
+    }
+
+    // update the client character data
+    Game.characterManager.updateClient(targetCharacter.user_id);
+
+    let suffix = '';
+    const moneyDirection = amount < 0 ? 'from' : 'to';
+    const moneyAction = amount < 0 ? 'took' : 'gave';
+    amount = Math.abs(amount);
+
+    // Make sure the target character is no the character who used the skill
+    if (params[2] && params[2].user_id !== character.user_id) {
+        if (type === 'bank') {
+            suffix = (targetCharacter.name[targetCharacter.name.length - 1].toLowerCase() === 's' ? '\'' : '\'s') + ' bank account';
+        }
+
+        Game.eventToSocket(socket, 'success', `You ${moneyAction} ${amount} money ${moneyDirection} ${targetCharacter.name}${suffix}.`);
+        Game.eventToUser(targetCharacter.user_id, 'success', `${character.name} ${moneyDirection} ${amount} money ${moneyDirection} you.`);
+    } else {
+        suffix = 'yourself.';
+
+        if (type === 'bank') {
+            suffix = 'your own bank account';
+        }
+
+        Game.eventToSocket(socket, 'success', `You ${moneyAction} ${amount} money ${moneyDirection} ${suffix}.`);
+    }
+}
 module.exports = [
     {
         command: '/modexp',
@@ -312,6 +363,29 @@ module.exports = [
         ],
         description: 'Give or take exp from a character or yourself..',
         method: cmdModifyExp,
+    },
+    {
+        command: '/modmoney',
+        aliases: [],
+        params: [
+            {
+                name: 'Amount',
+                desc: 'The amount of money to give or take (can be negative or positive).',
+                rules: 'required|integer',
+            },
+            {
+                name: 'Type',
+                desc: 'Where the money will be going: "cash" or "bank"',
+                rules: 'required|options:bank,cash',
+            },
+            {
+                name: 'Target',
+                desc: 'The name of the character to give or take money from. If left blank, target is yourself.',
+                rules: 'player',
+            },
+        ],
+        description: 'Give or take exp from a character or yourself..',
+        method: cmdModifyMoney,
     },
         command: '/teleport',
         aliases: [
