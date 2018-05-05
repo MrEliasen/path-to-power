@@ -259,8 +259,60 @@ function cmdTeleport(socket, character, command, params, cmdObject, Game) {
     Game.mapManager.updateClient(character.user_id);
 }
 
+/**
+ * Give/Take EXP command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
+function cmdModifyExp(socket, character, command, params, cmdObject, Game) {
+    if (process.env.NODE_ENV !== 'development') {
+        return;
+    }
+
+    const amount = params[0];
+    const targetCharacter = params[1] || character;
+
+    // update the target's exp
+    targetCharacter.updateExp(amount);
+
+    // update the client character data
+    Game.characterManager.updateClient(targetCharacter.user_id);
+
+    const expDirection = amount < 0 ? 'from' : 'to';
+    const expAction = amount < 0 ? 'took' : 'gave';
+
+    // Make sure the target character is no the character who used the skill
+    if (params[1] && params[1].user_id !== character.user_id) {
+        Game.eventToSocket(socket, 'success', `You ${expAction} ${amount} of EXP ${expDirection} ${targetCharacter.name}.`);
+        Game.eventToUser(targetCharacter.user_id, 'success', `${character.name} ${expAction} ${amount} of EXP ${expDirection} you.`);
+    } else {
+        Game.eventToSocket(socket, 'success', `You ${expAction} ${amount} of EXP ${expDirection} yourself`);
+    }
+}
+
 module.exports = [
     {
+        command: '/modexp',
+        aliases: [],
+        params: [
+            {
+                name: 'Amount',
+                desc: 'The amount of exp to give or take (can be negative or positive).',
+                rules: 'required|integer',
+            },
+            {
+                name: 'Target',
+                desc: 'The name of the character to give or take exp from. If left blank, target is yourself.',
+                rules: 'player',
+            },
+        ],
+        description: 'Give or take exp from a character or yourself..',
+        method: cmdModifyExp,
+    },
         command: '/teleport',
         aliases: [
             '/tp',
