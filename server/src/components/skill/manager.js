@@ -114,6 +114,7 @@ export default class SkillManager {
             return {
                 id: SkillObj.id,
                 name: SkillObj.name,
+                description: SkillObj.description,
                 tree: SkillObj.getTree(),
             };
         });

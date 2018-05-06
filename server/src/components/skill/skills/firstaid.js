@@ -13,6 +13,7 @@ export default class SkillFirstAid {
         this.id = 'firstaid';
         this.name = 'First Aid';
         this.command = '/firstaid';
+        this.description = 'Allows you to use /firstaid on yourself or a target, with a bandage, healing 5 health.';
         this.value = 0;
 
         Object.assign(this, {...modifiers});
@@ -36,7 +37,7 @@ export default class SkillFirstAid {
             {
                 tier: 1,
                 expCost: 1000,
-                description: 'Allows you to use /firstaid on yourself or a target, with a bandage, healing 5 health.',
+                description: 'First aid heals 5 health.',
             },
             {
                 tier: 2,

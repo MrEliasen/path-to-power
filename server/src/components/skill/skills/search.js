@@ -16,6 +16,7 @@ export default class SkillSearch {
         this.id = 'search';
         this.name = 'Search';
         this.command = '/search';
+        this.description = 'Description placeholder';
         this.value = 1;
         this.improve = true;
 

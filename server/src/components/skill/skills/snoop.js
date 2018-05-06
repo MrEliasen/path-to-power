@@ -13,6 +13,7 @@ export default class SkillSnoop {
         this.id = 'snoop';
         this.name = 'Snooping';
         this.command = '/snoop';
+        this.description = 'Gather information about a target, the higher your skill the more information you find.';
         this.value = 0;
 
         Object.assign(this, {...modifiers});

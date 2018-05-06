@@ -16,6 +16,7 @@ export default class SkillHide {
         this.id = 'hide';
         this.name = 'Hide';
         this.command = '/hide';
+        this.description = 'Description placeholder';
         this.value = 1;
         this.improve = true;
 
