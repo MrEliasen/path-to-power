@@ -24,51 +24,31 @@ class SkillsModal extends React.Component {
                             const characterSkill = this.props.character.skills[skill.id];
                             const characterEXP = this.props.character.stats.exp;
                             const currentLevel = characterSkill ? characterSkill.modifiers.value : 0;
+                            const nextLevel = skill.tree[(currentLevel ? currentLevel : 1)]; // skill levels starts 1, but arrays 0, so no need to modify the key.
 
                             return (
-                                <div
-                                    key={skill.id}
-                                    className="skill-tree"
-                                >
-                                    <div className="skill-name">
-                                        <h3>{skill.name}</h3>
-                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Facilis placeat ullam eius dolor similique ipsum sunt optio maxime tempore sed.</p>
+                                <div key={skill.id} className="skill-tree" >
+                                    <div className="skill-tier">
+                                        <h3>{skill.name} Lvl {currentLevel}</h3>
+                                        <p>{currentLevel > 0 ? skill.tree[currentLevel - 1].description : skill.description}</p>
+                                        {
+                                            nextLevel &&
+                                            <div className="next-tier">
+                                                <p>{nextLevel.description}</p>
+                                                {
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={() => this.props.buySkill(skill.id, nextLevel.tier)}
+                                                        color="primary"
+                                                        block={true}
+                                                        disabled={characterEXP < nextLevel.expCost}
+                                                    >
+                                                        Purchase Level
+                                                    </Button>
+                                                }
+                                            </div>
+                                        }
                                     </div>
-                                    {
-                                        skill.tree.map((tier) => {
-                                            let available = false;
-                                            let purchased = false;
-
-                                            if (tier.tier <= currentLevel) {
-                                                purchased = true;
-                                            }
-                                            
-                                            if (tier.tier === currentLevel + 1) {
-                                                available = true;
-                                            }
-
-                                            return (
-                                                <div
-                                                    key={`${skill.id}-${tier.tier}`}
-                                                    className={classNames('skill-tier', {
-                                                        '--purchased': purchased,
-                                                        '--unavailable': !available,
-                                                    })}
-                                                >
-                                                    <h3>Level {tier.tier}</h3>
-                                                    <p className="cost">Costs {tier.expCost} EXP</p>
-                                                    <p className="description">{tier.description}</p>
-                                                    {
-                                                        !purchased &&
-                                                        available &&
-                                                        <Button size="sm" onClick={() => this.props.buySkill(skill.id, tier.tier)} color="primary" block={true} disabled={characterEXP < tier.expCost}>
-                                                            Purchase Level
-                                                        </Button>
-                                                    }
-                                                </div>
-                                            )
-                                        })
-                                    }
                                 </div>
                             );
                         })
