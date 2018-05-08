@@ -2,27 +2,28 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-gap: 20px;
-
     .skill-tree {
         text-align: center;
-
         .skill-tier {
-            background: rgba(0,0,0,0.05);
+            background: rgba(0, 0, 0, 0.05);
             height: 350px;
             border: 1px dashed #ccc;
             border-radius: 15px;
             margin-bottom: 15px;
             padding: 8px 10px;
-
+            position: relative;
             p {
                 font-size: 13px;
             }
-
             h3 {
                 font-size: 1.35rem;
             }
-
             .next-tier {
+                position: absolute;
+                bottom: 10px;
+                left: 0;
+                padding: 0px 10px;
+                width: 100%;
                 .cost {
                     margin: 0px 0px 8px 0px;
                     padding: 0px;

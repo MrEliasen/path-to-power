@@ -24,17 +24,21 @@ class SkillsModal extends React.Component {
                             const characterSkill = this.props.character.skills[skill.id];
                             const characterEXP = this.props.character.stats.exp;
                             const currentLevel = characterSkill ? characterSkill.modifiers.value : 0;
-                            const nextLevel = skill.tree[(currentLevel ? currentLevel : 1)]; // skill levels starts 1, but arrays 0, so no need to modify the key.
+                            const nextLevel = skill.tree[currentLevel]; // skill levels starts 1, but arrays 0, so no need to modify the key./
 
                             return (
                                 <div key={skill.id} className="skill-tree" >
                                     <div className="skill-tier">
                                         <h3>{skill.name} Lvl {currentLevel}</h3>
-                                        <p>{currentLevel > 0 ? skill.tree[currentLevel - 1].description : skill.description}</p>
+                                        <p>{skill.description}</p>
+                                        {
+                                            currentLevel > 0 &&
+                                            <p><strong>Current Level:</strong> {skill.tree[currentLevel - 1].description}</p>
+                                        }
                                         {
                                             nextLevel &&
                                             <div className="next-tier">
-                                                <p>{nextLevel.description}</p>
+                                                <p><strong>Next Level:</strong> {nextLevel.description}</p>
                                                 {
                                                     <Button
                                                         size="sm"
