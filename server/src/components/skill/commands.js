@@ -125,6 +125,7 @@ function cmdSkillHide(socket, character, command, params, cmdObject, Game) {
  */
 function cmdSkillSearch(socket, character, command, params, cmdObject, Game) {
     const skill = character.skills.find((obj) => obj.id === 'search');
+    const target = params[0];
 
     if (!skill) {
         return Game.eventToSocket(socket, 'error', 'You do not have this skill.');
@@ -134,12 +135,12 @@ function cmdSkillSearch(socket, character, command, params, cmdObject, Game) {
     const ticksLeft = Game.cooldownManager.ticksLeft(character, `skill_${skill.id}`);
 
     if (ticksLeft) {
-        return Game.eventToUser(character.user_id, 'error', `You cannot search again so soon. You must wait another ${(ticksLeft / 10)} seconds.`);
+        return Game.eventToUser(character.user_id, 'error', `You cannot track again so soon. You must wait another ${(ticksLeft / 10)} seconds.`);
     }
     // add the search cooldown to the character
     Game.cooldownManager.add(character, `skill_${skill.id}`, null, true);
 
-    skill.use(character);
+    skill.use(character, target);
 }
 
 module.exports = [
@@ -183,12 +184,18 @@ module.exports = [
         method: cmdSkillFirstAid,
     },
     {
-        command: '/search',
+        command: '/track',
         aliases: [
-            '/find',
+            '/search',
         ],
-        params: [],
-        description: 'Search for a hidden players at your current location.',
+        params: [
+            {
+                name: 'Target',
+                desc: 'The player you want to track/find.',
+                rules: 'player',
+            },
+        ],
+        description: 'Track a players location, and attempt to force them out of hiding.',
         method: cmdSkillSearch,
     },
 ];

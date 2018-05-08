@@ -1,11 +1,11 @@
 import SkillSnoop from './snoop';
-import SkillHide from './hide';
+import SkillHiding from './hiding';
 import SkillSearch from './search';
 import SkillFirstAid from './firstaid';
 
 export default {
     snoop: SkillSnoop,
-    hide: SkillHide,
+    hiding: SkillHiding,
     search: SkillSearch,
     firstaid: SkillFirstAid,
 };
