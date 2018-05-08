@@ -154,7 +154,7 @@ export default class NPC extends Character {
 
         const target = this.hasActiveTarget();
 
-        if (!target) {
+        if (target) {
             return;
         }
 
