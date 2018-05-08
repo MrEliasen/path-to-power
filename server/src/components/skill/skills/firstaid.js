@@ -13,7 +13,7 @@ export default class SkillFirstAid {
         this.id = 'firstaid';
         this.name = 'First Aid';
         this.command = '/firstaid';
-        this.description = 'Allows you to use /firstaid on yourself or a target, with a bandage, healing 5 health.';
+        this.description = 'You can use /firstaid on yourself or target, healing some health.';
         this.value = 0;
 
         Object.assign(this, {...modifiers});
@@ -37,22 +37,38 @@ export default class SkillFirstAid {
             {
                 tier: 1,
                 expCost: 1000,
-                description: 'First aid heals 5 health.',
+                description: 'First aid heals 5 health. Effect reduced by 80% without a bandage.',
+                effects: {
+                    health: 5,
+                    penalty: 0.2,
+                },
             },
             {
                 tier: 2,
                 expCost: 2000,
-                description: 'Inceases healing about by 10 health.',
+                description: 'First aid heals 10 health. Effect reduced by 75% without a bandage.',
+                effects: {
+                    health: 10,
+                    penalty: 0.25,
+                },
             },
             {
                 tier: 3,
                 expCost: 5000,
-                description: 'Inceases healing about by 15 health',
+                description: 'First aid heals 15 health. Effect reduced by 70% without a bandage.',
+                effects: {
+                    health: 15,
+                    penalty: 0.3,
+                },
             },
             {
                 tier: 4,
                 expCost: 10000,
-                description: 'Inceases healing about by 20 health',
+                description: 'First aid heals 20 health. Effect reduced by 65% without a bandage.',
+                effects: {
+                    health: 20,
+                    penalty: 0.35,
+                },
             },
         ];
     }
@@ -64,10 +80,11 @@ export default class SkillFirstAid {
      * @return {Object}                    Information from the target character
      */
     use(targetCharacter, hasBandage = false) {
-        let healAmount = 5 * this.value;
+        const tier = this.getTree().find((tier) => tier.tier === this.value);
+        let healAmount = tier.effects.health;
 
         if (!hasBandage) {
-            healAmount = healAmount * 0.2;
+            healAmount = Math.round(healAmount * tier.effects.penalty);
         }
 
         targetCharacter.updateHealth(healAmount);

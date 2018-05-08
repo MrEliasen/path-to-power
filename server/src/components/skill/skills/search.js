@@ -17,7 +17,7 @@ export default class SkillSearch {
         this.name = 'Search';
         this.command = '/search';
         this.description = 'Description placeholder';
-        this.value = 1;
+        this.value = 0;
         this.improve = true;
 
         Object.assign(this, {...modifiers});

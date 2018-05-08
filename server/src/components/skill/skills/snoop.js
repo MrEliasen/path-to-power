@@ -13,7 +13,7 @@ export default class SkillSnoop {
         this.id = 'snoop';
         this.name = 'Snooping';
         this.command = '/snoop';
-        this.description = 'Gather information about a target, the higher your skill the more information you find.';
+        this.description = 'Gather information about a target player. The higher your skill level the more information.';
         this.value = 0;
 
         Object.assign(this, {...modifiers});
@@ -37,22 +37,22 @@ export default class SkillSnoop {
             {
                 tier: 1,
                 expCost: 1000,
-                description: 'Know which city a target is currently in.',
+                description: 'Know the target\'s city.',
             },
             {
                 tier: 2,
                 expCost: 2000,
-                description: 'Know which items a target has equipped.',
+                description: 'Know the target\'s city and which items a target has equipped.',
             },
             {
                 tier: 3,
                 expCost: 5000,
-                description: 'Know a target\'s health and North coordinate.',
+                description: 'Know the target\'s city, equipped items, health and North coordinate.',
             },
             {
                 tier: 4,
                 expCost: 10000,
-                description: 'Know a target\'s abilities and East coordinate.',
+                description: 'Know the target\'s city, equipped items, health, abilities, and location coordinate.',
             },
         ];
     }
