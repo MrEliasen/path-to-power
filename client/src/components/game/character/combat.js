@@ -21,7 +21,13 @@ class CombatMenu extends React.Component {
     }
 
     render() {
-        const target = this.props.character.target;
+        let target = this.props.character.target;
+
+        if (target && target.isNPC) {
+            target = this.props.npcs.find((obj) => {
+                return obj.id === target.id;
+            });
+        }
 
         if (!target) {
             return null;
@@ -33,7 +39,7 @@ class CombatMenu extends React.Component {
                 <a href="#" onClick={(e) => this.sendCommand(e, '/strike')}><Icon icon="hand-paper" /> Strike</a>
                 <a href="#" onClick={(e) => this.sendCommand(e, '/shoot')}><Icon icon="hand-point-left" /> Shoot</a>
                 <span>
-                    {target.name} {target.type ? `the ${target.type}` : ''}
+                    {target.name} {target.type ? `the ${target.type} (HP: ${target.health})` : ''}
                 </span>
             </Card>
         );
@@ -48,7 +54,7 @@ function mapActionsToProps(dispatch) {
 
 function mapStateToProps(state) {
     return {
-        game: {...state.game},
+        npcs: state.map.npcs,
         character: state.character.selected,
     };
 }

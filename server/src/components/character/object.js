@@ -228,6 +228,7 @@ export default class Character {
         if (target.npc_id) {
             details.type = target.type;
             details.isNPC = true;
+            details.id = target.id;
         };
 
         return details;
