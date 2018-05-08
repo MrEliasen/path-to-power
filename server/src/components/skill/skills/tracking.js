@@ -5,7 +5,7 @@ import {
 /**
  * Search Skill logic
  */
-export default class SkillSearch {
+export default class SkillTracking {
     /**
      * class constructor
      * @param  {Game}   Game      The game object
