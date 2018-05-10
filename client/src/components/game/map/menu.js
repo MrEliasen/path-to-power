@@ -46,6 +46,8 @@ class MapMenu extends React.Component {
     }
 
     renderModals() {
+        const players = this.props.map.players.filter((player) => player.user_id !== this.props.character.user_id);
+
         return (
             <React.Fragment>
                 <Modal isOpen={this.state.modalItems} toggle={this.toggleItems} size="lg">
@@ -76,7 +78,7 @@ class MapMenu extends React.Component {
                     <ModalHeader toggle={this.togglePlayers}>Players</ModalHeader>
                     <ModalBody>
                         {
-                            this.props.map.players.map((user, index) =>
+                            players.map((user, index) =>
                                 <React.Fragment key={user.user_id}>
                                     {
                                         index !== 0 &&
@@ -113,6 +115,7 @@ class MapMenu extends React.Component {
     }
 
     render() {
+        const players = this.props.map.players.filter((player) => player.user_id !== this.props.character.user_id);
         const total = this.props.map.structures.length + this.props.map.items.length + this.props.map.players.length + this.props.map.npcs.length;
         if (total === 0) {
             return '';
@@ -138,9 +141,9 @@ class MapMenu extends React.Component {
                         </Card>
                     }
                     {
-                        this.props.map.players.length > 0 &&
+                        players.length > 0 &&
                         <Card className="menu menu-map cluster">
-                            <a href="#" onClick={this.togglePlayers}><Icon icon="user-secret" /> Players ({this.props.map.players.length})</a>
+                            <a href="#" onClick={this.togglePlayers}><Icon icon="user-secret" /> Players ({players.length})</a>
                         </Card>
                     }
                     {
