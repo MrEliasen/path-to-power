@@ -17,6 +17,7 @@ import SkillManager from './components/skill/manager';
 import CooldownManager from './components/cooldown/manager';
 import NpcManager from './components/npc/manager';
 import EffectManager from './components/effect/manager';
+import EnhancementManager from './components/enhancement/manager';
 
 import {newEvent, addNews} from './actions';
 
@@ -62,6 +63,7 @@ class Game {
         this.cooldownManager = new CooldownManager(this);
         this.npcManager = new NpcManager(this);
         this.effectManager = new EffectManager(this);
+        this.enhancementManager = new EnhancementManager(this);
         this.lootManager = new LootManager(this);
 
         if (autoInit) {
@@ -86,6 +88,7 @@ class Game {
         await this.commandManager.init();
         await this.characterManager.init();
         await this.skillManager.init();
+        await this.enhancementManager.init();
 
         // setup autosave
         this.setupGameTimers();
