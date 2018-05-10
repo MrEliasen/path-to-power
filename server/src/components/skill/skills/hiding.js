@@ -66,7 +66,7 @@ export default class SkillHiding {
                 return obj.name + (obj.npc_id ? ` the ${obj.type}` : '');
             });
 
-            return this.Game.eventToUser(character.user_id, 'warning', `You can't hide while being aim'ed at by: ${list.join(', ')}`);
+            return this.Game.eventToUser(character.user_id, 'warning', `You can't hide while being aimed at by: ${list.join(', ')}`);
         }
 
         // hide the player from the grid playerlist

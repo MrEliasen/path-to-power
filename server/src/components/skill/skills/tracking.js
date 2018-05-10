@@ -70,35 +70,38 @@ export default class SkillTracking {
         let sameGrid = true;
         let foundTarget = false;
 
-        if (target.location.map !== character.location.map &&
-            target.location.y !== character.location.y &&
+        if (target.location.map !== character.location.map ||
+            target.location.y !== character.location.y ||
             target.location.x !== character.location.x
         ) {
             sameGrid = false;
+        }
 
-            if (targetSill && targetSill.value >= this.value) {
-                foundTarget = Math.random() < 0.1;
-            } else {
-                foundTarget = true;
-            }
+        if (targetSill && targetSill.value >= this.value) {
+            foundTarget = Math.random() < 0.1;
+        } else {
+            foundTarget = true;
         }
 
         if (!foundTarget) {
-            return this.Game.eventToUser(character.user_id, 'info', `You check with your contacts, but none of them had any fresh info on ${character.name} at this time.`);
+            return this.Game.eventToUser(character.user_id, 'info', `You check with your contacts, but none of them had any fresh info on ${target.name} at this time.`);
         }
 
         if (!sameGrid) {
-            return this.Game.eventToUser(character.user_id, 'info', `You check with your contacts, and find that ${character.name} was last seen in ${targetMap.name} around N${target.location.y}/E${target.location.x}`);
+            return this.Game.eventToUser(character.user_id, 'info', `You check with your contacts, and find that ${target.name} was last seen in ${targetMap.name} around N${target.location.y}/E${target.location.x}`);
         }
 
         if (!target.hidden) {
-            return this.Game.eventToUser(character.user_id, 'info', `No need to contact anyone, you see ${character.name} standing close to your.`);
+            return this.Game.eventToUser(character.user_id, 'info', `No need to contact anyone, you see ${target.name} standing close to your.`);
         }
 
         // yank the player out of hiding
         target.hidden = false;
 
-        this.Game.eventToUser(character.user_id, 'success', `You spot ${character.name} hidding in a nearby alley, forcing them to leave their hiding spot.`);
+        // apply the hide cooldown to the target
+        this.Game.cooldownManager.add(target, 'skill_hiding', null, true);
+
+        this.Game.eventToUser(character.user_id, 'success', `You spot ${target.name} hidding in a nearby alley, forcing them to leave their hiding spot.`);
         this.Game.eventToUser(target.user_id, 'info', `Despite your efforts, ${character.name} managed to track you down. You are no longer hidden.`);
 
         this.Game.eventToRoom(character.getLocationId(), 'info', `You hear ${character.name} shout they found ${target.name}.`, [character.user_id, target.user_id]);
@@ -109,24 +112,8 @@ export default class SkillTracking {
             payload: {
                 name: target.name,
                 user_id: target.user_id,
+                ignore: target.user_id,
             },
         });
-    }
-
-    /**
-     * Increase the skill by the training amount
-     */
-    train() {
-        if (!this.improve) {
-            return;
-        }
-
-        // this is how much the skill should increment when used.
-        // Round the new value to 5 decimal points
-        this.value = this.value + Math.round(
-            Math.round(
-                (0.015 / this.value) * 100000
-            )
-        ) / 100000;
     }
 }

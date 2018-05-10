@@ -93,7 +93,7 @@ function cmdSkillFirstAid(socket, character, command, params, cmdObject, Game) {
  * @param  {Game}   Game                The main Game object
  */
 function cmdSkillHide(socket, character, command, params, cmdObject, Game) {
-    const skill = character.skills.find((obj) => obj.id === 'hide');
+    const skill = character.skills.find((obj) => obj.id === 'hiding');
 
     if (!skill) {
         return Game.eventToSocket(socket, 'error', 'You do not have this skill.');
@@ -123,8 +123,8 @@ function cmdSkillHide(socket, character, command, params, cmdObject, Game) {
  * @param  {Object} cmdObject           The command object template
  * @param  {Game}   Game                The main Game object
  */
-function cmdSkillSearch(socket, character, command, params, cmdObject, Game) {
-    const skill = character.skills.find((obj) => obj.id === 'search');
+function cmdSkillTrack(socket, character, command, params, cmdObject, Game) {
+    const skill = character.skills.find((obj) => obj.id === 'tracking');
     const target = params[0];
 
     if (!skill) {
@@ -196,6 +196,6 @@ module.exports = [
             },
         ],
         description: 'Track a players location, and attempt to force them out of hiding.',
-        method: cmdSkillSearch,
+        method: cmdSkillTrack,
     },
 ];
