@@ -28,7 +28,10 @@ export default {
         attack: env('GAME_COOLDOWNS_ATTACK', 2.0),
         aim: env('GAME_COOLDOWNS_AIM', 1.0),
         chat: env('GAME_COOLDOWNS_CHAT', 1.0),
+        faction_invite: env('GAME_COOLDOWNS_FACTION_INVITE', 5.0),
+        skill_snoop: env('GAME_COOLDOWNS_SKILL_SNOOP', 60.0),
         skill_hiding: env('GAME_COOLDOWNS_SKILL_HIDING', 30.0),
         skill_tracking: env('GAME_COOLDOWNS_SKILL_TRACKING', 60.0),
+        skill_firstaid: env('GAME_COOLDOWNS_SKILL_FIRSTAID', 120.0),
     },
 };
