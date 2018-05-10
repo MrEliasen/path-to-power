@@ -6,6 +6,10 @@ export default {
         buyDrugs: env('GAME_REPGAINS_BUYDRUGS', 1),
         sellDrugs: env('GAME_REPGAINS_SELLDRUGS', 5),
     },
+    enhancement: {
+        intervalDuration: env('GAME_ENHANCEMENT_INTERVALDURATION', 5000),
+        intervalPoints: env('GAME_ENHANCEMENT_INTERVALPOINTS', 1),
+    },
     defaultstats: {
         health_max: env('GAME_DEFAULT_HEALTH', 100),
         money: env('GAME_DEFAULT_MONEY', 300),
