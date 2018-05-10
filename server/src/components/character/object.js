@@ -79,7 +79,32 @@ export default class Character {
         // run the "garbage collection" every N seconds
         this.timers.push({
             name: 'cooldownGc',
+            type: 'interval',
             timer: setInterval(this.Game.cooldownManager.cleanup, 1000, this),
+        });
+    }
+
+    /**
+     * Kills all timers on the character object
+     */
+    killTimers() {
+        this.cooldowns.forEach((cooldown) => {
+            if (cooldown.ticks > 0) {
+                clearInterval(cooldown.timer);
+            }
+        });
+
+        this.timers.forEach((timer) => {
+            try {
+                if (timer.type === 'timeout') {
+                    clearTimeout(timer.timer);
+                } else {
+                    clearInterval(timer.timer);
+                }
+            } catch (err) {
+                // supress errors caused by clearing a timer/interval
+                // which is no longer active.
+            }
         });
     }
 

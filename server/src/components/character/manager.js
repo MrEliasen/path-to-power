@@ -320,6 +320,9 @@ export default class CharacterManager {
             return;
         }
 
+        // remove all outstanding timers on the character
+        character.killTimers();
+
         try {
             await this.save(character.user_id);
         } catch (err) {

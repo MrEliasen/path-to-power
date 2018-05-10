@@ -76,6 +76,7 @@ export default class EnhancementManager {
 
         character.timers.push({
             name: 'enhancementPoints',
+            type: 'interval',
             timer: setInterval(this.onPointsInterval, this.Game.config.game.enhancement.intervalDuration, character),
         });
     }

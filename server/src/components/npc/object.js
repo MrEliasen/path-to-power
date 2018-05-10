@@ -340,6 +340,7 @@ export default class NPC extends Character {
         // Initiates the NPC's respawn timer
         this.timers.push({
             key: 'respawn',
+            type: 'timeout',
             ref: setTimeout(() => {
                 this.Game.npcManager.reset(this);
             }, this.logic.respawn * 1000),
