@@ -275,6 +275,9 @@ export default class CharacterManager {
         // load the character skills
         this.Game.skillManager.load(character);
 
+        // load the character skills
+        this.Game.enhancementManager.load(character);
+
         // check if they are in a faction, and load the faction if so
         const faction = this.Game.factionManager.get(character.faction_id);
 

@@ -60,7 +60,7 @@ export default class EnhancementManager {
      */
     load(character) {
         // save the players enhancement list
-        const characterEnhList = character.enhancements ? {...character.enhancements} : {};
+        const characterEnhList = character.enhancements ? [...character.enhancements] : [];
 
         // prepare the array which will keep the instanciated enhancements
         character.enhancements = [];
@@ -73,12 +73,31 @@ export default class EnhancementManager {
                 character.enhancements.push(newEnhancement);
             }
         });
+
+        character.timers.push({
+            name: 'enhancementPoints',
+            timer: setInterval(this.onPointsInterval, this.Game.config.game.enhancement.intervalDuration, character),
+        });
+    }
+
+    /**
+     * Give enhancement points to a character at the end of each point interval
+     * @param {Character} character the character to give points to
+     */
+    onPointsInterval = (character) => {
+        /* eslint-disable no-invalid-this */
+        const pointsReward = this.Game.config.game.enhancement.intervalPoints;
+
+        character.updateEnhPoints(pointsReward);
+        this.Game.characterManager.updateClient(character.user_id);
+        this.Game.eventToUser(character.user_id, 'info', `Thank you for playing! You have been awarded ${pointsReward} enhancement points!`);
+        /* eslint-enable no-invalid-this */
     }
 
     /**
      * Get the list of all enhancements
      */
-    getList() {
+    getList = () => {
         return Object.values(EnhancementsList).map((Enhancement) => {
             const EnhObj = new Enhancement();
 

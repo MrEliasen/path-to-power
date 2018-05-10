@@ -22,6 +22,8 @@ export default class Character {
         this.faction = null;
         // holds all the skills for the character
         this.skills = [];
+        // holds all the enhancements for the character
+        this.enhancements = [];
         // Whether their skills and abilities should improve when used
         this.train = true;
         // Whether to ignore quantities on items, like ammo, so they dont run out of ammo etc.
@@ -908,7 +910,7 @@ export default class Character {
      * @param  {Number} amount The amount to add/remove (negative number to remove)
      * @return {Number}        The new exp total
      */
-    enhPointsCost(amount) {
+    updateEnhPoints(amount) {
         this.stats.enhPoints = Math.max(0, Math.round(this.stats.enhPoints + amount));
         return this.stats.enhPoints;
     }
