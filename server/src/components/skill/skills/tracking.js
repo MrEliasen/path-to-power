@@ -15,7 +15,6 @@ export default class SkillTracking {
         this.Game = Game;
         this.id = 'tracking';
         this.name = 'Tracking';
-        this.command = '/track';
         this.description = 'Enables you to /track the position a target, and force them out of hiding.';
         this.value = 0;
 

@@ -12,7 +12,6 @@ export default class SkillSnoop {
         this.Game = Game;
         this.id = 'snoop';
         this.name = 'Snooping';
-        this.command = '/snoop';
         this.description = 'Gather information about a target player. The higher your skill level the more information.';
         this.value = 0;
 

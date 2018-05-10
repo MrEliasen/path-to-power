@@ -15,7 +15,6 @@ export default class SkillHiding {
         this.Game = Game;
         this.id = 'hiding';
         this.name = 'Hiding';
-        this.command = '/hide';
         this.description = 'Allows you to /hide your presence from others in a specific grid. ';
         this.value = 0;
 

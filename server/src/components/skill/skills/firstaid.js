@@ -12,7 +12,6 @@ export default class SkillFirstAid {
         this.Game = Game;
         this.id = 'firstaid';
         this.name = 'First Aid';
-        this.command = '/firstaid';
         this.description = 'You can use /firstaid on yourself or target, healing some health.';
         this.value = 0;
 
