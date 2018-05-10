@@ -40,7 +40,7 @@ export default class Character {
             money: 0,
             bank: 200,
             exp: 0,
-            inventorySize: 30,
+            inventorySize: 18,
         };
         // keeps track of all timers
         this.timers = [];
@@ -901,6 +901,16 @@ export default class Character {
     updateExp(amount) {
         this.stats.exp = Math.max(0, Math.round(this.stats.exp + amount));
         return this.stats.exp;
+    }
+
+    /**
+     * Add/remove enhancement points from the character
+     * @param  {Number} amount The amount to add/remove (negative number to remove)
+     * @return {Number}        The new exp total
+     */
+    enhPointsCost(amount) {
+        this.stats.enhPoints = Math.max(0, Math.round(this.stats.enhPoints + amount));
+        return this.stats.enhPoints;
     }
 
     /**
