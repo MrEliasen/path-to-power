@@ -39,10 +39,11 @@ export default class Character {
         this.stats = {
             health: 100,
             health_max: 100,
-            money: 0,
-            bank: 200,
+            base_health: Game.config.game.defaultstats.health,
+            money: Game.config.game.defaultstats.money,
+            bank: Game.config.game.defaultstats.bank,
             exp: 0,
-            inventorySize: 18,
+            inventorySize: Game.config.game.defaultstats.inventorySize,
         };
         // keeps track of all timers
         this.timers = [];
@@ -52,7 +53,6 @@ export default class Character {
             ...character,
             stats: {
                 ...this.stats,
-                ...character.stats,
             },
         });
 
@@ -90,9 +90,9 @@ export default class Character {
     killTimers() {
         this.cooldowns.forEach((cooldown) => {
             try {
-            if (cooldown.ticks > 0) {
-                clearInterval(cooldown.timer);
-            }
+                if (cooldown.ticks > 0) {
+                    clearInterval(cooldown.timer);
+                }
             } catch (err) {
                 // supress errors caused by clearing a timer/interval.
                 // We supress because if they throw, it would be because they are alreaady cleared.
@@ -158,6 +158,31 @@ export default class Character {
         });
 
         return exportedSkills;
+    }
+
+    /**
+     * Exports all enhancements to a plain object
+     * @param  {Boolean} toClient If true, includes the name of the ability as well
+     * @return {Object}           The object with ability id as key.
+     */
+    exportEnhancements(toClient = false) {
+        const exportedEnhancements = {};
+
+        this.enhancements.forEach((enhancement) => {
+            if (toClient) {
+                exportedEnhancements[enhancement.id] = {
+                    name: enhancement.name,
+                    modifiers: enhancement.getModifiers(),
+                };
+            } else {
+                exportedEnhancements[enhancement.id] = {
+                    id: enhancement.id,
+                    modifiers: enhancement.getModifiers(),
+                };
+            }
+        });
+
+        return exportedEnhancements;
     }
 
     /**
@@ -236,6 +261,7 @@ export default class Character {
             abilities: this.exportAbilities(true),
             faction: this.faction ? this.faction.toObject(true) : null,
             skills: this.exportSkills(true),
+            enhancements: this.exportEnhancements(true),
             location: this.location,
             target: this.getTargetDetails(),
         };
@@ -941,7 +967,7 @@ export default class Character {
      * @return {Number}        The new exp total
      */
     updateEnhPoints(amount) {
-        this.stats.enhPoints = Math.max(0, Math.round(this.stats.enhPoints + amount));
+        this.stats.enhPoints = Math.max(0, Math.round(((this.stats.enhPoints || 0) + amount)));
         return this.stats.enhPoints;
     }
 
