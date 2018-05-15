@@ -171,6 +171,13 @@ export default class Shop {
         let soldItem;
         let pricePerUnit = itemTemplate.stats.price * this.buy.priceMultiplier;
 
+        // if the character has the street smarts enhancement, and the items they want to sell is a drug
+        // apply the markup effect
+        const EnhStreetSmarts = character.enhancements.find((enh) => enh.id === 'streetsmarts');
+        if (EnhStreetSmarts) {
+            pricePerUnit = EnhStreetSmarts.applyEffect(pricePerUnit, 'markup');
+        }
+
         // remove item from inventory/reduce amount
         if (inventoryItem.stats.stackable) {
             soldItem = this.Game.itemManager.add(inventoryItem.id, {durability: amount});
@@ -306,7 +313,14 @@ export default class Shop {
             return this.Game.shopManager.eventToUser(user_id, 'error', 'Invalid item. The item might no longer be available.');
         }
 
-        const price = (itemTemplate.stats.price * this.sell.priceMultiplier);
+        let price = (itemTemplate.stats.price * this.sell.priceMultiplier);
+
+        // if the character has the street smarts enhancement, and the items they want to buy is a drug
+        // apply the discount effect
+        const EnhStreetSmarts = character.enhancements.find((enh) => enh.id === 'streetsmarts');
+        if (EnhStreetSmarts) {
+            price = EnhStreetSmarts.applyEffect(price, 'discount');
+        }
 
         // check if the character has enough money
         if (character.stats.money < price) {
