@@ -16,6 +16,8 @@ const defaultState = {
     items: {},
     commands: {},
     levels: [],
+    enhancements: [],
+    skills: [],
 };
 export default function(state = defaultState, action) {
     let players;
