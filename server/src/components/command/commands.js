@@ -295,6 +295,41 @@ function cmdModifyExp(socket, character, command, params, cmdObject, Game) {
 }
 
 /**
+ * Give/Take enhancement points command logic
+ * @param  {Socket.io Socket} socket    The socket of the client who sent the command
+ * @param  {[type]} character           Character of the client sending the request
+ * @param  {String} command             the command eg. /say
+ * @param  {Object} params              The validated and parsed parameters for the command
+ * @param  {Object} cmdObject           The command object template
+ * @param  {Game} Game                  The main Game object
+ */
+function cmdModifyEnhPoints(socket, character, command, params, cmdObject, Game) {
+    if (process.env.NODE_ENV !== 'development') {
+        return;
+    }
+
+    const amount = params[0];
+    const targetCharacter = params[1] || character;
+
+    // update the target's exp
+    targetCharacter.updateEnhPoints(amount);
+
+    // update the client character data
+    Game.characterManager.updateClient(targetCharacter.user_id);
+
+    const direction = amount < 0 ? 'from' : 'to';
+    const action = amount < 0 ? 'took' : 'gave';
+
+    // Make sure the target character is no the character who used the skill
+    if (params[1] && params[1].user_id !== character.user_id) {
+        Game.eventToSocket(socket, 'success', `You ${action} ${amount} of Enhancement Points ${direction} ${targetCharacter.name}.`);
+        Game.eventToUser(targetCharacter.user_id, 'success', `${character.name} ${action} ${amount} of Enhancement Points ${direction} you.`);
+    } else {
+        Game.eventToSocket(socket, 'success', `You ${action} ${amount} of Enhancement Points ${direction} yourself`);
+    }
+}
+
+/**
  * Give/Take money command logic
  * @param  {Socket.io Socket} socket    The socket of the client who sent the command
  * @param  {[type]} character           Character of the client sending the request
@@ -441,6 +476,24 @@ module.exports = [
         ],
         description: 'Give or take exp from a character or yourself..',
         method: cmdModifyExp,
+    },
+    {
+        command: '/modenh',
+        aliases: [],
+        params: [
+            {
+                name: 'Amount',
+                desc: 'The amount of enhancement points to give or take (can be negative or positive).',
+                rules: 'required|integer',
+            },
+            {
+                name: 'Target',
+                desc: 'The name of the character to give or take points from. If left blank, target is yourself.',
+                rules: 'player',
+            },
+        ],
+        description: 'Give or take enhancement points from a character or yourself.',
+        method: cmdModifyEnhPoints,
     },
     {
         command: '/modmoney',
