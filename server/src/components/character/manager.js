@@ -416,7 +416,6 @@ export default class CharacterManager {
     async create(user_id, characterName, city) {
         const character = await this.dbCreate(user_id, characterName, city);
         const newCharacter = new Character(this.Game, character.toObject());
-        newCharacter.profile_image = '';
 
         return newCharacter;
     }
@@ -502,7 +501,7 @@ export default class CharacterManager {
 
     /**
      * Find a character in the database, by name
-     * @param  {Strng} characterName  Name to search for
+     * @param  {String} characterName  Name to search for
      * @return {Object}               Plain object of character.
      */
     async dbGetByName(targetName) {
