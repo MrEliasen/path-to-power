@@ -492,6 +492,7 @@ export default class CharacterManager {
         dbCharacter.stats = {...character.stats};
         dbCharacter.abilities = character.exportAbilities();
         dbCharacter.skills = character.exportSkills();
+        dbCharacter.enhancements = character.exportEnhancements();
         dbCharacter.location = {...character.location};
         dbCharacter.faction_id = character.faction ? character.faction.faction_id : '';
 
@@ -832,6 +833,7 @@ export default class CharacterManager {
             maps: this.Game.mapManager.getList(),
             items: this.Game.itemManager.getTemplates(),
             skills: this.Game.skillManager.getSkills(),
+            enhancements: this.Game.enhancementManager.getList(),
             players: this.getOnline(),
             commands: this.Game.commandManager.getList(),
             levels: Levels,

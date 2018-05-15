@@ -28,6 +28,9 @@ const CharacterSchema = new mongoose.Schema({
     skills: {
         type: {},
     },
+    enhancements: {
+        type: {},
+    },
     faction_id: {
         type: String,
     },

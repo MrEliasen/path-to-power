@@ -37,7 +37,7 @@ export default class EnhBulk {
         }
 
         const enhTier = this.getTree().find((tier) => tier.tier === this.value);
-        character.stats.inventorySize = character.stats.inventorySize + enhTier.inventorySizeBonus;
+        character.stats.inventorySize = this.Game.config.game.defaultstats.inventorySize + enhTier.inventorySizeBonus;
     }
 
     /**
@@ -76,7 +76,7 @@ export default class EnhBulk {
                 inventorySizeBonus: 15,
             },
             {
-                tier: 5,
+                tier: 6,
                 enhPointsCost: 384,
                 description: 'Increase your inventory size to 36 slots.',
                 inventorySizeBonus: 18,

@@ -60,19 +60,13 @@ export default class EnhancementManager {
      */
     load(character) {
         // save the players enhancement list
-        const characterEnhList = character.enhancements ? [...character.enhancements] : [];
+        const characterEnhList = character.enhancements ? Object.values(character.enhancements) : [];
 
         // prepare the array which will keep the instanciated enhancements
-        character.enhancements = [];
+        character.enhancements = characterEnhList.map((enhancement) => this.new(enhancement));
 
-        // clear the list and make an array, which will hold our skills
-        characterEnhList.forEach((enhancement) => {
-            let newEnhancement = this.new(enhancement);
-
-            if (newEnhancement) {
-                character.enhancements.push(newEnhancement);
-            }
-        });
+        // applly the enhancement effects
+        character.enhancements.forEach((enhancement) => enhancement.applyEffect(character));
 
         character.timers.push({
             name: 'enhancementPoints',
@@ -168,8 +162,12 @@ export default class EnhancementManager {
         // if the character does not own the enhancement already, add it, otherwise set the new enhancement tier.
         if (!characterEnhancement) {
             character.enhancements.push(newEnh);
+            // apply the enhancement effect
+            newEnh.applyEffect(character);
         } else {
             characterEnhancement.value = tier;
+            // apply the enhancement effect
+            characterEnhancement.applyEffect(character);
         }
 
         this.Game.characterManager.updateClient(socket.user.user_id);
