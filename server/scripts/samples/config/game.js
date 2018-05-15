@@ -11,9 +11,10 @@ export default {
         intervalPoints: env('GAME_ENHANCEMENT_INTERVALPOINTS', 1),
     },
     defaultstats: {
-        health_max: env('GAME_DEFAULT_HEALTH', 100),
+        health: env('GAME_DEFAULT_HEALTH', 100),
         money: env('GAME_DEFAULT_MONEY', 300),
         bank: env('GAME_DEFAULT_BANK', 0),
+        inventorySize: env('GAME_DEFAULT_INVENTORY', 18),
     },
     timers: [
         {
