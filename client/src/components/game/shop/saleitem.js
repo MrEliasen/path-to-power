@@ -9,6 +9,9 @@ import {Card} from 'reactstrap';
 class SaleItem extends React.Component {
     constructor(props) {
         super(props);
+
+        this.calculateSellPrice = this.calculateSellPrice.bind(this);
+        this.renderNotification = this.renderNotification.bind(this);
     }
 
     renderNotification(canBuyExp, canBuyMoney) {
@@ -20,7 +23,7 @@ class SaleItem extends React.Component {
         }
 
         if (!canBuyMoney) {
-            message = `Not Enough Money (costs ${formatNumberDecimal(shopItem.price * this.props.priceMultiplier)})`;
+            message = `Not Enough Money (costs ${formatNumberDecimal(this.calculateSellPrice())})`;
         }
 
         if (!canBuyExp) {
@@ -28,6 +31,25 @@ class SaleItem extends React.Component {
         }
 
         return <p className="notification">{message}</p>;
+    }
+
+    calculateSellPrice() {
+        const {shopItem, character, priceMultiplier, EnhStreetSmarts} = this.props;
+        const itemObj = this.props.itemList[shopItem.id];
+        let basePrice = shopItem.price * priceMultiplier;
+
+        if (itemObj.subtype !== 'drug') {
+            return basePrice;
+        }
+
+        const CharacterStreetSmarts = character.enhancements['streetsmarts'];
+
+        if (!CharacterStreetSmarts) {
+            return basePrice;
+        }
+
+        const enhTier = EnhStreetSmarts.tree.find((tier) => tier.tier === CharacterStreetSmarts.modifiers.value);
+        return basePrice * enhTier.discount;
     }
 
     render() {
@@ -39,8 +61,9 @@ class SaleItem extends React.Component {
             return null;
         }
 
+        const sellPrice = this.calculateSellPrice();
         const canBuyExp = shopItem.expRequired ? shopItem.expRequired <= character.stats.exp : true;
-        const canBuyMoney = (shopItem.price * this.props.priceMultiplier) <= character.stats.money;
+        const canBuyMoney = sellPrice <= character.stats.money;
 
         return (
             <Card className={'sale-item' + (!canBuyExp || !canBuyMoney ? ' --cant-buy' : '')}>
@@ -54,7 +77,7 @@ class SaleItem extends React.Component {
                         itemObj={itemObj} />
                     <div>
                         {shopItem.name}<br/>
-                        Price: {formatNumberDecimal(shopItem.price * this.props.priceMultiplier)}
+                        Price: {formatNumberDecimal(sellPrice)}
                     </div>
                 </div>
             </Card>
@@ -67,6 +90,7 @@ function mapStateToProps(state) {
         priceMultiplier: state.shop ? state.shop.sell.priceMultiplier : 1.0,
         itemList: state.game.items,
         character: state.character.selected,
+        EnhStreetSmarts: state.game.enhancements.find((enh) => enh.id === 'streetsmarts'),
     };
 }
 
