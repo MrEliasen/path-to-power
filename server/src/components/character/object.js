@@ -89,8 +89,13 @@ export default class Character {
      */
     killTimers() {
         this.cooldowns.forEach((cooldown) => {
+            try {
             if (cooldown.ticks > 0) {
                 clearInterval(cooldown.timer);
+            }
+            } catch (err) {
+                // supress errors caused by clearing a timer/interval.
+                // We supress because if they throw, it would be because they are alreaady cleared.
             }
         });
 
@@ -103,7 +108,7 @@ export default class Character {
                 }
             } catch (err) {
                 // supress errors caused by clearing a timer/interval
-                // which is no longer active.
+                // We supress because if they throw, it would be because they are alreaady cleared.
             }
         });
     }
