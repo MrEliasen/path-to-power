@@ -45,6 +45,9 @@ This project does **not** yet adhere to [Semantic Versioning](http://semver.org/
     - Enhancements:
         - Bulk
         - Endurance
+        - Street Smarts
+- Added total EXP as a character stat, which is the total EXP accumulated in the life time of the character.
+- EXP requirements for anything in the game (like buying items in the Pawn Shop) now uses total EXP instead of EXP available.
 
 ### Changed   
 - /giveitem command now only works in development.
@@ -60,6 +63,8 @@ This project does **not** yet adhere to [Semantic Versioning](http://semver.org/
 - Default redirect to /game instead of /account on login.
 - Move method call to update item prices on "new day", from shop resupply to the actual timer method.
 - Increase default number of spawned NPCs
+- Player card now has EXP total and enhancement points.
+- Hid the map descriptions.
 - `health_max` config option renamed to `health_base`
 
 ### Fixed   
@@ -85,6 +90,7 @@ This project does **not** yet adhere to [Semantic Versioning](http://semver.org/
 - Character showing up on players list for themselves.
 - Memory leak with timers not clearing on character disconnect.
 - `releaseTarget` not referencing the correct character/NPC object.
+- Fix shop buy list being exported incorrectly.
 
 
 ## [0.1.0] - 2018-04-08   
