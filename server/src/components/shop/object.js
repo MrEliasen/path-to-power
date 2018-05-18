@@ -303,7 +303,7 @@ export default class Shop {
         }
 
         // make sure the player is high enough rank/exp
-        if (character.stats.exp < item.expRequired) {
+        if (character.stats.exp_total < item.expRequired) {
             return this.Game.shopManager.eventToUser(user_id, 'error', 'You do not have a high enough rank to purchase this item.');
         }
 

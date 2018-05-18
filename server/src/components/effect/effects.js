@@ -61,7 +61,7 @@ function miscPhone(character, modifiers = {}, item, Game) {
     ];
 
     // if they have over a certain amount of EXP, show druggies location as well.
-    if (character.stats.exp > 22563) {
+    if (character.stats.exp_total > 22563) {
         npcTypes.push('Druggie');
         // overwrite the initial message
         messageArray[0] = `You use your ${item.name} to call some contacts.`;

@@ -62,7 +62,7 @@ class SaleItem extends React.Component {
         }
 
         const sellPrice = this.calculateSellPrice();
-        const canBuyExp = shopItem.expRequired ? shopItem.expRequired <= character.stats.exp : true;
+        const canBuyExp = shopItem.expRequired ? shopItem.expRequired <= character.stats.exp_total : true;
         const canBuyMoney = sellPrice <= character.stats.money;
 
         return (

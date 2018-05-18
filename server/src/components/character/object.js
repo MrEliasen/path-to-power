@@ -43,6 +43,7 @@ export default class Character {
             money: character.stats.money || Game.config.game.defaultstats.money,
             bank: character.stats.bank ||Game.config.game.defaultstats.bank,
             exp: character.stats.exp || 0,
+            exp_total: character.stats.exp_total || 0,
             enhPoints: character.stats.enhPoints || 0,
             inventorySize: Game.config.game.defaultstats.inventorySize,
         };
@@ -955,10 +956,16 @@ export default class Character {
     /**
      * Add/remove exp from the character
      * @param  {Number} amount The amount to add/remove (negative number to remove)
+     * @param  {Boolean} updateTotalExp Whether the total exp should be updated as well
      * @return {Number}        The new exp total
      */
-    updateExp(amount) {
+    updateExp(amount, updateTotalExp = true) {
         this.stats.exp = Math.max(0, Math.round(this.stats.exp + amount));
+
+        if (updateTotalExp) {
+            this.stats.exp_total = Math.max(0, Math.round(this.stats.exp_total + amount));
+        }
+
         return this.stats.exp;
     }
 

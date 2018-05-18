@@ -172,7 +172,7 @@ export default class SkillManager {
         }
 
         // remove the exp from the character
-        character.updateExp(tierDetails.expCost * -1);
+        character.updateExp(tierDetails.expCost * -1, false);
 
         // if the character does not own the skill already, add it, otherwise set the new skill tier.
         if (!characterSkill) {
