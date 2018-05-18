@@ -52,6 +52,10 @@ function cmdSkillFirstAid(socket, character, command, params, cmdObject, Game) {
         return Game.eventToUser(character.user_id, 'error', `You cannot use first aid again so soon. You must wait another ${(ticksLeft / 10)} seconds.`);
     }
 
+    if (character.hidden) {
+        return Game.eventToUser(character.user_id, 'info', 'You cannot do this while hidden.');
+    }
+
     let targetCharacter = params[0] || character;
 
     if (targetCharacter.stats.health >= targetCharacter.stats.health_max) {
@@ -137,6 +141,11 @@ function cmdSkillTrack(socket, character, command, params, cmdObject, Game) {
     if (ticksLeft) {
         return Game.eventToUser(character.user_id, 'error', `You cannot track again so soon. You must wait another ${(ticksLeft / 10)} seconds.`);
     }
+
+    if (character.hidden) {
+        return Game.eventToUser(character.user_id, 'info', 'You cannot do this while hidden.');
+    }
+
     // add the search cooldown to the character
     Game.cooldownManager.add(character, `skill_${skill.id}`, null, true);
 
@@ -192,7 +201,7 @@ module.exports = [
             {
                 name: 'Target',
                 desc: 'The player you want to track/find.',
-                rules: 'player',
+                rules: 'required|player',
             },
         ],
         description: 'Track a players location, and attempt to force them out of hiding.',
