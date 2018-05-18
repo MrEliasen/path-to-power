@@ -37,7 +37,7 @@ export default class EnhEndurance {
         }
 
         const enhTier = this.getTree().find((tier) => tier.tier === this.value);
-        const newHealthMax = character.stats.base_health + enhTier.maxHealthBonus;
+        const newHealthMax = character.stats.health_base + enhTier.maxHealthBonus;
 
         // if the character is at full health, set the health to the new max health
         if (character.stats.health === character.stats.health_max) {

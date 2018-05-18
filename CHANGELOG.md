@@ -60,7 +60,7 @@ This project does **not** yet adhere to [Semantic Versioning](http://semver.org/
 - Default redirect to /game instead of /account on login.
 - Move method call to update item prices on "new day", from shop resupply to the actual timer method.
 - Increase default number of spawned NPCs
-- `health_max` config option renamed to `base_health`
+- `health_max` config option renamed to `health_base`
 
 ### Fixed   
 - API not listening on HTTPs when a certificate is provided.
