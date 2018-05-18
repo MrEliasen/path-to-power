@@ -172,11 +172,13 @@ export default class Shop {
         let soldItem;
         let pricePerUnit = itemTemplate.stats.price * this.buy.priceMultiplier;
 
-        // if the character has the street smarts enhancement, and the items they want to sell is a drug
-        // apply the markup effect
-        const EnhStreetSmarts = character.enhancements.find((enh) => enh.id === 'streetsmarts');
-        if (EnhStreetSmarts) {
-            pricePerUnit = EnhStreetSmarts.applyEffect(pricePerUnit, 'markup');
+        if (itemTemplate.subtype === 'drug') {
+            // if the character has the street smarts enhancement, and the items they want to sell is a drug
+            // apply the markup effect
+            const EnhStreetSmarts = character.enhancements.find((enh) => enh.id === 'streetsmarts');
+            if (EnhStreetSmarts) {
+                pricePerUnit = EnhStreetSmarts.applyEffect(pricePerUnit, 'markup');
+            }
         }
 
         // remove item from inventory/reduce amount
@@ -316,11 +318,13 @@ export default class Shop {
 
         let price = (itemTemplate.stats.price * this.sell.priceMultiplier);
 
-        // if the character has the street smarts enhancement, and the items they want to buy is a drug
-        // apply the discount effect
-        const EnhStreetSmarts = character.enhancements.find((enh) => enh.id === 'streetsmarts');
-        if (EnhStreetSmarts) {
-            price = EnhStreetSmarts.applyEffect(price, 'discount');
+        if (itemTemplate.subtype === 'drug') {
+            // if the character has the street smarts enhancement, and the items they want to buy is a drug
+            // apply the discount effect
+            const EnhStreetSmarts = character.enhancements.find((enh) => enh.id === 'streetsmarts');
+            if (EnhStreetSmarts) {
+                price = EnhStreetSmarts.applyEffect(price, 'discount');
+            }
         }
 
         // check if the character has enough money
