@@ -23,11 +23,11 @@ class SaleItem extends React.Component {
         }
 
         if (!canBuyMoney) {
-            message = `Not Enough Money (costs ${formatNumberDecimal(this.calculateSellPrice())})`;
+            message = `Insufficient Cash (${formatNumberDecimal(this.calculateSellPrice())})`;
         }
 
         if (!canBuyExp) {
-            message = `Not Enough EXP (${shopItem.expRequired} Needed)`;
+            message = `Insufficient Accumulated EXP (${shopItem.expRequired})`;
         }
 
         return <p className="notification">{message}</p>;
