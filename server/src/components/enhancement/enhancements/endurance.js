@@ -40,7 +40,7 @@ export default class EnhEndurance {
         const newHealthMax = character.stats.health_base + enhTier.maxHealthBonus;
 
         // if the character is at full health, set the health to the new max health
-        if (character.stats.health === character.stats.health_max) {
+        if (character.stats.health >= character.stats.health_max) {
             character.stats.health = newHealthMax;
         }
 
