@@ -91,10 +91,11 @@ export default class Shop {
         }
 
         return this.buy.list.map((item) => {
+            const itemObj = this.Game.itemManager.getTemplate(item);
+
             return {
-                id: item.id,
-                name: item.name,
-                quantity: item.shopQuantity,
+                id: itemObj.id,
+                name: itemObj.name,
             };
         });
     }
@@ -114,7 +115,7 @@ export default class Shop {
             },
             buy: {
                 ...this.buy,
-                list: this.getBuyList(true),
+                list: this.getBuyList(false),
             },
         };
     }
