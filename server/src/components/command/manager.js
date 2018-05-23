@@ -282,10 +282,6 @@ export default class CommandManager {
             param = param.substring(1, param.length - 1);
         }
 
-        if (param[param.length - 1] === '"') {
-            param = param.substring(0, param.length - 2);
-        }
-
         return param;
     }
 
