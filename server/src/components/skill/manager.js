@@ -71,13 +71,15 @@ export default class SkillManager {
      */
     load(character) {
         // save the players skills list
-        const characterSkills = character.skills ? {...character.skills} : {};
+        const characterSkills = character.skills ? [...character.skills] : [];
         // get the default skills, and overwrite their values (if any) with the value of the players matching skill
         let skills = this.getDefaults().map((obj) => {
+            const characterSkill = characterSkills.find((skill) => skill.id === obj.id);
+
             // check if the player has that skill already
-            if (characterSkills[obj.id]) {
+            if (characterSkill) {
                 // if so, overwrite the default value
-                Object.assign(obj.modifiers, {...characterSkills[obj.id].modifiers});
+                Object.assign(obj.modifiers, {...characterSkill.modifiers});
                 // remove the skill from the list, so we dont end up with 2 of the same skill when we merge in the
                 // rest of the skills the player might have, which are not part of the defaults
                 delete characterSkills[obj.id];
@@ -87,7 +89,7 @@ export default class SkillManager {
         });
 
         // merge the rest of the player skills which are not part of the defaults
-        skills = skills.concat(Object.values(characterSkills));
+        skills = skills.concat(characterSkills);
 
         // prepare the array for the instanciated skills
         character.skills = [];
@@ -95,8 +97,6 @@ export default class SkillManager {
         // clear the list and make an array, which will hold our skills
         skills.forEach((skill) => {
             let newSkill = this.new(skill);
-
-            newSkill.improve = character.train;
 
             if (newSkill) {
                 character.skills.push(newSkill);

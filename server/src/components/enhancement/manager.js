@@ -60,7 +60,7 @@ export default class EnhancementManager {
      */
     load(character) {
         // save the players enhancement list
-        const characterEnhList = character.enhancements ? Object.values(character.enhancements) : [];
+        const characterEnhList = character.enhancements ? [...character.enhancements] : [];
 
         // prepare the array which will keep the instanciated enhancements
         character.enhancements = characterEnhList.map((enhancement) => this.new(enhancement));

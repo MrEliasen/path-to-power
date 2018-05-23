@@ -20,8 +20,8 @@ class Stats extends React.Component {
                 }
                 <div>Skills</div>
                 {
-                    Object.keys(this.props.character.skills).map((key) =>
-                        <p key={key}><strong>{this.props.character.skills[key].name}:</strong> {this.props.character.skills[key].modifiers.value}</p>
+                    this.props.character.skills.map((skill) =>
+                        <p key={key}><strong>{skill.name}:</strong> {skill.modifiers.value}</p>
                     )
                 }
             </React.Fragment>

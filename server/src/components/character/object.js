@@ -143,23 +143,20 @@ export default class Character {
      * @return {Object}           The object with ability id as key.
      */
     exportSkills(toClient = false) {
-        const exportedSkills = {};
-
-        this.skills.forEach((skill) => {
+        return this.skills.map((skill) => {
             if (toClient) {
-                exportedSkills[skill.id] = {
+                return {
+                    id: skill.id,
                     name: skill.name,
                     modifiers: skill.getModifiers(),
                 };
             } else {
-                exportedSkills[skill.id] = {
+                return {
                     id: skill.id,
                     modifiers: skill.getModifiers(),
                 };
             }
         });
-
-        return exportedSkills;
     }
 
     /**
@@ -168,23 +165,20 @@ export default class Character {
      * @return {Object}           The object with ability id as key.
      */
     exportEnhancements(toClient = false) {
-        const exportedEnhancements = {};
-
-        this.enhancements.forEach((enhancement) => {
+        return this.enhancements.map((enhancement) => {
             if (toClient) {
-                exportedEnhancements[enhancement.id] = {
+                return {
+                    id: enhancement.id,
                     name: enhancement.name,
                     modifiers: enhancement.getModifiers(),
                 };
             } else {
-                exportedEnhancements[enhancement.id] = {
+                return {
                     id: enhancement.id,
                     modifiers: enhancement.getModifiers(),
                 };
             }
         });
-
-        return exportedEnhancements;
     }
 
     /**

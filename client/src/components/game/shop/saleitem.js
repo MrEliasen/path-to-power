@@ -42,7 +42,7 @@ class SaleItem extends React.Component {
             return basePrice;
         }
 
-        const CharacterStreetSmarts = character.enhancements['streetsmarts'];
+        const CharacterStreetSmarts = character.enhancements.find((enh) => enh.id === 'streetsmarts');
 
         if (!CharacterStreetSmarts) {
             return basePrice;

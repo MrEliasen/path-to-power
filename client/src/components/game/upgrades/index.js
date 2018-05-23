@@ -20,7 +20,7 @@ class UpgradesModal extends React.Component {
                         this.props.character &&
                         this.props.enhancements &&
                         this.props.enhancements.map((enhancement) => {
-                            const charEnhancement = this.props.character.enhancements[enhancement.id];
+                            const charEnhancement = this.props.character.enhancements.find((enh) => enh.id === enhancement.id);
                             const enhPoints = this.props.character.stats.enhPoints;
                             const currentLevel = charEnhancement ? charEnhancement.modifiers.value : 0;
                             const nextLevel = enhancement.tree[currentLevel]; // enhancement levels starts 1, but arrays 0, so no need to modify the key./

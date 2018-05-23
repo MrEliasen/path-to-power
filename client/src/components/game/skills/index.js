@@ -21,7 +21,7 @@ class SkillsModal extends React.Component {
                         this.props.character &&
                         this.props.skills &&
                         this.props.skills.map((skill) => {
-                            const characterSkill = this.props.character.skills[skill.id];
+                            const characterSkill = this.props.character.skills.find((charSkill) => charSkill.id === skill.id);
                             const characterEXP = this.props.character.stats.exp;
                             const currentLevel = characterSkill ? characterSkill.modifiers.value : 0;
                             const nextLevel = skill.tree[currentLevel]; // skill levels starts 1, but arrays 0, so no need to modify the key./
