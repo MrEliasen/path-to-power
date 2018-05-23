@@ -9,11 +9,13 @@ import path from 'path';
  * @return {String|Number}              The resulting config value
  */
 export function env(key, defaultValue, split = null) {
+    let configValue = defaultValue;
+
     if (typeof process.env[key] !== 'undefined' && process.env[key] !== '') {
-        return process.env[key];
+        configValue = process.env[key];
     }
 
-    return defaultValue;
+    return split && typeof configValue === 'string' ? configValue.split(split) : configValue;
 }
 
 /**
