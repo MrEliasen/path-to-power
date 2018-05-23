@@ -37,14 +37,14 @@ export default class Character {
         this.cooldowns = [];
         // if the character is new, they won't have stats, set the default here.
         this.stats = {
-            health: character.stats.health || 100,
+            health: character.stats && character.stats.health || 100,
             health_max: Game.config.game.defaultstats.health,
             health_base: Game.config.game.defaultstats.health,
-            money: character.stats.money || Game.config.game.defaultstats.money,
-            bank: character.stats.bank ||Game.config.game.defaultstats.bank,
-            exp: character.stats.exp || 0,
-            exp_total: character.stats.exp_total || 0,
-            enhPoints: character.stats.enhPoints || 0,
+            money: character.stats && character.stats.money || Game.config.game.defaultstats.money,
+            bank: character.stats && character.stats.bank ||Game.config.game.defaultstats.bank,
+            exp: character.stats && character.stats.exp || 0,
+            exp_total: character.stats && character.stats.exp_total || 0,
+            enhPoints: character.stats && character.stats.enhPoints || 0,
             inventorySize: Game.config.game.defaultstats.inventorySize,
         };
         // keeps track of all timers
