@@ -209,7 +209,7 @@ export function passwordReset(req, res) {
             user.passwordReset = resetObject;
             user.save((err) => {
                 const mailer = req.app.get('mailer');
-                const link = `http${req.secure ? 's' : ''}//${req.headers.host}/api/auth/reset/${user._id.toString()}?token=${resetObject.token}`;
+                const link = `http${req.secure ? 's' : ''}://${req.headers.host}/api/auth/reset/${user._id.toString()}?token=${resetObject.token}`;
 
                  // setup email data with unicode symbols
                 let mailOptions = {
