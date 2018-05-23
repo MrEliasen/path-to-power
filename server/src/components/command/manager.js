@@ -248,6 +248,7 @@ export default class CommandManager {
         const params = [];
         let insideString = false;
         let param = '';
+        let triggerChar = '';
         let char;
 
         for (let i = 0; i < stringLength; i++) {
@@ -257,8 +258,16 @@ export default class CommandManager {
                 params.push(param);
                 param = '';
             } else {
-                if (char == '"') {
-                    insideString = !insideString;
+                if (['"', '\''].includes(char)) {
+
+                    if (!insideString) {
+                        triggerChar = char;
+                        insideString = true;
+                    } else {
+                        if (char === triggerChar) {
+                            insideString = false;
+                        }
+                    }
                 }
 
                 param += char;
@@ -278,7 +287,8 @@ export default class CommandManager {
      * @return {String}       The parameter with the "" encapsulation
      */
     stripEncapsulation(param) {
-        if (param[0] === '"') {
+        // removes the parameter encapsulation "/'
+        if (['"', '\''].includes(param[0])) {
             param = param.substring(1, param.length - 1);
         }
 
