@@ -66,6 +66,7 @@ This project does **not** yet adhere to [Semantic Versioning](http://semver.org/
 - Player card now has EXP total and enhancement points.
 - Hid the map descriptions.
 - `health_max` config option renamed to `health_base`
+- Updated all client and server dependencies.
 
 ### Fixed   
 - API not listening on HTTPs when a certificate is provided.
