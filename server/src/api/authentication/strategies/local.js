@@ -8,6 +8,17 @@ import crypto from 'crypto';
 let logger;
 
 /**
+ * Outputs API response or redirects the response to the client
+ * @param  {Express Request}  req
+ * @param  {Express Response} res
+ * @param  {String|Object}    output
+ */
+function output(req, res, status, message) {
+    const errorUrl = `${req.app.get('config').app.clientUrl}/auth?${status > 203 ? 'error' : 'success'}=`;
+    return res.redirect(`${errorUrl}${message}`);
+}
+
+/**
  * Setup the authentication strategy
  * @param  {Passport} passport  Passport Object
  * @param  {Logger}   loggerObj The logger
@@ -69,47 +80,29 @@ function Auth(email, password, done) {
  */
 export function resetConfirm(req, res) {
     if (!req.query.token || !req.query.token.length) {
-        return res.status(400).json({
-            status: 400,
-            error: 'Missing or invalid reset token.',
-        });
+        return output(req, res, 400, 'Missing or invalid reset token.');
     }
 
     if (req.query.token.length !== 64) {
-        return res.status(400).json({
-            status: 400,
-            error: 'Missing or invalid reset token.',
-        });
+        return output(req, res, 400, 'Missing or invalid reset token.');
     }
 
     UserModel.findOne({_id: escape(req.params.userId)}, (err, user) => {
         if (err) {
             logger.error(err);
-            return res.status(500).json({
-                status: 500,
-                error: 'Something went wrong. Please try again in a moment.',
-            });
+            return output(req, res, 500, 'Something went wrong. Please try again in a moment.');
         }
 
         if (!user) {
-            return res.status(400).json({
-                status: 400,
-                error: 'Missing or invalid reset token.',
-            });
+            return output(req, res, 400, 'Missing or invalid reset token.');
         }
 
         if (!user.passwordReset || user.passwordReset.created < new Date().getTime() - (4 * 60 * 60 * 1000)) {
-            return res.status(400).json({
-                status: 400,
-                error: 'Missing or invalid reset token.',
-            });
+            return output(req, res, 400, 'Missing or invalid reset token.');
         }
 
         if (user.passwordReset.token !== req.query.token) {
-            return res.status(400).json({
-                status: 400,
-                error: 'Missing or invalid reset token.',
-            });
+            return output(req, res, 400, 'Missing or invalid reset token.');
         }
 
         // generate the password reset token
@@ -126,15 +119,12 @@ export function resetConfirm(req, res) {
         user.save((err) => {
             if (err) {
                 logger.error(err);
-                return res.status(500).json({
-                    status: 500,
-                    error: 'Sometihng went wrong. Please try again in a moment.',
-                });
+                return output(req, res, 500, 'Sometihng went wrong. Please try again in a moment.');
             }
 
             const mailer = req.app.get('mailer');
 
-             // setup email data with unicode symbols
+            // setup email data with unicode symbols
             let mailOptions = {
                 from: req.app.get('config').mail.sender,
                 to: user.email,
@@ -148,10 +138,7 @@ export function resetConfirm(req, res) {
                     return logger.error(error);
                 }
 
-                return res.status(200).json({
-                    status: 200,
-                    message: 'Password reset successfully! A new password has been sent to your email.',
-                });
+                return output(req, res, 200, 'Password reset successfully! A new password has been sent to your email.');
             });
         });
     });
