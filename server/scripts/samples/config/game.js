@@ -7,7 +7,7 @@ export default {
         sellDrugs: env('GAME_REPGAINS_SELLDRUGS', 5),
     },
     enhancement: {
-        intervalDuration: env('GAME_ENHANCEMENT_INTERVALDURATION', 5000),
+        intervalDuration: env('GAME_ENHANCEMENT_INTERVALDURATION', 900000),
         intervalPoints: env('GAME_ENHANCEMENT_INTERVALPOINTS', 1),
     },
     defaultstats: {
