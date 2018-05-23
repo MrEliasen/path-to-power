@@ -20,8 +20,34 @@ This project does **not** yet adhere to [Semantic Versioning](http://semver.org/
 - Weighted loot drop system.
 - updateAllClients method to character manager.
 - More "trash" items.
-- Add config options for rep gains on buy/sell drugs.
-
+- Add 'USE ITEM' drop zone in inventory.
+- Show updated NPC health during combat, when an NPC takes damage.
+- Add new command rule 'options'.
+- New config options:
+    - Ruputation gains on buy/sell drugs.
+    - Default inventory size.
+    - Enhancements.
+- Add session TTL configuration option.
+- add new development commands (only usable in development node env):
+    - `/modhealth <amount> [target]` modify the health of a target.
+    - `/modmoney <amount> <bank|cash> [target]` modify the money of a target.
+    - `/modexp <amount> [target]` modify the exp of a target.
+    - `/modenh <amount> [target]` modify the enhacement points of a target.
+    - `/teleport <N> <E> [map name]` teleports the user to the specified location.
+    - `/npclist` show the list of NPCs and their locations of the map your are in.
+- New progress system
+    - You now receive points you can use for enhancements while you are online in the game.
+    - Skills:
+        - Snooping
+        - First Aid
+        - Hiding
+        - Tracking
+    - Enhancements:
+        - Bulk
+        - Endurance
+        - Street Smarts
+- Added total EXP as a character stat, which is the total EXP accumulated in the life time of the character.
+- EXP requirements for anything in the game (like buying items in the Pawn Shop) now uses total EXP instead of EXP available.
 
 ### Changed   
 - /giveitem command now only works in development.
@@ -37,6 +63,10 @@ This project does **not** yet adhere to [Semantic Versioning](http://semver.org/
 - Default redirect to /game instead of /account on login.
 - Move method call to update item prices on "new day", from shop resupply to the actual timer method.
 - Increase default number of spawned NPCs
+- Player card now has EXP total and enhancement points.
+- Hid the map descriptions.
+- `health_max` config option renamed to `health_base`
+- Updated all client and server dependencies.
 
 ### Fixed   
 - API not listening on HTTPs when a certificate is provided.
@@ -54,9 +84,14 @@ This project does **not** yet adhere to [Semantic Versioning](http://semver.org/
 - Account activation success message showing as an error.
 - Character creation form resetting after creating a new character.
 - Prices of items in player's inventory not updating.
+- Reduce default inventory size.
 - Adding stackable items to shops throws an error.
 - Trash items being resellable.
-- Fix `releaseTarget` not referencing the correct character/NPC object.
+- NPC moving when in combat and not out of combat.
+- Character showing up on players list for themselves.
+- Memory leak with timers not clearing on character disconnect.
+- `releaseTarget` not referencing the correct character/NPC object.
+- Fix shop buy list being exported incorrectly.
 
 
 ## [0.1.0] - 2018-04-08   

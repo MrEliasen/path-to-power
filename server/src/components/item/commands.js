@@ -189,12 +189,12 @@ function cmdPickup(socket, character, command, params, cmdObject, Game) {
     const itemObject = Game.itemManager.pickup(...location, item.name, amount);
 
     if (typeof itemObject === 'string') {
-        return Game.eventToUser(user_id, 'error', itemObject);
+        return Game.eventToUser(character.user_id, 'error', itemObject);
     }
 
     // make sure the character has room
     if (!character.hasRoomForItem(itemObject)) {
-        return Game.eventToUser(user_id, 'error', 'You do not have enough inventory space to pickup that item.');
+        return Game.eventToUser(character.user_id, 'error', 'You do not have enough inventory space to pickup that item.');
     }
 
     // add to user inventory
@@ -223,26 +223,25 @@ function cmdPickup(socket, character, command, params, cmdObject, Game) {
  * @param  {Game}   Game                The main Game object
  */
 function cmdUseItem(socket, character, command, params, cmdObject, Game) {
-    const index = params[0];
-    const item = character.inventory[index];
+    const invSlot = params[0];
+    const item = character.getEquipped(invSlot);
 
-    // make sure the item exists
     if (!item) {
         return;
     }
 
-    return item.use(character);
+    item.use(character);
 }
 
 module.exports = [
     {
-        command: '/usebyindex',
+        command: '/useslot',
         aliases: [],
         params: [
             {
-                name: 'Index',
-                desc: 'The item\'s index in your inventory',
-                rules: 'required|integer|min:0',
+                name: 'Slot-ID',
+                desc: 'The inventory slot containing the item to use',
+                rules: 'required|slot',
             },
         ],
         description: 'use an inventory item, based on the item\'s inventory index.',

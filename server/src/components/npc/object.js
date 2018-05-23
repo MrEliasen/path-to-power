@@ -12,6 +12,11 @@ export default class NPC extends Character {
      * @param  {String} npcId   The npc template ID
      */
     constructor(Game, npcData, npcId) {
+        // If health is not defined, set it to the current health max of the NPC
+        if (!npcData.stats.health) {
+            npcData.stats.health = npcData.stats.health_max;
+        }
+
         super(Game, npcData);
         // bind the NPC template ID
         this.npc_id = npcId;
@@ -149,7 +154,7 @@ export default class NPC extends Character {
 
         const target = this.hasActiveTarget();
 
-        if (!target) {
+        if (target) {
             return;
         }
 
@@ -335,6 +340,7 @@ export default class NPC extends Character {
         // Initiates the NPC's respawn timer
         this.timers.push({
             key: 'respawn',
+            type: 'timeout',
             ref: setTimeout(() => {
                 this.Game.npcManager.reset(this);
             }, this.logic.respawn * 1000),

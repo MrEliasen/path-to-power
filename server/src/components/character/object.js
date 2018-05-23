@@ -22,6 +22,8 @@ export default class Character {
         this.faction = null;
         // holds all the skills for the character
         this.skills = [];
+        // holds all the enhancements for the character
+        this.enhancements = [];
         // Whether their skills and abilities should improve when used
         this.train = true;
         // Whether to ignore quantities on items, like ammo, so they dont run out of ammo etc.
@@ -35,12 +37,15 @@ export default class Character {
         this.cooldowns = [];
         // if the character is new, they won't have stats, set the default here.
         this.stats = {
-            health: 100,
-            health_max: 100,
-            money: 0,
-            bank: 200,
-            exp: 0,
-            inventorySize: 30,
+            health: character.stats.health || 100,
+            health_max: Game.config.game.defaultstats.health,
+            health_base: Game.config.game.defaultstats.health,
+            money: character.stats.money || Game.config.game.defaultstats.money,
+            bank: character.stats.bank ||Game.config.game.defaultstats.bank,
+            exp: character.stats.exp || 0,
+            exp_total: character.stats.exp_total || 0,
+            enhPoints: character.stats.enhPoints || 0,
+            inventorySize: Game.config.game.defaultstats.inventorySize,
         };
         // keeps track of all timers
         this.timers = [];
@@ -50,7 +55,6 @@ export default class Character {
             ...character,
             stats: {
                 ...this.stats,
-                ...character.stats,
             },
         });
 
@@ -77,7 +81,37 @@ export default class Character {
         // run the "garbage collection" every N seconds
         this.timers.push({
             name: 'cooldownGc',
+            type: 'interval',
             timer: setInterval(this.Game.cooldownManager.cleanup, 1000, this),
+        });
+    }
+
+    /**
+     * Kills all timers on the character object
+     */
+    killTimers() {
+        this.cooldowns.forEach((cooldown) => {
+            try {
+                if (cooldown.ticks > 0) {
+                    clearInterval(cooldown.timer);
+                }
+            } catch (err) {
+                // supress errors caused by clearing a timer/interval.
+                // We supress because if they throw, it would be because they are alreaady cleared.
+            }
+        });
+
+        this.timers.forEach((timer) => {
+            try {
+                if (timer.type === 'timeout') {
+                    clearTimeout(timer.timer);
+                } else {
+                    clearInterval(timer.timer);
+                }
+            } catch (err) {
+                // supress errors caused by clearing a timer/interval
+                // We supress because if they throw, it would be because they are alreaady cleared.
+            }
         });
     }
 
@@ -126,6 +160,31 @@ export default class Character {
         });
 
         return exportedSkills;
+    }
+
+    /**
+     * Exports all enhancements to a plain object
+     * @param  {Boolean} toClient If true, includes the name of the ability as well
+     * @return {Object}           The object with ability id as key.
+     */
+    exportEnhancements(toClient = false) {
+        const exportedEnhancements = {};
+
+        this.enhancements.forEach((enhancement) => {
+            if (toClient) {
+                exportedEnhancements[enhancement.id] = {
+                    name: enhancement.name,
+                    modifiers: enhancement.getModifiers(),
+                };
+            } else {
+                exportedEnhancements[enhancement.id] = {
+                    id: enhancement.id,
+                    modifiers: enhancement.getModifiers(),
+                };
+            }
+        });
+
+        return exportedEnhancements;
     }
 
     /**
@@ -204,6 +263,7 @@ export default class Character {
             abilities: this.exportAbilities(true),
             faction: this.faction ? this.faction.toObject(true) : null,
             skills: this.exportSkills(true),
+            enhancements: this.exportEnhancements(true),
             location: this.location,
             target: this.getTargetDetails(),
         };
@@ -228,6 +288,7 @@ export default class Character {
         if (target.npc_id) {
             details.type = target.type;
             details.isNPC = true;
+            details.id = target.id;
         };
 
         return details;
@@ -895,11 +956,27 @@ export default class Character {
     /**
      * Add/remove exp from the character
      * @param  {Number} amount The amount to add/remove (negative number to remove)
+     * @param  {Boolean} updateTotalExp Whether the total exp should be updated as well
      * @return {Number}        The new exp total
      */
-    updateExp(amount) {
+    updateExp(amount, updateTotalExp = true) {
         this.stats.exp = Math.max(0, Math.round(this.stats.exp + amount));
+
+        if (updateTotalExp) {
+            this.stats.exp_total = Math.max(0, Math.round(this.stats.exp_total + amount));
+        }
+
         return this.stats.exp;
+    }
+
+    /**
+     * Add/remove enhancement points from the character
+     * @param  {Number} amount The amount to add/remove (negative number to remove)
+     * @return {Number}        The new exp total
+     */
+    updateEnhPoints(amount) {
+        this.stats.enhPoints = Math.max(0, Math.round(((this.stats.enhPoints || 0) + amount)));
+        return this.stats.enhPoints;
     }
 
     /**

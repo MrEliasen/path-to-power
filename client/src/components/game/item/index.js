@@ -6,7 +6,7 @@ import ItemTooltip from './tooltip';
 
 // actions
 import {shopSell} from '../shop/actions';
-import {equipItem, unequipItem, moveItem, dropItem} from '../inventory/actions';
+import {equipItem, unequipItem, moveItem, dropItem, useItem} from '../inventory/actions';
 
 class Item extends React.Component {
     constructor(props) {
@@ -65,6 +65,7 @@ class Item extends React.Component {
 const itemSource = {
     beginDrag(props) {
         return {
+            hasUseEffect: props.item.hasUseEffect,
             inventorySlot: props.item.inventorySlot,
             itemType: props.item.type,
             itemSubtype: props.item.subtype,
@@ -78,11 +79,13 @@ const itemSource = {
 
         const item = monitor.getItem();
         const dropResult = monitor.getDropResult();
-        /*console.log(item);
-        console.log(dropResult);
-        console.log(props);*/
 
         if (dropResult && dropResult.inventorySlot) {
+            // if the item we are moving is equipped, we unequip it
+            if (dropResult.inventorySlot === 'dropUse') {
+                return props.useItem(item.inventorySlot);
+            }
+
             // if the item we are moving is equipped, we unequip it
             if (dropResult.inventorySlot === 'dropGround') {
                 return props.dropItem(item.inventorySlot);
@@ -128,6 +131,7 @@ function mapDispatchToProps(dispatch) {
         unequipItem,
         moveItem,
         dropItem,
+        useItem,
         shopSell,
     }, dispatch);
 }

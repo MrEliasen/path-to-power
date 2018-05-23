@@ -1,43 +1,59 @@
-export default class Skill_Template {
-    constructor(Game, modifiers) {
+/**
+ * Hide skill logic
+ */
+export default class SkillTemplate {
+    /**
+     * class constructor
+     * @param  {Game}   Game      The game object
+     * @param  {object} modifiers The skill plain object
+     */
+    constructor(Game, modifiers = {}) {
         this.Game = Game;
-        this.id = '_template'; // (REQUIRED) The unique id for this skill
-        this.name = 'Template'; // (REQUIRED) The name of the skill (visible to players)
-        this.command = '/templateskill'; // (OPTIONAL) The /command they player needs to type to use the skill
+        this.id = 'skillId';
+        this.name = 'Skill Name';
+        this.description = 'An overall description of the skill itself. ';
+        this.value = 0;
 
-        // (REQUIRED)
         Object.assign(this, {...modifiers});
     }
 
     /**
-     * (REQUIRED) Get the skill's modifieres, used for sending to client or saving in the DB
-     * @return {Object}
+     * Get the skill's modifieres
+     * @return {[type]} [description]
      */
     getModifiers() {
         return {
-            value: this.value
+            value: this.value,
         };
     }
 
     /**
-     * (OPTIONAL) The skill's functionality, how executed however else you want
+     * Returns the skill tree with requirements
      */
-    use() {
-        this.train();
-
-        // You skill code here
+    getTree() {
+        return [
+            {
+                tier: 1,
+                expCost: 1000,
+                description: 'Skill level 1 description',
+            },
+            {
+                tier: 2,
+                expCost: 2000,
+                description: 'Skill level 2 description',
+            },
+            {
+                tier: 3,
+                expCost: 5000,
+                description: 'Skill level 3 description',
+            },
+        ];
     }
 
     /**
-     * (OPTIONAL) Increase the skill by the training amount, not needed, you can do what you want
+     * The use logic for the skill
      */
-    train() {
-        // this is how much the skill should increment when used.
-        // Round the new value to 5 decimal points
-        this.value = Math.round(
-            Math.round(
-                (0.015 / this.value) * 100000
-            )
-        ) / 100000;
+    use() {
+        
     }
 }

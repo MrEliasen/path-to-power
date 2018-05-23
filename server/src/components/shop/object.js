@@ -91,10 +91,11 @@ export default class Shop {
         }
 
         return this.buy.list.map((item) => {
+            const itemObj = this.Game.itemManager.getTemplate(item);
+
             return {
-                id: item.id,
-                name: item.name,
-                quantity: item.shopQuantity,
+                id: itemObj.id,
+                name: itemObj.name,
             };
         });
     }
@@ -114,7 +115,7 @@ export default class Shop {
             },
             buy: {
                 ...this.buy,
-                list: this.getBuyList(true),
+                list: this.getBuyList(false),
             },
         };
     }
@@ -170,6 +171,15 @@ export default class Shop {
         // will hold the item, which was sold
         let soldItem;
         let pricePerUnit = itemTemplate.stats.price * this.buy.priceMultiplier;
+
+        if (itemTemplate.subtype === 'drug') {
+            // if the character has the street smarts enhancement, and the items they want to sell is a drug
+            // apply the markup effect
+            const EnhStreetSmarts = character.enhancements.find((enh) => enh.id === 'streetsmarts');
+            if (EnhStreetSmarts) {
+                pricePerUnit = EnhStreetSmarts.applyEffect(pricePerUnit, 'markup');
+            }
+        }
 
         // remove item from inventory/reduce amount
         if (inventoryItem.stats.stackable) {
@@ -295,7 +305,7 @@ export default class Shop {
         }
 
         // make sure the player is high enough rank/exp
-        if (character.stats.exp < item.expRequired) {
+        if (character.stats.exp_total < item.expRequired) {
             return this.Game.shopManager.eventToUser(user_id, 'error', 'You do not have a high enough rank to purchase this item.');
         }
 
@@ -306,7 +316,16 @@ export default class Shop {
             return this.Game.shopManager.eventToUser(user_id, 'error', 'Invalid item. The item might no longer be available.');
         }
 
-        const price = (itemTemplate.stats.price * this.sell.priceMultiplier);
+        let price = (itemTemplate.stats.price * this.sell.priceMultiplier);
+
+        if (itemTemplate.subtype === 'drug') {
+            // if the character has the street smarts enhancement, and the items they want to buy is a drug
+            // apply the discount effect
+            const EnhStreetSmarts = character.enhancements.find((enh) => enh.id === 'streetsmarts');
+            if (EnhStreetSmarts) {
+                price = EnhStreetSmarts.applyEffect(price, 'discount');
+            }
+        }
 
         // check if the character has enough money
         if (character.stats.money < price) {

@@ -29,6 +29,8 @@ import faHandPointLeft from '@fortawesome/fontawesome-free-solid/faHandPointLeft
 import faShieldAlt from '@fortawesome/fontawesome-free-solid/faShieldAlt';
 import faChartBar from '@fortawesome/fontawesome-free-solid/faChartBar';
 import faCog from '@fortawesome/fontawesome-free-solid/faCog';
+import faCubes from '@fortawesome/fontawesome-free-solid/faCubes';
+import faEllipsisH from '@fortawesome/fontawesome-free-solid/faEllipsisH';
 
 fontawesome.library.add(
     faBug,
@@ -41,7 +43,9 @@ fontawesome.library.add(
     faChartBar,
     faCog,
     faGithub,
-    faTwitch
+    faTwitch,
+    faCubes,
+    faEllipsisH
 );
 
 // Styles

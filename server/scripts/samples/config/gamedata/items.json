@@ -522,19 +522,13 @@
     {
         "id": "bandage",
         "name": "Sterile Bandage",
-        "description": "Will heal the user for {effect.healAmount} on use.",
+        "description": "Used in first aid.",
         "type": "consumable",
         "subtype": "misc",
         "stats": {
-            "price": 3849,
+            "price": 500,
             "stackable": false,
-            "durability": 1,
-            "useEffect": {
-                "id": "miscItemHeal",
-                "modifiers": {
-                    "health": 15
-                }
-            }
+            "durability": 1
         }
     },
     {

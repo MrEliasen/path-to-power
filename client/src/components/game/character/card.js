@@ -24,11 +24,21 @@ class CharacterCard extends React.Component {
                         Health: {this.props.character.stats.health + '/' + this.props.character.stats.health_max}
                     </Progress>
 
-                    <Progress color="info" value={1} max={1}>Reputation: {this.props.character.stats.exp || 0}</Progress>
-
                     <Progress multi>
-                        <Progress bar color="danger" value="50">Cash: {this.props.character.stats.money || 0}</Progress>
-                        <Progress bar color="danger" value="50">Bank: {this.props.character.stats.bank || 0}</Progress>
+                        <Progress bar color="info" value="50">XP: {this.props.character.stats.exp || 0}</Progress>
+                        <Progress bar color="info" value="50">Total: {this.props.character.stats.exp_total || 0}</Progress>
+                    </Progress>
+
+                    <Progress color="warning" value="1" max="1">
+                        Enhancement Points: {this.props.character.stats.enhPoints || 0}
+                    </Progress>
+
+                    <Progress color="danger" value="1" max="1">
+                        Cash: {this.props.character.stats.money || 0}
+                    </Progress>
+
+                    <Progress color="primary" value="1" max="1">
+                        Bank: {this.props.character.stats.bank || 0}
                     </Progress>
                     {
                         this.props.onSelect &&

@@ -2,7 +2,7 @@
     "police-officer" : {
         "type" : "Police Officer",
         "stats" : {
-            "health" : 250,
+            "health_max" : 250,
             "money" : 15330,
             "exp": 175
         },
@@ -50,7 +50,7 @@
     "drug-dealer" : {
         "type" : "Drug Dealer",
         "stats" : {
-            "health" : 450,
+            "health_max" : 450,
             "money" : 55330,
             "exp": -1250
         },
@@ -95,7 +95,7 @@
     "druggie" : {
         "type" : "Druggie",
         "stats" : {
-            "health" : 200,
+            "health_max" : 200,
             "money" : 1347,
             "exp": -650
         },
@@ -130,7 +130,7 @@
     "bum" : {
         "type" : "Bum",
         "stats" : {
-            "health" : 45,
+            "health_max" : 45,
             "money" : 21,
             "exp": 35
         },
@@ -165,7 +165,7 @@
     "pedestrian" : {
         "type" : "Pedestrian",
         "stats" : {
-            "health" : 35,
+            "health_max" : 35,
             "money" : 143,
             "exp": 23
         },
@@ -194,7 +194,7 @@
     "bouncer" : {
         "type" : "Bouncer",
         "stats" : {
-            "health" : 135,
+            "health_max" : 135,
             "money" : 342,
             "exp": 65
         },
@@ -223,7 +223,7 @@
     "hooker" : {
         "type" : "Hooker",
         "stats" : {
-            "health" : 100,
+            "health_max" : 100,
             "money" : 412,
             "exp": 50
         },
@@ -254,7 +254,7 @@
     "loadshark" : {
         "type" : "Load Shark",
         "stats" : {
-            "health" : 200,
+            "health_max" : 200,
             "money" : 4300,
             "exp": 85
         },
@@ -302,7 +302,7 @@
     "deaagent" : {
         "type" : "DEA Agent",
         "stats" : {
-            "health" : 375,
+            "health_max" : 375,
             "money" : 7535,
             "exp": 285
         },

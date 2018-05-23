@@ -49,8 +49,7 @@ function miscPhone(character, modifiers = {}, item, Game) {
 
     // check if the character has enough health to use the drug
     if (character.stats.money < effects.cost) {
-        Game.eventToUser(character.user_id, 'warning', 'You do not have enough money on you, to make a call.');
-        return 'Unable to use drug, too lowe health.';
+        return 'You do not have enough money on you, to make a call.';
     }
 
     // get the list of NPCS for the map
@@ -62,7 +61,7 @@ function miscPhone(character, modifiers = {}, item, Game) {
     ];
 
     // if they have over a certain amount of EXP, show druggies location as well.
-    if (character.stats.exp > 22563) {
+    if (character.stats.exp_total > 22563) {
         npcTypes.push('Druggie');
         // overwrite the initial message
         messageArray[0] = `You use your ${item.name} to call some contacts.`;

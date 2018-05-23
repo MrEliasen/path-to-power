@@ -32,6 +32,32 @@ class ItemTooltip extends React.Component {
         document.body.removeChild(this.portalElement);
     }
 
+    calculateSellPrice() {
+        const {item, character, shop, EnhStreetSmarts} = this.props;
+        let basePrice = item.stats.price * shop.buy.priceMultiplier;
+
+        if (shop.buy.list.length > 0 && !shop.buy.list.includes(item.id)) {
+            return 0;
+        }
+
+        if (shop.buy.ignoreType.includes(item.type) || shop.buy.ignoreSubtype.includes(item.subtype)) {
+            return 0;
+        }
+
+        if (item.subtype !== 'drug') {
+            return basePrice;
+        }
+
+        const CharacterStreetSmarts = character.enhancements['streetsmarts'];
+
+        if (!CharacterStreetSmarts) {
+            return basePrice;
+        }
+
+        const enhTier = EnhStreetSmarts.tree.find((tier) => tier.tier === CharacterStreetSmarts.modifiers.value);
+        return basePrice * enhTier.markup;
+    }
+
     render() {
         if (!this.props.item) {
             return null;
@@ -70,7 +96,7 @@ class ItemTooltip extends React.Component {
                 }
                 {
                     shop && !isShopItem &&
-                    <div className="sell-price">Sells For: {formatNumberDecimal(item.stats.price * shop.buy.priceMultiplier)} /ea</div>
+                    <div className="sell-price">Sells For: {formatNumberDecimal(this.calculateSellPrice())} /ea</div>
                 }
             </div>
             , this.portalElement
@@ -81,6 +107,8 @@ class ItemTooltip extends React.Component {
 function mapStateToProps(state) {
     return {
         shop: state.shop,
+        character: state.character.selected,
+        EnhStreetSmarts: state.game.enhancements.find((enh) => enh.id === 'streetsmarts'),
     };
 }
 

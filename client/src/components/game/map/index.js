@@ -73,9 +73,11 @@ class Map extends React.Component {
                 <div id="map">
                     {this.renderGrid()}
                 </div>
-                <CardBody>
-                    {this.props.map.description}
-                </CardBody>
+                {/*
+                    <CardBody>
+                        {this.props.map.description}
+                    </CardBody>
+                */}
             </Card>
         );
     }

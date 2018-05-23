@@ -275,6 +275,9 @@ export default class CharacterManager {
         // load the character skills
         this.Game.skillManager.load(character);
 
+        // load the character skills
+        this.Game.enhancementManager.load(character);
+
         // check if they are in a faction, and load the faction if so
         const faction = this.Game.factionManager.get(character.faction_id);
 
@@ -316,6 +319,9 @@ export default class CharacterManager {
         if (!character) {
             return;
         }
+
+        // remove all outstanding timers on the character
+        character.killTimers();
 
         try {
             await this.save(character.user_id);
@@ -410,7 +416,6 @@ export default class CharacterManager {
     async create(user_id, characterName, city) {
         const character = await this.dbCreate(user_id, characterName, city);
         const newCharacter = new Character(this.Game, character.toObject());
-        newCharacter.profile_image = '';
 
         return newCharacter;
     }
@@ -428,7 +433,7 @@ export default class CharacterManager {
             location: {
                 map: city,
             },
-            stats: {...this.Game.config.game.defaultstats},
+            stats: {},
         });
 
         await newCharacter.saveAsync();
@@ -487,6 +492,7 @@ export default class CharacterManager {
         dbCharacter.stats = {...character.stats};
         dbCharacter.abilities = character.exportAbilities();
         dbCharacter.skills = character.exportSkills();
+        dbCharacter.enhancements = character.exportEnhancements();
         dbCharacter.location = {...character.location};
         dbCharacter.faction_id = character.faction ? character.faction.faction_id : '';
 
@@ -496,7 +502,7 @@ export default class CharacterManager {
 
     /**
      * Find a character in the database, by name
-     * @param  {Strng} characterName  Name to search for
+     * @param  {String} characterName  Name to search for
      * @return {Object}               Plain object of character.
      */
     async dbGetByName(targetName) {
@@ -826,6 +832,8 @@ export default class CharacterManager {
         return {
             maps: this.Game.mapManager.getList(),
             items: this.Game.itemManager.getTemplates(),
+            skills: this.Game.skillManager.getSkills(),
+            enhancements: this.Game.enhancementManager.getList(),
             players: this.getOnline(),
             commands: this.Game.commandManager.getList(),
             levels: Levels,

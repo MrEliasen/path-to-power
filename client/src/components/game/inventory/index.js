@@ -2,6 +2,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import ItemSlot from '../item/slot';
 import DropSlot from './drop';
+import UseSlot from './use';
 
 class Inventory extends React.Component {
     constructor(props) {
@@ -19,6 +20,7 @@ class Inventory extends React.Component {
                     })
                 }
                 <DropSlot />
+                <UseSlot />
             </div>
         );
     }

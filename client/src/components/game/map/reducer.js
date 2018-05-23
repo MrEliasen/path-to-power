@@ -1,5 +1,6 @@
 import {
     MAP_GRID_DETAILS,
+    NPC_GRID_DETAILS,
     CHARACTER_LEFT_GRID,
     CHARACTER_JOINED_GRID,
     NPC_JOINED_GRID,
@@ -26,6 +27,14 @@ export default function(state = defaultState, action) {
         case MAP_GRID_DETAILS:
             return {
                 ...action.payload,
+            };
+
+        case NPC_GRID_DETAILS:
+            return {
+                ...state,
+                npcs: [
+                    ...action.payload,
+                ],
             };
 
         // when another character joins the players grid

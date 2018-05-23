@@ -1,6 +1,7 @@
 import {env} from 'utils/configure';
 
 export default {
+    sessionTTL: env('AUTH_SESSION_TTL', '7d'), // JWT TTL syntax
     providers: [
         {
             id: env('AUTH_LOCAL_ID', 'local'),

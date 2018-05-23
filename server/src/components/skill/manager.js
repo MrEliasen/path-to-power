@@ -2,6 +2,9 @@
 import SkillList from './skills';
 import skillCommands from './commands';
 
+// action types
+import {SKILL_PURCHASE} from 'shared/actionTypes';
+
 /**
  * Skill manager
  */
@@ -20,7 +23,21 @@ export default class SkillManager {
      */
     init() {
         this.Game.commandManager.registerManager(skillCommands);
-        console.log('SKILL MANAGER LOADED');
+        // listen for dispatches from the socket manager
+        this.Game.socketManager.on('dispatch', this.onDispatch.bind(this));
+        this.Game.logger.debug('SkillManager::constructor Loaded');
+    }
+
+    /**
+     * Parses a client action
+     * @param {Socket.io Socket} socket The client socket the request is made from
+     * @param {Object} action Redux action object
+     */
+    onDispatch(socket, action) {
+        switch (action.type) {
+            case SKILL_PURCHASE:
+                return this.purchaseSkill(socket, action);
+        }
     }
 
     /**
@@ -29,26 +46,7 @@ export default class SkillManager {
      */
     getDefaults() {
         // NOTE: set the default skills for new players here
-        return [
-            {
-                id: 'snoop',
-                modifiers: {
-                    value: 1,
-                },
-            },
-            {
-                id: 'hide',
-                modifiers: {
-                    value: 1,
-                },
-            },
-            {
-                id: 'search',
-                modifiers: {
-                    value: 1,
-                },
-            },
-        ];
+        return [];
     }
 
     /**
@@ -104,5 +102,85 @@ export default class SkillManager {
                 character.skills.push(newSkill);
             }
         });
+    }
+
+    /**
+     * Get the list of all skills
+     */
+    getSkills() {
+        return Object.values(SkillList).map((Skill) => {
+            const SkillObj = new Skill();
+
+            return {
+                id: SkillObj.id,
+                name: SkillObj.name,
+                description: SkillObj.description,
+                tree: SkillObj.getTree(),
+            };
+        });
+    }
+
+    /**
+     * Learn a new skill
+     * @param {Object} action redux action object
+     */
+    purchaseSkill(socket, action) {
+        const character = this.Game.characterManager.get(socket.user.user_id);
+
+        if (!character) {
+            return;
+        }
+
+        const tier = parseInt(action.payload.tier, 10);
+        const skillId = action.payload.skillId;
+        const characterSkill = character.skills.find((obj) => obj.id === skillId);
+
+        // If the character does not have the skill already, and the tier they are trying to buy
+        // is not tier 1, error out.
+        if (!characterSkill && tier !== 1) {
+            return this.Game.eventToUser(character.user_id, 'error', 'You can only purchase the first tier of this skill as you do not own it yet.');
+        }
+
+        // If the character owns the skill, make sure the tier they are trying to buy
+        // is the next level
+        if (characterSkill && characterSkill.value + 1 !== tier) {
+            return this.Game.eventToUser(character.user_id, 'error', `You cannot buy a tier higher than ${characterSkill.value + 1} for this skill.`);
+        }
+
+        const newSkill = this.new({
+            id: skillId,
+            modifiers: {
+                value: tier,
+            },
+        });
+
+        if (!newSkill) {
+            return this.Game.eventToUser(character.user_id, 'error', 'That skill does not exist.');
+        }
+
+        const skillTiers = newSkill.getTree();
+        const tierDetails = skillTiers.find((obj) => obj.tier === tier);
+
+        // check if the tier exists
+        if (!tierDetails) {
+            return this.Game.eventToUser(character.user_id, 'error', 'That skill does not have that tier.');
+        }
+
+        // check if the character has enough experience to purchase the skill level
+        if (character.stats.exp < tierDetails.expCost) {
+            return this.Game.eventToUser(character.user_id, 'error', 'You do not have enough exp to buy this tier.');
+        }
+
+        // remove the exp from the character
+        character.updateExp(tierDetails.expCost * -1, false);
+
+        // if the character does not own the skill already, add it, otherwise set the new skill tier.
+        if (!characterSkill) {
+            character.skills.push(newSkill);
+        } else {
+            characterSkill.value = tier;
+        }
+
+        this.Game.characterManager.updateClient(socket.user.user_id);
     }
 }
