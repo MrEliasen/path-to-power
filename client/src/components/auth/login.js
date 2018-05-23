@@ -37,7 +37,7 @@ class AuthLogin extends React.Component {
         });
 
         this.props.getStrategies();
-        this.autoLogin(error ? false : true);
+        this.autoLogin(error || success ? false : true);
     }
 
     autoLogin(doLogin = true) {
